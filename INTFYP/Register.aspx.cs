@@ -14,9 +14,9 @@ namespace YourProjectNamespace
         {
             if (db == null)
             {
-                string path = Server.MapPath("~/App_Data/serviceAccount.json");
+                string path = Server.MapPath("~/serviceAccountKey.json");
                 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
-                db = FirestoreDb.Create("intoranetto"); // <-- replace with your project ID
+                db = FirestoreDb.Create("intorannetto"); // <-- replace with your project ID
             }
         }
 
