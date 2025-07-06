@@ -317,10 +317,11 @@
     <Content Include="protos\google\api\backend.proto" />
     <Content Include="protos\google\api\auth.proto" />
     <Content Include="protos\google\api\annotations.proto" />
-    <Content Include="serviceAccountKey.json" />
     <Content Include="Login.aspx" />
-    <Content Include="WebForm2.aspx" />
-    <Content Include="Chibai.aspx" />
+    <Content Include="serviceAccountKey.json" />
+    <Content Include="Library.aspx" />
+    <Content Include="AddBook.aspx" />
+    <Content Include="CitationGenerator.aspx" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -393,19 +394,26 @@
     <Compile Include="Login.aspx.designer.cs">
       <DependentUpon>Login.aspx</DependentUpon>
     </Compile>
-    <Compile Include="WebForm2.aspx.cs">
-      <DependentUpon>WebForm2.aspx</DependentUpon>
+    <Compile Include="Library.aspx.cs">
+      <DependentUpon>Library.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="WebForm2.aspx.designer.cs">
-      <DependentUpon>WebForm2.aspx</DependentUpon>
+    <Compile Include="Library.aspx.designer.cs">
+      <DependentUpon>Library.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Chibai.aspx.cs">
-      <DependentUpon>Chibai.aspx</DependentUpon>
+    <Compile Include="AddBook.aspx.cs">
+      <DependentUpon>AddBook.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Chibai.aspx.designer.cs">
-      <DependentUpon>Chibai.aspx</DependentUpon>
+    <Compile Include="AddBook.aspx.designer.cs">
+      <DependentUpon>AddBook.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="CitationGenerator.aspx.cs">
+      <DependentUpon>CitationGenerator.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CitationGenerator.aspx.designer.cs">
+      <DependentUpon>CitationGenerator.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup />
