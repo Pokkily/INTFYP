@@ -7,7 +7,7 @@ using System.Web.UI.WebControls;
 
 namespace INTFYP
 {
-    public partial class About : Page
+    public partial class Admin : System.Web.UI.Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {

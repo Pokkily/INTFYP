@@ -1,0 +1,153 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="YourProjectNamespace.Site" %>
+
+<!DOCTYPE html>
+<html>
+<head runat="server">
+    <title><asp:ContentPlaceHolder ID="TitleContent" runat="server" /></title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 30px;
+            border-bottom: 1px solid #ccc;
+            background-color: #fff;
+        }
+
+        .left-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img {
+            height: 28px;
+            margin-right: 15px;
+        }
+
+        .profile-img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .title-group {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .title-group .title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .title-group .subtitle {
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .menu {
+            display: flex;
+            gap: 16px;
+            margin-left: 60px;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: black;
+            font-weight: 500;
+            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        .menu a.mainpage {
+            background-color: #eee;
+        }
+
+        .right-panel {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            border: 1px solid #ccc;
+            background: white;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            color: black;
+        }
+
+        .btn.black {
+            background-color: black;
+            color: white;
+            border: none;
+        }
+
+        .username {
+            font-size: 14px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <form runat="server">
+        <div class="header">
+            <!-- Left Logo + Username + Welcome -->
+            <div class="left-section">
+                <img src="Images/logo.png" alt="Logo" class="logo-img" />
+                <img src="Images/dprofile.jpg" alt="Profile" class="profile-img" />
+                <div class="title-group">
+                    <% if (Session["username"] != null) { %>
+                        <span class="title"><%= Session["username"] %></span>
+                        <span class="subtitle">Welcome back!</span>
+                    <% } else { %>
+                        <span class="title">Guest</span>
+                        <span class="subtitle">Please sign in</span>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <div class="menu">
+                <a href="Class.aspx" class="<%= GetPageClass("Class.aspx") %>">Class</a>
+                <a href="StudyHub.aspx" class="<%= GetPageClass("StudyHub.aspx") %>">StudyHub</a>
+                <a href="Library.aspx" class="<%= GetPageClass("Library.aspx") %>">Library</a>
+                <a href="Quiz.aspx" class="<%= GetPageClass("Quiz.aspx") %>">Quiz</a>
+                <a href="Learning.aspx" class="<%= GetPageClass("Learning.aspx") %>">Learning</a>
+                <a href="Scholarship.aspx" class="<%= GetPageClass("Scholarship.aspx") %>">Scholarship</a>
+                <a href="Feedback.aspx" class="<%= GetPageClass("Feedback.aspx") %>">Feedback</a>
+
+                <% if (Session["position"] != null && Session["position"].ToString() == "teacher") { %>
+                    <a href="Manage.aspx" class="<%= GetPageClass("Manage.aspx") %>">Manage</a>
+                <% } %>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <% if (Session["username"] != null) { %>
+                    <a href="Logout.aspx" class="btn">Logout</a>
+                <% } else { %>
+                    <a href="Login.aspx" class="btn">Sign in</a>
+                    <a href="Register.aspx" class="btn black">Register</a>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+    </form>
+</body>
+</html>

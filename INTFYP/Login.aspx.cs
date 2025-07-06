@@ -89,8 +89,15 @@ namespace YourProjectNamespace
                 Session["position"] = userData["position"];
 
                 ShowSuccess("Login successful! Redirecting...");
+                string position = userData["position"]?.ToString()?.ToLower();
+
+                string redirectPage = position == "administrator" ? "admin.aspx" : "mainpage.aspx";
+
+                // Optional: show success first, then redirect
+                ShowSuccess("Login successful! Redirecting...");
                 ClientScript.RegisterStartupScript(this.GetType(), "redirect",
-                    "setTimeout(function(){ window.location='Home.aspx'; }, 2000);", true);
+                    $"setTimeout(function(){{ window.location='{redirectPage}'; }}, 2000);", true);
+
             }
             catch (Exception ex)
             {
