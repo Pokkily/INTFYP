@@ -131,7 +131,7 @@
                 <a href="Feedback.aspx" class="<%= GetPageClass("Feedback.aspx") %>">Feedback</a>
 
                 <% if (Session["position"] != null && Session["position"].ToString() == "teacher") { %>
-                    <a href="Manage.aspx" class="<%= GetPageClass("Manage.aspx") %>">Manage</a>
+                    <a href="CreateClassroom.aspx" class="<%= GetPageClass("CreateClassroom.aspx") %>">Manage</a>
                 <% } %>
             </div>
 

@@ -229,6 +229,7 @@
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\Site.css" />
+    <Content Include="CreateClassroom.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
@@ -322,7 +323,6 @@
     <Content Include="protos\google\api\annotations.proto" />
     <Content Include="serviceAccountKey.json" />
     <Content Include="Login.aspx" />
-    <Content Include="WebForm2.aspx" />
     <Content Include="Chibai.aspx" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
@@ -371,6 +371,13 @@
     <Compile Include="Contact.aspx.designer.cs">
       <DependentUpon>Contact.aspx</DependentUpon>
     </Compile>
+    <Compile Include="CreateClassroom.aspx.cs">
+      <DependentUpon>CreateClassroom.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CreateClassroom.aspx.designer.cs">
+      <DependentUpon>CreateClassroom.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -410,19 +417,19 @@
     <Compile Include="Site.Master.designer.cs">
       <DependentUpon>Site.Master</DependentUpon>
     </Compile>
-    <Compile Include="WebForm2.aspx.cs">
-      <DependentUpon>WebForm2.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="WebForm2.aspx.designer.cs">
-      <DependentUpon>WebForm2.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Chibai.aspx.cs">
       <DependentUpon>Chibai.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Chibai.aspx.designer.cs">
       <DependentUpon>Chibai.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="TeacherSite.Master.cs">
+      <DependentUpon>TeacherSite.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TeacherSite.Master.designer.cs">
+      <DependentUpon>TeacherSite.Master</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup />
@@ -431,6 +438,7 @@
     <Content Include="Scripts\jquery-3.7.0.slim.min.map" />
     <Content Include="Scripts\jquery-3.7.0.min.map" />
     <Content Include="Site.Master" />
+    <Content Include="TeacherSite.Master" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
