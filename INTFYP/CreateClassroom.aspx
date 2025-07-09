@@ -1,6 +1,7 @@
 ﻿<%@ Page Title="Create Classroom" Language="C#" MasterPageFile="~/TeacherSite.master" 
     AutoEventWireup="true" CodeBehind="CreateClassroom.aspx.cs" 
-    Inherits="YourProjectNamespace.CreateClassroom" %>
+    Inherits="YourProjectNamespace.CreateClassroom" Async="true" %>
+
 
 <asp:Content ID="ClassroomContent" ContentPlaceHolderID="TeacherMainContent" runat="server">
     <style>

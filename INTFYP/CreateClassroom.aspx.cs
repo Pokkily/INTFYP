@@ -14,25 +14,20 @@ namespace YourProjectNamespace
 
         protected void Page_Load(object sender, EventArgs e)
         {
+            InitializeFirestore(); // <-- Always initialize
+
             if (!IsPostBack)
             {
-                // Initialize Firestore
-                InitializeFirestore();
-
-                // Set default date to today
                 txtClassDate.Text = DateTime.Now.ToString("yyyy-MM-dd");
 
-                // Initialize session for storing invited students
                 if (Session["InvitedStudents"] == null)
-                {
                     Session["InvitedStudents"] = new List<Student>();
-                }
             }
 
-            // Load invited students from session
             invitedStudents = (List<Student>)Session["InvitedStudents"];
             BindStudentsRepeater();
         }
+
 
         private void InitializeFirestore()
         {
@@ -67,26 +62,22 @@ namespace YourProjectNamespace
 
             try
             {
-                // Check if student exists in Firestore
-                Query query = db.Collection("users")
-                    .WhereEqualTo("email", email)
-                    .WhereEqualTo("position", "student");
-
+                // ✅ Query without filtering by "position"
+                Query query = db.Collection("users").WhereEqualTo("email", email);
                 QuerySnapshot snapshot = await query.GetSnapshotAsync();
 
                 if (snapshot.Count == 0)
                 {
-                    lblInviteStatus.Text = "Student not found or not a valid student account";
+                    lblInviteStatus.Text = "Student not found.";
                     lblInviteStatus.CssClass = "text-danger";
                     return;
                 }
 
-                // Get student details
+                // ✅ Get user info
                 DocumentSnapshot document = snapshot.Documents[0];
-                string name = document.GetValue<string>("username");
                 string studentEmail = document.GetValue<string>("email");
+                string name = document.GetValue<string>("firstName") + " " + document.GetValue<string>("lastName");
 
-                // Check if already invited
                 if (invitedStudents.Exists(s => s.Email == studentEmail))
                 {
                     lblInviteStatus.Text = "This student has already been invited";
@@ -94,11 +85,10 @@ namespace YourProjectNamespace
                     return;
                 }
 
-                // Add to invited list
+                // ✅ Add to invited list
                 invitedStudents.Add(new Student { Name = name, Email = studentEmail });
                 Session["InvitedStudents"] = invitedStudents;
 
-                // Update UI
                 BindStudentsRepeater();
                 txtStudentEmail.Text = "";
                 lblInviteStatus.Text = "Student added successfully";
@@ -111,6 +101,7 @@ namespace YourProjectNamespace
                 lblInviteStatus.CssClass = "text-danger";
             }
         }
+
 
         protected void rptStudents_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
