@@ -110,39 +110,43 @@
                 <img src="Images/logo.png" alt="Logo" class="logo-img" />
                 <img src="Images/dprofile.jpg" alt="Profile" class="profile-img" />
                 <div class="title-group">
-                    <% if (Session["username"] != null) { %>
-                        <span class="title"><%= Session["username"] %></span>
+                    <asp:PlaceHolder ID="phUser" runat="server" Visible="false">
+                        <span id="lblUsername" runat="server" class="title username"></span>
                         <span class="subtitle">Welcome back!</span>
-                    <% } else { %>
+                    </asp:PlaceHolder>
+                    <asp:PlaceHolder ID="phGuestLabel" runat="server" Visible="false">
                         <span class="title">Guest</span>
                         <span class="subtitle">Please sign in</span>
-                    <% } %>
+                    </asp:PlaceHolder>
                 </div>
             </div>
 
             <!-- Navigation Menu -->
             <div class="menu">
-                <a href="Class.aspx" class="<%= GetPageClass("Class.aspx") %>">Class</a>
-                <a href="StudyHub.aspx" class="<%= GetPageClass("StudyHub.aspx") %>">StudyHub</a>
-                <a href="Library.aspx" class="<%= GetPageClass("Library.aspx") %>">Library</a>
-                <a href="Quiz.aspx" class="<%= GetPageClass("Quiz.aspx") %>">Quiz</a>
-                <a href="Learning.aspx" class="<%= GetPageClass("Learning.aspx") %>">Learning</a>
-                <a href="Scholarship.aspx" class="<%= GetPageClass("Scholarship.aspx") %>">Scholarship</a>
-                <a href="Feedback.aspx" class="<%= GetPageClass("Feedback.aspx") %>">Feedback</a>
+    <asp:HyperLink ID="lnkClass" runat="server" NavigateUrl="Class.aspx" Text="Class" CssClass="menu-link" />
+    <asp:HyperLink ID="lnkStudyHub" runat="server" NavigateUrl="StudyHub.aspx" Text="StudyHub" CssClass="menu-link" />
+    <asp:HyperLink ID="lnkLibrary" runat="server" NavigateUrl="Library.aspx" Text="Library" CssClass="menu-link" />
+    <asp:HyperLink ID="lnkQuiz" runat="server" NavigateUrl="Quiz.aspx" Text="Quiz" CssClass="menu-link" />
+    <asp:HyperLink ID="lnkLearning" runat="server" NavigateUrl="Learning.aspx" Text="Learning" CssClass="menu-link" />
+    <asp:HyperLink ID="lnkScholarship" runat="server" NavigateUrl="Scholarship.aspx" Text="Scholarship" CssClass="menu-link" />
+    <asp:HyperLink ID="lnkFeedback" runat="server" NavigateUrl="Feedback.aspx" Text="Feedback" CssClass="menu-link" />
 
-                <% if (Session["position"] != null && Session["position"].ToString() == "teacher") { %>
-                    <a href="CreateClassroom.aspx" class="<%= GetPageClass("CreateClassroom.aspx") %>">Manage</a>
-                <% } %>
-            </div>
+    <asp:PlaceHolder ID="phTeacherMenu" runat="server" Visible="false">
+        <asp:HyperLink ID="lnkManage" runat="server" NavigateUrl="CreateClassroom.aspx" Text="Manage" CssClass="menu-link" />
+    </asp:PlaceHolder>
+</div>
+
 
             <!-- Right Panel -->
             <div class="right-panel">
-                <% if (Session["username"] != null) { %>
+                <asp:PlaceHolder ID="phLoggedIn" runat="server" Visible="false">
                     <a href="Logout.aspx" class="btn">Logout</a>
-                <% } else { %>
+                </asp:PlaceHolder>
+
+                <asp:PlaceHolder ID="phGuest" runat="server" Visible="false">
                     <a href="Login.aspx" class="btn">Sign in</a>
                     <a href="Register.aspx" class="btn black">Register</a>
-                <% } %>
+                </asp:PlaceHolder>
             </div>
         </div>
 
