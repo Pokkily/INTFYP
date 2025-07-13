@@ -18,33 +18,33 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
-        .form-wrapper h2 {
-            margin-bottom: 24px;
-            font-size: 24px;
-            font-weight: 600;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 12px;
-        }
+            .form-wrapper h2 {
+                margin-bottom: 24px;
+                font-size: 24px;
+                font-weight: 600;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 12px;
+            }
 
         .form-group {
             margin-bottom: 16px;
         }
 
-        .form-group label {
-            display: block;
-            font-weight: 500;
-            margin-bottom: 6px;
-        }
+            .form-group label {
+                display: block;
+                font-weight: 500;
+                margin-bottom: 6px;
+            }
 
-        .form-group input,
-        .form-group textarea,
-        .form-group select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-        }
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                font-size: 14px;
+            }
 
         .btn {
             padding: 10px 20px;
@@ -107,7 +107,30 @@
 
         <div class="form-group">
             <label for="FileUpload1">Attach File (Optional)</label>
-            <asp:FileUpload ID="FileUpload1" runat="server" />
+            <div class="form-group">
+                <label>Attach Files</label>
+
+                <asp:FileUpload ID="fileUploadAdd" runat="server" />
+                <asp:Button ID="btnAddFile" runat="server" Text="Add File" CssClass="btn btn-secondary"
+                    OnClick="btnAddFile_Click" />
+
+                <asp:HiddenField ID="hfUploadedFiles" runat="server" />
+
+                <asp:PlaceHolder ID="phAttachedFiles" runat="server" Visible="false">
+                    <div class="file-preview" style="margin-top: 10px;">
+                        <asp:Repeater ID="rptAttachedFiles" runat="server">
+                            <ItemTemplate>
+                                <div class="file-item">
+                                    <a href='<%# Eval("Url") %>' target="_blank"><%# Eval("Name") %></a>
+                                </div>
+                            </ItemTemplate>
+                        </asp:Repeater>
+                    </div>
+                </asp:PlaceHolder>
+            </div>
+
+
+
         </div>
 
         <div class="form-group">
