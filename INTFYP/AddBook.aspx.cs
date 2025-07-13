@@ -34,7 +34,7 @@ namespace INTFYP
         {
             try
             {
-                DocumentReference addedDocRef = await db.Collection("books").AddAsync(new 
+                DocumentReference addedDocRef = await db.Collection("books").AddAsync(new
                 {
                     Title = txtTitle.Text.Trim(),
                     Author = txtAuthor.Text.Trim(),
