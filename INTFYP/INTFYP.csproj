@@ -351,6 +351,7 @@
     <Content Include="protos\google\api\annotations.proto" />
     <Content Include="ServiceAccountKey.json" />
     <Content Include="ManagePost.aspx" />
+    <Content Include="FeedBack.aspx" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -501,6 +502,13 @@
     </Compile>
     <Compile Include="ManagePost.aspx.designer.cs">
       <DependentUpon>ManagePost.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="FeedBack.aspx.cs">
+      <DependentUpon>FeedBack.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="FeedBack.aspx.designer.cs">
+      <DependentUpon>FeedBack.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup />
