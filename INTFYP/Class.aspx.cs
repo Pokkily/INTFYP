@@ -1,4 +1,6 @@
-﻿using Google.Cloud.Firestore;
+﻿// Fix: Ensure Firestore is initialized during postbacks too
+
+using Google.Cloud.Firestore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,6 +15,8 @@ namespace YourProjectNamespace
 
         protected async void Page_Load(object sender, EventArgs e)
         {
+            InitializeFirestore(); // Always initialize
+
             if (!IsPostBack)
             {
                 InitializeFirestore();
@@ -22,9 +26,12 @@ namespace YourProjectNamespace
 
         private void InitializeFirestore()
         {
-            string path = Server.MapPath("~/serviceAccountKey.json");
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
-            db = FirestoreDb.Create("intorannetto");
+            if (db == null)
+            {
+                string path = Server.MapPath("~/serviceAccountKey.json");
+                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
+                db = FirestoreDb.Create("intorannetto");
+            }
         }
 
         private async Task LoadInvitedClassesAsync()
@@ -85,6 +92,8 @@ namespace YourProjectNamespace
 
         protected async void rptClasses_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
+            InitializeFirestore(); // Ensure db is available
+
             string classId = e.CommandArgument.ToString();
             string userEmail = Session["email"]?.ToString()?.ToLower();
             if (string.IsNullOrEmpty(classId) || string.IsNullOrEmpty(userEmail)) return;
@@ -98,6 +107,11 @@ namespace YourProjectNamespace
             if (e.CommandName == "Join")
             {
                 await inviteRef.UpdateAsync("status", "accepted");
+                await LoadInvitedClassesAsync();
+            }
+            else if (e.CommandName == "Decline")
+            {
+                await inviteRef.UpdateAsync("status", "declined");
                 await LoadInvitedClassesAsync();
             }
             else if (e.CommandName == "Enter")

@@ -66,6 +66,7 @@
     <div style="padding: 24px; max-width: 800px; margin: auto;">
         <h2>📚 Your Classes</h2>
         <asp:Repeater ID="rptClasses" runat="server" OnItemCommand="rptClasses_ItemCommand">
+<<<<<<< HEAD
             <ItemTemplate>
                 <div class="class-card">
                     <div class="placeholder-img"></div>
@@ -73,13 +74,36 @@
                         <h5><%# Eval("name") %></h5>
                         <small>Invitation From <%# Eval("createdByName") %></small>
                     </div>
-                    <asp:Button ID="btnAction" runat="server"
-                        Text='<%# Eval("status").ToString() == "pending" ? "Join" : "Enter" %>'
-                        CommandName='<%# Eval("status").ToString() == "pending" ? "Join" : "Enter" %>'
+=======
+    <ItemTemplate>
+        <div class="class-card">
+            <div class="placeholder-img"></div>
+            <div class="class-details">
+                <h5><%# Eval("name") %></h5>
+                <small>Invitation From <%# Eval("createdByName") %></small>
+            </div>
+>>>>>>> 64034487c422bb23654d492ee0fe444f25e1b27f
+
+            <%# Eval("status").ToString() == "pending" ? "" : null %>
+            <asp:Panel runat="server" Visible='<%# Eval("status").ToString() == "pending" %>'>
+                <asp:Button ID="btnJoin" runat="server" Text="Join"
+                            CommandName="Join"
+                            CommandArgument='<%# Eval("classId") %>'
+                            CssClass="btn btn-join" />
+                <asp:Button ID="btnDecline" runat="server" Text="Decline"
+                            CommandName="Decline"
+                            CommandArgument='<%# Eval("classId") %>'
+                            CssClass="btn btn-decline" />
+            </asp:Panel>
+            <asp:Panel runat="server" Visible='<%# Eval("status").ToString() == "accepted" %>'>
+                <asp:Button ID="btnEnter" runat="server" Text="Enter"
+                            CommandName="Enter"
                         CommandArgument='<%# Eval("classId") %>'
-                        CssClass='<%# Eval("status").ToString() == "pending" ? "btn btn-join" : "btn btn-enter" %>' />
+                            CssClass="btn btn-enter" />
+            </asp:Panel>
                 </div>
             </ItemTemplate>
         </asp:Repeater>
+
     </div>
 </asp:Content>
