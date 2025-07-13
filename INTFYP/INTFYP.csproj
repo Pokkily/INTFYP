@@ -349,9 +349,9 @@
     <Content Include="protos\google\api\backend.proto" />
     <Content Include="protos\google\api\auth.proto" />
     <Content Include="protos\google\api\annotations.proto" />
-    <Content Include="ServiceAccountKey.json" />
     <Content Include="ManagePost.aspx" />
     <Content Include="FeedBack.aspx" />
+    <Content Include="ServiceAccountKey.json" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />

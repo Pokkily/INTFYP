@@ -81,4 +81,3 @@ public partial class CitationGenerator : System.Web.UI.Page
         // lblCitationOutput.Text = citation;
     }
 }
-}

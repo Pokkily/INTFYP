@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using CloudinaryDotNet;
@@ -15,16 +14,20 @@ namespace YourProjectNamespace
     public partial class ManagePost : System.Web.UI.Page
     {
         private FirestoreDb db;
-        private static string selectedClassId;
-        private static List<PostItem> postList;
+        private static Cloudinary cloudinary;
+        private string selectedClassId = string.Empty;
+        private string postTypeFilter = "all";
+        private List<PostItem> postList = new List<PostItem>();
 
         protected async void Page_Load(object sender, EventArgs e)
         {
             InitializeFirestore();
+            InitializeCloudinary();
 
             if (!IsPostBack)
             {
                 await LoadClassDropdownAsync();
+                await LoadPostsAsync();
             }
         }
 
@@ -38,17 +41,34 @@ namespace YourProjectNamespace
             }
         }
 
+        private void InitializeCloudinary()
+        {
+            if (cloudinary == null)
+            {
+                var account = new Account(
+                    ConfigurationManager.AppSettings["CloudinaryCloudName"],
+                    ConfigurationManager.AppSettings["CloudinaryApiKey"],
+                    ConfigurationManager.AppSettings["CloudinaryApiSecret"]);
+
+                cloudinary = new Cloudinary(account);
+            }
+        }
+
         private async Task LoadClassDropdownAsync()
         {
-            string userEmail = Session["email"]?.ToString()?.ToLower();
-            QuerySnapshot snapshot = await db.Collection("classrooms").WhereEqualTo("createdBy", userEmail).GetSnapshotAsync();
+            string email = Session["email"]?.ToString();
+            if (string.IsNullOrEmpty(email)) return;
+
+            QuerySnapshot snapshot = await db.Collection("classrooms")
+                .WhereEqualTo("createdBy", email.ToLower())
+                .GetSnapshotAsync();
 
             ddlClassFilter.Items.Clear();
             ddlClassFilter.Items.Add(new ListItem("-- Select Class --", ""));
 
             foreach (DocumentSnapshot doc in snapshot.Documents)
             {
-                string name = doc.ContainsField("name") ? doc.GetValue<string>("name") : "(Unnamed)";
+                string name = doc.ContainsField("name") ? doc.GetValue<string>("name") : "Unnamed Class";
                 ddlClassFilter.Items.Add(new ListItem(name, doc.Id));
             }
         }
@@ -59,119 +79,128 @@ namespace YourProjectNamespace
             await LoadPostsAsync();
         }
 
-        private async Task LoadPostsAsync()
+        protected async void ddlPostTypeFilter_SelectedIndexChanged(object sender, EventArgs e)
         {
-            postList = new List<PostItem>();
-            if (string.IsNullOrEmpty(selectedClassId)) return;
-
-            var snapshot = await db.Collection("classrooms").Document(selectedClassId).Collection("posts").GetSnapshotAsync();
-            foreach (var doc in snapshot.Documents)
-            {
-                List<string> urls = doc.ContainsField("fileUrls") ? doc.GetValue<List<string>>("fileUrls") : new List<string>();
-                List<string> names = doc.ContainsField("fileNames") ? doc.GetValue<List<string>>("fileNames") : new List<string>();
-
-                postList.Add(new PostItem
-                {
-                    Id = doc.Id,
-                    Title = doc.ContainsField("title") ? doc.GetValue<string>("title") : "",
-                    Content = doc.ContainsField("content") ? doc.GetValue<string>("content") : "",
-                    FileUrls = urls,
-                    FileNames = names,
-                    IsEditing = false
-                });
-            }
-            BindRepeater();
+            postTypeFilter = ddlPostTypeFilter.SelectedValue;
+            await LoadPostsAsync();
         }
 
-        private void BindRepeater()
+        private async Task LoadPostsAsync()
         {
+            postList.Clear();
+            if (string.IsNullOrEmpty(ddlClassFilter.SelectedValue)) return;
+
+            selectedClassId = ddlClassFilter.SelectedValue;
+            postTypeFilter = ddlPostTypeFilter.SelectedValue;
+
+            CollectionReference postCollection = db.Collection("classrooms")
+                                                   .Document(selectedClassId)
+                                                   .Collection("posts");
+
+            Query query = postCollection.OrderByDescending("postedAt");
+            if (postTypeFilter != "all")
+                query = query.WhereEqualTo("postType", postTypeFilter);
+
+            QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+            foreach (DocumentSnapshot doc in snapshot.Documents)
+            {
+                PostItem post = new PostItem
+                {
+                    Id = doc.Id,
+                    Title = doc.GetValue<string>("title"),
+                    Content = doc.GetValue<string>("content"),
+                    PostType = doc.GetValue<string>("postType"),
+                    FileUrl = doc.ContainsField("fileUrl") ? doc.GetValue<string>("fileUrl") : null,
+                    FileName = doc.ContainsField("fileName") ? doc.GetValue<string>("fileName") : null,
+                    IsEditing = false
+                };
+                postList.Add(post);
+            }
+
             rptPosts.DataSource = postList;
             rptPosts.DataBind();
         }
 
         protected async void rptPosts_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
-            string postId = e.CommandArgument.ToString();
-            var item = postList.FirstOrDefault(p => p.Id == postId);
+            string postId = e.CommandArgument.ToString().Split('|')[0];
+            PostItem post = postList.FirstOrDefault(p => p.Id == postId);
+            if (post == null) return;
 
-            if (e.CommandName == "Edit")
+            switch (e.CommandName)
             {
-                postList.ForEach(p => p.IsEditing = false);
-                if (item != null) item.IsEditing = true;
-                BindRepeater();
-            }
-            else if (e.CommandName == "CancelEdit")
-            {
-                item.IsEditing = false;
-                BindRepeater();
-            }
-            else if (e.CommandName == "Delete")
-            {
-                await db.Collection("classrooms").Document(selectedClassId).Collection("posts").Document(postId).DeleteAsync();
-                await LoadPostsAsync();
-            }
-            else if (e.CommandName == "Save")
-            {
-                var txtTitle = (TextBox)e.Item.FindControl("txtEditTitle");
-                var txtContent = (TextBox)e.Item.FindControl("txtEditContent");
-                var fileUpload = (FileUpload)e.Item.FindControl("fileUploadEdit");
-                var hiddenRemovedFiles = (HiddenField)e.Item.FindControl("hiddenRemovedFiles");
+                case "Edit":
+                    postList.ForEach(p => p.IsEditing = false);
+                    post.IsEditing = true;
+                    break;
 
-                string newTitle = txtTitle.Text.Trim();
-                string newContent = txtContent.Text.Trim();
-                List<string> updatedUrls = new List<string>(item.FileUrls);
-                List<string> updatedNames = new List<string>(item.FileNames);
+                case "CancelEdit":
+                    post.IsEditing = false;
+                    break;
 
-                string[] filesToRemove = hiddenRemovedFiles?.Value.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries) ?? new string[0];
-                foreach (string filename in filesToRemove)
-                {
-                    int index = updatedNames.IndexOf(filename);
-                    if (index >= 0)
+                case "Delete":
+                    await db.Collection("classrooms").Document(selectedClassId)
+                              .Collection("posts").Document(postId).DeleteAsync();
+                    break;
+
+                case "Save":
+                    await SavePostAsync(e, post);
+                    break;
+
+                case "RemoveFile":
+                    post.FileUrl = null;
+                    post.FileName = null;
+                    await db.Collection("classrooms").Document(selectedClassId)
+                              .Collection("posts").Document(post.Id)
+                              .UpdateAsync(new Dictionary<string, object>
                     {
-                        updatedNames.RemoveAt(index);
-                        updatedUrls.RemoveAt(index);
-                    }
-                }
+                        { "fileUrl", FieldValue.Delete },
+                        { "fileName", FieldValue.Delete }
+                    });
+                    post.IsEditing = true;
+                    break;
+            }
 
-                if (fileUpload.HasFiles)
+            rptPosts.DataSource = postList;
+            rptPosts.DataBind();
+        }
+
+        private async Task SavePostAsync(RepeaterCommandEventArgs e, PostItem post)
+        {
+            TextBox txtTitle = (TextBox)e.Item.FindControl("txtEditTitle");
+            TextBox txtContent = (TextBox)e.Item.FindControl("txtEditContent");
+            FileUpload fileUpload = (FileUpload)e.Item.FindControl("fileUploadEdit");
+
+            if (fileUpload.HasFile)
+            {
+                RawUploadParams uploadParams = new RawUploadParams
                 {
-                    var account = new Account(
-                        ConfigurationManager.AppSettings["CloudinaryCloudName"],
-                        ConfigurationManager.AppSettings["CloudinaryApiKey"],
-                        ConfigurationManager.AppSettings["CloudinaryApiSecret"]);
-
-                    var cloudinary = new Cloudinary(account);
-
-                    foreach (HttpPostedFile uploadedFile in fileUpload.PostedFiles)
-                    {
-                        var uploadParams = new RawUploadParams
-                        {
-                            File = new FileDescription(uploadedFile.FileName, uploadedFile.InputStream),
-                            Folder = "class_posts"
-                        };
-
-                        var uploadResult = cloudinary.Upload(uploadParams);
-                        if (uploadResult.SecureUrl != null)
-                        {
-                            updatedUrls.Add(uploadResult.SecureUrl.ToString());
-                            updatedNames.Add(uploadResult.OriginalFilename);
-                        }
-                    }
-                }
-
-                var updatedData = new Dictionary<string, object>
-                {
-                    { "title", newTitle },
-                    { "content", newContent },
-                    { "fileUrls", updatedUrls },
-                    { "fileNames", updatedNames }
+                    File = new FileDescription(fileUpload.FileName, fileUpload.PostedFile.InputStream),
+                    Folder = "class_posts"
                 };
 
-                await db.Collection("classrooms").Document(selectedClassId)
-                    .Collection("posts").Document(postId).UpdateAsync(updatedData);
-
-                await LoadPostsAsync();
+                RawUploadResult uploadResult = await cloudinary.UploadAsync(uploadParams);
+                if (uploadResult.SecureUrl != null)
+                {
+                    post.FileUrl = uploadResult.SecureUrl.ToString();
+                    post.FileName = fileUpload.FileName;
+                }
             }
+
+            Dictionary<string, object> updates = new Dictionary<string, object>
+            {
+                { "title", txtTitle.Text.Trim() },
+                { "content", txtContent.Text.Trim() },
+                { "fileUrl", post.FileUrl ?? FieldValue.Delete },
+                { "fileName", post.FileName ?? FieldValue.Delete },
+                { "lastUpdated", Timestamp.GetCurrentTimestamp() }
+            };
+
+            await db.Collection("classrooms").Document(selectedClassId)
+                    .Collection("posts").Document(post.Id).UpdateAsync(updates);
+
+            post.IsEditing = false;
         }
 
         public class PostItem
@@ -179,8 +208,9 @@ namespace YourProjectNamespace
             public string Id { get; set; }
             public string Title { get; set; }
             public string Content { get; set; }
-            public List<string> FileUrls { get; set; }
-            public List<string> FileNames { get; set; }
+            public string PostType { get; set; }
+            public string FileUrl { get; set; }
+            public string FileName { get; set; }
             public bool IsEditing { get; set; }
         }
     }

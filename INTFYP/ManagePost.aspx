@@ -9,26 +9,26 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="TeacherMainContent" runat="server">
     <style>
         body {
-            background-color: #1c1c1c;
-            color: #eaeaea;
+            background-color: #f9f9f9;
+            color: #222;
         }
 
         .post-container {
-            max-width: 800px;
+            max-width: 900px;
             margin: auto;
-            background: #2a2a2a;
-            padding: 24px;
+            background: #ffffff;
+            padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
         }
 
         .form-group label,
         .form-group input,
         .form-group textarea,
         .form-group select {
-            color: #fff;
-            background-color: #3a3a3a;
-            border: 1px solid #555;
+            color: #333;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
         }
 
         .btn {
@@ -41,7 +41,7 @@
         }
 
         .btn-edit {
-            background-color: #444;
+            background-color: #555;
             color: white;
         }
 
@@ -61,7 +61,7 @@
         }
 
         .file-preview {
-            background-color: #383838;
+            background-color: #f1f1f1;
             padding: 10px;
             border-radius: 6px;
             margin-top: 10px;
@@ -72,12 +72,12 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 6px;
-            color: #ccc;
+            color: #333;
         }
 
         .file-item a {
             text-decoration: none;
-            color: #ccc;
+            color: #007bff;
         }
 
         .file-item a:hover {
@@ -86,96 +86,104 @@
 
         .remove-btn {
             cursor: pointer;
-            color: #ff5f57;
+            color: #e60023;
             font-weight: bold;
         }
 
-        .dropdown-class {
+        .filter-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
             margin-bottom: 24px;
         }
     </style>
 
     <div class="post-container">
-        <div class="dropdown-class">
-            <label for="ddlClassFilter"><strong>Select a Class:</strong></label>
-            <asp:DropDownList ID="ddlClassFilter" runat="server" AutoPostBack="true"
-                              OnSelectedIndexChanged="ddlClassFilter_SelectedIndexChanged"
-                              CssClass="form-control" />
+        <div class="filter-row">
+            <div>
+                <label for="ddlClassFilter"><strong>Select Class:</strong></label>
+                <asp:DropDownList ID="ddlClassFilter" runat="server" AutoPostBack="true"
+                                  OnSelectedIndexChanged="ddlClassFilter_SelectedIndexChanged"
+                                  CssClass="form-control" />
+            </div>
+            <div>
+                <label for="ddlPostTypeFilter"><strong>Filter By Type:</strong></label>
+                <asp:DropDownList ID="ddlPostTypeFilter" runat="server" AutoPostBack="true"
+                                  OnSelectedIndexChanged="ddlPostTypeFilter_SelectedIndexChanged"
+                                  CssClass="form-control">
+                    <asp:ListItem Text="All" Value="all" />
+                    <asp:ListItem Text="Announcement" Value="announcement" />
+                    <asp:ListItem Text="Assignment" Value="assignment" />
+                    <asp:ListItem Text="Reminder" Value="reminder" />
+                </asp:DropDownList>
+            </div>
         </div>
 
         <asp:Repeater ID="rptPosts" runat="server" OnItemCommand="rptPosts_ItemCommand">
             <ItemTemplate>
                 <div class="post-item">
                     <asp:Panel ID="pnlView" runat="server">
-                        <%-- We avoid Eval("IsEditing") logic here to bypass Func<> usage --%>
-                        <asp:PlaceHolder ID="phView" runat="server" Visible='<%# Convert.ToBoolean(DataBinder.Eval(Container.DataItem, "IsEditing")) == false %>'>
-                            <h4><%# DataBinder.Eval(Container.DataItem, "Title") %></h4>
-                            <p><%# DataBinder.Eval(Container.DataItem, "Content") %></p>
+                        <asp:PlaceHolder ID="phView" runat="server" Visible='<%# !Convert.ToBoolean(Eval("IsEditing")) %>'>
+                            <h4><%# Eval("Title") %> - <small><%# Eval("PostType") %></small></h4>
+                            <p><%# Eval("Content") %></p>
 
-                            <asp:PlaceHolder ID="phFiles" runat="server" Visible='<%# ((System.Collections.IList)DataBinder.Eval(Container.DataItem, "FileUrls")).Count > 0 %>'>
+                            <asp:PlaceHolder ID="phFile" runat="server" Visible='<%# Eval("FileUrl") != null && Eval("FileUrl").ToString() != "" %>'>
                                 <div class="file-preview">
-                                    <asp:Repeater ID="rptFiles" runat="server" DataSource='<%# DataBinder.Eval(Container.DataItem, "FileUrls") %>'>
-                                        <ItemTemplate>
-                                            <div class="file-item">
-                                                <a href='<%# Container.DataItem.ToString() %>' target="_blank">View File</a>
-                                            </div>
-                                        </ItemTemplate>
-                                    </asp:Repeater>
+                                    <div class="file-item">
+                                        <a href='<%# Eval("FileUrl") %>' target="_blank"><%# Eval("FileName") %></a>
+                                    </div>
                                 </div>
                             </asp:PlaceHolder>
 
-                            <asp:Button ID="btnEdit" runat="server" CommandName="Edit" CommandArgument='<%# DataBinder.Eval(Container.DataItem, "Id") %>'
+                            <asp:Button ID="btnEdit" runat="server" CommandName="Edit" CommandArgument='<%# Eval("Id") %>'
                                         Text="Edit" CssClass="btn btn-edit" />
-                            <asp:Button ID="btnDelete" runat="server" CommandName="Delete" CommandArgument='<%# DataBinder.Eval(Container.DataItem, "Id") %>'
+                            <asp:Button ID="btnDelete" runat="server" CommandName="Delete" CommandArgument='<%# Eval("Id") %>'
                                         Text="Delete" CssClass="btn btn-delete"
                                         OnClientClick="return confirm('Are you sure you want to delete this post?');" />
                         </asp:PlaceHolder>
 
-                        <asp:PlaceHolder ID="phEdit" runat="server" Visible='<%# Convert.ToBoolean(DataBinder.Eval(Container.DataItem, "IsEditing")) %>'>
+                        <asp:PlaceHolder ID="phEdit" runat="server" Visible='<%# Convert.ToBoolean(Eval("IsEditing")) %>'>
                             <div class="form-group">
                                 <label>Title</label>
                                 <asp:TextBox ID="txtEditTitle" runat="server" CssClass="form-control"
-                                             Text='<%# DataBinder.Eval(Container.DataItem, "Title") %>' />
+                                             Text='<%# Eval("Title") %>' />
                             </div>
 
                             <div class="form-group">
                                 <label>Content</label>
-                                <asp:TextBox ID="txtEditContent" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="5"
-                                             Text='<%# DataBinder.Eval(Container.DataItem, "Content") %>' />
+                                <asp:TextBox ID="txtEditContent" runat="server" CssClass="form-control"
+                                             TextMode="MultiLine" Rows="5" Text='<%# Eval("Content") %>' />
                             </div>
 
                             <div class="form-group">
-                                <label>Upload New File(s)</label>
-                                <asp:FileUpload ID="fileUploadEdit" runat="server" AllowMultiple="true" />
+                                <label>Upload New File</label>
+                                <asp:FileUpload ID="fileUploadEdit" runat="server" />
                             </div>
 
-                            <asp:PlaceHolder ID="phEditFiles" runat="server" Visible='<%# ((System.Collections.IList)DataBinder.Eval(Container.DataItem, "FileUrls")).Count > 0 %>'>
-                                <label>Existing Files:</label>
+                            <asp:PlaceHolder ID="phEditFiles" runat="server" Visible='<%# Eval("FileUrl") != null && Eval("FileUrl").ToString() != "" %>'>
+                                <label>Existing File:</label>
                                 <div class="file-preview">
-                                    <asp:Repeater ID="rptEditFiles" runat="server" DataSource='<%# DataBinder.Eval(Container.DataItem, "FileUrls") %>'>
-                                        <ItemTemplate>
-                                            <div class="file-item">
-                                                <a href='<%# Container.DataItem %>' target="_blank">
-                                                    <%# Container.DataItem.ToString().Split('/')[Container.DataItem.ToString().Split('/').Length - 1] %>
-                                                </a>
-                                                <asp:HiddenField ID="hdnFileUrl" runat="server" Value='<%# Container.DataItem %>' />
-                                                <asp:LinkButton ID="lnkRemove" runat="server" Text="❌" CssClass="remove-btn"
-                                                                CommandName="RemoveFile" CommandArgument='<%# DataBinder.Eval(Container.DataItem, "Id") + "|" + Container.DataItem %>'
-                                                                OnClientClick="return confirm('Are you sure you want to remove this file?');" />
-                                            </div>
-                                        </ItemTemplate>
-                                    </asp:Repeater>
+                                    <div class="file-item">
+                                        <a href='<%# Eval("FileUrl") %>' target="_blank"><%# Eval("FileName") %></a>
+                                        <asp:LinkButton ID="lnkRemove" runat="server" Text="❌" CssClass="remove-btn"
+                                                        CommandName="RemoveFile" CommandArgument='<%# Eval("Id") %>'
+                                                        OnClientClick="return confirm('Remove this file?');" />
+                                    </div>
                                 </div>
                             </asp:PlaceHolder>
 
-                            <asp:Button ID="btnSave" runat="server" CommandName="Save" CommandArgument='<%# DataBinder.Eval(Container.DataItem, "Id") %>'
+                            <asp:Button ID="btnSave" runat="server" CommandName="Save" CommandArgument='<%# Eval("Id") %>'
                                         Text="Save" CssClass="btn btn-save" />
-                            <asp:Button ID="btnCancel" runat="server" CommandName="CancelEdit" CommandArgument='<%# DataBinder.Eval(Container.DataItem, "Id") %>'
+                            <asp:Button ID="btnCancel" runat="server" CommandName="CancelEdit" CommandArgument='<%# Eval("Id") %>'
                                         Text="Cancel" CssClass="btn btn-cancel" />
                         </asp:PlaceHolder>
                     </asp:Panel>
                 </div>
             </ItemTemplate>
         </asp:Repeater>
+
+        <asp:Panel ID="pnlNoPosts" runat="server" Visible="false">
+            <p>No posts found for the selected class and type.</p>
+        </asp:Panel>
     </div>
 </asp:Content>

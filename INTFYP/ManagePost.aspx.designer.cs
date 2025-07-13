@@ -24,6 +24,15 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.DropDownList ddlClassFilter;
 
         /// <summary>
+        /// ddlPostTypeFilter control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlPostTypeFilter;
+
+        /// <summary>
         /// rptPosts control.
         /// </summary>
         /// <remarks>
@@ -31,5 +40,14 @@ namespace YourProjectNamespace
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater rptPosts;
+
+        /// <summary>
+        /// pnlNoPosts control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlNoPosts;
     }
 }
