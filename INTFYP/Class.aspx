@@ -66,13 +66,13 @@
     <div style="padding: 24px; max-width: 800px; margin: auto;">
         <h2>📚 Your Classes</h2>
         <asp:Repeater ID="rptClasses" runat="server" OnItemCommand="rptClasses_ItemCommand">
-    <ItemTemplate>
-        <div class="class-card">
-            <div class="placeholder-img"></div>
-            <div class="class-details">
-                <h5><%# Eval("name") %></h5>
-                <small>Invitation From <%# Eval("createdByName") %></small>
-            </div>
+            <ItemTemplate>
+                <div class="class-card">
+                    <div class="placeholder-img"></div>
+                    <div class="class-details">
+                        <h5><%# Eval("name") %></h5>
+                        <small>Invitation From <%# Eval("createdByName") %></small>
+                    </div>
 
             <%# Eval("status").ToString() == "pending" ? "" : null %>
             <asp:Panel runat="server" Visible='<%# Eval("status").ToString() == "pending" %>'>
@@ -88,12 +88,12 @@
             <asp:Panel runat="server" Visible='<%# Eval("status").ToString() == "accepted" %>'>
                 <asp:Button ID="btnEnter" runat="server" Text="Enter"
                             CommandName="Enter"
-                            CommandArgument='<%# Eval("classId") %>'
+                        CommandArgument='<%# Eval("classId") %>'
                             CssClass="btn btn-enter" />
             </asp:Panel>
-        </div>
-    </ItemTemplate>
-</asp:Repeater>
+                </div>
+            </ItemTemplate>
+        </asp:Repeater>
 
     </div>
 </asp:Content>

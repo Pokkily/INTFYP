@@ -33,6 +33,24 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.DropDownList ddlClasses;
 
         /// <summary>
+        /// ddlPostType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlPostType;
+
+        /// <summary>
+        /// txtPostTitle control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPostTitle;
+
+        /// <summary>
         /// txtPostContent control.
         /// </summary>
         /// <remarks>
@@ -51,6 +69,15 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.FileUpload FileUpload1;
 
         /// <summary>
+        /// txtScheduleDate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtScheduleDate;
+
+        /// <summary>
         /// btnSubmitPost control.
         /// </summary>
         /// <remarks>
@@ -58,5 +85,14 @@ namespace YourProjectNamespace
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnSubmitPost;
+
+        /// <summary>
+        /// btnReset control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnReset;
     }
 }

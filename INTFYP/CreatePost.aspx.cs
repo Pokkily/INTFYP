@@ -40,7 +40,6 @@ namespace YourProjectNamespace
                 .GetSnapshotAsync();
 
             var classList = new List<ClassItem>();
-
             foreach (var doc in snapshot.Documents)
             {
                 string name = doc.ContainsField("name") ? doc.GetValue<string>("name") : "(Unnamed)";
@@ -60,20 +59,22 @@ namespace YourProjectNamespace
         protected async void btnSubmitPost_Click(object sender, EventArgs e)
         {
             string classId = ddlClasses.SelectedValue;
+            string title = txtPostTitle.Text.Trim();
             string content = txtPostContent.Text.Trim();
+            string type = ddlPostType.SelectedValue;
+            string scheduleInput = txtScheduleDate.Text.Trim();
             string userEmail = Session["email"]?.ToString()?.ToLower();
 
             if (string.IsNullOrEmpty(classId) || string.IsNullOrEmpty(content))
             {
-                lblStatus.ForeColor = System.Drawing.Color.Red;
-                lblStatus.Text = "Please select a class and enter post content.";
+                lblStatus.Text = "Please fill in all required fields.";
+                lblStatus.Visible = true;
                 return;
             }
 
             string fileUrl = null;
             string fileName = null;
 
-            // Upload file to Cloudinary
             if (FileUpload1.HasFile)
             {
                 try
@@ -98,38 +99,49 @@ namespace YourProjectNamespace
                 }
                 catch (Exception ex)
                 {
-                    lblStatus.ForeColor = System.Drawing.Color.Red;
                     lblStatus.Text = "File upload failed: " + ex.Message;
+                    lblStatus.Visible = true;
                     return;
                 }
             }
 
-            // Get class name for storing with post
+            // Retrieve class name
             string className = "(Unknown)";
             DocumentSnapshot classDoc = await db.Collection("classrooms").Document(classId).GetSnapshotAsync();
             if (classDoc.Exists && classDoc.ContainsField("name"))
-            {
                 className = classDoc.GetValue<string>("name");
-            }
+
+            Timestamp postTime = Timestamp.GetCurrentTimestamp();
+            if (DateTime.TryParse(scheduleInput, out DateTime scheduledDate))
+                postTime = Timestamp.FromDateTime(scheduledDate.ToUniversalTime());
 
             var postData = new Dictionary<string, object>
             {
+                { "title", title },
                 { "content", content },
-                { "postedAt", Timestamp.GetCurrentTimestamp() },
+                { "postType", type },
+                { "postedAt", postTime },
                 { "createdBy", userEmail },
-                { "fileUrl", fileUrl },
-                { "fileName", fileName },
                 { "classId", classId },
                 { "className", className },
-                { "visibleTo", new List<string>() }  // placeholder for future logic
+                { "fileUrl", fileUrl },
+                { "fileName", fileName },
+                { "visibleTo", new List<string>() }
             };
 
-            await db.Collection("classrooms").Document(classId)
+            DocumentReference newPost = await db.Collection("classrooms").Document(classId)
                 .Collection("posts").AddAsync(postData);
 
-            lblStatus.ForeColor = System.Drawing.Color.Green;
-            lblStatus.Text = "✅ Post successfully created!";
+            // Success feedback
+            lblStatus.Text = $"Post created for <strong>{className}</strong> at <em>{postTime.ToDateTime().ToLocalTime():f}</em>.<br />Post ID: {newPost.Id}";
+            lblStatus.Visible = true;
+
+            // Clear fields
+            txtPostTitle.Text = "";
             txtPostContent.Text = "";
+            ddlPostType.SelectedIndex = 0;
+            ddlClasses.SelectedIndex = 0;
+            txtScheduleDate.Text = "";
         }
 
         public class ClassItem
