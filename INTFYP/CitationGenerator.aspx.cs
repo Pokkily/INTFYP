@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Web.UI;
+
 
 public partial class CitationGenerator : System.Web.UI.Page
 {
@@ -80,5 +80,4 @@ public partial class CitationGenerator : System.Web.UI.Page
         // string citation = GenerateCitation(style, sourceType);
         // lblCitationOutput.Text = citation;
     }
-}
 }
