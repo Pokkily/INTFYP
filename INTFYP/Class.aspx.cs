@@ -1,4 +1,6 @@
-﻿using Google.Cloud.Firestore;
+﻿// Fix: Ensure Firestore is initialized during postbacks too
+
+using Google.Cloud.Firestore;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,18 +15,33 @@ namespace YourProjectNamespace
 
         protected async void Page_Load(object sender, EventArgs e)
         {
+            InitializeFirestore(); // Always initialize
+
             if (!IsPostBack)
             {
+<<<<<<< HEAD
                 InitializeFirestore();
+=======
+>>>>>>> 64034487c422bb23654d492ee0fe444f25e1b27f
                 await LoadInvitedClassesAsync();
             }
         }
 
         private void InitializeFirestore()
         {
+            if (db == null)
+            {
+<<<<<<< HEAD
             string path = Server.MapPath("~/serviceAccountKey.json");
             Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
             db = FirestoreDb.Create("intorannetto");
+        }
+=======
+                string path = Server.MapPath("~/serviceAccountKey.json");
+                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
+                db = FirestoreDb.Create("intorannetto");
+            }
+>>>>>>> 64034487c422bb23654d492ee0fe444f25e1b27f
         }
 
         private async Task LoadInvitedClassesAsync()
@@ -32,7 +49,10 @@ namespace YourProjectNamespace
             string userEmail = Session["email"]?.ToString()?.ToLower();
             if (string.IsNullOrEmpty(userEmail)) return;
 
+<<<<<<< HEAD
             // Get all invitedStudents docs where email == current user
+=======
+>>>>>>> 64034487c422bb23654d492ee0fe444f25e1b27f
             QuerySnapshot invitedSnapshots = await db
                 .CollectionGroup("invitedStudents")
                 .WhereEqualTo("email", userEmail)
@@ -46,18 +66,27 @@ namespace YourProjectNamespace
                     ? inviteDoc.GetValue<string>("status")
                     : "pending";
 
+<<<<<<< HEAD
                 // Parent classroom document:
+=======
+>>>>>>> 64034487c422bb23654d492ee0fe444f25e1b27f
                 DocumentReference classRef = inviteDoc.Reference.Parent.Parent;
                 DocumentSnapshot classDoc = await classRef.GetSnapshotAsync();
 
                 if (!classDoc.Exists) continue;
 
+<<<<<<< HEAD
                 // Read classroom fields:
+=======
+>>>>>>> 64034487c422bb23654d492ee0fe444f25e1b27f
                 string classId = classRef.Id;
                 string name = classDoc.GetValue<string>("name");
                 string creatorEmail = classDoc.GetValue<string>("createdBy");
 
+<<<<<<< HEAD
                 // Fetch creator's full name from users collection:
+=======
+>>>>>>> 64034487c422bb23654d492ee0fe444f25e1b27f
                 string creatorName = creatorEmail;
                 QuerySnapshot userSnap = await db
                     .Collection("users")
@@ -85,6 +114,8 @@ namespace YourProjectNamespace
 
         protected async void rptClasses_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
+            InitializeFirestore(); // Ensure db is available
+
             string classId = e.CommandArgument.ToString();
             string userEmail = Session["email"]?.ToString()?.ToLower();
             if (string.IsNullOrEmpty(classId) || string.IsNullOrEmpty(userEmail)) return;
@@ -98,6 +129,11 @@ namespace YourProjectNamespace
             if (e.CommandName == "Join")
             {
                 await inviteRef.UpdateAsync("status", "accepted");
+                await LoadInvitedClassesAsync();
+            }
+            else if (e.CommandName == "Decline")
+            {
+                await inviteRef.UpdateAsync("status", "declined");
                 await LoadInvitedClassesAsync();
             }
             else if (e.CommandName == "Enter")

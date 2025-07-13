@@ -41,7 +41,7 @@ namespace YourProjectNamespace
                 new TeacherNavItem {
                     Text = "Create New Post",
                     Description = "Make new announcement",
-                    Link = "~/CreatePost.aspx",
+                    Link = "CreatePost.aspx",
                     IsActive = ""
                 },
                 new TeacherNavItem {
