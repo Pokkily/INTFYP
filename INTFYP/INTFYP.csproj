@@ -346,6 +346,7 @@
     <Content Include="protos\google\api\backend.proto" />
     <Content Include="protos\google\api\auth.proto" />
     <Content Include="protos\google\api\annotations.proto" />
+    <Content Include="ServiceAccountKey.json" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -373,7 +374,6 @@
     <Content Include="Scripts\WebForms\WebForms.js" />
     <Content Include="Scripts\WebForms\WebParts.js" />
     <Content Include="Scripts\WebForms\WebUIValidation.js" />
-    <Content Include="serviceAccountKey.json" />
     <Content Include="Login.aspx" />
     <Content Include="Chibai.aspx" />
     <Content Include="ViewSwitcher.ascx" />
