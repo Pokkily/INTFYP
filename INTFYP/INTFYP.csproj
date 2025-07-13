@@ -50,6 +50,7 @@
     <Reference Include="CloudinaryDotNet, Version=1.27.6.0, Culture=neutral, PublicKeyToken=c8234dc617ae7841, processorArchitecture=MSIL">
       <HintPath>..\packages\CloudinaryDotNet.1.27.6\lib\net452\CloudinaryDotNet.dll</HintPath>
     </Reference>
+<Reference Include="netstandard" />
     <Reference Include="Google.Api.CommonProtos, Version=2.16.0.0, Culture=neutral, PublicKeyToken=3ec5ea7f18953e47, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Api.CommonProtos.2.16.0\lib\net461\Google.Api.CommonProtos.dll</HintPath>
     </Reference>
@@ -347,6 +348,7 @@
     <Content Include="protos\google\api\auth.proto" />
     <Content Include="protos\google\api\annotations.proto" />
     <Content Include="ServiceAccountKey.json" />
+    <Content Include="ManagePost.aspx" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -484,6 +486,13 @@
     </Compile>
     <Compile Include="ViewSwitcher.ascx.designer.cs">
       <DependentUpon>ViewSwitcher.ascx</DependentUpon>
+    </Compile>
+    <Compile Include="ManagePost.aspx.cs">
+      <DependentUpon>ManagePost.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ManagePost.aspx.designer.cs">
+      <DependentUpon>ManagePost.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup />
