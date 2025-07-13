@@ -19,7 +19,10 @@ namespace YourProjectNamespace
 
             if (!IsPostBack)
             {
+<<<<<<< HEAD
                 InitializeFirestore();
+=======
+>>>>>>> 64034487c422bb23654d492ee0fe444f25e1b27f
                 await LoadInvitedClassesAsync();
             }
         }
@@ -28,10 +31,17 @@ namespace YourProjectNamespace
         {
             if (db == null)
             {
+<<<<<<< HEAD
             string path = Server.MapPath("~/serviceAccountKey.json");
             Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
             db = FirestoreDb.Create("intorannetto");
         }
+=======
+                string path = Server.MapPath("~/serviceAccountKey.json");
+                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
+                db = FirestoreDb.Create("intorannetto");
+            }
+>>>>>>> 64034487c422bb23654d492ee0fe444f25e1b27f
         }
 
         private async Task LoadInvitedClassesAsync()
@@ -39,7 +49,10 @@ namespace YourProjectNamespace
             string userEmail = Session["email"]?.ToString()?.ToLower();
             if (string.IsNullOrEmpty(userEmail)) return;
 
+<<<<<<< HEAD
             // Get all invitedStudents docs where email == current user
+=======
+>>>>>>> 64034487c422bb23654d492ee0fe444f25e1b27f
             QuerySnapshot invitedSnapshots = await db
                 .CollectionGroup("invitedStudents")
                 .WhereEqualTo("email", userEmail)
@@ -53,18 +66,27 @@ namespace YourProjectNamespace
                     ? inviteDoc.GetValue<string>("status")
                     : "pending";
 
+<<<<<<< HEAD
                 // Parent classroom document:
+=======
+>>>>>>> 64034487c422bb23654d492ee0fe444f25e1b27f
                 DocumentReference classRef = inviteDoc.Reference.Parent.Parent;
                 DocumentSnapshot classDoc = await classRef.GetSnapshotAsync();
 
                 if (!classDoc.Exists) continue;
 
+<<<<<<< HEAD
                 // Read classroom fields:
+=======
+>>>>>>> 64034487c422bb23654d492ee0fe444f25e1b27f
                 string classId = classRef.Id;
                 string name = classDoc.GetValue<string>("name");
                 string creatorEmail = classDoc.GetValue<string>("createdBy");
 
+<<<<<<< HEAD
                 // Fetch creator's full name from users collection:
+=======
+>>>>>>> 64034487c422bb23654d492ee0fe444f25e1b27f
                 string creatorName = creatorEmail;
                 QuerySnapshot userSnap = await db
                     .Collection("users")

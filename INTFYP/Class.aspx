@@ -66,6 +66,7 @@
     <div style="padding: 24px; max-width: 800px; margin: auto;">
         <h2>📚 Your Classes</h2>
         <asp:Repeater ID="rptClasses" runat="server" OnItemCommand="rptClasses_ItemCommand">
+<<<<<<< HEAD
             <ItemTemplate>
                 <div class="class-card">
                     <div class="placeholder-img"></div>
@@ -73,6 +74,15 @@
                         <h5><%# Eval("name") %></h5>
                         <small>Invitation From <%# Eval("createdByName") %></small>
                     </div>
+=======
+    <ItemTemplate>
+        <div class="class-card">
+            <div class="placeholder-img"></div>
+            <div class="class-details">
+                <h5><%# Eval("name") %></h5>
+                <small>Invitation From <%# Eval("createdByName") %></small>
+            </div>
+>>>>>>> 64034487c422bb23654d492ee0fe444f25e1b27f
 
             <%# Eval("status").ToString() == "pending" ? "" : null %>
             <asp:Panel runat="server" Visible='<%# Eval("status").ToString() == "pending" %>'>
