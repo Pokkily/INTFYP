@@ -1,0 +1,157 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="YourProjectNamespace.Site" %>
+
+<!DOCTYPE html>
+<html>
+<head runat="server">
+    <title><asp:ContentPlaceHolder ID="TitleContent" runat="server" /></title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 30px;
+            border-bottom: 1px solid #ccc;
+            background-color: #fff;
+        }
+
+        .left-section {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-img {
+            height: 28px;
+            margin-right: 15px;
+        }
+
+        .profile-img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .title-group {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .title-group .title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .title-group .subtitle {
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .menu {
+            display: flex;
+            gap: 16px;
+            margin-left: 60px;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: black;
+            font-weight: 500;
+            font-size: 14px;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+
+        .menu a.mainpage {
+            background-color: #eee;
+        }
+
+        .right-panel {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            border: 1px solid #ccc;
+            background: white;
+            padding: 6px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+            color: black;
+        }
+
+        .btn.black {
+            background-color: black;
+            color: white;
+            border: none;
+        }
+
+        .username {
+            font-size: 14px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <form runat="server">
+        <div class="header">
+            <!-- Left Logo + Username + Welcome -->
+            <div class="left-section">
+                <img src="Images/logo.png" alt="Logo" class="logo-img" />
+                <img src="Images/dprofile.jpg" alt="Profile" class="profile-img" />
+                <div class="title-group">
+                    <asp:PlaceHolder ID="phUser" runat="server" Visible="false">
+                        <span id="lblUsername" runat="server" class="title username"></span>
+                        <span class="subtitle">Welcome back!</span>
+                    </asp:PlaceHolder>
+                    <asp:PlaceHolder ID="phGuestLabel" runat="server" Visible="false">
+                        <span class="title">Guest</span>
+                        <span class="subtitle">Please sign in</span>
+                    </asp:PlaceHolder>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <div class="menu">
+    <asp:HyperLink ID="lnkClass" runat="server" NavigateUrl="Class.aspx" Text="Class" CssClass="menu-link" />
+    <asp:HyperLink ID="lnkStudyHub" runat="server" NavigateUrl="StudyHub.aspx" Text="StudyHub" CssClass="menu-link" />
+    <asp:HyperLink ID="lnkLibrary" runat="server" NavigateUrl="Library.aspx" Text="Library" CssClass="menu-link" />
+    <asp:HyperLink ID="lnkQuiz" runat="server" NavigateUrl="Quiz.aspx" Text="Quiz" CssClass="menu-link" />
+    <asp:HyperLink ID="lnkLearning" runat="server" NavigateUrl="Learning.aspx" Text="Learning" CssClass="menu-link" />
+    <asp:HyperLink ID="lnkScholarship" runat="server" NavigateUrl="Scholarship.aspx" Text="Scholarship" CssClass="menu-link" />
+    <asp:HyperLink ID="lnkFeedback" runat="server" NavigateUrl="Feedback.aspx" Text="Feedback" CssClass="menu-link" />
+
+    <asp:PlaceHolder ID="phTeacherMenu" runat="server" Visible="false">
+        <asp:HyperLink ID="lnkManage" runat="server" NavigateUrl="CreateClassroom.aspx" Text="Manage" CssClass="menu-link" />
+    </asp:PlaceHolder>
+</div>
+
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <asp:PlaceHolder ID="phLoggedIn" runat="server" Visible="false">
+                    <a href="Logout.aspx" class="btn">Logout</a>
+                </asp:PlaceHolder>
+
+                <asp:PlaceHolder ID="phGuest" runat="server" Visible="false">
+                    <a href="Login.aspx" class="btn">Sign in</a>
+                    <a href="Register.aspx" class="btn black">Register</a>
+                </asp:PlaceHolder>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+    </form>
+</body>
+</html>
