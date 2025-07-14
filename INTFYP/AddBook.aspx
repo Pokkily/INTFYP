@@ -180,7 +180,7 @@
           </div>
           <div class="extra">
             <button class="bookmark">Your Bookmark</button>
-            <button class="citation">Citation Generator</button>
+            <button class="citation" type="button" onclick="location.href='CitationGenerator.aspx';">Citation Generator</button>
           </div>
         </aside>
 
@@ -199,7 +199,7 @@
             <asp:Label Text="Category:" runat="server" AssociatedControlID="txtCategory" />
             <asp:TextBox ID="txtCategory" runat="server" CssClass="form-control" />
 
-            <asp:Label Text="Upload PDF:" runat="server" AssociatedControlID="filePdf" />
+            <asp:Label Text="PDF File:" runat="server" AssociatedControlID="filePdf" />
             <asp:FileUpload ID="filePdf" runat="server" CssClass="form-control" />
 
             <asp:Button ID="btnSubmit" runat="server" Text="Add Book" OnClick="btnSubmit_Click" CssClass="btn" />

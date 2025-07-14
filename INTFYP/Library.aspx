@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Library.aspx.cs" Inherits="INTFYP.Library" %>
+﻿<%@ Page Language="C#" Async="true" AutoEventWireup="true" CodeBehind="Library.aspx.cs" Inherits="INTFYP.Library" %>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -178,7 +178,7 @@
           </div>
           <div class="extra">
             <button class="bookmark">Your Bookmark</button>
-            <button class="citation">Citation Generator</button>
+            <button class="citation" type="button" onclick="location.href='CitationGenerator.aspx';">Citation Generator</button>
             <button class="citation" type="button" onclick="location.href='AddBook.aspx';">Add Books</button>
           </div>
         </aside>
@@ -196,16 +196,6 @@
                         <h3><%# Eval("Title") %></h3>
                         <p><%# Eval("Author") %></p>
                         <span>#<%# Eval("Category") %></span>
-
-                        <%-- PDF Preview Link --%>
-                        <asp:HyperLink 
-                            ID="lnkPreview" 
-                            runat="server" 
-                            NavigateUrl='<%# Eval("PdfUrl") != null ? "PreviewPdf.aspx?url=" + HttpUtility.UrlEncode(Eval("PdfUrl").ToString()) : "#" %>' 
-                            Text="📖 Preview PDF" 
-                            Target="_blank"
-                            Visible='<%# Eval("PdfUrl") != null %>' 
-                        />
                     </div>
                 </ItemTemplate>
                 <FooterTemplate></div></FooterTemplate>

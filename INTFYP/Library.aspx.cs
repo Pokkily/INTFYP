@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using Google.Cloud.Firestore;
 
 namespace INTFYP
@@ -35,7 +36,7 @@ namespace INTFYP
             foreach (DocumentSnapshot doc in snapshot.Documents)
             {
                 LibraryBook b = doc.ConvertTo<LibraryBook>();
-                b.PdfUrl = doc.ContainsField("PdfUrl") ? doc.GetValue<string>("PdfUrl") : null; // Safety
+                b.PdfUrl = doc.ContainsField("PdfUrl") ? doc.GetValue<string>("PdfUrl") : null;
                 bookList.Add(b);
             }
 
