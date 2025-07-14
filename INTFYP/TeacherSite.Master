@@ -1,6 +1,5 @@
 ﻿<%@ Master Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" 
     CodeBehind="TeacherSite.master.cs" Inherits="YourProjectNamespace.TeacherSite" %>
-
 <asp:Content ID="MainContent" ContentPlaceHolderID="MainContent" runat="server">
     <style>
         .teacher-container {

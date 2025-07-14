@@ -280,6 +280,7 @@
     <Content Include="Content\Site.css" />
     <Content Include="CreateClassroom.aspx" />
     <Content Include="CreatePost.aspx" />
+    <Content Include="CreateQuiz.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
@@ -439,6 +440,13 @@
     </Compile>
     <Compile Include="CreatePost.aspx.designer.cs">
       <DependentUpon>CreatePost.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="CreateQuiz.aspx.cs">
+      <DependentUpon>CreateQuiz.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CreateQuiz.aspx.designer.cs">
+      <DependentUpon>CreateQuiz.aspx</DependentUpon>
     </Compile>
     <Compile Include="Default.aspx.cs">
       <DependentUpon>Default.aspx</DependentUpon>
