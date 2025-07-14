@@ -180,7 +180,9 @@ namespace YourProjectNamespace
                 }
                 else if (e.CommandName == "Enter" || e.CommandName == "View")
                 {
-                    Response.Redirect($"ClassroomView.aspx?classId={classId}");
+                    Response.Redirect($"ClassDetails.aspx?classId={classId}", false);
+                    Context.ApplicationInstance.CompleteRequest(); // Prevents ThreadAbortException
+
                 }
             }
             catch (Exception ex)
