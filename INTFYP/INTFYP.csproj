@@ -256,7 +256,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AddBook.aspx" />
     <Content Include="CitationGenerator.aspx" />
     <Content Include="Class.aspx" />
     <Content Include="Contact.aspx" />
@@ -351,12 +350,9 @@
     <Content Include="protos\google\api\annotations.proto" />
     <Content Include="ManagePost.aspx" />
     <Content Include="FeedBack.aspx" />
-
     <Content Include="libman.json" />
     <Content Include="Preview.aspx" />
-
     <Content Include="ServiceAccountKey.json" />
-
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -390,13 +386,6 @@
     <Content Include="Bundle.config" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddBook.aspx.cs">
-      <DependentUpon>AddBook.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="AddBook.aspx.designer.cs">
-      <DependentUpon>AddBook.aspx</DependentUpon>
-    </Compile>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="CitationGenerator.aspx.cs">
