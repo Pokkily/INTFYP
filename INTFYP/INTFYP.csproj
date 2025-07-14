@@ -281,7 +281,6 @@
     <Content Include="CreatePost.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="favicon.ico" />
-    <Content Include="Global.asax" />
     <Content Include="Images\dprofile.jpg" />
     <Content Include="Images\logo.png" />
     <Content Include="Library.aspx" />
@@ -352,7 +351,12 @@
     <Content Include="protos\google\api\annotations.proto" />
     <Content Include="ManagePost.aspx" />
     <Content Include="FeedBack.aspx" />
+
+    <Content Include="libman.json" />
+    <Content Include="Preview.aspx" />
+
     <Content Include="ServiceAccountKey.json" />
+
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -437,9 +441,6 @@
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Global.asax.cs">
-      <DependentUpon>Global.asax</DependentUpon>
-    </Compile>
     <Compile Include="Library.aspx.cs">
       <DependentUpon>Library.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -517,6 +518,13 @@
     </Compile>
     <Compile Include="FeedBack.aspx.designer.cs">
       <DependentUpon>FeedBack.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Preview.aspx.cs">
+      <DependentUpon>Preview.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Preview.aspx.designer.cs">
+      <DependentUpon>Preview.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup />
