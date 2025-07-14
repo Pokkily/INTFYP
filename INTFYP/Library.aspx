@@ -196,6 +196,16 @@
                         <h3><%# Eval("Title") %></h3>
                         <p><%# Eval("Author") %></p>
                         <span>#<%# Eval("Category") %></span>
+
+                        <%-- PDF Preview Link --%>
+                        <asp:HyperLink 
+                            ID="lnkPreview" 
+                            runat="server" 
+                            NavigateUrl='<%# Eval("PdfUrl") != null ? "PreviewPdf.aspx?url=" + HttpUtility.UrlEncode(Eval("PdfUrl").ToString()) : "#" %>' 
+                            Text="📖 Preview PDF" 
+                            Target="_blank"
+                            Visible='<%# Eval("PdfUrl") != null %>' 
+                        />
                     </div>
                 </ItemTemplate>
                 <FooterTemplate></div></FooterTemplate>

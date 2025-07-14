@@ -35,6 +35,7 @@ namespace INTFYP
             foreach (DocumentSnapshot doc in snapshot.Documents)
             {
                 LibraryBook b = doc.ConvertTo<LibraryBook>();
+                b.PdfUrl = doc.ContainsField("PdfUrl") ? doc.GetValue<string>("PdfUrl") : null; // Safety
                 bookList.Add(b);
             }
 
@@ -42,13 +43,13 @@ namespace INTFYP
             Repeater1.DataBind();
         }
 
-
         [FirestoreData]
         public class LibraryBook
         {
             [FirestoreProperty] public string Title { get; set; }
             [FirestoreProperty] public string Author { get; set; }
             [FirestoreProperty] public string Category { get; set; }
+            [FirestoreProperty] public string PdfUrl { get; set; }
         }
     }
 }
