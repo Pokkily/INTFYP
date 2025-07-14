@@ -5,7 +5,7 @@ using System.Web.UI;
 using Google.Cloud.Firestore;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using Google.Protobuf.Reflection;
+using Newtonsoft.Json;
 
 namespace YourProjectNamespace
 {
@@ -18,7 +18,10 @@ namespace YourProjectNamespace
             InitializeFirestore();
 
             if (!IsPostBack)
+            {
                 await LoadTeacherClassesAsync();
+                UploadedFiles = new List<UploadedFileItem>(); // reset file list
+            }
         }
 
         private void InitializeFirestore()
@@ -57,6 +60,61 @@ namespace YourProjectNamespace
             ddlClasses.DataBind();
         }
 
+        // 🔽 Session-backed uploaded file list
+        private List<UploadedFileItem> UploadedFiles
+        {
+            get
+            {
+                return (Session["UploadedFiles"] as List<UploadedFileItem>) ?? new List<UploadedFileItem>();
+            }
+            set
+            {
+                Session["UploadedFiles"] = value;
+            }
+        }
+
+        protected async void btnAddFile_Click(object sender, EventArgs e)
+        {
+            if (!fileUploadAdd.HasFile) return;
+
+            try
+            {
+                var account = new Account(
+                    ConfigurationManager.AppSettings["CloudinaryCloudName"],
+                    ConfigurationManager.AppSettings["CloudinaryApiKey"],
+                    ConfigurationManager.AppSettings["CloudinaryApiSecret"]
+                );
+                var cloudinary = new Cloudinary(account);
+
+                var uploadParams = new RawUploadParams
+                {
+                    File = new FileDescription(fileUploadAdd.FileName, fileUploadAdd.PostedFile.InputStream),
+                    Folder = "class_posts"
+                };
+
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                var currentList = UploadedFiles;
+                currentList.Add(new UploadedFileItem
+                {
+                    Url = uploadResult.SecureUrl.ToString(),
+                    Name = fileUploadAdd.FileName
+                });
+                UploadedFiles = currentList;
+
+                // Update hidden field and UI
+                hfUploadedFiles.Value = JsonConvert.SerializeObject(currentList);
+                rptAttachedFiles.DataSource = currentList;
+                rptAttachedFiles.DataBind();
+                phAttachedFiles.Visible = true;
+            }
+            catch (Exception ex)
+            {
+                lblStatus.Text = "File upload failed: " + ex.Message;
+                lblStatus.Visible = true;
+            }
+        }
+
         protected async void btnSubmitPost_Click(object sender, EventArgs e)
         {
             string classId = ddlClasses.SelectedValue;
@@ -73,40 +131,17 @@ namespace YourProjectNamespace
                 return;
             }
 
-            string fileUrl = null;
-            string fileName = null;
+            var fileList = UploadedFiles;
+            List<string> fileUrls = new List<string>();
+            List<string> fileNames = new List<string>();
 
-            if (FileUpload1.HasFile)
+            foreach (var file in fileList)
             {
-                try
-                {
-                    var account = new Account(
-                        ConfigurationManager.AppSettings["CloudinaryCloudName"],
-                        ConfigurationManager.AppSettings["CloudinaryApiKey"],
-                        ConfigurationManager.AppSettings["CloudinaryApiSecret"]
-                    );
-
-                    var cloudinary = new Cloudinary(account);
-
-                    var uploadParams = new RawUploadParams
-                    {
-                        File = new FileDescription(FileUpload1.FileName, FileUpload1.PostedFile.InputStream),
-                        Folder = "class_posts"
-                    };
-
-                    var uploadResult = cloudinary.Upload(uploadParams);
-                    fileUrl = uploadResult.SecureUrl.ToString();
-                    fileName = uploadResult.OriginalFilename;
-                }
-                catch (Exception ex)
-                {
-                    lblStatus.Text = "File upload failed: " + ex.Message;
-                    lblStatus.Visible = true;
-                    return;
-                }
+                fileUrls.Add(file.Url);
+                fileNames.Add(file.Name);
             }
 
-            // Retrieve class name
+            // Get class name
             string className = "(Unknown)";
             DocumentSnapshot classDoc = await db.Collection("classrooms").Document(classId).GetSnapshotAsync();
             if (classDoc.Exists && classDoc.ContainsField("name"))
@@ -125,24 +160,32 @@ namespace YourProjectNamespace
                 { "createdBy", userEmail },
                 { "classId", classId },
                 { "className", className },
-                { "fileUrl", fileUrl },
-                { "fileName", fileName },
+                { "fileUrls", fileUrls },
+                { "fileNames", fileNames },
                 { "visibleTo", new List<string>() }
             };
 
             DocumentReference newPost = await db.Collection("classrooms").Document(classId)
                 .Collection("posts").AddAsync(postData);
 
-            // Success feedback
             lblStatus.Text = $"Post created for <strong>{className}</strong> at <em>{postTime.ToDateTime().ToLocalTime():f}</em>.<br />Post ID: {newPost.Id}";
             lblStatus.Visible = true;
 
-            // Clear fields
+            // Reset UI
             txtPostTitle.Text = "";
             txtPostContent.Text = "";
             ddlPostType.SelectedIndex = 0;
             ddlClasses.SelectedIndex = 0;
             txtScheduleDate.Text = "";
+            UploadedFiles = new List<UploadedFileItem>();
+            hfUploadedFiles.Value = "";
+            phAttachedFiles.Visible = false;
+        }
+
+        public class UploadedFileItem
+        {
+            public string Url { get; set; }
+            public string Name { get; set; }
         }
 
         public class ClassItem

@@ -285,6 +285,7 @@
     <Content Include="Images\logo.png" />
     <Content Include="Library.aspx" />
     <Content Include="MainPage.aspx" />
+    <Content Include="ManageClassroom.aspx" />
     <Content Include="Register.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -348,11 +349,14 @@
     <Content Include="protos\google\api\backend.proto" />
     <Content Include="protos\google\api\auth.proto" />
     <Content Include="protos\google\api\annotations.proto" />
-    <Content Include="ServiceAccountKey.json" />
     <Content Include="ManagePost.aspx" />
     <Content Include="FeedBack.aspx" />
+<<<<<<< HEAD
     <Content Include="libman.json" />
     <Content Include="Preview.aspx" />
+=======
+    <Content Include="ServiceAccountKey.json" />
+>>>>>>> ffeb4330ac2a4742ae397aeb857f03db373ae3e9
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -450,6 +454,13 @@
     </Compile>
     <Compile Include="MainPage.aspx.designer.cs">
       <DependentUpon>MainPage.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ManageClassroom.aspx.cs">
+      <DependentUpon>ManageClassroom.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ManageClassroom.aspx.designer.cs">
+      <DependentUpon>ManageClassroom.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Register.aspx.cs">

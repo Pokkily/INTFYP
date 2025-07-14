@@ -29,13 +29,13 @@ namespace YourProjectNamespace
                 new TeacherNavItem {
                     Text = "Create Classroom",
                     Description = "Create a new class",
-                    Link = "~/CreateClassroom.aspx",
+                    Link = "CreateClassroom.aspx",
                     IsActive = ""
                 },
                 new TeacherNavItem {
                     Text = "Manage Classroom",
                     Description = "Modify classroom",
-                    Link = "~/ManageClassroom.aspx",
+                    Link = "ManageClassroom.aspx",
                     IsActive = ""
                 },
                 new TeacherNavItem {
