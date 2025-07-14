@@ -60,13 +60,49 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.TextBox txtPostContent;
 
         /// <summary>
-        /// FileUpload1 control.
+        /// fileUploadAdd control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.FileUpload FileUpload1;
+        protected global::System.Web.UI.WebControls.FileUpload fileUploadAdd;
+
+        /// <summary>
+        /// btnAddFile control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnAddFile;
+
+        /// <summary>
+        /// hfUploadedFiles control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfUploadedFiles;
+
+        /// <summary>
+        /// phAttachedFiles control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.PlaceHolder phAttachedFiles;
+
+        /// <summary>
+        /// rptAttachedFiles control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptAttachedFiles;
 
         /// <summary>
         /// txtScheduleDate control.
