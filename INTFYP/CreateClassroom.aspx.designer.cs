@@ -33,13 +33,13 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.TextBox txtClassDescription;
 
         /// <summary>
-        /// txtClassDate control.
+        /// ddlDayOfWeek control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtClassDate;
+        protected global::System.Web.UI.WebControls.DropDownList ddlDayOfWeek;
 
         /// <summary>
         /// txtStartTime control.
@@ -121,6 +121,24 @@ namespace YourProjectNamespace
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater rptStudents;
+
+        /// <summary>
+        /// pnlPreview control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlPreview;
+
+        /// <summary>
+        /// lblPreview control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblPreview;
 
         /// <summary>
         /// btnCreateClass control.
