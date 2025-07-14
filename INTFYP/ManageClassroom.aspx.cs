@@ -1,7 +1,6 @@
 ﻿using Google.Cloud.Firestore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -11,13 +10,11 @@ namespace YourProjectNamespace
     public partial class ManageClassroom : System.Web.UI.Page
     {
         private FirestoreDb db;
-        private string teacherEmail;
+        private static string editingClassId = null;
 
         protected async void Page_Load(object sender, EventArgs e)
         {
             InitializeFirestore();
-            teacherEmail = Session["email"]?.ToString() ?? "unknown@teacher.com";
-
             if (!IsPostBack)
             {
                 await LoadClassrooms();
@@ -31,221 +28,123 @@ namespace YourProjectNamespace
             db = FirestoreDb.Create("intorannetto");
         }
 
-        protected async Task LoadClassrooms(string searchTerm = "", string filter = "all")
+        private async Task LoadClassrooms()
         {
-            Query query = db.Collection("classrooms")
-                           .WhereEqualTo("createdBy", teacherEmail);
+            string teacherEmail = Session["email"]?.ToString() ?? "unknown@teacher.com";
 
-            if (filter != "all")
+            Query query = db.Collection("classrooms").WhereEqualTo("createdBy", teacherEmail);
+            QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+            List<Classroom> classrooms = new List<Classroom>();
+
+            foreach (DocumentSnapshot doc in snapshot.Documents)
             {
-                query = query.WhereEqualTo("status", filter);
+                var data = doc.ToDictionary();
+                data.TryGetValue("name", out object name);
+                data.TryGetValue("description", out object description);
+                data.TryGetValue("venue", out object venue);
+                data.TryGetValue("weeklyDay", out object weeklyDay);
+                data.TryGetValue("startTime", out object startTime);
+                data.TryGetValue("endTime", out object endTime);
+                data.TryGetValue("status", out object status);
+
+                classrooms.Add(new Classroom
+                {
+                    Id = doc.Id,
+                    Name = name?.ToString(),
+                    Description = description?.ToString(),
+                    Venue = venue?.ToString(),
+                    WeeklyDay = weeklyDay?.ToString(),
+                    StartTime = startTime?.ToString(),
+                    EndTime = endTime?.ToString(),
+                    Status = status?.ToString(),
+                    IsEditing = (doc.Id == editingClassId)
+                });
             }
 
-            var snapshot = await query.GetSnapshotAsync();
-            var filteredDocs = new List<DocumentSnapshot>();
-
-            if (!string.IsNullOrEmpty(searchTerm))
+            rptClassrooms.DataSource = classrooms;
+            rptClassrooms.DataBind();
+        }
+        protected void rptClassrooms_ItemDataBound(object sender, RepeaterItemEventArgs e)
+        {
+            if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem)
             {
-                foreach (var doc in snapshot.Documents)
+                DropDownList ddlDay = (DropDownList)e.Item.FindControl("ddlEditDay");
+                string weeklyDay = DataBinder.Eval(e.Item.DataItem, "WeeklyDay")?.ToString();
+                if (!string.IsNullOrEmpty(weeklyDay))
                 {
-                    if (doc.GetValue<string>("name").ToLower().Contains(searchTerm.ToLower()) ||
-                       doc.GetValue<string>("description").ToLower().Contains(searchTerm.ToLower()) ||
-                       doc.GetValue<string>("venue").ToLower().Contains(searchTerm.ToLower()))
-                    {
-                        filteredDocs.Add(doc);
-                    }
+                    ListItem selected = ddlDay.Items.FindByText(weeklyDay);
+                    if (selected != null)
+                        ddlDay.ClearSelection();
+                    selected.Selected = true;
                 }
             }
-            else
-            {
-                filteredDocs = snapshot.Documents.ToList();
-            }
-
-            if (filteredDocs.Count == 0)
-            {
-                pnlEmptyState.Visible = true;
-                pnlClassrooms.Visible = false;
-                return;
-            }
-
-            pnlEmptyState.Visible = false;
-            pnlClassrooms.Visible = true;
-            pnlClassrooms.Controls.Clear();
-
-            foreach (var doc in filteredDocs)
-            {
-                var classroom = doc.ToDictionary();
-                AddClassroomCard(doc.Id, classroom);
-            }
         }
 
-        private void AddClassroomCard(string classroomId, Dictionary<string, object> classroom)
+        protected async void rptClassrooms_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
-            Panel card = new Panel { CssClass = "classroom-card" };
+            string classId = e.CommandArgument.ToString();
 
-            // Classroom title
-            Literal title = new Literal
+            if (e.CommandName == "Delete")
             {
-                Text = $"<div class='classroom-title'>{classroom["name"]}</div>"
-            };
-            card.Controls.Add(title);
+                await db.Collection("classrooms").Document(classId).DeleteAsync();
+                editingClassId = null;
+                await LoadClassrooms();
+            }
+            else if (e.CommandName == "Edit")
+            {
+                editingClassId = classId;
+                await LoadClassrooms();
+            }
+            else if (e.CommandName == "Cancel")
+            {
+                editingClassId = null;
+                await LoadClassrooms();
+            }
+            else if (e.CommandName == "Update")
+            {
+                TextBox txtEditName = (TextBox)e.Item.FindControl("txtEditName");
+                TextBox txtEditDescription = (TextBox)e.Item.FindControl("txtEditDescription");
+                TextBox txtEditVenue = (TextBox)e.Item.FindControl("txtEditVenue");
+                TextBox txtEditStart = (TextBox)e.Item.FindControl("txtEditStart");
+                TextBox txtEditEnd = (TextBox)e.Item.FindControl("txtEditEnd");
+                DropDownList ddlEditDay = (DropDownList)e.Item.FindControl("ddlEditDay");
 
-            // Classroom metadata
-            Literal meta = new Literal
-            {
-                Text = $@"<div class='classroom-meta'>
-                            <span class='student-count'>{GetStudentCount(classroomId).Result} students</span>
-                            Every {classroom["weeklyDay"]} | {classroom["startTime"]} - {classroom["endTime"]}
-                          </div>"
-            };
-            card.Controls.Add(meta);
-
-            // Classroom description
-            if (!string.IsNullOrEmpty(classroom["description"]?.ToString()))
-            {
-                Literal description = new Literal
+                var update = new Dictionary<string, object>
                 {
-                    Text = $"<div class='classroom-description'>{classroom["description"]}</div>"
+                    { "name", txtEditName.Text.Trim() },
+                    { "description", txtEditDescription.Text.Trim() },
+                    { "venue", txtEditVenue.Text.Trim() },
+                    { "startTime", txtEditStart.Text.Trim() },
+                    { "endTime", txtEditEnd.Text.Trim() },
+                    { "weeklyDay", ddlEditDay.SelectedValue }
                 };
-                card.Controls.Add(description);
-            }
 
-            // Action buttons
-            Panel actionButtons = new Panel { CssClass = "action-buttons" };
+                await db.Collection("classrooms").Document(classId).UpdateAsync(update);
 
-            Button btnView = new Button
-            {
-                Text = "View",
-                CssClass = "btn btn-view",
-                PostBackUrl = $"ClassroomDetails.aspx?id={classroomId}"
-            };
-            actionButtons.Controls.Add(btnView);
-
-            Button btnEdit = new Button
-            {
-                Text = "Edit",
-                CssClass = "btn btn-edit",
-                CommandArgument = classroomId
-            };
-            btnEdit.Click += BtnEdit_Click;
-            actionButtons.Controls.Add(btnEdit);
-
-            Button btnDelete = new Button
-            {
-                Text = "Delete",
-                CssClass = "btn btn-delete",
-                CommandArgument = classroomId
-            };
-            btnDelete.Click += BtnDelete_Click;
-            actionButtons.Controls.Add(btnDelete);
-
-            card.Controls.Add(actionButtons);
-            pnlClassrooms.Controls.Add(card);
-        }
-
-        private async Task<int> GetStudentCount(string classroomId)
-        {
-            var snapshot = await db.Collection("classrooms")
-                                 .Document(classroomId)
-                                 .Collection("students")
-                                 .GetSnapshotAsync();
-            return snapshot.Count;
-        }
-
-        protected async void BtnEdit_Click(object sender, EventArgs e)
-        {
-            string classroomId = ((Button)sender).CommandArgument;
-            var doc = await db.Collection("classrooms").Document(classroomId).GetSnapshotAsync();
-
-            if (doc.Exists)
-            {
-                var classroom = doc.ToDictionary();
-                txtEditClassName.Text = classroom["name"].ToString();
-                txtEditDescription.Text = classroom["description"].ToString();
-                ddlEditDayOfWeek.SelectedValue = classroom["weeklyDay"].ToString();
-                txtEditVenue.Text = classroom["venue"].ToString();
-
-                var startTimeParts = classroom["startTime"].ToString().Split(' ');
-                txtEditStartTime.Text = startTimeParts[0];
-
-                var endTimeParts = classroom["endTime"].ToString().Split(' ');
-                txtEditEndTime.Text = endTimeParts[0];
-
-                ddlEditStatus.SelectedValue = classroom["status"].ToString();
-                hdnEditClassroomId.Value = classroomId;
-
-                ScriptManager.RegisterStartupScript(this, GetType(), "ShowEditModal",
-                    "$('#editClassroomModal').modal('show');", true);
+                editingClassId = null;
+                await LoadClassrooms();
             }
         }
-
-        protected async void BtnDelete_Click(object sender, EventArgs e)
+        protected string FormatTime(object time)
         {
-            string classroomId = ((Button)sender).CommandArgument;
-            hdnDeleteClassroomId.Value = classroomId;
-
-            ScriptManager.RegisterStartupScript(this, GetType(), "ShowDeleteModal",
-                "$('#deleteConfirmationModal').modal('show');", true);
+            if (time == null) return "";
+            if (DateTime.TryParse(time.ToString(), out DateTime dt))
+                return dt.ToString("hh:mm tt");
+            return time.ToString();
         }
 
-        protected async void btnSaveChanges_Click(object sender, EventArgs e)
+        public class Classroom
         {
-            string classroomId = hdnEditClassroomId.Value;
-            var classroomRef = db.Collection("classrooms").Document(classroomId);
-
-            string startTimeAmPm = txtEditStartTime.Text.Contains("PM") ? "PM" : "AM";
-            string endTimeAmPm = txtEditEndTime.Text.Contains("PM") ? "PM" : "AM";
-
-            await classroomRef.UpdateAsync(new Dictionary<string, object>
-            {
-                { "name", txtEditClassName.Text },
-                { "description", txtEditDescription.Text },
-                { "weeklyDay", ddlEditDayOfWeek.SelectedValue },
-                { "venue", txtEditVenue.Text },
-                { "startTime", $"{txtEditStartTime.Text} {startTimeAmPm}" },
-                { "endTime", $"{txtEditEndTime.Text} {endTimeAmPm}" },
-                { "status", ddlEditStatus.SelectedValue },
-                { "updatedAt", Timestamp.GetCurrentTimestamp() }
-            });
-
-            ScriptManager.RegisterStartupScript(this, GetType(), "HideEditModal",
-                "$('#editClassroomModal').modal('hide');", true);
-            await LoadClassrooms();
-        }
-
-        protected async void btnConfirmDelete_Click(object sender, EventArgs e)
-        {
-            string classroomId = hdnDeleteClassroomId.Value;
-
-            // First delete all students in this classroom
-            var studentsSnapshot = await db.Collection("classrooms")
-                                         .Document(classroomId)
-                                         .Collection("students")
-                                         .GetSnapshotAsync();
-
-            var batch = db.StartBatch();
-            foreach (var studentDoc in studentsSnapshot.Documents)
-            {
-                batch.Delete(studentDoc.Reference);
-            }
-            await batch.CommitAsync();
-
-            // Then delete the classroom itself
-            await db.Collection("classrooms").Document(classroomId).DeleteAsync();
-
-            ScriptManager.RegisterStartupScript(this, GetType(), "HideDeleteModal",
-                "$('#deleteConfirmationModal').modal('hide');", true);
-            await LoadClassrooms();
-        }
-
-        protected async void btnSearch_Click(object sender, EventArgs e)
-        {
-            await LoadClassrooms(txtSearch.Text.Trim(), ddlFilter.SelectedValue);
-        }
-
-        protected async void ddlFilter_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            await LoadClassrooms(txtSearch.Text.Trim(), ddlFilter.SelectedValue);
+            public string Id { get; set; }
+            public string Name { get; set; }
+            public string Description { get; set; }
+            public string Venue { get; set; }
+            public string WeeklyDay { get; set; }
+            public string StartTime { get; set; }
+            public string EndTime { get; set; }
+            public string Status { get; set; }
+            public bool IsEditing { get; set; }
         }
     }
 }

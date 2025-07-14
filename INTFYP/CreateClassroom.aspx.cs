@@ -97,8 +97,8 @@ namespace YourProjectNamespace
             string name = txtClassName.Text.Trim();
             string description = txtClassDescription.Text.Trim();
             string venue = txtVenue.Text.Trim();
-            string startTime = txtStartTime.Text + " " + ddlStartAmPm.SelectedValue;
-            string endTime = txtEndTime.Text + " " + ddlEndAmPm.SelectedValue;
+            string startTime = txtStartTime.Text.Trim(); 
+            string endTime = txtEndTime.Text.Trim();     
             string teacherEmail = Session["email"]?.ToString() ?? "unknown@teacher.com";
             string weeklyDay = ddlDayOfWeek.SelectedValue;
 

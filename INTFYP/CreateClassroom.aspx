@@ -208,10 +208,7 @@
                 <label class="form-label">Start Time</label>
                 <div class="time-input-group">
                     <asp:TextBox ID="txtStartTime" runat="server" TextMode="Time" CssClass="form-control" />
-                    <asp:DropDownList ID="ddlStartAmPm" runat="server" CssClass="form-control">
-                        <asp:ListItem Text="AM" />
-                        <asp:ListItem Text="PM" />
-                    </asp:DropDownList>
+                    
                 </div>
             </div>
 
@@ -219,10 +216,7 @@
                 <label class="form-label">End Time</label>
                 <div class="time-input-group">
                     <asp:TextBox ID="txtEndTime" runat="server" TextMode="Time" CssClass="form-control" />
-                    <asp:DropDownList ID="ddlEndAmPm" runat="server" CssClass="form-control">
-                        <asp:ListItem Text="AM" />
-                        <asp:ListItem Text="PM" />
-                    </asp:DropDownList>
+                    
                 </div>
             </div>
 
