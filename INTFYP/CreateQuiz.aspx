@@ -2,92 +2,105 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TeacherMainContent" runat="server">
     <style>
-        .form-container {
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .question-container {
             margin-bottom: 30px;
             padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-        }
-        
-        .question-preview {
-            margin-bottom: 20px;
-            padding: 15px;
             border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #fff;
+            border-radius: 10px;
+            background-color: #f8f9fa;
         }
-        
-        .question-image {
-            max-width: 300px;
-            max-height: 200px;
-            margin: 10px 0;
+
+        .option-input {
+            margin-left: 20px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
         }
-        
-        .correct-option {
-            font-weight: bold;
-            color: green;
+
+        .option-input input[type="text"] {
+            margin-left: 8px;
         }
-        
-        .error-message {
-            color: red;
-            margin: 10px 0;
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
         }
+
+        .btn-primary {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .image-preview {
+            max-width: 200px;
+            margin-top: 10px;
+        }
+        .btn-danger {
+    background-color: #dc3545;
+    color: white;
+    margin-top: 10px;
+}
+
     </style>
 
     <h2>Create Quiz</h2>
-    
+
     <div class="form-group">
-        <label>Quiz Title</label>
-        <asp:TextBox ID="txtQuizTitle" runat="server" CssClass="form-control"></asp:TextBox>
+        <label for="txtQuizTitle">Quiz Title</label><br />
+        <asp:TextBox ID="txtQuizTitle" runat="server" CssClass="form-control" Width="400px" />
     </div>
-    
-    <asp:Label ID="lblError" runat="server" CssClass="error-message" Visible="false"></asp:Label>
-    
-    <div class="form-container">
-        <h3>Add New Question</h3>
-        
-        <div class="form-group">
-            <label>Question Text</label>
-            <asp:TextBox ID="txtQuestion" runat="server" TextMode="MultiLine" Rows="3" CssClass="form-control"></asp:TextBox>
-        </div>
-        
-        <div class="form-group">
-            <label>Options</label>
-            <div class="option-row">
-                <asp:CheckBox ID="chkOption1" runat="server" />
-                <asp:TextBox ID="txtOption1" runat="server" CssClass="form-control option-input"></asp:TextBox>
+
+    <asp:Repeater ID="rptQuestions" runat="server" OnItemCommand="rptQuestions_ItemCommand">
+
+        <ItemTemplate>
+            <div class="question-container">
+                <asp:Button ID="btnRemove" runat="server" Text="❌ Remove" CommandName="Remove" CommandArgument='<%# Container.ItemIndex %>' CssClass="btn btn-danger" />
+
+                <h5>Question <%# Container.ItemIndex + 1 %></h5>
+                <asp:TextBox ID="txtQuestion" runat="server" Text='<%# Eval("Question") %>' CssClass="form-control" TextMode="MultiLine" Rows="3" Width="100%" /><br /><br />
+
+                <div class="option-input">
+                    <asp:CheckBox ID="chk0" runat="server" Checked='<%# ((List<bool>)Eval("IsCorrect"))[0] %>' />
+                    <asp:TextBox ID="opt0" runat="server" Text='<%# ((List<string>)Eval("Options"))[0] %>' CssClass="form-control" Width="300px" />
+                </div>
+                <div class="option-input">
+                    <asp:CheckBox ID="chk1" runat="server" Checked='<%# ((List<bool>)Eval("IsCorrect"))[1] %>' />
+                    <asp:TextBox ID="opt1" runat="server" Text='<%# ((List<string>)Eval("Options"))[1] %>' CssClass="form-control" Width="300px" />
+                </div>
+                <div class="option-input">
+                    <asp:CheckBox ID="chk2" runat="server" Checked='<%# ((List<bool>)Eval("IsCorrect"))[2] %>' />
+                    <asp:TextBox ID="opt2" runat="server" Text='<%# ((List<string>)Eval("Options"))[2] %>' CssClass="form-control" Width="300px" />
+                </div>
+                <div class="option-input">
+                    <asp:CheckBox ID="chk3" runat="server" Checked='<%# ((List<bool>)Eval("IsCorrect"))[3] %>' />
+                    <asp:TextBox ID="opt3" runat="server" Text='<%# ((List<string>)Eval("Options"))[3] %>' CssClass="form-control" Width="300px" />
+                </div>
+
+                <div class="form-group">
+                    <label>Upload Image (Optional)</label><br />
+                    <asp:FileUpload ID="fileUpload" runat="server" />
+                    <asp:Image ID="imgPreview" runat="server" CssClass="image-preview" Visible='<%# !string.IsNullOrEmpty(Eval("ImageUrl") as string) %>' ImageUrl='<%# Eval("ImageUrl") %>' />
+                </div>
             </div>
-            <div class="option-row">
-                <asp:CheckBox ID="chkOption2" runat="server" />
-                <asp:TextBox ID="txtOption2" runat="server" CssClass="form-control option-input"></asp:TextBox>
-            </div>
-            <div class="option-row">
-                <asp:CheckBox ID="chkOption3" runat="server" />
-                <asp:TextBox ID="txtOption3" runat="server" CssClass="form-control option-input"></asp:TextBox>
-            </div>
-            <div class="option-row">
-                <asp:CheckBox ID="chkOption4" runat="server" />
-                <asp:TextBox ID="txtOption4" runat="server" CssClass="form-control option-input"></asp:TextBox>
-            </div>
-        </div>
-        
-        <div class="form-group">
-            <label>Question Image (Optional)</label>
-            <asp:FileUpload ID="fileUpload" runat="server" CssClass="form-control" />
-        </div>
-        
-        <asp:Button ID="btnAddQuestion" runat="server" Text="Add Question" 
-            CssClass="btn btn-primary" OnClick="btnAddQuestion_Click" />
-    </div>
-    
-    <div class="questions-preview">
-        <h3>Questions Preview</h3>
-        <asp:Panel ID="pnlQuestionPreview" runat="server"></asp:Panel>
-    </div>
-    
+        </ItemTemplate>
+    </asp:Repeater>
+
     <div class="form-group">
-        <asp:Button ID="btnSubmitQuiz" runat="server" Text="Submit Quiz" 
-            CssClass="btn btn-success" OnClick="btnSubmitQuiz_Click" />
+        <asp:Button ID="btnAddQuestion" runat="server" Text="Add Question" CssClass="btn btn-secondary" OnClick="btnAddQuestion_Click" />
+    </div>
+
+    <div class="form-group">
+        <asp:Button ID="btnSubmitQuiz" runat="server" Text="Submit Quiz" CssClass="btn btn-primary" OnClick="btnSubmitQuiz_Click" />
     </div>
 </asp:Content>
