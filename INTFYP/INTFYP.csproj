@@ -259,6 +259,7 @@
     <Content Include="AddBook.aspx" />
     <Content Include="CitationGenerator.aspx" />
     <Content Include="Class.aspx" />
+    <Content Include="ClassDetails.aspx" />
     <Content Include="Contact.aspx" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
@@ -281,6 +282,7 @@
     <Content Include="CreatePost.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="favicon.ico" />
+    <Content Include="Global.asax" />
     <Content Include="Images\dprofile.jpg" />
     <Content Include="Images\logo.png" />
     <Content Include="Library.aspx" />
@@ -354,7 +356,10 @@
     <Content Include="libman.json" />
     <Content Include="Preview.aspx" />
     <Content Include="ServiceAccountKey.json" />
+<<<<<<< HEAD
     <Content Include="AddFeedBack.aspx" />
+=======
+>>>>>>> 71d9b795a9449d146d8fb29b55aaf1d2f30913f2
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -411,6 +416,13 @@
     <Compile Include="Class.aspx.designer.cs">
       <DependentUpon>Class.aspx</DependentUpon>
     </Compile>
+    <Compile Include="ClassDetails.aspx.cs">
+      <DependentUpon>ClassDetails.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ClassDetails.aspx.designer.cs">
+      <DependentUpon>ClassDetails.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Contact.aspx.cs">
       <DependentUpon>Contact.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -438,6 +450,9 @@
     </Compile>
     <Compile Include="Default.aspx.designer.cs">
       <DependentUpon>Default.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Library.aspx.cs">
       <DependentUpon>Library.aspx</DependentUpon>
@@ -524,6 +539,7 @@
     <Compile Include="Preview.aspx.designer.cs">
       <DependentUpon>Preview.aspx</DependentUpon>
     </Compile>
+<<<<<<< HEAD
     <Compile Include="AddFeedBack.aspx.cs">
       <DependentUpon>AddFeedBack.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -531,6 +547,8 @@
     <Compile Include="AddFeedBack.aspx.designer.cs">
       <DependentUpon>AddFeedBack.aspx</DependentUpon>
     </Compile>
+=======
+>>>>>>> 71d9b795a9449d146d8fb29b55aaf1d2f30913f2
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
