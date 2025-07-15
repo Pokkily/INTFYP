@@ -10,8 +10,6 @@ namespace YourProjectNamespace
     public partial class QuizDetail : Page
     {
         private FirestoreDb db;
-        protected string QuizTitle = "";
-        private string QuizCode = "";
 
         [Serializable]
         public class QuizQuestion
@@ -21,34 +19,15 @@ namespace YourProjectNamespace
             public string imageUrl { get; set; }
         }
 
-        private List<QuizQuestion> AllQuestions
-        {
-            get => Session["QuizQuestions"] as List<QuizQuestion>;
-            set => Session["QuizQuestions"] = value;
-        }
-
-        private Dictionary<int, string> SelectedAnswers
-        {
-            get => Session["SelectedAnswers"] as Dictionary<int, string> ?? new Dictionary<int, string>();
-            set => Session["SelectedAnswers"] = value;
-        }
-
-        private int CurrentQuestionIndex
-        {
-            get => Session["CurrentQuestionIndex"] != null ? (int)Session["CurrentQuestionIndex"] : 0;
-            set => Session["CurrentQuestionIndex"] = value;
-        }
-
         protected async void Page_Load(object sender, EventArgs e)
         {
-            QuizCode = Request.QueryString["code"];
-            if (string.IsNullOrEmpty(QuizCode)) return;
-
-            InitializeFirestore();
-
             if (!IsPostBack)
             {
-                await LoadQuizData(QuizCode);
+                string quizCode = Request.QueryString["code"];
+                if (string.IsNullOrEmpty(quizCode)) return;
+
+                InitializeFirestore();
+                await LoadQuizData(quizCode);
             }
 
             DisplayCurrentQuestion();
@@ -70,7 +49,7 @@ namespace YourProjectNamespace
 
                 if (doc.Exists)
                 {
-                    QuizTitle = doc.GetValue<string>("title");
+                    Session["QuizTitle"] = doc.GetValue<string>("title");
                     var questions = doc.GetValue<List<Dictionary<string, object>>>("questions");
 
                     var parsed = new List<QuizQuestion>();
@@ -84,9 +63,9 @@ namespace YourProjectNamespace
                         });
                     }
 
-                    AllQuestions = parsed;
-                    SelectedAnswers = new Dictionary<int, string>();
-                    CurrentQuestionIndex = 0;
+                    Session["QuizQuestions"] = parsed;
+                    Session["SelectedAnswers"] = new Dictionary<int, string>();
+                    Session["CurrentQuestionIndex"] = 0;
                 }
             }
             catch (Exception ex)
@@ -95,13 +74,44 @@ namespace YourProjectNamespace
             }
         }
 
-        // Rest of your methods remain the same...
+        // Public methods for ASPX page to access data
+        public string GetQuizTitle()
+        {
+            return Session["QuizTitle"]?.ToString() ?? "Quiz";
+        }
+
+        public int GetTotalQuestions()
+        {
+            var questions = Session["QuizQuestions"] as List<QuizQuestion>;
+            return questions?.Count ?? 0;
+        }
+
+        public int GetCurrentQuestionNumber()
+        {
+            int index = Session["CurrentQuestionIndex"] != null ? (int)Session["CurrentQuestionIndex"] : 0;
+            return index + 1;
+        }
+
+        public int GetProgressWidth()
+        {
+            var questions = Session["QuizQuestions"] as List<QuizQuestion>;
+            if (questions == null || questions.Count == 0)
+                return 0;
+
+            int index = Session["CurrentQuestionIndex"] != null ? (int)Session["CurrentQuestionIndex"] : 0;
+            return (index + 1) * 100 / questions.Count;
+        }
+
         private void DisplayCurrentQuestion()
         {
-            if (AllQuestions == null || CurrentQuestionIndex >= AllQuestions.Count) return;
+            var questions = Session["QuizQuestions"] as List<QuizQuestion>;
+            if (questions == null) return;
 
-            var current = AllQuestions[CurrentQuestionIndex];
-            questionText.InnerText = $"Q{CurrentQuestionIndex + 1}. {current.question}";
+            int currentIndex = Session["CurrentQuestionIndex"] != null ? (int)Session["CurrentQuestionIndex"] : 0;
+            if (currentIndex >= questions.Count) return;
+
+            var current = questions[currentIndex];
+            questionText.InnerText = $"Q{currentIndex + 1}. {current.question}";
 
             rblOptions.Items.Clear();
             foreach (var option in current.options)
@@ -113,12 +123,13 @@ namespace YourProjectNamespace
             if (imgQuestionImage.Visible)
                 imgQuestionImage.ImageUrl = current.imageUrl;
 
-            btnNext.Visible = (CurrentQuestionIndex < AllQuestions.Count - 1);
-            btnSubmit.Visible = (CurrentQuestionIndex == AllQuestions.Count - 1);
+            btnNext.Visible = (currentIndex < questions.Count - 1);
+            btnSubmit.Visible = (currentIndex == questions.Count - 1);
 
-            if (SelectedAnswers.ContainsKey(CurrentQuestionIndex))
+            var selectedAnswers = Session["SelectedAnswers"] as Dictionary<int, string>;
+            if (selectedAnswers != null && selectedAnswers.ContainsKey(currentIndex))
             {
-                string prevAnswer = SelectedAnswers[CurrentQuestionIndex];
+                string prevAnswer = selectedAnswers[currentIndex];
                 var item = rblOptions.Items.FindByValue(prevAnswer);
                 if (item != null)
                     item.Selected = true;
@@ -128,7 +139,8 @@ namespace YourProjectNamespace
         protected void btnNext_Click(object sender, EventArgs e)
         {
             SaveCurrentAnswer();
-            CurrentQuestionIndex++;
+            int currentIndex = Session["CurrentQuestionIndex"] != null ? (int)Session["CurrentQuestionIndex"] : 0;
+            Session["CurrentQuestionIndex"] = currentIndex + 1;
             DisplayCurrentQuestion();
         }
 
@@ -142,7 +154,15 @@ namespace YourProjectNamespace
         {
             if (rblOptions.SelectedItem != null)
             {
-                SelectedAnswers[CurrentQuestionIndex] = rblOptions.SelectedItem.Value;
+                int currentIndex = Session["CurrentQuestionIndex"] != null ? (int)Session["CurrentQuestionIndex"] : 0;
+                var selectedAnswers = Session["SelectedAnswers"] as Dictionary<int, string>;
+                if (selectedAnswers == null)
+                {
+                    selectedAnswers = new Dictionary<int, string>();
+                    Session["SelectedAnswers"] = selectedAnswers;
+                }
+
+                selectedAnswers[currentIndex] = rblOptions.SelectedItem.Value;
             }
         }
     }
