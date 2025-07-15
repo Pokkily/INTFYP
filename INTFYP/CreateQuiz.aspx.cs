@@ -1,30 +1,45 @@
-﻿using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
-using Google.Cloud.Firestore;
+﻿using Google.Cloud.Firestore;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using System.IO;
+
 
 namespace YourProjectNamespace
 {
     public partial class CreateQuiz : System.Web.UI.Page
     {
         private FirestoreDb db;
-        private List<QuestionData> Questions
+
+        [Serializable]
+        public class QuizQuestion
         {
-            get { return ViewState["Questions"] as List<QuestionData> ?? new List<QuestionData>(); }
-            set { ViewState["Questions"] = value; }
+            public string Question { get; set; }
+            public List<string> Options { get; set; } = new List<string> { "", "", "", "" };
+            public List<bool> IsCorrect { get; set; } = new List<bool> { false, false, false, false };
+            public string ImageUrl { get; set; } = "";
         }
 
-        protected void Page_Init(object sender, EventArgs e)
+
+
+        private List<QuizQuestion> QuestionList
+        {
+            get => ViewState["QuestionList"] as List<QuizQuestion> ?? new List<QuizQuestion>();
+            set => ViewState["QuestionList"] = value;
+        }
+
+        protected void Page_Load(object sender, EventArgs e)
         {
             InitializeFirestore();
+
             if (!IsPostBack)
             {
-                Questions = new List<QuestionData>();
-                ResetInputForm();
+                QuestionList.Add(new QuizQuestion()); // first question
+                BindRepeater();
             }
         }
 
@@ -38,197 +53,180 @@ namespace YourProjectNamespace
             }
         }
 
+        private void BindRepeater()
+        {
+            rptQuestions.DataSource = QuestionList;
+            rptQuestions.DataBind();
+        }
+
         protected void btnAddQuestion_Click(object sender, EventArgs e)
         {
-            // Validate inputs
-            if (string.IsNullOrWhiteSpace(txtQuestion.Text))
-            {
-                ShowError("Question text is required");
-                return;
-            }
-
-            // Collect options
-            var options = new List<string> { txtOption1.Text, txtOption2.Text, txtOption3.Text, txtOption4.Text };
-            options.RemoveAll(string.IsNullOrWhiteSpace);
-
-            if (options.Count < 2)
-            {
-                ShowError("At least 2 options are required");
-                return;
-            }
-
-            // Get correct answers
-            var correctIndexes = new List<int>();
-            if (chkOption1.Checked) correctIndexes.Add(0);
-            if (chkOption2.Checked) correctIndexes.Add(1);
-            if (chkOption3.Checked) correctIndexes.Add(2);
-            if (chkOption4.Checked) correctIndexes.Add(3);
-
-            if (correctIndexes.Count == 0)
-            {
-                ShowError("At least one correct answer is required");
-                return;
-            }
-
-            // Handle image upload
-            string imageUrl = null;
-            if (fileUpload.HasFile)
-            {
-                try
-                {
-                    imageUrl = UploadToCloudinary(fileUpload);
-                }
-                catch (Exception ex)
-                {
-                    ShowError($"Error uploading image: {ex.Message}");
-                    return;
-                }
-            }
-
-            // Add to questions list
-            Questions.Add(new QuestionData
-            {
-                QuestionText = txtQuestion.Text,
-                Options = options,
-                CorrectOptions = correctIndexes,
-                ImageUrl = imageUrl
-            });
-
-            // Update preview
-            UpdateQuestionPreview();
-            ResetInputForm();
-        }
-
-        private void UpdateQuestionPreview()
-        {
-            pnlQuestionPreview.Controls.Clear();
-
-            for (int i = 0; i < Questions.Count; i++)
-            {
-                var question = Questions[i];
-                var panel = new Panel { CssClass = "question-preview" };
-
-                panel.Controls.Add(new Literal { Text = $"<h5>Question {i + 1}</h5>" });
-                panel.Controls.Add(new Literal { Text = $"<p>{question.QuestionText}</p>" });
-
-                if (!string.IsNullOrEmpty(question.ImageUrl))
-                {
-                    panel.Controls.Add(new Literal { Text = $"<img src='{question.ImageUrl}' class='question-image' />" });
-                }
-
-                panel.Controls.Add(new Literal { Text = "<ul>" });
-                for (int j = 0; j < question.Options.Count; j++)
-                {
-                    var cssClass = question.CorrectOptions.Contains(j) ? "correct-option" : "";
-                    panel.Controls.Add(new Literal
-                    {
-                        Text = $"<li class='{cssClass}'>{question.Options[j]}</li>"
-                    });
-                }
-                panel.Controls.Add(new Literal { Text = "</ul>" });
-
-                // Add edit/remove buttons if needed
-                pnlQuestionPreview.Controls.Add(panel);
-            }
-        }
-
-        private void ResetInputForm()
-        {
-            txtQuestion.Text = "";
-            txtOption1.Text = "";
-            txtOption2.Text = "";
-            txtOption3.Text = "";
-            txtOption4.Text = "";
-            chkOption1.Checked = false;
-            chkOption2.Checked = false;
-            chkOption3.Checked = false;
-            chkOption4.Checked = false;
-            fileUpload.Dispose();
+            SaveRepeaterToState();
+            QuestionList.Add(new QuizQuestion());
+            BindRepeater();
         }
 
         protected void btnSubmitQuiz_Click(object sender, EventArgs e)
         {
-            if (Questions.Count == 0)
-            {
-                ShowError("Please add at least one question");
-                return;
-            }
+            SaveRepeaterToState();
 
             string quizTitle = txtQuizTitle.Text.Trim();
             string teacherEmail = Session["email"]?.ToString()?.ToLower();
+            if (string.IsNullOrEmpty(quizTitle) || string.IsNullOrEmpty(teacherEmail)) return;
 
-            if (string.IsNullOrEmpty(quizTitle) || string.IsNullOrEmpty(teacherEmail))
+            // 📸 Validate and upload quiz image
+            if (!fileQuizImage.HasFile)
             {
-                ShowError("Quiz title and teacher email are required");
+                lblImageError.Text = "Please upload a quiz image.";
+                lblImageError.Visible = true;
                 return;
             }
 
-            var firestoreQuestions = new List<Dictionary<string, object>>();
-            foreach (var question in Questions)
+            string quizImageUrl = "";
+            try
             {
-                firestoreQuestions.Add(new Dictionary<string, object>
+                var account = new Account(
+                    ConfigurationManager.AppSettings["CloudinaryCloudName"],
+                    ConfigurationManager.AppSettings["CloudinaryApiKey"],
+                    ConfigurationManager.AppSettings["CloudinaryApiSecret"]
+                );
+                var cloudinary = new Cloudinary(account);
+
+                using (var stream = fileQuizImage.PostedFile.InputStream)
                 {
-                    { "question", question.QuestionText },
-                    { "options", question.Options },
-                    { "correctIndexes", question.CorrectOptions },
-                    { "imageUrl", question.ImageUrl }
-                });
+                    var uploadParams = new ImageUploadParams()
+                    {
+                        File = new FileDescription(fileQuizImage.FileName, stream)
+                    };
+
+                    var uploadResult = cloudinary.Upload(uploadParams);
+                    quizImageUrl = uploadResult.SecureUrl.ToString();
+
+                    // Optional preview
+                    imgQuizPreview.ImageUrl = quizImageUrl;
+                    imgQuizPreview.Visible = true;
+                }
             }
+            catch (Exception ex)
+            {
+                lblImageError.Text = "Image upload failed: " + ex.Message;
+                lblImageError.Visible = true;
+                return;
+            }
+
 
             string quizCode = GenerateQuizCode();
 
-            var quizDoc = new Dictionary<string, object>
+            List<Dictionary<string, object>> formattedQuestions = new List<Dictionary<string, object>>();
+            foreach (var q in QuestionList)
             {
-                { "quizCode", quizCode },
-                { "title", quizTitle },
-                { "createdBy", teacherEmail },
-                { "createdAt", Timestamp.GetCurrentTimestamp() },
-                { "questions", firestoreQuestions }
-            };
+                formattedQuestions.Add(new Dictionary<string, object>
+    {
+        { "question", q.Question },
+        { "options", q.Options },
+        { "correctIndexes", GetCorrectIndexes(q.IsCorrect) },
+        { "imageUrl", q.ImageUrl } // ✅ Include it here
+    });
+            }
+
+
+            var quizDoc = new Dictionary<string, object>
+{
+    { "quizCode", quizCode },
+    { "title", quizTitle },
+    { "createdBy", teacherEmail },
+    { "createdAt", Timestamp.GetCurrentTimestamp() },
+    { "quizImageUrl", quizImageUrl }, // ✅ Save quiz image URL
+    { "questions", formattedQuestions }
+};
+
 
             db.Collection("quizzes").Document(quizCode).SetAsync(quizDoc).GetAwaiter().GetResult();
-            Questions.Clear();
+            ViewState["QuestionList"] = null;
+
             Response.Redirect("ManagePost.aspx");
         }
 
-        private string UploadToCloudinary(FileUpload fileUpload)
+        private void SaveRepeaterToState()
         {
-            var account = new Account(
-                ConfigurationManager.AppSettings["CloudinaryCloudName"],
-                ConfigurationManager.AppSettings["CloudinaryApiKey"],
-                ConfigurationManager.AppSettings["CloudinaryApiSecret"]
-            );
-            var cloudinary = new Cloudinary(account);
+            var updatedList = new List<QuizQuestion>();
 
-            using (var stream = fileUpload.PostedFile.InputStream)
+            foreach (RepeaterItem item in rptQuestions.Items)
             {
-                var uploadParams = new ImageUploadParams
+                var q = new QuizQuestion();
+
+                var txtQuestion = (TextBox)item.FindControl("txtQuestion");
+                q.Question = txtQuestion?.Text.Trim() ?? "";
+
+                for (int i = 0; i < 4; i++)
                 {
-                    File = new FileDescription(fileUpload.FileName, stream)
-                };
-                var uploadResult = cloudinary.Upload(uploadParams);
-                return uploadResult.SecureUrl.ToString();
+                    var opt = (TextBox)item.FindControl($"opt{i}");
+                    var chk = (CheckBox)item.FindControl($"chk{i}");
+
+                    q.Options[i] = opt?.Text.Trim() ?? "";
+                    q.IsCorrect[i] = chk?.Checked ?? false;
+                }
+
+                // 📸 Handle optional image upload
+                var fileUpload = (FileUpload)item.FindControl("fileUpload");
+                if (fileUpload != null && fileUpload.HasFile)
+                {
+                    var account = new Account(
+                        ConfigurationManager.AppSettings["CloudinaryCloudName"],
+                        ConfigurationManager.AppSettings["CloudinaryApiKey"],
+                        ConfigurationManager.AppSettings["CloudinaryApiSecret"]
+                    );
+                    var cloudinary = new Cloudinary(account);
+
+                    using (var stream = fileUpload.PostedFile.InputStream)
+                    {
+                        var uploadParams = new ImageUploadParams()
+                        {
+                            File = new FileDescription(fileUpload.FileName, stream)
+                        };
+
+                        var uploadResult = cloudinary.Upload(uploadParams);
+                        q.ImageUrl = uploadResult.SecureUrl.ToString();
+                    }
+                }
+
+                updatedList.Add(q);
             }
+
+            QuestionList = updatedList;
+        }
+
+        protected void rptQuestions_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            if (e.CommandName == "Remove")
+            {
+                int indexToRemove = Convert.ToInt32(e.CommandArgument);
+
+                SaveRepeaterToState(); // Save current inputs
+                var list = QuestionList;
+
+                if (indexToRemove >= 0 && indexToRemove < list.Count)
+                {
+                    list.RemoveAt(indexToRemove);
+                    QuestionList = list;
+                    BindRepeater(); // Refresh UI
+                }
+            }
+        }
+
+        private List<int> GetCorrectIndexes(List<bool> flags)
+        {
+            var indexes = new List<int>();
+            for (int i = 0; i < flags.Count; i++)
+            {
+                if (flags[i]) indexes.Add(i);
+            }
+            return indexes;
         }
 
         private string GenerateQuizCode()
         {
-            Random rand = new Random();
-            return rand.Next(100000, 999999).ToString();
+            return new Random().Next(100000, 999999).ToString();
         }
-
-        private void ShowError(string message)
-        {
-            lblError.Text = message;
-            lblError.Visible = true;
-        }
-    }
-
-    public class QuestionData
-    {
-        public string QuestionText { get; set; }
-        public List<string> Options { get; set; }
-        public List<int> CorrectOptions { get; set; }
-        public string ImageUrl { get; set; }
     }
 }
