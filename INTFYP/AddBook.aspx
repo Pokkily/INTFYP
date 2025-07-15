@@ -180,7 +180,7 @@
           </div>
           <div class="extra">
             <button class="bookmark">Your Bookmark</button>
-            <button class="citation">Citation Generator</button>
+            <button class="citation" type="button" onclick="location.href='CitationGenerator.aspx';">Citation Generator</button>
           </div>
         </aside>
 
