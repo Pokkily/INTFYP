@@ -42,13 +42,22 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.Image imgQuestionImage;
 
         /// <summary>
-        /// rblOptions control.
+        /// cblOptions control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.RadioButtonList rblOptions;
+        protected global::System.Web.UI.WebControls.CheckBoxList cblOptions;
+
+        /// <summary>
+        /// lblMultiSelectNotice control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblMultiSelectNotice;
 
         /// <summary>
         /// btnNext control.

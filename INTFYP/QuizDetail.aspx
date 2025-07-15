@@ -7,123 +7,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #4361ee;
-            --secondary-color: #3f37c9;
-            --success-color: #4cc9f0;
-            --danger-color: #f72585;
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
-            --border-radius: 8px;
-            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        * {
-            box-sizing: border-box;
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
             margin: 0;
             padding: 0;
-            font-family: 'Roboto', sans-serif;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            color: var(--dark-color);
-            line-height: 1.6;
         }
         
         .quiz-container {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            padding: 2rem;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
         }
         
         .quiz-header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
         
         .quiz-header h1 {
-            color: var(--primary-color);
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .quiz-progress {
-            width: 100%;
-            background-color: #e9ecef;
-            border-radius: var(--border-radius);
-            height: 10px;
-            margin-bottom: 1.5rem;
-            overflow: hidden;
-        }
-        
-        .quiz-progress-bar {
-            height: 100%;
-            background-color: var(--primary-color);
-            width: <%= GetProgressWidth() %>%;
-            transition: width 0.3s ease;
+            color: #333;
+            font-weight: 500;
         }
         
         .quiz-card {
             background-color: white;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            max-width: 800px;
-            width: 100%;
-            margin: 0 auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 2rem;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
+        }
+        
+        .quiz-progress {
+            height: 6px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            margin-bottom: 2rem;
+        }
+        
+        .quiz-progress-bar {
+            height: 100%;
+            background-color: #4285f4;
+            border-radius: 3px;
+            width: <%= GetProgressWidth() %>%;
+            transition: width 0.3s ease;
         }
         
         .question-container {
             margin-bottom: 2rem;
-            flex-grow: 1;
         }
         
         .question-text {
-            font-size: 1.25rem;
+            font-size: 1.2rem;
             font-weight: 500;
             margin-bottom: 1.5rem;
-            color: var(--dark-color);
+            color: #333;
         }
         
         .question-image {
             max-width: 100%;
-            max-height: 300px;
-            margin: 0 auto 1.5rem;
+            height: auto;
+            margin-bottom: 1.5rem;
+            border-radius: 4px;
             display: block;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
         }
         
         .options-container {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        
+        .options-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
         }
         
         .option-item {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            background-color: var(--light-color);
-            border-radius: var(--border-radius);
+            padding: 0.8rem 1rem;
+            margin-bottom: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
             cursor: pointer;
             transition: all 0.2s ease;
-            border: 1px solid #dee2e6;
         }
         
         .option-item:hover {
-            background-color: #e9ecef;
-            transform: translateY(-2px);
+            background-color: #f0f0f0;
+            border-color: #ccc;
         }
         
-        .option-item input[type="radio"] {
-            margin-right: 1rem;
-            transform: scale(1.2);
+        .option-item.selected {
+            background-color: #e3f2fd;
+            border-color: #bbdefb;
         }
         
         .quiz-footer {
@@ -131,61 +106,55 @@
             justify-content: space-between;
             align-items: center;
             margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #dee2e6;
+        }
+        
+        .question-counter {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .question-counter span {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
         }
         
         .btn {
-            padding: 0.75rem 1.5rem;
+            padding: 0.6rem 1.2rem;
             border: none;
-            border-radius: var(--border-radius);
+            border-radius: 4px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 1rem;
+            transition: background-color 0.2s ease;
         }
         
         .btn-primary {
-            background-color: var(--primary-color);
+            background-color: #4285f4;
             color: white;
         }
         
         .btn-primary:hover {
-            background-color: var(--secondary-color);
-            transform: translateY(-2px);
+            background-color: #3367d6;
         }
         
         .btn-success {
-            background-color: var(--success-color);
+            background-color: #34a853;
             color: white;
         }
         
         .btn-success:hover {
-            background-color: #3aa8d4;
-            transform: translateY(-2px);
+            background-color: #2d9249;
         }
         
-        .question-counter {
-            color: #6c757d;
-            font-weight: 500;
-        }
-        
-        @media (max-width: 768px) {
-            .quiz-container {
-                padding: 1rem;
-            }
-            
-            .quiz-card {
-                padding: 1.5rem;
-            }
-            
-            .question-text {
-                font-size: 1.1rem;
-            }
-            
-            .btn {
-                padding: 0.6rem 1.2rem;
-            }
+        .submit-notice {
+            margin-top: 1rem;
+            color: #666;
+            font-style: italic;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -207,9 +176,11 @@
                     <asp:Image ID="imgQuestionImage" runat="server" CssClass="question-image" Visible="false" />
                     
                     <div class="options-container">
-                        <asp:RadioButtonList ID="rblOptions" runat="server" CssClass="options-list">
-                        </asp:RadioButtonList>
+                        <asp:CheckBoxList ID="cblOptions" runat="server" CssClass="options-list">
+                        </asp:CheckBoxList>
                     </div>
+                    
+                    <asp:Label ID="lblMultiSelectNotice" runat="server" CssClass="submit-notice" Visible="false"></asp:Label>
                 </div>
                 
                 <div class="quiz-footer">
@@ -227,12 +198,43 @@
     </form>
     
     <script>
-        // Add client-side interactivity for better UX
         document.addEventListener('DOMContentLoaded', function () {
-            // Style radio buttons as cards
+            // Style checkboxes as cards
             const options = document.querySelectorAll('.options-list label');
             options.forEach(option => {
-                option.parentElement.classList.add('option-item');
+                const wrapper = document.createElement('div');
+                wrapper.className = 'option-item';
+                option.parentNode.insertBefore(wrapper, option);
+                wrapper.appendChild(option);
+
+                // Add click handler to select the checkbox when clicking anywhere on the option
+                wrapper.addEventListener('click', function (e) {
+                    if (e.target.tagName !== 'INPUT') {
+                        const checkbox = this.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+
+                        // Trigger change event
+                        const event = new Event('change');
+                        checkbox.dispatchEvent(event);
+                    }
+                });
+            });
+
+            // Highlight selected options
+            document.querySelectorAll('.options-list input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                    const optionItem = this.closest('.option-item');
+                    if (this.checked) {
+                        optionItem.classList.add('selected');
+                    } else {
+                        optionItem.classList.remove('selected');
+                    }
+                });
+            });
+
+            // Initialize selected state
+            document.querySelectorAll('.options-list input[type="checkbox"]:checked').forEach(checkbox => {
+                checkbox.closest('.option-item').classList.add('selected');
             });
 
             // Prevent form submission when pressing enter

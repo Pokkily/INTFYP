@@ -291,6 +291,7 @@
     <Content Include="ManageClassroom.aspx" />
     <Content Include="Quiz.aspx" />
     <Content Include="QuizDetail.aspx" />
+    <Content Include="QuizResult.aspx" />
     <Content Include="Register.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -415,6 +416,7 @@
     <Compile Include="Class.aspx.designer.cs">
       <DependentUpon>Class.aspx</DependentUpon>
     </Compile>
+    <Compile Include="QuizModels.cs" />
     <Compile Include="ClassDetails.aspx.cs">
       <DependentUpon>ClassDetails.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -495,6 +497,13 @@
     </Compile>
     <Compile Include="QuizDetail.aspx.designer.cs">
       <DependentUpon>QuizDetail.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="QuizResult.aspx.cs">
+      <DependentUpon>QuizResult.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="QuizResult.aspx.designer.cs">
+      <DependentUpon>QuizResult.aspx</DependentUpon>
     </Compile>
     <Compile Include="Register.aspx.cs">
       <DependentUpon>Register.aspx</DependentUpon>

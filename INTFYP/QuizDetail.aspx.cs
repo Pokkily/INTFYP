@@ -1,6 +1,7 @@
 ﻿using Google.Cloud.Firestore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -11,12 +12,15 @@ namespace YourProjectNamespace
     {
         private FirestoreDb db;
 
+
         [Serializable]
         public class QuizQuestion
         {
             public string question { get; set; }
             public List<string> options { get; set; }
             public string imageUrl { get; set; }
+            public List<int> correctIndexes { get; set; }
+            public bool isMultiSelect { get; set; }
         }
 
         protected async void Page_Load(object sender, EventArgs e)
@@ -55,16 +59,26 @@ namespace YourProjectNamespace
                     var parsed = new List<QuizQuestion>();
                     foreach (var q in questions)
                     {
-                        parsed.Add(new QuizQuestion
+                        var question = new QuizQuestion
                         {
                             question = q.ContainsKey("question") ? q["question"].ToString() : "",
                             options = q.ContainsKey("options") ? (q["options"] as List<object>).ConvertAll(o => o.ToString()) : new List<string>(),
-                            imageUrl = q.ContainsKey("imageUrl") ? q["imageUrl"].ToString() : ""
-                        });
+                            imageUrl = q.ContainsKey("imageUrl") ? q["imageUrl"].ToString() : "",
+                            correctIndexes = new List<int>()
+                        };
+
+                        // Determine if this is a multi-select question
+                        if (q.ContainsKey("correctIndexes"))
+                        {
+                            question.correctIndexes = (q["correctIndexes"] as List<object>).ConvertAll(o => Convert.ToInt32(o));
+                            question.isMultiSelect = question.correctIndexes.Count > 1;
+                        }
+
+                        parsed.Add(question);
                     }
 
                     Session["QuizQuestions"] = parsed;
-                    Session["SelectedAnswers"] = new Dictionary<int, string>();
+                    Session["SelectedAnswers"] = new Dictionary<int, List<int>>(); // Stores selected option indexes
                     Session["CurrentQuestionIndex"] = 0;
                 }
             }
@@ -113,10 +127,17 @@ namespace YourProjectNamespace
             var current = questions[currentIndex];
             questionText.InnerText = $"Q{currentIndex + 1}. {current.question}";
 
-            rblOptions.Items.Clear();
+            cblOptions.Items.Clear();
             foreach (var option in current.options)
             {
-                rblOptions.Items.Add(new ListItem(option, option));
+                cblOptions.Items.Add(new ListItem(option));
+            }
+
+            // Show multi-select notice if applicable
+            lblMultiSelectNotice.Visible = current.isMultiSelect;
+            if (current.isMultiSelect)
+            {
+                lblMultiSelectNotice.Text = "(Select all that apply - " + current.correctIndexes.Count + " correct answers)";
             }
 
             imgQuestionImage.Visible = !string.IsNullOrEmpty(current.imageUrl);
@@ -126,13 +147,17 @@ namespace YourProjectNamespace
             btnNext.Visible = (currentIndex < questions.Count - 1);
             btnSubmit.Visible = (currentIndex == questions.Count - 1);
 
-            var selectedAnswers = Session["SelectedAnswers"] as Dictionary<int, string>;
+            // Restore selected answers
+            var selectedAnswers = Session["SelectedAnswers"] as Dictionary<int, List<int>>;
             if (selectedAnswers != null && selectedAnswers.ContainsKey(currentIndex))
             {
-                string prevAnswer = selectedAnswers[currentIndex];
-                var item = rblOptions.Items.FindByValue(prevAnswer);
-                if (item != null)
-                    item.Selected = true;
+                foreach (int selectedIndex in selectedAnswers[currentIndex])
+                {
+                    if (selectedIndex >= 0 && selectedIndex < cblOptions.Items.Count)
+                    {
+                        cblOptions.Items[selectedIndex].Selected = true;
+                    }
+                }
             }
         }
 
@@ -147,23 +172,32 @@ namespace YourProjectNamespace
         protected void btnSubmit_Click(object sender, EventArgs e)
         {
             SaveCurrentAnswer();
+
+            // Store the quiz data in session before redirecting
+            Session["QuizTitle"] = Session["QuizTitle"];
+            Session["QuizQuestions"] = Session["QuizQuestions"];
+            Session["SelectedAnswers"] = Session["SelectedAnswers"];
+
             Response.Redirect("QuizResult.aspx");
         }
 
         private void SaveCurrentAnswer()
         {
-            if (rblOptions.SelectedItem != null)
-            {
-                int currentIndex = Session["CurrentQuestionIndex"] != null ? (int)Session["CurrentQuestionIndex"] : 0;
-                var selectedAnswers = Session["SelectedAnswers"] as Dictionary<int, string>;
-                if (selectedAnswers == null)
-                {
-                    selectedAnswers = new Dictionary<int, string>();
-                    Session["SelectedAnswers"] = selectedAnswers;
-                }
+            int currentIndex = (int)Session["CurrentQuestionIndex"];
+            var selectedAnswers = Session["SelectedAnswers"] as Dictionary<int, List<int>> ?? new Dictionary<int, List<int>>();
 
-                selectedAnswers[currentIndex] = rblOptions.SelectedItem.Value;
+            // Get all selected option indexes
+            var selectedIndexes = new List<int>();
+            for (int i = 0; i < cblOptions.Items.Count; i++)
+            {
+                if (cblOptions.Items[i].Selected)
+                {
+                    selectedIndexes.Add(i);
+                }
             }
+
+            selectedAnswers[currentIndex] = selectedIndexes;
+            Session["SelectedAnswers"] = selectedAnswers;
         }
     }
 }
