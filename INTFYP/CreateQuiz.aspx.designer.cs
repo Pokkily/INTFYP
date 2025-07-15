@@ -24,6 +24,33 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.TextBox txtQuizTitle;
 
         /// <summary>
+        /// fileQuizImage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.FileUpload fileQuizImage;
+
+        /// <summary>
+        /// lblImageError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblImageError;
+
+        /// <summary>
+        /// imgQuizPreview control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Image imgQuizPreview;
+
+        /// <summary>
         /// rptQuestions control.
         /// </summary>
         /// <remarks>

@@ -74,6 +74,47 @@ namespace YourProjectNamespace
             string teacherEmail = Session["email"]?.ToString()?.ToLower();
             if (string.IsNullOrEmpty(quizTitle) || string.IsNullOrEmpty(teacherEmail)) return;
 
+            // 📸 Validate and upload quiz image
+            if (!fileQuizImage.HasFile)
+            {
+                lblImageError.Text = "Please upload a quiz image.";
+                lblImageError.Visible = true;
+                return;
+            }
+
+            string quizImageUrl = "";
+            try
+            {
+                var account = new Account(
+                    ConfigurationManager.AppSettings["CloudinaryCloudName"],
+                    ConfigurationManager.AppSettings["CloudinaryApiKey"],
+                    ConfigurationManager.AppSettings["CloudinaryApiSecret"]
+                );
+                var cloudinary = new Cloudinary(account);
+
+                using (var stream = fileQuizImage.PostedFile.InputStream)
+                {
+                    var uploadParams = new ImageUploadParams()
+                    {
+                        File = new FileDescription(fileQuizImage.FileName, stream)
+                    };
+
+                    var uploadResult = cloudinary.Upload(uploadParams);
+                    quizImageUrl = uploadResult.SecureUrl.ToString();
+
+                    // Optional preview
+                    imgQuizPreview.ImageUrl = quizImageUrl;
+                    imgQuizPreview.Visible = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                lblImageError.Text = "Image upload failed: " + ex.Message;
+                lblImageError.Visible = true;
+                return;
+            }
+
+
             string quizCode = GenerateQuizCode();
 
             List<Dictionary<string, object>> formattedQuestions = new List<Dictionary<string, object>>();
@@ -90,13 +131,15 @@ namespace YourProjectNamespace
 
 
             var quizDoc = new Dictionary<string, object>
-            {
-                { "quizCode", quizCode },
-                { "title", quizTitle },
-                { "createdBy", teacherEmail },
-                { "createdAt", Timestamp.GetCurrentTimestamp() },
-                { "questions", formattedQuestions }
-            };
+{
+    { "quizCode", quizCode },
+    { "title", quizTitle },
+    { "createdBy", teacherEmail },
+    { "createdAt", Timestamp.GetCurrentTimestamp() },
+    { "quizImageUrl", quizImageUrl }, // ✅ Save quiz image URL
+    { "questions", formattedQuestions }
+};
+
 
             db.Collection("quizzes").Document(quizCode).SetAsync(quizDoc).GetAwaiter().GetResult();
             ViewState["QuestionList"] = null;

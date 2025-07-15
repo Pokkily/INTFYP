@@ -51,6 +51,12 @@
     color: white;
     margin-top: 10px;
 }
+        .image-preview {
+    max-width: 400px;
+    margin-top: 10px;
+    display: block;
+}
+
 
     </style>
 
@@ -59,7 +65,16 @@
     <div class="form-group">
         <label for="txtQuizTitle">Quiz Title</label><br />
         <asp:TextBox ID="txtQuizTitle" runat="server" CssClass="form-control" Width="400px" />
+
     </div>
+
+    <div class="form-group">
+    <label for="fileQuizImage">Quiz Image (Required)</label><br />
+    <asp:FileUpload ID="fileQuizImage" runat="server" />
+    <asp:Label ID="lblImageError" runat="server" ForeColor="Red" Visible="false"></asp:Label>
+    <asp:Image ID="imgQuizPreview" runat="server" CssClass="image-preview" Visible="false" />
+</div>
+
 
     <asp:Repeater ID="rptQuestions" runat="server" OnItemCommand="rptQuestions_ItemCommand">
 
