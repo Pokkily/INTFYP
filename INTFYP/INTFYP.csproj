@@ -357,6 +357,9 @@
     <Content Include="libman.json" />
     <Content Include="Preview.aspx" />
     <Content Include="ServiceAccountKey.json" />
+
+    <Content Include="AddFeedBack.aspx" />
+
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -543,6 +546,15 @@
     <Compile Include="Preview.aspx.designer.cs">
       <DependentUpon>Preview.aspx</DependentUpon>
     </Compile>
+
+    <Compile Include="AddFeedBack.aspx.cs">
+      <DependentUpon>AddFeedBack.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AddFeedBack.aspx.designer.cs">
+      <DependentUpon>AddFeedBack.aspx</DependentUpon>
+    </Compile>
+
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
