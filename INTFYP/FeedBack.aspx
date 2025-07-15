@@ -1,184 +1,64 @@
-﻿<%@ Page Language="C#" Async="true" AutoEventWireup="true" CodeBehind="Library.aspx.cs" Inherits="INTFYP.Library" %>
+﻿<%@ Page Async="true" Title="Feedback" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeBehind="Feedback.aspx.cs" Inherits="YourProjectNamespace.Feedback" %>
 
-<!DOCTYPE html>
-<html lang="en">
-<head runat="server">
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Library</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background-color: #f5f5f5;
-    }
+<asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
+    Feedback
+</asp:Content>
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: #fff;
-      padding: 10px 30px;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .logo {
-      font-weight: bold;
-      font-size: 24px;
-    }
-
-    nav a {
-      margin: 0 10px;
-      text-decoration: none;
-      color: #333;
-    }
-
-    nav a.active {
-      font-weight: bold;
-      color: #000;
-    }
-
-    .auth-buttons button {
-      margin-left: 10px;
-      padding: 5px 10px;
-      cursor: pointer;
-    }
-
-    .auth-buttons .register {
-      background-color: black;
-      color: white;
-      border: none;
-    }
-
-    main {
-      padding: 20px 40px;
-    }
-
-    .content {
-      display: flex;
-      margin-top: 30px;
-    }
-
-    .sidebar {
-      width: 200px;
-      margin-right: 30px;
-    }
-
-    .categories button,
-    .extra button {
-      display: block;
-      width: 100%;
-      margin-bottom: 10px;
-      padding: 8px;
-      background-color: #e4e4e4;
-      border: none;
-      cursor: pointer;
-    }
-
-    .extra .bookmark {
-      background-color: #d4d4ff;
-    }
-
-    .extra .citation {
-      background-color: #ddd;
-    }
-
-    .main-library {
-      flex: 1;
-    }
-
-    .search-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .search-bar input {
-      padding: 8px;
-      width: 200px;
-    }
-
-    .book-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 20px;
-      margin-top: 20px;
-    }
-
-    .book {
-      background-color: #ccc;
-      padding: 15px;
-      border-radius: 8px;
-    }
-
-    .book span {
-      display: block;
-      margin-top: 5px;
-      font-size: 12px;
-      color: #333;
-    }
-
-    .welcome-container {
-      width: 100%;
-      text-align: center;
-      border: 2px solid #333;
-      background-color: #cccccc8f;
-      padding: 30px 0;
-    }
-
-    .welcome h1 {
-      font-size: 36px;
-      margin-bottom: 10px;
-    }
-
-    .welcome p {
-      font-size: 18px;
-      color: #666;
-    }
-  </style>
-</head>
-<body>
-  <form id="form1" runat="server">
-    <header>
-      <div class="logo">L.</div>
-      <nav>
-        <a href="#">Class</a>
-        <a href="#">StudyHub</a>
-        <a href="Library.aspx" class="active">Library</a>
-        <a href="#">Quiz</a>
-        <a href="#">Learning</a>
-        <a href="#">Scholarship</a>
-        <a href="#">Feedback</a>
-      </nav>
-      <div class="auth-buttons">
-        <asp:Button ID="btnSignIn" runat="server" Text="Sign in" CssClass="signin" />
-        <asp:Button ID="btnRegister" runat="server" Text="Register" CssClass="register" />
-      </div>
-    </header>
-
-    <main>
-      <section class="welcome-container">
-        <div class="welcome">
-          <h1>Welcome to Library</h1>
-          <p>All Materials You Need</p>
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+    <!-- Header -->
+    <section class="text-center bg-light py-4 border rounded mb-4">
+        <div class="container">
+            <h1 class="display-5 fw-bold">Student Feedback</h1>
+            <p class="lead text-muted">Submit your feedback with description, image, or video</p>
         </div>
-      </section>
+    </section>
 
-      <section class="content">
-        <aside class="sidebar">
-          <div class="categories">
-            <h3>CATEGORY</h3>
-            <button>#Fiction</button>
-            <button>#Horror</button>
-            <button>#Adventure</button>
-            <button>#Fantasy</button>
-            <button>#Drama</button>
-            <button>#English</button>
-            <button>#Article</button>
-          </div>
-          <div class="extra">
-            <button class="bookmark">Your Bookmark</button>
-            <button class="citation" type="button" onclick="location.href='CitationGenerator.aspx';">Citation Generator</button>
-            <button class="citation" type="button" onclick="location.href='AddBook.aspx';">Add Books</button>
-          </div>
-        </aside>
+    <!-- Two-Column Layout -->
+    <div class="container mb-5">
+        <div class="row">
+            <!-- LEFT: Student Info -->
+            <div class="col-md-4">
+                <div class="card p-3 shadow-sm">
+                    <h5 class="fw-bold mb-3">Student Information</h5>
+                    <p><strong>Name:</strong> <asp:Label ID="lblName" runat="server" /></p>
+                    <p><strong>Username:</strong> <asp:Label ID="lblUsername" runat="server" /></p>
+                    <p><strong>Email:</strong> <asp:Label ID="lblEmail" runat="server" /></p>
+                    <p><strong>Phone:</strong> <asp:Label ID="lblPhone" runat="server" /></p>
+                    <p><strong>Gender:</strong> <asp:Label ID="lblGender" runat="server" /></p>
+                    <p><strong>Birthdate:</strong> <asp:Label ID="lblBirthdate" runat="server" /></p>
+                    <p><strong>Position:</strong> <asp:Label ID="lblPosition" runat="server" /></p>
+                    <p><strong>Address:</strong> <asp:Label ID="lblAddress" runat="server" /></p>
+                </div>
+            </div>
+
+            <!-- RIGHT: Feedback Form -->
+            <div class="col-md-8">
+                <div class="card p-4 shadow-sm">
+                    <h5 class="fw-bold mb-3">Submit Feedback</h5>
+
+                    <asp:Label ID="lblMessage" runat="server" Visible="false" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <asp:TextBox ID="txtFeedbackUsername" runat="server" CssClass="form-control" ReadOnly="true" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="txtDescription" class="form-label">Description</label>
+                        <asp:TextBox ID="txtDescription" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="4" placeholder="Enter your feedback here" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="fileUpload" class="form-label">Upload Image/Video (optional)</label>
+                        <asp:FileUpload ID="fileUpload" runat="server" CssClass="form-control" />
+                    </div>
+
+                    <asp:Button ID="btnSubmit" runat="server" CssClass="btn btn-primary" Text="Submit Feedback" OnClick="btnSubmit_Click" />
+                </div>
+
+                <!-- Feedback Posts -->
+                <div class="mt-5" id="feedbackPosts" runat="server"></div>
+            </div>
+        </div>
+    </div>
+</asp:Content>

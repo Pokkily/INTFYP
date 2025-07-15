@@ -11,70 +11,70 @@ namespace YourProjectNamespace
 {
 
 
-    public partial class CreateQuiz
+    public partial class QuizDetail
     {
 
         /// <summary>
-        /// txtQuizTitle control.
+        /// form1 control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtQuizTitle;
+        protected global::System.Web.UI.HtmlControls.HtmlForm form1;
 
         /// <summary>
-        /// fileQuizImage control.
+        /// questionText control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.FileUpload fileQuizImage;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl questionText;
 
         /// <summary>
-        /// lblImageError control.
+        /// imgQuestionImage control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblImageError;
+        protected global::System.Web.UI.WebControls.Image imgQuestionImage;
 
         /// <summary>
-        /// imgQuizPreview control.
+        /// cblOptions control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Image imgQuizPreview;
+        protected global::System.Web.UI.WebControls.CheckBoxList cblOptions;
 
         /// <summary>
-        /// rptQuestions control.
+        /// lblMultiSelectNotice control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptQuestions;
+        protected global::System.Web.UI.WebControls.Label lblMultiSelectNotice;
 
         /// <summary>
-        /// btnAddQuestion control.
+        /// btnNext control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnAddQuestion;
+        protected global::System.Web.UI.WebControls.Button btnNext;
 
         /// <summary>
-        /// btnSubmitQuiz control.
+        /// btnSubmit control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnSubmitQuiz;
+        protected global::System.Web.UI.WebControls.Button btnSubmit;
     }
 }

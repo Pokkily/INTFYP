@@ -53,13 +53,15 @@
                     </HeaderTemplate>
                     <ItemTemplate>
                         <div class="col">
-                            <div class="card h-100 shadow-sm">
-                                <div class="card-body">
-                                    <h5 class="card-title"><%# Eval("Title") %></h5>
-                                    <p class="card-text"><%# Eval("Author") %></p>
-                                    <span class="badge bg-secondary">#<%# Eval("Category") %></span>
+                            <a href='<%# "PreviewBook.aspx?pdfUrl=" + HttpUtility.UrlEncode(Eval("PdfUrl").ToString()) %>' style="text-decoration: none; color: inherit;">
+                                <div class="card h-100 shadow-sm">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><%# Eval("Title") %></h5>
+                                        <p class="card-text"><%# Eval("Author") %></p>
+                                        <span class="badge bg-secondary">#<%# Eval("Category") %></span>
+                                    </div>
                                 </div>
-                            </div>
+                            </a>
                         </div>
                     </ItemTemplate>
                     <FooterTemplate>
