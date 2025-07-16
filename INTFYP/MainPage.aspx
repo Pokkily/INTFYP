@@ -15,7 +15,7 @@
                 <li><a href="StudyHub.aspx">Open Study Hub</a></li>
                 <li><a href="Library.aspx">Visit Library</a></li>
                 <li><a href="Quiz.aspx">Start Quiz</a></li>
-                <li><a href="Feedback.aspx">Give Feedback</a></li>
+                <li><a href="FeedBack.aspx">Give Feedback</a></li>
             </ul>
         </div>
     </div>

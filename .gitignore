@@ -362,3 +362,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /INTFYP/serviceAccountKey.json
+/INTFYP/FeedBack.aspx
+/INTFYP/FeedBack.aspx.designer.cs
+/INTFYP/FeedBack.aspx.designer.cs

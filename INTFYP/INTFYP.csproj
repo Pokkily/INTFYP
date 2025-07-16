@@ -363,10 +363,9 @@
     <Content Include="protos\google\api\auth.proto" />
     <Content Include="protos\google\api\annotations.proto" />
     <Content Include="ManagePost.aspx" />
-    <Content Include="FeedBack.aspx" />
     <Content Include="libman.json" />
-    <Content Include="Preview.aspx" />
-    <Content Include="ServiceAccountKey.json" />
+    <Content Include="PreviewBook.aspx" />
+    <Content Include="Feedback.aspx" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -561,19 +560,19 @@
     <Compile Include="ManagePost.aspx.designer.cs">
       <DependentUpon>ManagePost.aspx</DependentUpon>
     </Compile>
-    <Compile Include="FeedBack.aspx.cs">
-      <DependentUpon>FeedBack.aspx</DependentUpon>
+    <Compile Include="PreviewBook.aspx.cs">
+      <DependentUpon>PreviewBook.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="FeedBack.aspx.designer.cs">
-      <DependentUpon>FeedBack.aspx</DependentUpon>
+    <Compile Include="PreviewBook.aspx.designer.cs">
+      <DependentUpon>PreviewBook.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Preview.aspx.cs">
-      <DependentUpon>Preview.aspx</DependentUpon>
+    <Compile Include="Feedback.aspx.cs">
+      <DependentUpon>Feedback.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Preview.aspx.designer.cs">
-      <DependentUpon>Preview.aspx</DependentUpon>
+    <Compile Include="Feedback.aspx.designer.cs">
+      <DependentUpon>Feedback.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup />
@@ -606,6 +605,7 @@
     <Content Include="Scripts\jquery-3.7.0.slim.min.map" />
     <Content Include="Scripts\jquery-3.7.0.min.map" />
     <Content Include="Site.Mobile.Master" />
+    <Content Include="ServiceAccountKey.json" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
