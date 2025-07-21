@@ -52,5 +52,56 @@ namespace INTFYP
             [FirestoreProperty] public string Category { get; set; }
             [FirestoreProperty] public string PdfUrl { get; set; }
         }
+
+        protected async void txtCategorySearch_TextChanged(object sender, EventArgs e)
+        {
+            string searchTerm = txtCategorySearch.Text.Trim().ToLower();
+            InitializeFirestore();
+
+            Query query = db.Collection("books");
+            QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+            List<LibraryBook> bookList = new List<LibraryBook>();
+            foreach (DocumentSnapshot doc in snapshot.Documents)
+            {
+                LibraryBook b = doc.ConvertTo<LibraryBook>();
+                string category = b.Category?.ToLower() ?? "";
+
+                if (category.Contains(searchTerm))  // partial match
+                {
+                    b.PdfUrl = doc.ContainsField("PdfUrl") ? doc.GetValue<string>("PdfUrl") : null;
+                    bookList.Add(b);
+                }
+            }
+
+            Repeater1.DataSource = bookList;
+            Repeater1.DataBind();
+        }
+
+        protected async void txtBookSearch_TextChanged(object sender, EventArgs e)
+        {
+            string searchTerm = txtBookSearch.Text.Trim().ToLower();
+            InitializeFirestore();
+
+            Query query = db.Collection("books");
+            QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+            List<LibraryBook> bookList = new List<LibraryBook>();
+            foreach (DocumentSnapshot doc in snapshot.Documents)
+            {
+                LibraryBook b = doc.ConvertTo<LibraryBook>();
+                string title = b.Title?.ToLower() ?? "";
+                string author = b.Author?.ToLower() ?? "";
+
+                if (title.Contains(searchTerm) || author.Contains(searchTerm))
+                {
+                    b.PdfUrl = doc.ContainsField("PdfUrl") ? doc.GetValue<string>("PdfUrl") : null;
+                    bookList.Add(b);
+                }
+            }
+
+            Repeater1.DataSource = bookList;
+            Repeater1.DataBind();
+        }
     }
 }

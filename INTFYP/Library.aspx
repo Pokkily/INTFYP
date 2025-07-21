@@ -5,10 +5,7 @@
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-    <!-- Bootstrap CSS (in case not already in Site.master) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-
-    <!-- Welcome Section -->
+    <!-- Header -->
     <section class="text-center bg-light py-4 border rounded mb-4">
         <div class="container">
             <h1 class="display-5 fw-bold">Welcome to Library</h1>
@@ -19,20 +16,13 @@
     <!-- Main Content Grid -->
     <div class="container mb-5">
         <div class="row">
-            <!-- Sidebar -->
+            <!-- Left Sidebar -->
             <div class="col-md-3 mb-4">
                 <div class="mb-4">
-                    <h5 class="fw-bold">CATEGORY</h5>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-outline-secondary">#Fiction</button>
-                        <button class="btn btn-outline-secondary">#Horror</button>
-                        <button class="btn btn-outline-secondary">#Adventure</button>
-                        <button class="btn btn-outline-secondary">#Fantasy</button>
-                        <button class="btn btn-outline-secondary">#Drama</button>
-                        <button class="btn btn-outline-secondary">#English</button>
-                        <button class="btn btn-outline-secondary">#Article</button>
-                    </div>
+                    <h5 class="fw-bold">Search by Category</h5>
+                    <asp:TextBox ID="txtCategorySearch" runat="server" CssClass="form-control mb-2" placeholder="Type category name..." AutoPostBack="true" OnTextChanged="txtCategorySearch_TextChanged" />
                 </div>
+
                 <div class="d-grid gap-2">
                     <button class="btn btn-primary">Your Bookmark</button>
                     <button class="btn btn-dark" type="button" onclick="location.href='CitationGenerator.aspx';">Citation Generator</button>
@@ -44,7 +34,7 @@
             <div class="col-md-9">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h3 class="fw-bold mb-0">Recommend</h3>
-                    <input type="text" class="form-control w-25" placeholder="Search..." />
+                    <asp:TextBox ID="txtBookSearch" runat="server" CssClass="form-control w-25" placeholder="Search by title or author..." AutoPostBack="true" OnTextChanged="txtBookSearch_TextChanged" />
                 </div>
 
                 <asp:Repeater ID="Repeater1" runat="server">
