@@ -282,6 +282,7 @@
     <Content Include="CreatePost.aspx" />
     <Content Include="CreateQuiz.aspx" />
     <Content Include="Default.aspx" />
+    <Content Include="FavBooks.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Images\dprofile.jpg" />
@@ -417,6 +418,13 @@
     </Compile>
     <Compile Include="Class.aspx.designer.cs">
       <DependentUpon>Class.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="FavBooks.aspx.cs">
+      <DependentUpon>FavBooks.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="FavBooks.aspx.designer.cs">
+      <DependentUpon>FavBooks.aspx</DependentUpon>
     </Compile>
     <Compile Include="QuizModels.cs" />
     <Compile Include="ClassDetails.aspx.cs">
