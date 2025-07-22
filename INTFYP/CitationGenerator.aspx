@@ -1,47 +1,41 @@
 ﻿<%@ Page Title="Citation Generator" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeFile="CitationGenerator.aspx.cs" Inherits="CitationGenerator" %>
 
-<asp:Content ContentPlaceHolderID="MainContent" runat="server">
+<asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
+    Citation Generator
+</asp:Content>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+
+  <section class="text-center bg-light py-4 border rounded mb-4">
+    <div class="container">
+      <h1 class="display-5 fw-bold">Citation Generator</h1>
+      <p class="lead text-muted">Create perfect citations in multiple styles</p>
+    </div>
+  </section>
 
   <style>
-    /* Move styles here instead of <head> */
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-    }
-    .welcome-container {
-      width: 100%;
-      text-align: center;
-      border: 2px solid #333;
-      background-color: #cccccc8f;
-      padding: 30px 0;
-      margin-bottom: 30px;
-    }
-    .welcome h1 { font-size: 36px; margin-bottom: 10px; }
-    .welcome p { font-size: 18px; color: #666; }
-    .citation-generator {
-      background-color: white;
-      padding: 25px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      max-width: 800px;
-      margin: auto;
+    .form-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.05);
     }
     .form-group {
       margin-bottom: 20px;
     }
     .form-group label {
-      display: block;
-      margin-bottom: 8px;
       font-weight: bold;
+      margin-bottom: 8px;
+      display: block;
     }
     .form-group input,
-    .form-group select,
     .form-group textarea {
       width: 100%;
       padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
     }
     .form-group textarea {
       min-height: 120px;
@@ -56,8 +50,9 @@
       flex: 1;
       padding: 10px;
       background-color: #f0f0f0;
-      border: 1px solid #ddd;
+      border: 1px solid #ccc;
       cursor: pointer;
+      border-radius: 4px;
     }
     .style-buttons button.active {
       background-color: #2c3e50;
@@ -69,19 +64,18 @@
       margin-top: 20px;
     }
     .action-buttons button {
-      padding: 12px 20px;
+      flex: 1;
+      padding: 12px;
       border: none;
-      border-radius: 4px;
-      cursor: pointer;
+      border-radius: 5px;
       font-size: 16px;
+      color: white;
     }
     .generate-btn {
       background-color: #2c3e50;
-      color: white;
     }
     .copy-btn {
       background-color: #3498db;
-      color: white;
     }
     .success-message {
       color: #27ae60;
@@ -90,25 +84,25 @@
     }
   </style>
 
-  <section class="welcome-container">
-    <div class="welcome">
-      <h1>Citation Generator</h1>
-      <p>Create perfect citations in multiple styles</p>
-    </div>
-  </section>
-
-  <div class="citation-generator">
-    <div class="form-group">
-      <label for="sourceType">Source Type</label>
-      <select id="sourceType">
-        <option value="book">Book</option>
-        <option value="website">Website/Webpage</option>
-        <option value="journal">Journal Article</option>
-      </select>
-    </div>
-
+  <div class="form-container">
     <div id="citationFields">
-      <!-- Dynamic input fields injected by JS -->
+      <!-- Book input fields shown by default -->
+      <div class="form-group">
+        <label for="author">Author(s)</label>
+        <input type="text" id="author" placeholder="Lastname, F.">
+      </div>
+      <div class="form-group">
+        <label for="title">Title</label>
+        <input type="text" id="title" placeholder="Book title">
+      </div>
+      <div class="form-group">
+        <label for="year">Year</label>
+        <input type="text" id="year" placeholder="YYYY">
+      </div>
+      <div class="form-group">
+        <label for="publisher">Publisher</label>
+        <input type="text" id="publisher" placeholder="Publisher name">
+      </div>
     </div>
 
     <div class="form-group">
@@ -128,13 +122,13 @@
     </div>
 
     <div class="action-buttons">
-      <button id="generateCitation" type="button" class="generate-btn">Generate Citation</button>
-      <button id="copyCitation" type="button" class="copy-btn">Copy to Clipboard</button>
+      <button id="generateCitation" type="button" class="generate-btn">Generate</button>
+      <button id="copyCitation" type="button" class="copy-btn">Copy</button>
     </div>
-    <div id="copySuccess" class="success-message">Citation copied to clipboard!</div>
+    <div id="copySuccess" class="success-message">Citation copied!</div>
 
-    <div class="form-group">
-      <label for="citationOutput">Generated Citation</label>
+    <div class="form-group mt-4">
+      <label for="citationOutput">Citation</label>
       <textarea id="citationOutput" readonly></textarea>
     </div>
   </div>
@@ -142,56 +136,6 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
       $(document).ready(function () {
-          const fieldTemplates = {
-              book: `
-          <div class="form-group">
-            <label for="author">Author(s)</label>
-            <input type="text" id="author" placeholder="Lastname, F.">
-          </div>
-          <div class="form-group">
-            <label for="title">Title</label>
-            <input type="text" id="title" placeholder="Book title">
-          </div>
-          <div class="form-group">
-            <label for="year">Year</label>
-            <input type="text" id="year" placeholder="YYYY">
-          </div>
-          <div class="form-group">
-            <label for="publisher">Publisher</label>
-            <input type="text" id="publisher" placeholder="Publisher name">
-          </div>
-        `,
-              website: `
-          <div class="form-group">
-            <label for="author">Author(s)</label>
-            <input type="text" id="author" placeholder="Author or Organization">
-          </div>
-          <div class="form-group">
-            <label for="title">Title</label>
-            <input type="text" id="title" placeholder="Page title">
-          </div>
-          <div class="form-group">
-            <label for="website">Website</label>
-            <input type="text" id="website" placeholder="Website name">
-          </div>
-          <div class="form-group">
-            <label for="date">Date</label>
-            <input type="text" id="date" placeholder="YYYY-MM-DD or n.d.">
-          </div>
-          <div class="form-group">
-            <label for="url">URL</label>
-            <input type="text" id="url" placeholder="https://example.com">
-          </div>
-        `
-          };
-
-          $('#citationFields').html(fieldTemplates.book);
-
-          $('#sourceType').change(function () {
-              const type = $(this).val();
-              $('#citationFields').html(fieldTemplates[type] || '');
-          });
-
           $('.style-buttons button').click(function () {
               $('.style-buttons button').removeClass('active');
               $(this).addClass('active');
@@ -200,26 +144,18 @@
 
           $('#generateCitation').click(function () {
               const style = $('#citationStyle').val();
-              const type = $('#sourceType').val();
-
               const getValue = (id) => $(`#${id}`).val()?.trim() || '[Not specified]';
+
+              const author = getValue('author');
+              const title = getValue('title');
+              const year = getValue('year');
+              const publisher = getValue('publisher');
+
               let citation = '';
-
-              if (type === 'book') {
-                  const a = getValue('author'), t = getValue('title'), y = getValue('year'), p = getValue('publisher');
-                  if (style === 'apa') citation = `${a}. (${y}). *${t}*. ${p}.`;
-                  if (style === 'mla') citation = `${a}. *${t}*. ${p}, ${y}.`;
-                  if (style === 'chicago') citation = `${a}. ${y}. *${t}*. ${p}.`;
-                  if (style === 'harvard') citation = `${a} (${y}) *${t}*. ${p}.`;
-              }
-
-              if (type === 'website') {
-                  const a = getValue('author'), t = getValue('title'), w = getValue('website'), d = getValue('date'), u = getValue('url');
-                  if (style === 'apa') citation = `${a}. (${d}). ${t}. *${w}*. ${u}`;
-                  if (style === 'mla') citation = `${a}. "${t}." *${w}*, ${d}, ${u}.`;
-                  if (style === 'chicago') citation = `${a}. "${t}." *${w}*. ${d}. ${u}.`;
-                  if (style === 'harvard') citation = `${a} (${d}) '${t}'. *${w}*. Available at: ${u} (Accessed: ${new Date().toLocaleDateString('en-GB')}).`;
-              }
+              if (style === 'apa') citation = `${author}. (${year}). *${title}*. ${publisher}.`;
+              if (style === 'mla') citation = `${author}. *${title}*. ${publisher}, ${year}.`;
+              if (style === 'chicago') citation = `${author}. ${year}. *${title}*. ${publisher}.`;
+              if (style === 'harvard') citation = `${author} (${year}) *${title}*. ${publisher}.`;
 
               $('#citationOutput').val(citation);
           });

@@ -11,7 +11,7 @@ namespace INTFYP
 {
 
 
-    public partial class Library
+    public partial class FavBooks
     {
 
         /// <summary>

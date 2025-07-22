@@ -7,38 +7,29 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace INTFYP
+namespace YourProjectNamespace
 {
 
 
-    public partial class Library
+    public partial class StudyHub
     {
 
         /// <summary>
-        /// txtCategorySearch control.
+        /// btnCreateGroup control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtCategorySearch;
+        protected global::System.Web.UI.WebControls.Button btnCreateGroup;
 
         /// <summary>
-        /// txtBookSearch control.
+        /// rptGroups control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtBookSearch;
-
-        /// <summary>
-        /// Repeater1 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater Repeater1;
+        protected global::System.Web.UI.WebControls.Repeater rptGroups;
     }
 }
