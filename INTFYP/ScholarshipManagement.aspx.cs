@@ -62,9 +62,6 @@ namespace YourProjectNamespace
                 resultList.Add(data);
             }
 
-
-            rptResults.DataSource = resultList;
-            rptResults.DataBind();
         }
 
         protected async void ResultCommand(object sender, CommandEventArgs e)
