@@ -38,8 +38,30 @@ namespace YourProjectNamespace
             {
                 var data = doc.ToDictionary();
                 data["DocId"] = doc.Id; // Needed for commands
+
+                // Build HTML for all subject-grade pairs
+                string subjectsHtml = "";
+                for (int i = 1; i <= 15; i++)
+                {
+                    string subjectKey = $"Subject{i}";
+                    string gradeKey = $"Grade{i}";
+
+                    if (data.ContainsKey(subjectKey) && data.ContainsKey(gradeKey))
+                    {
+                        var subject = data[subjectKey]?.ToString();
+                        var grade = data[gradeKey]?.ToString();
+
+                        if (!string.IsNullOrWhiteSpace(subject) && !string.IsNullOrWhiteSpace(grade))
+                        {
+                            subjectsHtml += $"<p class='card-text mb-1'><strong>{subject}:</strong> {grade}</p>";
+                        }
+                    }
+                }
+
+                data["SubjectsHtml"] = subjectsHtml;
                 resultList.Add(data);
             }
+
 
             rptResults.DataSource = resultList;
             rptResults.DataBind();

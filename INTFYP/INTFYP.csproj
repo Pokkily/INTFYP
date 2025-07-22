@@ -168,6 +168,13 @@
       <Private>True</Private>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Net.Http.Extensions, Version=2.2.29.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Net.Http.2.2.29\lib\net45\System.Net.Http.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Primitives, Version=4.2.29.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Net.Http.2.2.29\lib\net45\System.Net.Http.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest" />
     <Reference Include="System.Net.Http.WinHttpHandler, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Net.Http.WinHttpHandler.8.0.0\lib\net462\System.Net.Http.WinHttpHandler.dll</HintPath>
     </Reference>
@@ -281,6 +288,7 @@
     <Content Include="CreateClassroom.aspx" />
     <Content Include="CreatePost.aspx" />
     <Content Include="CreateQuiz.aspx" />
+    <Content Include="CreateStudyGroup.aspx" />
     <Content Include="Default.aspx" />
     <Content Include="FavBooks.aspx" />
     <Content Include="favicon.ico" />
@@ -363,6 +371,7 @@
     <Content Include="PreviewBook.aspx" />
     <Content Include="Feedback.aspx" />
     <Content Include="Learning.aspx" />
+    <Content Include="StudyHub.aspx" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -419,6 +428,13 @@
     </Compile>
     <Compile Include="Class.aspx.designer.cs">
       <DependentUpon>Class.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="CreateStudyGroup.aspx.cs">
+      <DependentUpon>CreateStudyGroup.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CreateStudyGroup.aspx.designer.cs">
+      <DependentUpon>CreateStudyGroup.aspx</DependentUpon>
     </Compile>
     <Compile Include="FavBooks.aspx.cs">
       <DependentUpon>FavBooks.aspx</DependentUpon>
@@ -607,6 +623,13 @@
     <Compile Include="Learning.aspx.designer.cs">
       <DependentUpon>Learning.aspx</DependentUpon>
     </Compile>
+    <Compile Include="StudyHub.aspx.cs">
+      <DependentUpon>StudyHub.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="StudyHub.aspx.designer.cs">
+      <DependentUpon>StudyHub.aspx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
@@ -683,6 +706,11 @@
   <Import Project="..\packages\Grpc.Core.2.46.6\build\net45\Grpc.Core.targets" Condition="Exists('..\packages\Grpc.Core.2.46.6\build\net45\Grpc.Core.targets')" />
   <Import Project="..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets" Condition="Exists('..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets')" />
   <Import Project="..\packages\Google.Api.CommonProtos.2.16.0\build\Google.Api.CommonProtos.targets" Condition="Exists('..\packages\Google.Api.CommonProtos.2.16.0\build\Google.Api.CommonProtos.targets')" />
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
+    <Error Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

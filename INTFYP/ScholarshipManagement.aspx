@@ -17,14 +17,12 @@
                     <div class="card-body">
                         <h5 class="card-title"><%# Eval("[Username]") %></h5>
                         <p class="card-text mb-1"><strong>Email:</strong> <%# Eval("[Email]") %></p>
-                        <p class="card-text mb-1"><strong><%# Eval("[Subject1]") %>:</strong> <%# Eval("[Grade1]") %></p>
-                        <p class="card-text mb-1"><strong><%# Eval("[Subject2]") %>:</strong> <%# Eval("[Grade2]") %></p>
+                        <asp:Literal ID="litSubjects" runat="server" Text='<%# Eval("[SubjectsHtml]") %>' />
                         <p class="card-text"><strong>Status:</strong> 
                             <span class='<%# Eval("[Status]").ToString() == "Verified" ? "text-success" : Eval("[Status]").ToString() == "Rejected" ? "text-danger" : "text-warning" %>'>
                                 <%# Eval("[Status]") %>
                             </span>
                         </p>
-
                         <div class="mt-2">
                             <asp:Button ID="btnVerify" runat="server" Text="✔ Verify" CommandName="Verify" CommandArgument='<%# Eval("[DocId]") %>' CssClass="btn btn-success btn-sm me-2" OnCommand="ResultCommand" />
                             <asp:Button ID="btnReject" runat="server" Text="✖ Reject" CommandName="Reject" CommandArgument='<%# Eval("[DocId]") %>' CssClass="btn btn-danger btn-sm" OnCommand="ResultCommand" />
