@@ -302,7 +302,6 @@
     <Content Include="QuizDetail.aspx" />
     <Content Include="QuizResult.aspx" />
     <Content Include="Register.aspx" />
-    <Content Include="Scholarship.aspx" />
     <Content Include="ScholarshipManagement.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -545,13 +544,6 @@
     </Compile>
     <Compile Include="Login.aspx.designer.cs">
       <DependentUpon>Login.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Scholarship.aspx.cs">
-      <DependentUpon>Scholarship.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Scholarship.aspx.designer.cs">
-      <DependentUpon>Scholarship.aspx</DependentUpon>
     </Compile>
     <Compile Include="ScholarshipManagement.aspx.cs">
       <DependentUpon>ScholarshipManagement.aspx</DependentUpon>
