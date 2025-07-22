@@ -43,11 +43,13 @@
                     </asp:Repeater>
                 </div>
 
-                    <asp:Button ID="btnApplyScholarship" runat="server" CssClass="btn btn-success w-100 py-2 fw-bold mb-2" Text="Submit Application" />
+                <!-- Submit Result and Apply Buttons (LEFT SIDE) -->
+                <asp:Button ID="btnApplyScholarship" runat="server" CssClass="btn btn-success w-100 py-2 fw-bold mb-2" Text="Submit Application" />
 
-                    <asp:HyperLink ID="btnSubmitResult" runat="server" NavigateUrl="~/SubmitResult.aspx" CssClass="btn btn-outline-secondary w-100 py-2 fw-bold">
-                        Submit Result
-                    </asp:HyperLink>
+                <asp:HyperLink ID="btnSubmitResult" runat="server" NavigateUrl="~/SubmitResult.aspx" CssClass="btn btn-outline-secondary w-100 py-2 fw-bold">
+                    Submit Result
+                </asp:HyperLink>
+            </div>
 
             <!-- RIGHT: Application Form -->
             <div class="col-md-6">

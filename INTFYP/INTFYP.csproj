@@ -295,6 +295,14 @@
     <Content Include="Global.asax" />
     <Content Include="Images\dprofile.jpg" />
     <Content Include="Images\logo.png" />
+    <Content Include="KLesson1.aspx" />
+    <Content Include="Korean.aspx" />
+    <Content Include="LanguageLearning\KLesson1\audio\Coffee.mp3" />
+    <Content Include="LanguageLearning\KLesson1\audio\Juice.mp3" />
+    <Content Include="LanguageLearning\KLesson1\audio\Tea.mp3" />
+    <Content Include="LanguageLearning\KLesson1\image\Coffee.png" />
+    <Content Include="LanguageLearning\KLesson1\image\Juice.png" />
+    <Content Include="LanguageLearning\KLesson1\image\Tea.png" />
     <Content Include="Library.aspx" />
     <Content Include="MainPage.aspx" />
     <Content Include="ManageClassroom.aspx" />
@@ -445,6 +453,20 @@
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="KLesson1.aspx.cs">
+      <DependentUpon>KLesson1.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="KLesson1.aspx.designer.cs">
+      <DependentUpon>KLesson1.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Korean.aspx.cs">
+      <DependentUpon>Korean.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Korean.aspx.designer.cs">
+      <DependentUpon>Korean.aspx</DependentUpon>
     </Compile>
     <Compile Include="QuizModels.cs" />
     <Compile Include="ClassDetails.aspx.cs">

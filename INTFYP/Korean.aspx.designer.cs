@@ -11,7 +11,7 @@ namespace YourNamespace
 {
 
 
-    public partial class Learning
+    public partial class Korean
     {
     }
 }
