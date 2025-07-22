@@ -288,7 +288,9 @@
     <Content Include="CreateClassroom.aspx" />
     <Content Include="CreatePost.aspx" />
     <Content Include="CreateQuiz.aspx" />
+    <Content Include="CreateStudyGroup.aspx" />
     <Content Include="Default.aspx" />
+    <Content Include="FavBooks.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Images\dprofile.jpg" />
@@ -300,6 +302,7 @@
     <Content Include="QuizDetail.aspx" />
     <Content Include="QuizResult.aspx" />
     <Content Include="Register.aspx" />
+    <Content Include="Scholarship.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -366,6 +369,8 @@
     <Content Include="libman.json" />
     <Content Include="PreviewBook.aspx" />
     <Content Include="Feedback.aspx" />
+    <Content Include="Learning.aspx" />
+    <Content Include="StudyHub.aspx" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -394,6 +399,7 @@
     <Content Include="Scripts\WebForms\WebParts.js" />
     <Content Include="Scripts\WebForms\WebUIValidation.js" />
     <Content Include="Login.aspx" />
+    <Content Include="SubmitResult.aspx" />
     <Content Include="ViewSwitcher.ascx" />
     <Content Include="Web.config" />
     <Content Include="Bundle.config" />
@@ -421,6 +427,20 @@
     </Compile>
     <Compile Include="Class.aspx.designer.cs">
       <DependentUpon>Class.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="CreateStudyGroup.aspx.cs">
+      <DependentUpon>CreateStudyGroup.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="CreateStudyGroup.aspx.designer.cs">
+      <DependentUpon>CreateStudyGroup.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="FavBooks.aspx.cs">
+      <DependentUpon>FavBooks.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="FavBooks.aspx.designer.cs">
+      <DependentUpon>FavBooks.aspx</DependentUpon>
     </Compile>
     <Compile Include="QuizModels.cs" />
     <Compile Include="ClassDetails.aspx.cs">
@@ -525,6 +545,13 @@
     <Compile Include="Login.aspx.designer.cs">
       <DependentUpon>Login.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Scholarship.aspx.cs">
+      <DependentUpon>Scholarship.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Scholarship.aspx.designer.cs">
+      <DependentUpon>Scholarship.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -538,6 +565,13 @@
     </Compile>
     <Compile Include="Site.Mobile.Master.designer.cs">
       <DependentUpon>Site.Mobile.Master</DependentUpon>
+    </Compile>
+    <Compile Include="SubmitResult.aspx.cs">
+      <DependentUpon>SubmitResult.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="SubmitResult.aspx.designer.cs">
+      <DependentUpon>SubmitResult.aspx</DependentUpon>
     </Compile>
     <Compile Include="TeacherSite.Master.cs">
       <DependentUpon>TeacherSite.Master</DependentUpon>
@@ -573,6 +607,20 @@
     </Compile>
     <Compile Include="Feedback.aspx.designer.cs">
       <DependentUpon>Feedback.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Learning.aspx.cs">
+      <DependentUpon>Learning.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Learning.aspx.designer.cs">
+      <DependentUpon>Learning.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="StudyHub.aspx.cs">
+      <DependentUpon>StudyHub.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="StudyHub.aspx.designer.cs">
+      <DependentUpon>StudyHub.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup />

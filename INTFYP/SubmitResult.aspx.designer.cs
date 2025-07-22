@@ -11,34 +11,43 @@ namespace INTFYP
 {
 
 
-    public partial class Library
+    public partial class SubmitResult
     {
 
         /// <summary>
-        /// txtCategorySearch control.
+        /// PanelSubjects control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtCategorySearch;
+        protected global::System.Web.UI.WebControls.Panel PanelSubjects;
 
         /// <summary>
-        /// txtBookSearch control.
+        /// RepeaterSubjects control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtBookSearch;
+        protected global::System.Web.UI.WebControls.Repeater RepeaterSubjects;
 
         /// <summary>
-        /// Repeater1 control.
+        /// fileUploadResultImage control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater Repeater1;
+        protected global::System.Web.UI.WebControls.FileUpload fileUploadResultImage;
+
+        /// <summary>
+        /// btnSubmitResult control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnSubmitResult;
     }
 }
