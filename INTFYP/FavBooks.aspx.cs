@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using Google.Cloud.Firestore;
 using static INTFYP.Library;
 
@@ -115,6 +116,67 @@ namespace INTFYP
             Repeater1.DataSource = results;
             Repeater1.DataBind();
         }
+
+        protected async void Repeater1_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            if (string.IsNullOrEmpty(CurrentUserId)) return;
+
+            string bookId = e.CommandArgument.ToString();
+            DocumentReference bookRef = db.Collection("books").Document(bookId);
+
+            DocumentSnapshot bookSnap = await bookRef.GetSnapshotAsync();
+            if (!bookSnap.Exists) return;
+
+            var bookData = bookSnap.ToDictionary();
+            var bookUpdates = new Dictionary<string, object>();
+
+            if (e.CommandName == "Favorite")
+            {
+                var favoritedBy = bookData.ContainsKey("FavoritedBy")
+                    ? ((List<object>)bookData["FavoritedBy"]).Select(x => x.ToString()).ToList()
+                    : new List<string>();
+
+                bool isFavorited = favoritedBy.Contains(CurrentUserId);
+
+                if (isFavorited)
+                    favoritedBy.Remove(CurrentUserId);
+                else
+                    favoritedBy.Add(CurrentUserId);
+
+                bookUpdates["FavoritedBy"] = favoritedBy;
+                await bookRef.UpdateAsync(bookUpdates);
+            }
+            else if (e.CommandName == "Recommend")
+            {
+                var recommendedBy = bookData.ContainsKey("RecommendedBy")
+                    ? ((List<object>)bookData["RecommendedBy"]).Select(x => x.ToString()).ToList()
+                    : new List<string>();
+
+                int recommendations = bookData.ContainsKey("Recommendations")
+                    ? Convert.ToInt32(bookData["Recommendations"])
+                    : 0;
+
+                bool isRecommended = recommendedBy.Contains(CurrentUserId);
+
+                if (isRecommended)
+                {
+                    recommendedBy.Remove(CurrentUserId);
+                    recommendations = Math.Max(0, recommendations - 1);
+                }
+                else
+                {
+                    recommendedBy.Add(CurrentUserId);
+                    recommendations += 1;
+                }
+
+                bookUpdates["RecommendedBy"] = recommendedBy;
+                bookUpdates["Recommendations"] = recommendations;
+                await bookRef.UpdateAsync(bookUpdates);
+            }
+
+            await LoadBooks(); // refresh data after update
+        }
+
 
     }
 }

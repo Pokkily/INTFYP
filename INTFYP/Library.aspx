@@ -48,16 +48,16 @@
                                         <span class="badge bg-secondary">#<%# Eval("Category") %></span>
                                         <div class="mt-2 d-flex align-items-center">
                                             <asp:Button ID="btnRecommend" runat="server"
-                                            Text='<%# String.Format("{0} 👍", Eval("Recommendations")) %>'
+                                            Text='<%# String.Format("{0} ❤️", Eval("Recommendations")) %>'
                                             CommandName="Recommend"
                                             CommandArgument='<%# Eval("DocumentId") %>'
-                                            CssClass='<%# (bool)Eval("IsRecommended") ? "btn btn-success btn-sm me-2" : "btn btn-outline-success btn-sm me-2" %>' />
+                                            CssClass='<%# (bool)Eval("IsRecommended") ? "btn btn-lavender btn-sm me-2" : "btn btn-outline-black btn-sm me-2" %>' />
 
                                         <asp:Button ID="btnFavorite" runat="server"
                                             Text="⭐"
                                             CommandName="Favorite"
                                             CommandArgument='<%# Eval("DocumentId") %>'
-                                            CssClass='<%# (bool)Eval("IsFavorited") ? "btn btn-dark btn-sm" : "btn btn-outline-dark btn-sm" %>' />
+                                            CssClass='<%# (bool)Eval("IsFavorited") ? "btn btn-young-sage btn-sm" : "btn btn-outline-black btn-sm" %>' />
                                         </div>
                                     </div>
                                 </div>
@@ -67,4 +67,28 @@
                 </div>
             </div>
         </div>
+        <style>
+            .btn-outline-black {
+                background-color: white;
+                color: black;
+                border: 1px solid black;
+            }
+
+            .btn-outline-black:hover {
+                background-color: black;
+                color: white;
+            }
+
+            .btn-lavender {
+                background-color: #d8b5f0; 
+                color: black;
+                border: 1px solid black;
+            }
+
+            .btn-young-sage {
+                background-color: #9caf88; 
+                color: black;
+                border: 1px solid black;
+            }
+        </style>
     </asp:Content>
