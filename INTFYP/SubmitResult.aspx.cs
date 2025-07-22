@@ -47,7 +47,7 @@ namespace INTFYP
             string userId = Session["userId"] as string;
             if (string.IsNullOrEmpty(userId))
             {
-                Response.Write("<script>alert('User not logged in.');</script>");
+                Response.Write("<script>alert('Upload successful!');</script>");
                 return;
             }
 
@@ -93,11 +93,20 @@ namespace INTFYP
 
             resultData["Timestamp"] = Timestamp.GetCurrentTimestamp();
 
-            // Save to Firebase under logged-in student's account
-            DocumentReference docRef = db.Collection("users").Document(userId).Collection("results").Document();
+            resultData["StudentId"] = userId;
+            resultData["Username"] = Session["username"] as string;
+            resultData["Email"] = Session["email"] as string;
+            resultData["Position"] = Session["position"] as string; // 
+            resultData["Status"] = "Pending";
+            resultData["Timestamp"] = Timestamp.GetCurrentTimestamp();
+
+            DocumentReference docRef = db.Collection("results").Document();
             await docRef.SetAsync(resultData);
 
-            Response.Write("<script>alert('Result submitted successfully.'); window.location='Scholarship.aspx';</script>");
+
+            lblSuccess.Text = "✅ Result submitted successfully!";
+            lblSuccess.CssClass = "alert alert-success d-block"; // Show the success message
+
         }
     }
 }

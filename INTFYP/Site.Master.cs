@@ -21,7 +21,7 @@ namespace YourProjectNamespace
                 SetActiveMenu(lnkFeedback, "feedback.aspx", currentPage);
                 SetActiveMenu(lnkManage, "createclassroom.aspx", currentPage);
 
-                if (Session["position"]?.ToString() == "teacher")
+                if (Session["position"]?.ToString() == "Teacher")
                 {
                     phTeacherMenu.Visible = true;
                 }

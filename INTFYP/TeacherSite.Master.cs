@@ -67,7 +67,14 @@ namespace YourProjectNamespace
                     Description = "Automated grouping",
                     Link = "~/AssignmentGrouping.aspx",
                     IsActive = ""
+                },
+                new TeacherNavItem {
+                    Text = "Result Validation",
+                    Description = "Student Result",
+                    Link = "ScholarshipManagement.aspx",
+                    IsActive = ""
                 }
+
             };
 
             // Set active item
