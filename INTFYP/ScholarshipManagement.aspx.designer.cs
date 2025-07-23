@@ -11,26 +11,17 @@ namespace YourNamespace
 {
 
 
-    public partial class Scholarship
+    public partial class ScholarshipManagement
     {
 
         /// <summary>
-        /// lblSubmittedTime control.
+        /// pnlSubjects control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblSubmittedTime;
-
-        /// <summary>
-        /// lblStatus control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblStatus;
+        protected global::System.Web.UI.WebControls.Panel pnlSubjects;
 
         /// <summary>
         /// rptSubjects control.
@@ -42,6 +33,24 @@ namespace YourNamespace
         protected global::System.Web.UI.WebControls.Repeater rptSubjects;
 
         /// <summary>
+        /// lblSubmissionTime control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblSubmissionTime;
+
+        /// <summary>
+        /// statusBadge control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl statusBadge;
+
+        /// <summary>
         /// btnApplyScholarship control.
         /// </summary>
         /// <remarks>
@@ -49,41 +58,5 @@ namespace YourNamespace
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnApplyScholarship;
-
-        /// <summary>
-        /// btnSubmitResult control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink btnSubmitResult;
-
-        /// <summary>
-        /// txtScholarshipTitle control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtScholarshipTitle;
-
-        /// <summary>
-        /// txtWhy control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtWhy;
-
-        /// <summary>
-        /// fuSupportingDoc control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.FileUpload fuSupportingDoc;
     }
 }

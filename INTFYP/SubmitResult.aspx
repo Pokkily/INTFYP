@@ -15,16 +15,17 @@
 
     <div class="container">
         <div class="card p-4">
+            <asp:Label ID="lblSuccess" runat="server" CssClass="alert alert-success d-none" />
             <asp:Panel ID="PanelSubjects" runat="server">
                 <%-- 15 subject-grade pairs --%>
                 <asp:Repeater ID="RepeaterSubjects" runat="server">
                     <ItemTemplate>
                         <div class="mb-3 row">
                             <div class="col-md-6">
-                                <asp:TextBox ID="txtSubject" runat="server" CssClass="form-control" placeholder='<%# "Subject " + Container.ItemIndex %>'></asp:TextBox>
+                                <asp:TextBox ID="txtSubject" runat="server" CssClass="form-control" placeholder='<%# "Subject " + (Container.ItemIndex + 1) %>'></asp:TextBox>
                             </div>
                             <div class="col-md-6">
-                                <asp:TextBox ID="txtGrade" runat="server" CssClass="form-control" placeholder='<%# "Grade " + Container.ItemIndex %>'></asp:TextBox>
+                                <asp:TextBox ID="txtGrade" runat="server" CssClass="form-control" placeholder='<%# "Grade " + (Container.ItemIndex + 1) %>'></asp:TextBox>
                             </div>
                         </div>
                     </ItemTemplate>
