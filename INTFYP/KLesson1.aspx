@@ -60,4 +60,16 @@
             </div>
         </div>
     </div>
+    <style>
+        .correct-answer {
+            background-color: #d4edda !important;
+            color: #155724 !important;
+            border: 1px solid #c3e6cb;
+        }
+        .wrong-answer {
+            background-color: #f8d7da !important;
+            color: #721c24 !important;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
 </asp:Content>
