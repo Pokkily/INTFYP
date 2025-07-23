@@ -1,11 +1,13 @@
 ﻿using System;
-namespace INTFYP
+using System.Web.UI;
+
+namespace YourNamespace
 {
-    public partial class Learning : System.Web.UI.Page
+    public partial class Learning : Page
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            // No logic yet
+            // Optional logic for page load
         }
     }
 }

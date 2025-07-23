@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace INTFYP
+namespace YourNamespace
 {
 
 
