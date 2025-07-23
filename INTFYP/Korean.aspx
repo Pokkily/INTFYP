@@ -40,7 +40,7 @@
                     <div class="card-body d-flex justify-content-between align-items-center">
                         <div class="ms-2">
                             <h5 class="card-title mb-1">Korean Lesson 1</h5>
-                            <p class="mb-0">Done <i class="bi bi-check-circle-fill text-success"></i></p>
+                            <asp:Literal ID="lesson1StatusLiteral" runat="server" />
                         </div>
                         <a href="Klesson1.aspx" class="btn btn-dark me-2">Start</a>
                     </div>

@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web.UI.WebControls;
+using Google.Cloud.Firestore;
 
 namespace KoreanApp
 {
     public partial class KLesson1 : System.Web.UI.Page
     {
+        FirestoreDb db;
+        static readonly object dbLock = new object();
+
         class Question
         {
             public string Text { get; set; }
@@ -37,8 +41,15 @@ namespace KoreanApp
             set => ViewState["CurrentQuestionIndex"] = value;
         }
 
+        int correctCount
+        {
+            get => ViewState["CorrectCount"] != null ? (int)ViewState["CorrectCount"] : 0;
+            set => ViewState["CorrectCount"] = value;
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
+            InitializeFirestore();
             if (!IsPostBack)
             {
                 quizPanel.Visible = false;
@@ -50,9 +61,25 @@ namespace KoreanApp
             startScreen.Visible = false;
             quizPanel.Visible = true;
             currentQuestionIndex = 0;
+            correctCount = 0;
             ShowQuestion();
         }
 
+        private void InitializeFirestore()
+        {
+            if (db == null)
+            {
+                lock (dbLock)
+                {
+                    if (db == null)
+                    {
+                        string path = Server.MapPath("~/serviceAccountKey.json");
+                        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
+                        db = FirestoreDb.Create("intorannetto");
+                    }
+                }
+            }
+        }
 
         private void ShowQuestion()
         {
@@ -60,14 +87,12 @@ namespace KoreanApp
             lblQuestion.Text = q.Text;
             lblFeedback.Text = "";
 
-            // Media visibility
             imgQuestion.Visible = !string.IsNullOrEmpty(q.ImagePath);
             imgQuestion.ImageUrl = q.ImagePath ?? "";
 
             audioQuestion.Visible = !string.IsNullOrEmpty(q.AudioPath);
             audioSource.Src = q.AudioPath ?? "";
 
-            // Shuffle options
             string[] shuffled = ShuffleArray((string[])q.Options.Clone());
 
             if (q.IsImageOption)
@@ -82,7 +107,6 @@ namespace KoreanApp
                     { "주스", "juice.png" }
                 };
 
-                // Set shuffled image buttons
                 img1.Src = "/LanguageLearning/KLesson1/image/" + wordToImage[shuffled[0]];
                 lblImgText1.Text = shuffled[0];
                 imgOption1.CommandArgument = shuffled[0];
@@ -109,24 +133,11 @@ namespace KoreanApp
                 btnOption3.CommandArgument = shuffled[2];
             }
 
-            // RESET state for text buttons
-            btnOption1.Enabled = true;
-            btnOption2.Enabled = true;
-            btnOption3.Enabled = true;
+            btnOption1.Enabled = btnOption2.Enabled = btnOption3.Enabled = true;
+            btnOption1.CssClass = btnOption2.CssClass = btnOption3.CssClass = "btn btn-outline-primary me-2 mb-2";
 
-            btnOption1.CssClass = "btn btn-outline-primary me-2 mb-2";
-            btnOption2.CssClass = "btn btn-outline-primary me-2 mb-2";
-            btnOption3.CssClass = "btn btn-outline-primary me-2 mb-2";
-
-            // RESET state for image option buttons
-            imgOption1.Enabled = true;
-            imgOption2.Enabled = true;
-            imgOption3.Enabled = true;
-
-            imgOption1.CssClass = "";
-            imgOption2.CssClass = "";
-            imgOption3.CssClass = "";
-
+            imgOption1.Enabled = imgOption2.Enabled = imgOption3.Enabled = true;
+            imgOption1.CssClass = imgOption2.CssClass = imgOption3.CssClass = "";
 
             btnNext.Visible = false;
         }
@@ -162,14 +173,14 @@ namespace KoreanApp
             bool isCorrect = selected == q.Answer;
 
             lblFeedback.Text = isCorrect ? "✅ Correct!" : $"❌ Wrong! Correct answer: {q.Answer}";
+            if (isCorrect) correctCount++;
+
             btnNext.Visible = true;
 
             if (q.IsImageOption)
             {
-                // Disable image options
                 imgOption1.Enabled = imgOption2.Enabled = imgOption3.Enabled = false;
 
-                // Highlight correct/incorrect
                 if (imgOption1.CommandArgument == selected)
                     imgOption1.CssClass += (isCorrect ? " correct-answer" : " wrong-answer");
                 if (imgOption2.CommandArgument == selected)
@@ -179,10 +190,8 @@ namespace KoreanApp
             }
             else
             {
-                // Disable text options
                 btnOption1.Enabled = btnOption2.Enabled = btnOption3.Enabled = false;
 
-                // Highlight buttons
                 if (btnOption1.CommandArgument == selected)
                     btnOption1.CssClass += (isCorrect ? " correct-answer" : " wrong-answer");
                 if (btnOption2.CommandArgument == selected)
@@ -192,19 +201,39 @@ namespace KoreanApp
             }
         }
 
-
-        protected void btnNext_Click(object sender, EventArgs e)
+        protected async void btnNext_Click(object sender, EventArgs e)
         {
             currentQuestionIndex++;
             if (currentQuestionIndex >= questions.Count)
             {
-                lblQuestion.Text = "🎉 Lesson Complete!";
+                string userId = Session["userId"]?.ToString();
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    DocumentReference userDoc = db.Collection("users").Document(userId);
+                    CollectionReference resultCol = userDoc.Collection("KLesson1_Results");
+
+                    double percentage = ((double)correctCount / questions.Count) * 100;
+                    string status = $"{Math.Round(percentage)}%";
+
+                    Dictionary<string, object> resultData = new Dictionary<string, object>
+            {
+                { "score", correctCount },
+                { "total", questions.Count },
+                { "status", status },
+                { "timestamp", Timestamp.GetCurrentTimestamp() }
+            };
+
+                    await resultCol.AddAsync(resultData);
+                }
+
+                lblQuestion.Text = $"🎉 Lesson Complete!<br/>You got {correctCount} out of {questions.Count} correct!";
+
                 imageOptions.Visible = textOptions.Visible = false;
                 imgQuestion.Visible = audioQuestion.Visible = false;
                 btnNext.Visible = false;
+                lblFeedback.Visible = false;
 
-                // Add client-side script to redirect after 2.5 seconds (2500 ms)
-                string script = "<script>setTimeout(function() { window.location.href = 'Korean.aspx'; }, 2500);</script>";
+                string script = "<script>setTimeout(function() { window.location.href = 'Korean.aspx'; }, 3500);</script>";
                 ClientScript.RegisterStartupScript(this.GetType(), "RedirectAfterDelay", script);
             }
             else
@@ -212,5 +241,6 @@ namespace KoreanApp
                 ShowQuestion();
             }
         }
+
     }
 }

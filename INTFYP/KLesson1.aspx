@@ -1,4 +1,4 @@
-﻿<%@ Page Title="Korean Lesson 1" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeBehind="KLesson1.aspx.cs" Inherits="KoreanApp.KLesson1" %>
+﻿<%@ Page Async="true" Title="Korean Lesson 1" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeBehind="KLesson1.aspx.cs" Inherits="KoreanApp.KLesson1" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
     Korean Lesson 1
