@@ -37,9 +37,8 @@ namespace YourProjectNamespace
             foreach (DocumentSnapshot doc in snapshot.Documents)
             {
                 var data = doc.ToDictionary();
-                data["DocId"] = doc.Id; // Needed for commands
+                data["DocId"] = doc.Id;
 
-                // Build HTML for all subject-grade pairs
                 string subjectsHtml = "";
                 for (int i = 1; i <= 15; i++)
                 {
@@ -62,7 +61,10 @@ namespace YourProjectNamespace
                 resultList.Add(data);
             }
 
+            rptResults.DataSource = resultList;
+            rptResults.DataBind();
         }
+
 
         protected async void ResultCommand(object sender, CommandEventArgs e)
         {
@@ -73,12 +75,7 @@ namespace YourProjectNamespace
 
             await docRef.UpdateAsync("Status", status);
 
-            LoadResultCards(); // Refresh the cards
-        }
-
-        protected void btnSave_Click(object sender, EventArgs e)
-        {
-            // Your scholarship save logic here
+            LoadResultCards();
         }
     }
 }
