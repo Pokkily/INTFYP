@@ -48,7 +48,6 @@ namespace INTFYP
                 lblStatus.Text = $"✅ Scholarship saved successfully!";
                 lblStatus.ForeColor = System.Drawing.Color.Green;
 
-                // Clear form
                 txtTitle.Text = "";
                 txtRequirement.Text = "";
                 txtTerms.Text = "";

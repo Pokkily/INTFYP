@@ -22,5 +22,12 @@ namespace INTFYP
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.HtmlControls.HtmlForm form1;
+        protected global::System.Web.UI.WebControls.TextBox txtTitle;
+        protected global::System.Web.UI.WebControls.TextBox txtRequirement;
+        protected global::System.Web.UI.WebControls.TextBox txtTerms;
+        protected global::System.Web.UI.WebControls.TextBox txtCourses;
+        protected global::System.Web.UI.WebControls.TextBox txtLink;
+        protected global::System.Web.UI.WebControls.Label lblStatus;
+        protected global::System.Web.UI.WebControls.Button btnSubmit;
     }
 }
