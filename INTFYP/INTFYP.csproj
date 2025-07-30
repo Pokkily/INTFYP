@@ -288,6 +288,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AddBook.aspx" />
+    <Content Include="AddScholarship.aspx" />
     <Content Include="CitationGenerator.aspx" />
     <Content Include="Class.aspx" />
     <Content Include="ClassDetails.aspx" />
@@ -314,7 +315,6 @@
     <Content Include="CreateQuiz.aspx" />
     <Content Include="CreateStudyGroup.aspx" />
     <Content Include="Default.aspx" />
-    <Content Include="EditBook.aspx" />
     <Content Include="FavBooks.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="GeminiAi.aspx" />
@@ -449,6 +449,13 @@
     <Compile Include="AddBook.aspx.designer.cs">
       <DependentUpon>AddBook.aspx</DependentUpon>
     </Compile>
+    <Compile Include="AddScholarship.aspx.cs">
+      <DependentUpon>AddScholarship.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AddScholarship.aspx.designer.cs">
+      <DependentUpon>AddScholarship.aspx</DependentUpon>
+    </Compile>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="CitationGenerator.aspx.cs">
@@ -464,13 +471,6 @@
     </Compile>
     <Compile Include="Class.aspx.designer.cs">
       <DependentUpon>Class.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="EditBook.aspx.cs">
-      <DependentUpon>EditBook.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="EditBook.aspx.designer.cs">
-      <DependentUpon>EditBook.aspx</DependentUpon>
     </Compile>
     <Compile Include="GeminiAi.aspx.cs">
       <DependentUpon>GeminiAi.aspx</DependentUpon>

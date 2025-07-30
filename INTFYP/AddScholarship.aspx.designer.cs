@@ -7,56 +7,47 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace YourNamespace
+namespace INTFYP
 {
 
 
-    public partial class Scholarship
+    public partial class AddScholarship
     {
 
         /// <summary>
-        /// lblSubmittedTime control.
+        /// form1 control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblSubmittedTime;
+        protected global::System.Web.UI.HtmlControls.HtmlForm form1;
 
         /// <summary>
-        /// lblStatus control.
+        /// txtScholarshipTitle control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblStatus;
+        protected global::System.Web.UI.WebControls.TextBox txtScholarshipTitle;
 
         /// <summary>
-        /// rptSubjects control.
+        /// txtWhy control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptSubjects;
+        protected global::System.Web.UI.WebControls.TextBox txtWhy;
 
         /// <summary>
-        /// btnApplyScholarship control.
+        /// fuSupportingDoc control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnApplyScholarship;
-
-        /// <summary>
-        /// btnSubmitResult control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink btnSubmitResult;
+        protected global::System.Web.UI.WebControls.FileUpload fuSupportingDoc;
     }
 }
