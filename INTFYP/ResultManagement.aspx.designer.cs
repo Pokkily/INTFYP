@@ -11,7 +11,7 @@ namespace YourProjectNamespace
 {
 
 
-    public partial class ScholarshipManagement
+    public partial class ResultManagement
     {
 
         /// <summary>

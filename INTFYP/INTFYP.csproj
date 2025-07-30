@@ -338,7 +338,7 @@
     <Content Include="Register.aspx" />
     <Content Include="ResultValidation.aspx" />
     <Content Include="Scholarship.aspx" />
-    <Content Include="ScholarshipManagement.aspx" />
+    <Content Include="ResultManagement.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -624,12 +624,12 @@
     <Compile Include="Scholarship.aspx.designer.cs">
       <DependentUpon>Scholarship.aspx</DependentUpon>
     </Compile>
-    <Compile Include="ScholarshipManagement.aspx.cs">
-      <DependentUpon>ScholarshipManagement.aspx</DependentUpon>
+    <Compile Include="ResultManagement.aspx.cs">
+      <DependentUpon>ResultManagement.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="ScholarshipManagement.aspx.designer.cs">
-      <DependentUpon>ScholarshipManagement.aspx</DependentUpon>
+    <Compile Include="ResultManagement.aspx.designer.cs">
+      <DependentUpon>ResultManagement.aspx</DependentUpon>
     </Compile>
     <Compile Include="Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>

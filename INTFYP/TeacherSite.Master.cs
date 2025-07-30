@@ -83,7 +83,7 @@ namespace YourProjectNamespace
                 new TeacherNavItem {
                     Text = "Result Validation",
                     Description = "Student Result",
-                    Link = "ScholarshipManagement.aspx",
+                    Link = "ResultManagement.aspx",
                     IsActive = ""
                 }
 

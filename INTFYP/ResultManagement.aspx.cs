@@ -5,7 +5,7 @@ using Google.Cloud.Firestore;
 
 namespace YourProjectNamespace
 {
-    public partial class ScholarshipManagement : System.Web.UI.Page
+    public partial class ResultManagement : System.Web.UI.Page
     {
         private static FirestoreDb db;
 

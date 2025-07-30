@@ -1,4 +1,4 @@
-﻿<%@ Page Async="true" Title="Scholarship Management" Language="C#" MasterPageFile="~/TeacherSite.master" AutoEventWireup="true" CodeBehind="ScholarshipManagement.aspx.cs" Inherits="YourProjectNamespace.ScholarshipManagement" %>
+﻿<%@ Page Async="true" Title="Result Management" Language="C#" MasterPageFile="~/TeacherSite.master" AutoEventWireup="true" CodeBehind="ResultManagement.aspx.cs" Inherits="YourProjectNamespace.ResultManagement" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TeacherMainContent" runat="server">
 
