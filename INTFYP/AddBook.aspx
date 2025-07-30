@@ -1,4 +1,4 @@
-﻿<%@ Page Title="Add Book" Language="C#" MasterPageFile="~/TeacherSite.master" Async="true" AutoEventWireup="true" CodeFile="AddBook.aspx.cs" Inherits="INTFYP.AddBook" %>
+﻿<%@ Page Async="true" Title="Add Book" Language="C#" MasterPageFile="~/TeacherSite.master" Async="true" AutoEventWireup="true" CodeFile="AddBook.aspx.cs" Inherits="INTFYP.AddBook" %>
 
 <asp:Content ID="AddBookContent" ContentPlaceHolderID="TeacherMainContent" runat="server">
 
