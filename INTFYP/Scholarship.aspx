@@ -13,43 +13,61 @@
         </div>
     </section>
 
+    <!-- Left: Student Result | Right: Scholarships -->
     <div class="container mb-5">
         <div class="row g-4">
-            <!-- LEFT: Submitted Result -->
-            <div class="col-md-6">
-                <div class="card p-4 shadow-sm mb-3">
-                    <h5 class="fw-bold mb-3">Your Submitted Result</h5>
 
-                    <div class="mb-2">
-                        <strong>Submitted On:</strong>
-                        <asp:Label ID="lblSubmittedTime" runat="server" Text="-" />
+            <!-- LEFT SIDEBAR -->
+            <div class="col-md-3">
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-header bg-white fw-bold">Your Submitted Result</div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <strong>Submitted On:</strong><br />
+                            <asp:Label ID="lblSubmittedTime" runat="server" Text="-" />
+                        </div>
+                        <div class="mb-3">
+                            <strong>Status:</strong><br />
+                            <asp:Label ID="lblStatus" runat="server" Text="Pending" CssClass="badge bg-warning text-dark" />
+                        </div>
+
+                        <h6 class="fw-bold">Subjects & Grades:</h6>
+                        <asp:Repeater ID="rptSubjects" runat="server">
+                            <ItemTemplate>
+                                <div class="d-flex justify-content-between border-bottom py-1">
+                                    <span><%# Eval("Subject") %></span>
+                                    <span class="fw-bold text-primary"><%# Eval("Grade") %></span>
+                                </div>
+                            </ItemTemplate>
+                        </asp:Repeater>
                     </div>
-
-                    <div class="mb-3">
-                        <strong>Status:</strong>
-                        <asp:Label ID="lblStatus" runat="server" Text="Pending" CssClass="badge bg-warning text-dark" />
+                    <div class="card-footer bg-white">
+                        <asp:HyperLink ID="btnSubmitResult" runat="server" NavigateUrl="~/SubmitResult.aspx" CssClass="btn btn-outline-secondary w-100 py-2 fw-bold">
+                            Submit Result
+                        </asp:HyperLink>
                     </div>
-
-                    <hr />
-                    <h6 class="fw-bold mb-2">Subjects & Grades:</h6>
-
-                    <asp:Repeater ID="rptSubjects" runat="server">
-                        <ItemTemplate>
-                            <div class="d-flex justify-content-between border-bottom py-2">
-                                <span><%# Eval("Subject") %></span>
-                                <span class="fw-bold text-primary"><%# Eval("Grade") %></span>
-                            </div>
-                        </ItemTemplate>
-                    </asp:Repeater>
                 </div>
+            </div>
 
-                <!-- Submit Result and Apply Buttons (LEFT SIDE) -->
-                <asp:Button ID="btnApplyScholarship" runat="server" CssClass="btn btn-success w-100 py-2 fw-bold mb-2" Text="Submit Application" />
+            <!-- RIGHT SIDE: Scholarships -->
+            <div class="col-md-9">
+                <h3 class="fw-bold mb-3">Available Scholarships</h3>
 
-                <asp:HyperLink ID="btnSubmitResult" runat="server" NavigateUrl="~/SubmitResult.aspx" CssClass="btn btn-outline-secondary w-100 py-2 fw-bold">
-                    Submit Result
-                </asp:HyperLink>
-            </div>           
+                <asp:Repeater ID="rptScholarships" runat="server">
+                    <ItemTemplate>
+                        <div class="card mb-4 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title"><%# Eval("Title") %></h5>
+                                <p><strong>Requirements:</strong> <%# Eval("Requirement") %></p>
+                                <p><strong>Terms:</strong> <%# Eval("Terms") %></p>
+                                <p><strong>Courses:</strong> <%# Eval("Courses") %></p>
+                                <a href='<%# Eval("Link") %>' target="_blank" class="btn btn-outline-primary">View Scholarship</a>
+                            </div>
+                        </div>
+                    </ItemTemplate>
+                </asp:Repeater>
+            </div>
+
         </div>
     </div>
 </asp:Content>

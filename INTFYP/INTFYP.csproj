@@ -288,7 +288,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AddBook.aspx" />
-    <Content Include="AddScholarship.aspx" />
     <Content Include="CitationGenerator.aspx" />
     <Content Include="Class.aspx" />
     <Content Include="ClassDetails.aspx" />
@@ -448,13 +447,6 @@
     </Compile>
     <Compile Include="AddBook.aspx.designer.cs">
       <DependentUpon>AddBook.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="AddScholarship.aspx.cs">
-      <DependentUpon>AddScholarship.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="AddScholarship.aspx.designer.cs">
-      <DependentUpon>AddScholarship.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />

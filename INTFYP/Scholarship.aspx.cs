@@ -18,6 +18,7 @@ namespace YourNamespace
             if (!IsPostBack)
             {
                 LoadStudentResult();
+                LoadScholarships(); // Load scholarships from Firestore
             }
         }
 
@@ -56,7 +57,6 @@ namespace YourNamespace
 
                 if (status == "Verified")
                 {
-                    // Show subject grades only if Verified
                     List<SubjectGrade> subjectGrades = new List<SubjectGrade>();
                     for (int i = 1; i <= 15; i++)
                     {
@@ -72,18 +72,53 @@ namespace YourNamespace
 
                     rptSubjects.DataSource = subjectGrades;
                     rptSubjects.DataBind();
-                    rptSubjects.Visible = true; // Make sure it's visible
+                    rptSubjects.Visible = true;
                 }
                 else
                 {
-                    rptSubjects.Visible = false; // Hide the subject list for Pending/Rejected
+                    rptSubjects.Visible = false;
                 }
             }
             else
             {
                 lblSubmittedTime.Text = "-";
                 lblStatus.Text = "No Submission Found";
-                rptSubjects.Visible = false; // Hide in case of no data
+                rptSubjects.Visible = false;
+            }
+        }
+
+        private async void LoadScholarships()
+        {
+            try
+            {
+                CollectionReference scholarshipsRef = db.Collection("scholarships");
+                QuerySnapshot snapshot = await scholarshipsRef.GetSnapshotAsync();
+
+                List<ScholarshipItem> scholarshipList = new List<ScholarshipItem>();
+
+                foreach (DocumentSnapshot doc in snapshot.Documents)
+                {
+                    Dictionary<string, object> data = doc.ToDictionary();
+
+                    scholarshipList.Add(new ScholarshipItem
+                    {
+                        Title = data.ContainsKey("Title") ? data["Title"].ToString() : "",
+                        Requirement = data.ContainsKey("Requirement") ? data["Requirement"].ToString() : "",
+                        Terms = data.ContainsKey("Terms") ? data["Terms"].ToString() : "",
+                        Courses = data.ContainsKey("Courses") ? data["Courses"].ToString() : "",
+                        Link = data.ContainsKey("Link") ? data["Link"].ToString() : "#"
+                    });
+                }
+
+                rptScholarships.DataSource = scholarshipList;
+                rptScholarships.DataBind();
+
+                // Debug
+                Console.WriteLine("Scholarships loaded: " + scholarshipList.Count);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error loading scholarships: " + ex.Message);
             }
         }
 
@@ -92,6 +127,15 @@ namespace YourNamespace
         {
             public string Subject { get; set; }
             public string Grade { get; set; }
+        }
+
+        public class ScholarshipItem
+        {
+            public string Title { get; set; }
+            public string Requirement { get; set; }
+            public string Terms { get; set; }
+            public string Courses { get; set; }
+            public string Link { get; set; }
         }
     }
 }
