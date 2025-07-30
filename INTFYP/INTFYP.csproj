@@ -314,6 +314,7 @@
     <Content Include="CreateQuiz.aspx" />
     <Content Include="CreateStudyGroup.aspx" />
     <Content Include="Default.aspx" />
+    <Content Include="EditBook.aspx" />
     <Content Include="FavBooks.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="GeminiAi.aspx" />
@@ -463,6 +464,13 @@
     </Compile>
     <Compile Include="Class.aspx.designer.cs">
       <DependentUpon>Class.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="EditBook.aspx.cs">
+      <DependentUpon>EditBook.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="EditBook.aspx.designer.cs">
+      <DependentUpon>EditBook.aspx</DependentUpon>
     </Compile>
     <Compile Include="GeminiAi.aspx.cs">
       <DependentUpon>GeminiAi.aspx</DependentUpon>

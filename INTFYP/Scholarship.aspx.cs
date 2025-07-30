@@ -47,36 +47,46 @@ namespace YourNamespace
 
             if (snapshot.Count > 0)
             {
-                // Assume latest submission
                 DocumentSnapshot doc = snapshot.Documents.OrderByDescending(d => d.CreateTime).First();
                 Dictionary<string, object> data = doc.ToDictionary();
 
                 lblSubmittedTime.Text = doc.CreateTime?.ToDateTime().ToString("yyyy-MM-dd HH:mm") ?? "-";
-                lblStatus.Text = data.ContainsKey("Status") ? data["Status"].ToString() : "Unknown";
+                string status = data.ContainsKey("Status") ? data["Status"].ToString() : "Unknown";
+                lblStatus.Text = status;
 
-                // Extract subjects and grades
-                List<SubjectGrade> subjectGrades = new List<SubjectGrade>();
-                for (int i = 1; i <= 15; i++)
+                if (status == "Verified")
                 {
-                    if (data.ContainsKey($"Subject{i}") && data.ContainsKey($"Grade{i}"))
+                    // Show subject grades only if Verified
+                    List<SubjectGrade> subjectGrades = new List<SubjectGrade>();
+                    for (int i = 1; i <= 15; i++)
                     {
-                        subjectGrades.Add(new SubjectGrade
+                        if (data.ContainsKey($"Subject{i}") && data.ContainsKey($"Grade{i}"))
                         {
-                            Subject = data[$"Subject{i}"].ToString(),
-                            Grade = data[$"Grade{i}"].ToString()
-                        });
+                            subjectGrades.Add(new SubjectGrade
+                            {
+                                Subject = data[$"Subject{i}"].ToString(),
+                                Grade = data[$"Grade{i}"].ToString()
+                            });
+                        }
                     }
-                }
 
-                rptSubjects.DataSource = subjectGrades;
-                rptSubjects.DataBind();
+                    rptSubjects.DataSource = subjectGrades;
+                    rptSubjects.DataBind();
+                    rptSubjects.Visible = true; // Make sure it's visible
+                }
+                else
+                {
+                    rptSubjects.Visible = false; // Hide the subject list for Pending/Rejected
+                }
             }
             else
             {
                 lblSubmittedTime.Text = "-";
                 lblStatus.Text = "No Submission Found";
+                rptSubjects.Visible = false; // Hide in case of no data
             }
         }
+
 
         public class SubjectGrade
         {
