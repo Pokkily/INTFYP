@@ -105,7 +105,7 @@ namespace YourProjectNamespace
                     createdAt = Timestamp.GetCurrentTimestamp()
                 };
 
-                await db.Collection("feedback").AddAsync(feedback);
+                await db.Collection("feedbacks").AddAsync(feedback);
 
                 lblMessage.CssClass = "text-success";
                 lblMessage.Text = "Feedback submitted successfully!";
