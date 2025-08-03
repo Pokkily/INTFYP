@@ -51,7 +51,7 @@
 
             <!-- RIGHT SIDE: Scholarships -->
             <div class="col-md-9">
-                <h3 class="fw-bold mb-3">Available Scholarships</h3>
+                <h3 class="fw-bold mb-3">Scholarships</h3>
 
                 <asp:Repeater ID="rptScholarships" runat="server">
                     <ItemTemplate>
