@@ -58,9 +58,19 @@
                         <div class="card mb-4 shadow-sm">
                             <div class="card-body">
                                 <h5 class="card-title"><%# Eval("Title") %></h5>
-                                <p><strong>Requirements:</strong> <%# Eval("Requirement") %></p>
-                                <p><strong>Terms:</strong> <%# Eval("Terms") %></p>
-                                <p><strong>Courses:</strong> <%# Eval("Courses") %></p>
+
+                                <p><strong>Requirements:</strong><br />
+                                    <asp:Literal ID="litRequirement" runat="server" Text='<%# Eval("Requirement").ToString().Replace("\n", "<br/>") %>' />
+                                </p>
+
+                                <p><strong>Terms:</strong><br />
+                                    <asp:Literal ID="litTerms" runat="server" Text='<%# Eval("Terms").ToString().Replace("\n", "<br/>") %>' />
+                                </p>
+
+                                <p><strong>Courses:</strong><br />
+                                    <asp:Literal ID="litCourses" runat="server" Text='<%# Eval("Courses").ToString().Replace("\n", "<br/>") %>' />
+                                </p>
+
                                 <a href='<%# Eval("Link") %>' target="_blank" class="btn btn-outline-primary">View Scholarship</a>
                             </div>
                         </div>

@@ -30,8 +30,8 @@
         .form-control {
             border-radius: 4px;
             border: 1px solid #e0e0e0;
-            padding: 10px 12px;
-            font-size: 14px;
+            padding: 12px 14px;
+            font-size: 15px;
         }
 
         .form-control:focus {
@@ -71,17 +71,17 @@
 
             <div class="col-md-12">
                 <label class="form-label">📄 Requirement</label>
-                <asp:TextBox ID="txtRequirement" runat="server" TextMode="MultiLine" Rows="3" CssClass="form-control" placeholder="Enter requirements" />
+                <asp:TextBox ID="txtRequirement" runat="server" TextMode="MultiLine" Rows="8" CssClass="form-control" placeholder="Enter requirements" />
             </div>
 
             <div class="col-md-12">
                 <label class="form-label">📜 Terms & Conditions</label>
-                <asp:TextBox ID="txtTerms" runat="server" TextMode="MultiLine" Rows="3" CssClass="form-control" placeholder="Enter terms & conditions" />
+                <asp:TextBox ID="txtTerms" runat="server" TextMode="MultiLine" Rows="8" CssClass="form-control" placeholder="Enter terms & conditions" />
             </div>
 
             <div class="col-md-12">
                 <label class="form-label">🎓 Study Courses</label>
-                <asp:TextBox ID="txtCourses" runat="server" TextMode="MultiLine" Rows="2" CssClass="form-control" placeholder="List of eligible study courses" />
+                <asp:TextBox ID="txtCourses" runat="server" TextMode="MultiLine" Rows="6" CssClass="form-control" placeholder="List of eligible study courses" />
             </div>
 
             <div class="col-md-12">
