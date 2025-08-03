@@ -25,13 +25,6 @@
                         <li class="list-group-item d-flex justify-content-between small">Japanese <span>87%</span></li>
                     </ul>
                 </div>
-
-                <!-- Question Button -->
-                <div class="d-grid mt-3 ms-2">
-                    <button class="btn btn-outline-dark" type="button">
-                        <i class="bi bi-question-circle"></i> Question
-                    </button>
-                </div>
             </div>
 
             <!-- Right Content: Korean Lessons -->
