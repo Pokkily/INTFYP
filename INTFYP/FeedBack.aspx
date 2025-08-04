@@ -28,15 +28,66 @@
                     <p><strong>Birthdate:</strong> <asp:Label ID="lblBirthdate" runat="server" /></p>
                     <p><strong>Position:</strong> <asp:Label ID="lblPosition" runat="server" /></p>
                     <p><strong>Address:</strong> <asp:Label ID="lblAddress" runat="server" /></p>
+
+                    <!-- Trigger Modal -->
+                    <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#feedbackModal">
+                        Submit Feedback
+                    </button>
                 </div>
             </div>
 
-            <!-- RIGHT: Feedback Form -->
+            <!-- RIGHT: Feedback Posts -->
             <div class="col-md-8">
-                <div class="card p-4 shadow-sm">
-                    <h5 class="fw-bold mb-3">Submit Feedback</h5>
+                <asp:Repeater ID="rptFeedback" runat="server" OnItemCommand="rptFeedback_ItemCommand">
+                    <HeaderTemplate>
+                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <div class="col">
+                            <div class="card h-100 shadow-sm p-3">
+                                <h6 class="fw-bold"><%# Eval("Username") %></h6>
+                                <p><%# Eval("Description") %></p>
 
-                    <asp:Label ID="lblMessage" runat="server" Visible="false" />
+                                <div class="mb-2">
+                                    <%# GetMediaHtml(Eval("MediaUrl")?.ToString()) %>
+                                </div>
+
+                                <hr class="my-2" />
+
+                                <div class="d-flex justify-content-between">
+                                    <asp:Button ID="btnLike" runat="server"
+                                        Text='<%# String.Format("👍 {0}", Eval("Likes")) %>'
+                                        CommandName="Like"
+                                        CommandArgument='<%# Eval("PostId") %>'
+                                        CssClass="btn btn-sm btn-outline-primary" />
+
+                                    <asp:Button ID="btnComment" runat="server"
+                                        Text="💬 Comment"
+                                        CommandName="Comment"
+                                        CommandArgument='<%# Eval("PostId") %>'
+                                        CssClass="btn btn-sm btn-outline-secondary" />
+                                </div>
+                            </div>
+                        </div>
+                    </ItemTemplate>
+                    <FooterTemplate>
+                        </div>
+                    </FooterTemplate>
+                </asp:Repeater>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Modal for Submit Feedback -->
+    <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="feedbackModalLabel">Submit Feedback</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <asp:Label ID="lblMessage" runat="server" Visible="false" CssClass="text-danger" />
 
                     <div class="mb-3">
                         <label class="form-label">Username</label>
@@ -52,12 +103,11 @@
                         <label for="fileUpload" class="form-label">Upload Image/Video (optional)</label>
                         <asp:FileUpload ID="fileUpload" runat="server" CssClass="form-control" />
                     </div>
-
-                    <asp:Button ID="btnSubmit" runat="server" CssClass="btn btn-primary" Text="Submit Feedback" OnClick="btnSubmit_Click" />
                 </div>
-
-                <!-- Feedback Posts -->
-                <div class="mt-5" id="feedbackPosts" runat="server"></div>
+                <div class="modal-footer">
+                    <asp:Button ID="btnSubmit" runat="server" CssClass="btn btn-primary" Text="Submit Feedback" OnClick="btnSubmit_Click" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
             </div>
         </div>
     </div>

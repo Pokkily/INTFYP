@@ -1,12 +1,13 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Google.Cloud.Firestore;
-using Grpc.Core;
 
 namespace YourProjectNamespace
 {
@@ -50,7 +51,6 @@ namespace YourProjectNamespace
             if (snapshot.Exists)
             {
                 var data = snapshot.ToDictionary();
-
                 lblName.Text = $"{data.GetValueOrDefault("firstName", "")} {data.GetValueOrDefault("lastName", "")}";
                 lblUsername.Text = data.GetValueOrDefault("username", "").ToString();
                 lblEmail.Text = data.GetValueOrDefault("email", "").ToString();
@@ -65,124 +65,124 @@ namespace YourProjectNamespace
 
         protected async void btnSubmit_Click(object sender, EventArgs e)
         {
-            try
-            {
-                string userId = Session["userId"]?.ToString();
-                if (string.IsNullOrEmpty(userId))
-                {
-                    lblMessage.CssClass = "text-danger";
-                    lblMessage.Text = "Please login to submit feedback.";
-                    return;
-                }
+            lblMessage.Visible = true;
 
-                string description = txtDescription.Text.Trim();
-                if (string.IsNullOrWhiteSpace(description))
-                {
-                    lblMessage.CssClass = "text-danger";
-                    lblMessage.Text = "Please enter feedback description.";
-                    return;
-                }
-
-                string mediaUrl = null;
-
-                if (fileUpload.HasFile)
-                {
-                    var account = new Account(
-                        System.Configuration.ConfigurationManager.AppSettings["CloudinaryCloudName"],
-                        System.Configuration.ConfigurationManager.AppSettings["CloudinaryApiKey"],
-                        System.Configuration.ConfigurationManager.AppSettings["CloudinaryApiSecret"]
-                    );
-
-                    var cloudinary = new Cloudinary(account);
-
-                    using (var stream = fileUpload.PostedFile.InputStream)
-                    {
-                        string ext = Path.GetExtension(fileUpload.FileName).ToLower();
-
-                        if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".gif")
-                        {
-                            var uploadParams = new ImageUploadParams
-                            {
-                                File = new FileDescription(fileUpload.FileName, stream),
-                                Folder = "feedback_images"
-                            };
-                            var uploadResult = cloudinary.Upload(uploadParams);
-                            mediaUrl = uploadResult.SecureUrl?.ToString();
-                        }
-                        else if (ext == ".mp4" || ext == ".mov" || ext == ".avi" || ext == ".webm")
-                        {
-                            var uploadParams = new VideoUploadParams
-                            {
-                                File = new FileDescription(fileUpload.FileName, stream),
-                                Folder = "feedback_videos"
-                            };
-                            var uploadResult = cloudinary.Upload(uploadParams);
-                            mediaUrl = uploadResult.SecureUrl?.ToString();
-                        }
-                    }
-                }
-
-                var feedback = new
-                {
-                    userId,
-                    username = Session["username"]?.ToString(),
-                    email = Session["email"]?.ToString(),
-                    description,
-                    mediaUrl,
-                    likes = new string[] { },
-                    comments = new object[] { },
-                    createdAt = Timestamp.GetCurrentTimestamp()
-                };
-
-                await db.Collection("feedbacks").AddAsync(feedback);
-
-                lblMessage.CssClass = "text-success";
-                lblMessage.Text = "Feedback submitted successfully!";
-                txtDescription.Text = "";
-
-                await LoadAllFeedbacks();
-            }
-            catch (Exception ex)
+            string userId = Session["userId"]?.ToString();
+            if (string.IsNullOrEmpty(userId))
             {
                 lblMessage.CssClass = "text-danger";
-                lblMessage.Text = "Error: " + ex.Message;
+                lblMessage.Text = "Please login to submit feedback.";
+                return;
             }
+
+            string description = txtDescription.Text.Trim();
+            if (string.IsNullOrWhiteSpace(description))
+            {
+                lblMessage.CssClass = "text-danger";
+                lblMessage.Text = "Please enter feedback description.";
+                return;
+            }
+
+            string mediaUrl = await UploadFileIfAny();
+
+            var feedback = new
+            {
+                userId,
+                username = Session["username"]?.ToString(),
+                email = Session["email"]?.ToString(),
+                description,
+                mediaUrl,
+                likes = new string[] { },
+                comments = new object[] { },
+                createdAt = Timestamp.GetCurrentTimestamp()
+            };
+
+            await db.Collection("feedbacks").AddAsync(feedback);
+
+            lblMessage.CssClass = "text-success";
+            lblMessage.Text = "Feedback submitted successfully!";
+            txtDescription.Text = "";
+
+            await LoadAllFeedbacks();
+        }
+
+        private async Task<string> UploadFileIfAny()
+        {
+            if (!fileUpload.HasFile) return null;
+
+            var account = new Account(
+                System.Configuration.ConfigurationManager.AppSettings["CloudinaryCloudName"],
+                System.Configuration.ConfigurationManager.AppSettings["CloudinaryApiKey"],
+                System.Configuration.ConfigurationManager.AppSettings["CloudinaryApiSecret"]
+            );
+
+            var cloudinary = new Cloudinary(account);
+
+            using (var stream = fileUpload.PostedFile.InputStream)
+            {
+                string ext = Path.GetExtension(fileUpload.FileName).ToLower();
+
+                if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".gif")
+                {
+                    var uploadParams = new ImageUploadParams
+                    {
+                        File = new FileDescription(fileUpload.FileName, stream),
+                        Folder = "feedback_images"
+                    };
+                    var uploadResult = cloudinary.Upload(uploadParams);
+                    return uploadResult.SecureUrl?.ToString();
+                }
+                else if (ext == ".mp4" || ext == ".mov" || ext == ".avi" || ext == ".webm")
+                {
+                    var uploadParams = new VideoUploadParams
+                    {
+                        File = new FileDescription(fileUpload.FileName, stream),
+                        Folder = "feedback_videos"
+                    };
+                    var uploadResult = cloudinary.Upload(uploadParams);
+                    return uploadResult.SecureUrl?.ToString();
+                }
+            }
+
+            return null;
         }
 
         private async Task LoadAllFeedbacks()
         {
-            var feedbackHtml = new StringBuilder();
+            var feedbacks = new System.Collections.Generic.List<dynamic>();
             QuerySnapshot snapshot = await db.Collection("feedbacks").OrderByDescending("createdAt").GetSnapshotAsync();
 
             foreach (var doc in snapshot.Documents)
             {
                 var data = doc.ToDictionary();
-                string username = data["username"]?.ToString();
-                string description = data["description"]?.ToString();
-                string mediaUrl = data.ContainsKey("mediaUrl") ? data["mediaUrl"]?.ToString() : null;
-                string postId = doc.Id;
-
-                feedbackHtml.Append("<div class='card p-3 mb-3 shadow-sm'>");
-                feedbackHtml.Append($"<h6><strong>{username}</strong></h6>");
-                feedbackHtml.Append($"<p>{description}</p>");
-                if (!string.IsNullOrEmpty(mediaUrl))
+                feedbacks.Add(new
                 {
-                    string ext = Path.GetExtension(mediaUrl).ToLower();
-                    if (ext == ".mp4" || ext == ".webm")
-                        feedbackHtml.Append($"<video controls width='100%' src='{mediaUrl}' class='mb-2'></video>");
-                    else
-                        feedbackHtml.Append($"<img src='{mediaUrl}' class='img-fluid mb-2' />");
-                }
-
-                feedbackHtml.Append("<hr class='my-2' />");
-                feedbackHtml.Append("<div class='d-flex align-items-center justify-content-between'>");
-                feedbackHtml.Append($"<button class='btn btn-sm btn-outline-primary' disabled>Like</button>");
-                feedbackHtml.Append($"<span class='text-muted small'>Comments feature coming soon</span>");
-                feedbackHtml.Append("</div>");
-                feedbackHtml.Append("</div>");
+                    PostId = doc.Id,
+                    Username = data["username"]?.ToString(),
+                    Description = data["description"]?.ToString(),
+                    MediaUrl = data.ContainsKey("mediaUrl") ? data["mediaUrl"]?.ToString() : null,
+                    Likes = (data["likes"] as System.Collections.Generic.IEnumerable<object>)?.Count() ?? 0
+                });
             }
 
-            feedbackPosts.InnerHtml = feedbackHtml.ToString();
+            rptFeedback.DataSource = feedbacks;
+            rptFeedback.DataBind();
+        }
+
+        public string GetMediaHtml(string url)
+        {
+            if (string.IsNullOrEmpty(url)) return string.Empty;
+
+            string ext = Path.GetExtension(url).ToLower();
+            if (ext == ".mp4" || ext == ".webm")
+                return $"<video controls width='100%' src='{url}' class='mb-2'></video>";
+            else
+                return $"<img src='{url}' class='img-fluid mb-2' />";
+        }
+
+        protected void rptFeedback_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            // Placeholder for Like/Comment functionality.
         }
     }
 
