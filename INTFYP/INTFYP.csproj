@@ -328,7 +328,7 @@
     <Content Include="Global.asax" />
     <Content Include="Images\dprofile.jpg" />
     <Content Include="Images\logo.png" />
-    <Content Include="KLesson1.aspx" />
+    <Content Include="KoreanCSL1.aspx" />
     <Content Include="Korean.aspx" />
     <Content Include="LanguageLearning\KLesson1\audio\Coffee.mp3" />
     <Content Include="LanguageLearning\KLesson1\audio\Juice.mp3" />
@@ -502,12 +502,12 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="KLesson1.aspx.cs">
-      <DependentUpon>KLesson1.aspx</DependentUpon>
+    <Compile Include="KoreanCSL1.aspx.cs">
+      <DependentUpon>KoreanCSL1.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="KLesson1.aspx.designer.cs">
-      <DependentUpon>KLesson1.aspx</DependentUpon>
+    <Compile Include="KoreanCSL1.aspx.designer.cs">
+      <DependentUpon>KoreanCSL1.aspx</DependentUpon>
     </Compile>
     <Compile Include="Korean.aspx.cs">
       <DependentUpon>Korean.aspx</DependentUpon>

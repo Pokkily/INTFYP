@@ -5,7 +5,7 @@ using Google.Cloud.Firestore;
 
 namespace KoreanApp
 {
-    public partial class KLesson1 : System.Web.UI.Page
+    public partial class KoreanCSL1 : System.Web.UI.Page
     {
         FirestoreDb db;
         static readonly object dbLock = new object();
@@ -210,7 +210,7 @@ namespace KoreanApp
                 if (!string.IsNullOrEmpty(userId))
                 {
                     DocumentReference userDoc = db.Collection("users").Document(userId);
-                    CollectionReference resultCol = userDoc.Collection("KLesson1_Results");
+                    CollectionReference resultCol = userDoc.Collection("KoreanCSL1_Results");
 
                     double percentage = ((double)correctCount / questions.Count) * 100;
                     string status = $"{Math.Round(percentage)}%";
