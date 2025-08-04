@@ -174,7 +174,7 @@ namespace INTFYP
                 await bookRef.UpdateAsync(bookUpdates);
             }
 
-            await LoadBooks(); // refresh data after update
+            await LoadBooks();
         }
 
 

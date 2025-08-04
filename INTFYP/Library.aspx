@@ -23,7 +23,6 @@
                     <div class="d-grid gap-2">
                         <button type="button" class="btn btn-primary" onclick="location.href='FavBooks.aspx';">Favorite Book</button>
                         <button type="button" class="btn btn-dark" onclick="location.href='CitationGenerator.aspx';">Citation Generator</button>
-                        <button type="button" class="btn btn-dark" onclick="location.href='AddBook.aspx';">Add Books</button>
                     </div>
                 </div>
 
@@ -41,28 +40,30 @@
                         </HeaderTemplate>
                         <ItemTemplate>
                             <div class="col">
-                                <div class="card h-100 shadow-sm">
-                                    <div class="card-body">
-                                        <h5 class="card-title"><%# Eval("Title") %></h5>
-                                        <p class="card-text"><%# Eval("Author") %></p>
-                                        <span class="badge bg-secondary">#<%# Eval("Category") %></span>
-                                        <div class="mt-2 d-flex align-items-center">
-                                            <asp:Button ID="btnRecommend" runat="server"
-                                            Text='<%# String.Format("{0} ❤️", Eval("Recommendations")) %>'
-                                            CommandName="Recommend"
-                                            CommandArgument='<%# Eval("DocumentId") %>'
-                                            CssClass='<%# (bool)Eval("IsRecommended") ? "btn btn-lavender btn-sm me-2" : "btn btn-outline-black btn-sm me-2" %>' />
-
-                                        <asp:Button ID="btnFavorite" runat="server"
-                                            Text="⭐"
-                                            CommandName="Favorite"
-                                            CommandArgument='<%# Eval("DocumentId") %>'
-                                            CssClass='<%# (bool)Eval("IsFavorited") ? "btn btn-young-sage btn-sm" : "btn btn-outline-black btn-sm" %>' />
+                                <a href='<%# "PreviewBook.aspx?pdfUrl=" + HttpUtility.UrlEncode(Eval("PdfUrl").ToString()) %>' style="text-decoration: none; color: inherit;">
+                                    <div class="card h-100 shadow-sm hover-shadow">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><%# Eval("Title") %></h5>
+                                            <p class="card-text"><%# Eval("Author") %></p>
+                                            <span class="badge bg-secondary">#<%# Eval("Category") %></span>
+                                            <div class="mt-2 d-flex align-items-center">
+                                                <asp:Button ID="btnRecommend" runat="server"
+                                                    Text='<%# String.Format("{0} ❤️", Eval("Recommendations")) %>'
+                                                    CommandName="Recommend"
+                                                    CommandArgument='<%# Eval("DocumentId") %>'
+                                                    CssClass='<%# (bool)Eval("IsRecommended") ? "btn btn-lavender btn-sm me-2" : "btn btn-outline-black btn-sm me-2" %>' />
+                                                <asp:Button ID="btnFavorite" runat="server"
+                                                    Text="⭐"
+                                                    CommandName="Favorite"
+                                                    CommandArgument='<%# Eval("DocumentId") %>'
+                                                    CssClass='<%# (bool)Eval("IsFavorited") ? "btn btn-young-sage btn-sm" : "btn btn-outline-black btn-sm" %>' />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             </div>
                         </ItemTemplate>
+ 
                     </asp:Repeater>
                 </div>
             </div>

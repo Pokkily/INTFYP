@@ -295,6 +295,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AddBook.aspx" />
+    <Content Include="AddScholarship.aspx" />
     <Content Include="CitationGenerator.aspx" />
     <Content Include="Class.aspx" />
     <Content Include="ClassDetails.aspx" />
@@ -342,8 +343,9 @@
     <Content Include="QuizDetail.aspx" />
     <Content Include="QuizResult.aspx" />
     <Content Include="Register.aspx" />
+    <Content Include="ResultValidation.aspx" />
     <Content Include="Scholarship.aspx" />
-    <Content Include="ScholarshipManagement.aspx" />
+    <Content Include="ResultManagement.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -453,6 +455,13 @@
     </Compile>
     <Compile Include="AddBook.aspx.designer.cs">
       <DependentUpon>AddBook.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="AddScholarship.aspx.cs">
+      <DependentUpon>AddScholarship.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AddScholarship.aspx.designer.cs">
+      <DependentUpon>AddScholarship.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -608,6 +617,13 @@
     <Compile Include="Login.aspx.designer.cs">
       <DependentUpon>Login.aspx</DependentUpon>
     </Compile>
+    <Compile Include="ResultValidation.aspx.cs">
+      <DependentUpon>ResultValidation.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ResultValidation.aspx.designer.cs">
+      <DependentUpon>ResultValidation.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Scholarship.aspx.cs">
       <DependentUpon>Scholarship.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -615,12 +631,12 @@
     <Compile Include="Scholarship.aspx.designer.cs">
       <DependentUpon>Scholarship.aspx</DependentUpon>
     </Compile>
-    <Compile Include="ScholarshipManagement.aspx.cs">
-      <DependentUpon>ScholarshipManagement.aspx</DependentUpon>
+    <Compile Include="ResultManagement.aspx.cs">
+      <DependentUpon>ResultManagement.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="ScholarshipManagement.aspx.designer.cs">
-      <DependentUpon>ScholarshipManagement.aspx</DependentUpon>
+    <Compile Include="ResultManagement.aspx.designer.cs">
+      <DependentUpon>ResultManagement.aspx</DependentUpon>
     </Compile>
     <Compile Include="Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>

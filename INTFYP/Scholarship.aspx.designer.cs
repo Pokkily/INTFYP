@@ -42,15 +42,6 @@ namespace YourNamespace
         protected global::System.Web.UI.WebControls.Repeater rptSubjects;
 
         /// <summary>
-        /// btnApplyScholarship control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnApplyScholarship;
-
-        /// <summary>
         /// btnSubmitResult control.
         /// </summary>
         /// <remarks>
@@ -60,30 +51,12 @@ namespace YourNamespace
         protected global::System.Web.UI.WebControls.HyperLink btnSubmitResult;
 
         /// <summary>
-        /// txtScholarshipTitle control.
+        /// rptScholarships control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtScholarshipTitle;
-
-        /// <summary>
-        /// txtWhy control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtWhy;
-
-        /// <summary>
-        /// fuSupportingDoc control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.FileUpload fuSupportingDoc;
+        protected global::System.Web.UI.WebControls.Repeater rptScholarships;
     }
 }

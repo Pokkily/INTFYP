@@ -69,9 +69,21 @@ namespace YourProjectNamespace
                     IsActive = ""
                 },
                 new TeacherNavItem {
+                    Text = "Student Materials",
+                    Description = "Library Materials",
+                    Link = "AddBook.aspx",
+                    IsActive = ""
+                },               
+                new TeacherNavItem {
+                    Text = "Scholarship Post",
+                    Description = "All Your Support",
+                    Link = "AddScholarship.aspx",
+                    IsActive = ""
+                },
+                new TeacherNavItem {
                     Text = "Result Validation",
                     Description = "Student Result",
-                    Link = "ScholarshipManagement.aspx",
+                    Link = "ResultManagement.aspx",
                     IsActive = ""
                 }
 
