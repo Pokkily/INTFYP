@@ -72,40 +72,47 @@ namespace YourNamespace
             CollectionReference resultCol = userDoc.Collection(collectionName);
             QuerySnapshot snapshot = await resultCol.GetSnapshotAsync();
 
-            double highestScore = 0;
-            string highestStatus = null;
-            DateTime highestTime = DateTime.MinValue;
+            double highestScore = -1;
+            DateTime earliestTime = DateTime.MaxValue;
+            string bestStatus = null;
 
             foreach (DocumentSnapshot doc in snapshot.Documents)
             {
-                if (doc.Exists)
+                if (!doc.Exists) continue;
+
+                Dictionary<string, object> data = doc.ToDictionary();
+
+                if (data.TryGetValue("score", out object scoreObj) &&
+                    double.TryParse(scoreObj.ToString(), out double score) &&
+                    data.TryGetValue("timestamp", out object timeObj) && timeObj is Timestamp ts)
                 {
-                    Dictionary<string, object> data = doc.ToDictionary();
+                    DateTime thisTime = ts.ToDateTime();
 
-                    if (data.TryGetValue("score", out object scoreObj) && double.TryParse(scoreObj.ToString(), out double score))
+                    if (score > highestScore)
                     {
-                        if (score > highestScore)
-                        {
-                            highestScore = score;
-
-                            if (data.TryGetValue("status", out object statusObj))
-                                highestStatus = statusObj?.ToString();
-
-                            if (data.TryGetValue("timestamp", out object timeObj) && timeObj is Timestamp ts)
-                                highestTime = ts.ToDateTime();
-                        }
+                        highestScore = score;
+                        earliestTime = thisTime;
+                        bestStatus = data.ContainsKey("status") ? data["status"]?.ToString() : null;
+                    }
+                    else if (score == highestScore && thisTime < earliestTime)
+                    {
+                        earliestTime = thisTime;
+                        bestStatus = data.ContainsKey("status") ? data["status"]?.ToString() : null;
                     }
                 }
             }
 
-            if (!string.IsNullOrEmpty(highestStatus))
+            if (highestScore >= 0 && !string.IsNullOrEmpty(bestStatus))
             {
-                statusLiteral.Text = $"<div style='color: green;'>Progress: {highestStatus} ({highestTime:g})</div>";
+                statusLiteral.Text = $"<div style='color: green;'>Progress: {bestStatus}<br/>Score: {highestScore}<br/>Taken on: {malaysiaTime:g}</div>";
             }
             else
             {
                 statusLiteral.Text = "<div style='color: red;'>Status: No Progress!</div>";
             }
         }
+
+
+
     }
 }

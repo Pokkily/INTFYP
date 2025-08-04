@@ -20,9 +20,6 @@
                 <div class="card mb-3 shadow-sm">
                     <div class="card-header bg-white fw-bold">Language Joined</div>
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between">Mandarin Chinese <span>50%</span></li>
-                        <li class="list-group-item d-flex justify-content-between">French <span>20%</span></li>
-                        <li class="list-group-item d-flex justify-content-between">Japanese <span>87%</span></li>
                     </ul>
                 </div>             
 
