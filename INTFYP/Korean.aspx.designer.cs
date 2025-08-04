@@ -22,5 +22,23 @@ namespace YourNamespace
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal lesson1StatusLiteral;
+
+        /// <summary>
+        /// lesson2StatusLiteral control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal lesson2StatusLiteral;
+
+        /// <summary>
+        /// lesson3StatusLiteral control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal lesson3StatusLiteral;
     }
 }
