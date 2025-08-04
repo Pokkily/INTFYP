@@ -34,7 +34,7 @@
                                     <h6 class="card-title mb-1">Travel Lesson 1</h6>
                                     <asp:Literal ID="travelLesson1StatusLiteral" runat="server" />
                                 </div>
-                                <a href="TravelLesson1.aspx" class="btn btn-primary">Start</a>
+                                <a href="KoreanTravel1.aspx" class="btn btn-primary">Start</a>
                             </div>
                         </div>
                         <div class="card mb-2 shadow-sm">
@@ -43,7 +43,7 @@
                                     <h6 class="card-title mb-1">Travel Lesson 2</h6>
                                     <asp:Literal ID="travelLesson2StatusLiteral" runat="server" />
                                 </div>
-                                <a href="TravelLesson2.aspx" class="btn btn-primary">Start</a>
+                                <a href="KoreanTravel2.aspx" class="btn btn-primary">Start</a>
                             </div>
                         </div>
                         <div class="card mb-2 shadow-sm">
@@ -52,7 +52,7 @@
                                     <h6 class="card-title mb-1">Travel Lesson 3</h6>
                                     <asp:Literal ID="travelLesson3StatusLiteral" runat="server" />
                                 </div>
-                                <a href="TravelLesson3.aspx" class="btn btn-primary">Start</a>
+                                <a href="KoreanTravel3.aspx" class="btn btn-primary">Start</a>
                             </div>
                         </div>
                     </div>
@@ -76,7 +76,7 @@
                                     <h6 class="card-title mb-1">Coffee Shop Lesson 1</h6>
                                     <asp:Literal ID="lesson1StatusLiteral" runat="server" />
                                 </div>
-                                <a href="Klesson1.aspx" class="btn btn-dark">Start</a>
+                                <a href="KoreanCSL1.aspx" class="btn btn-dark">Start</a>
                             </div>
                         </div>
                         <div class="card mb-2 shadow-sm">
@@ -85,7 +85,7 @@
                                     <h6 class="card-title mb-1">Coffee Shop Lesson 2</h6>
                                     <asp:Literal ID="lesson2StatusLiteral" runat="server" />
                                 </div>
-                                <a href="Klesson2.aspx" class="btn btn-dark">Start</a>
+                                <a href="KoreanCSL2.aspx" class="btn btn-dark">Start</a>
                             </div>
                         </div>
                         <div class="card mb-2 shadow-sm">
@@ -94,7 +94,7 @@
                                     <h6 class="card-title mb-1">Coffee Shop Lesson 3</h6>
                                     <asp:Literal ID="lesson3StatusLiteral" runat="server" />
                                 </div>
-                                <a href="Klesson3.aspx" class="btn btn-dark">Start</a>
+                                <a href="KoreanCSL3.aspx" class="btn btn-dark">Start</a>
                             </div>
                         </div>
                     </div>
@@ -118,7 +118,7 @@
                                     <h6 class="card-title mb-1">Market Lesson 1</h6>
                                     <asp:Literal ID="marketLesson1StatusLiteral" runat="server" />
                                 </div>
-                                <a href="MarketLesson1.aspx" class="btn btn-success">Start</a>
+                                <a href="KoreanMarket1.aspx" class="btn btn-success">Start</a>
                             </div>
                         </div>
                         <div class="card mb-2 shadow-sm">
@@ -127,7 +127,7 @@
                                     <h6 class="card-title mb-1">Market Lesson 2</h6>
                                     <asp:Literal ID="marketLesson2StatusLiteral" runat="server" />
                                 </div>
-                                <a href="MarketLesson2.aspx" class="btn btn-success">Start</a>
+                                <a href="KoreanMarket1.aspx" class="btn btn-success">Start</a>
                             </div>
                         </div>
                         <div class="card mb-2 shadow-sm">
@@ -136,7 +136,7 @@
                                     <h6 class="card-title mb-1">Market Lesson 3</h6>
                                     <asp:Literal ID="marketLesson3StatusLiteral" runat="server" />
                                 </div>
-                                <a href="MarketLesson3.aspx" class="btn btn-success">Start</a>
+                                <a href="KoreanMarket1.aspx" class="btn btn-success">Start</a>
                             </div>
                         </div>
                     </div>
@@ -160,7 +160,7 @@
                                     <h6 class="card-title mb-1">Restaurant Lesson 1</h6>
                                     <asp:Literal ID="restLesson1StatusLiteral" runat="server" />
                                 </div>
-                                <a href="RestaurantLesson1.aspx" class="btn btn-danger">Start</a>
+                                <a href="KoreanRestaurant1.aspx" class="btn btn-danger">Start</a>
                             </div>
                         </div>
                         <div class="card mb-2 shadow-sm">
@@ -169,7 +169,7 @@
                                     <h6 class="card-title mb-1">Restaurant Lesson 2</h6>
                                     <asp:Literal ID="restLesson2StatusLiteral" runat="server" />
                                 </div>
-                                <a href="RestaurantLesson2.aspx" class="btn btn-danger">Start</a>
+                                <a href="KoreanRestaurant1.aspx" class="btn btn-danger">Start</a>
                             </div>
                         </div>
                         <div class="card mb-2 shadow-sm">
@@ -178,7 +178,7 @@
                                     <h6 class="card-title mb-1">Restaurant Lesson 3</h6>
                                     <asp:Literal ID="restLesson3StatusLiteral" runat="server" />
                                 </div>
-                                <a href="RestaurantLesson3.aspx" class="btn btn-danger">Start</a>
+                                <a href="KoreanRestaurant1.aspx" class="btn btn-danger">Start</a>
                             </div>
                         </div>
                     </div>

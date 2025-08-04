@@ -44,10 +44,27 @@ namespace YourNamespace
             if (string.IsNullOrEmpty(userId))
                 return;
 
-            await LoadLessonStatus("KLesson1_Results", lesson1StatusLiteral);
-            await LoadLessonStatus("KLesson2_Results", lesson2StatusLiteral);
-            await LoadLessonStatus("KLesson3_Results", lesson3StatusLiteral);
+            // Travel
+            await LoadLessonStatus("KoreanTravel1_Results", travelLesson1StatusLiteral);
+            await LoadLessonStatus("KoreanTravel2_Results", travelLesson2StatusLiteral);
+            await LoadLessonStatus("KoreanTravel3_Results", travelLesson3StatusLiteral);
+
+            // Coffee Shop
+            await LoadLessonStatus("KoreanCSL1_Results", lesson1StatusLiteral);
+            await LoadLessonStatus("KoreanCSL2_Results", lesson2StatusLiteral);
+            await LoadLessonStatus("KoreanCSL3_Results", lesson3StatusLiteral);
+
+            // Market
+            await LoadLessonStatus("KoreanMarket1_Results", marketLesson1StatusLiteral);
+            await LoadLessonStatus("KoreanMarket2_Results", marketLesson2StatusLiteral);
+            await LoadLessonStatus("KoreanMarket3_Results", marketLesson3StatusLiteral);
+
+            // Restaurant
+            await LoadLessonStatus("KoreanRestaurant1_Results", restLesson1StatusLiteral);
+            await LoadLessonStatus("KoreanRestaurant2_Results", restLesson2StatusLiteral);
+            await LoadLessonStatus("KoreanRestaurant3_Results", restLesson3StatusLiteral);
         }
+
 
         private async Task LoadLessonStatus(string collectionName, System.Web.UI.WebControls.Literal statusLiteral)
         {
