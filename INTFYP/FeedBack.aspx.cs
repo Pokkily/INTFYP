@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -155,23 +156,25 @@ namespace YourProjectNamespace
             foreach (var doc in snapshot.Documents)
             {
                 var data = doc.ToDictionary();
+                var likesList = data.ContainsKey("likes") ? (data["likes"] as IEnumerable<object>)?.ToList() : new List<object>();
+
                 feedbacks.Add(new
                 {
                     PostId = doc.Id,
                     Username = data["username"]?.ToString(),
                     Description = data["description"]?.ToString(),
                     MediaUrl = data.ContainsKey("mediaUrl") ? data["mediaUrl"]?.ToString() : null,
-                    Likes = (data["likes"] as System.Collections.Generic.IEnumerable<object>)?.Count() ?? 0,
+                    Likes = likesList?.Count ?? 0,
                     CreatedAt = data.ContainsKey("createdAt")
-                    ? ((Timestamp)data["createdAt"]).ToDateTime()
-                    : DateTime.Now
+                        ? ((Timestamp)data["createdAt"]).ToDateTime()
+                        : DateTime.Now
                 });
-
             }
 
             rptFeedback.DataSource = feedbacks;
             rptFeedback.DataBind();
         }
+
 
         public string GetMediaHtml(string url)
         {
@@ -184,10 +187,48 @@ namespace YourProjectNamespace
                 return $"<img src='{url}' class='img-fluid mb-2' />";
         }
 
-        protected void rptFeedback_ItemCommand(object source, RepeaterCommandEventArgs e)
+        protected async void rptFeedback_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
-            // Placeholder for Like/Comment functionality.
+            if (e.CommandName == "Like")
+            {
+                string postId = e.CommandArgument.ToString();
+                string userId = Session["userId"]?.ToString();
+
+                if (string.IsNullOrEmpty(userId)) return;
+
+                DocumentReference postRef = db.Collection("feedbacks").Document(postId);
+                DocumentSnapshot postSnap = await postRef.GetSnapshotAsync();
+
+                if (postSnap.Exists)
+                {
+                    var data = postSnap.ToDictionary();
+                    var likes = data.ContainsKey("likes") ? (data["likes"] as IEnumerable<object>)?.ToList() : new List<object>();
+
+                    if (likes == null)
+                        likes = new List<object>();
+
+                    if (likes.Contains(userId))
+                    {
+                        // Unlike
+                        likes.Remove(userId);
+                    }
+                    else
+                    {
+                        // Like
+                        likes.Add(userId);
+                    }
+
+                    Dictionary<string, object> updates = new Dictionary<string, object>
+            {
+                { "likes", likes }
+            };
+
+                    await postRef.UpdateAsync(updates);
+                    await LoadAllFeedbacks(); // Refresh
+                }
+            }
         }
+
     }
 
     public static class FirestoreExtensions
