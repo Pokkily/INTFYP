@@ -201,6 +201,7 @@ namespace INTFYP
             [FirestoreProperty] public int? Recommendations { get; set; }
             [FirestoreProperty] public List<string> RecommendedBy { get; set; }
             [FirestoreProperty] public List<string> FavoritedBy { get; set; }
+            [FirestoreProperty] public string PdfUrl { get; set; }
 
             public string DocumentId { get; set; }
             public bool IsRecommended { get; set; }

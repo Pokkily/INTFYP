@@ -1,13 +1,16 @@
-﻿using Google.Cloud.Firestore;
-using System;
+﻿using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.UI;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using Google.Cloud.Firestore;
+using Grpc.Core;
 
 namespace YourProjectNamespace
 {
-    public partial class Feedback : Page
+    public partial class Feedback : System.Web.UI.Page
     {
         private static FirestoreDb db;
 
@@ -81,16 +84,42 @@ namespace YourProjectNamespace
                 }
 
                 string mediaUrl = null;
+
                 if (fileUpload.HasFile)
                 {
-                    string folderPath = Server.MapPath("~/Uploads/");
-                    if (!Directory.Exists(folderPath))
-                        Directory.CreateDirectory(folderPath);
+                    var account = new Account(
+                        System.Configuration.ConfigurationManager.AppSettings["CloudinaryCloudName"],
+                        System.Configuration.ConfigurationManager.AppSettings["CloudinaryApiKey"],
+                        System.Configuration.ConfigurationManager.AppSettings["CloudinaryApiSecret"]
+                    );
 
-                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(fileUpload.FileName);
-                    string fullPath = Path.Combine(folderPath, fileName);
-                    fileUpload.SaveAs(fullPath);
-                    mediaUrl = "Uploads/" + fileName;
+                    var cloudinary = new Cloudinary(account);
+
+                    using (var stream = fileUpload.PostedFile.InputStream)
+                    {
+                        string ext = Path.GetExtension(fileUpload.FileName).ToLower();
+
+                        if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".gif")
+                        {
+                            var uploadParams = new ImageUploadParams
+                            {
+                                File = new FileDescription(fileUpload.FileName, stream),
+                                Folder = "feedback_images"
+                            };
+                            var uploadResult = cloudinary.Upload(uploadParams);
+                            mediaUrl = uploadResult.SecureUrl?.ToString();
+                        }
+                        else if (ext == ".mp4" || ext == ".mov" || ext == ".avi" || ext == ".webm")
+                        {
+                            var uploadParams = new VideoUploadParams
+                            {
+                                File = new FileDescription(fileUpload.FileName, stream),
+                                Folder = "feedback_videos"
+                            };
+                            var uploadResult = cloudinary.Upload(uploadParams);
+                            mediaUrl = uploadResult.SecureUrl?.ToString();
+                        }
+                    }
                 }
 
                 var feedback = new
@@ -105,7 +134,7 @@ namespace YourProjectNamespace
                     createdAt = Timestamp.GetCurrentTimestamp()
                 };
 
-                await db.Collection("feedback").AddAsync(feedback);
+                await db.Collection("feedbacks").AddAsync(feedback);
 
                 lblMessage.CssClass = "text-success";
                 lblMessage.Text = "Feedback submitted successfully!";
@@ -123,7 +152,7 @@ namespace YourProjectNamespace
         private async Task LoadAllFeedbacks()
         {
             var feedbackHtml = new StringBuilder();
-            QuerySnapshot snapshot = await db.Collection("feedback").OrderByDescending("createdAt").GetSnapshotAsync();
+            QuerySnapshot snapshot = await db.Collection("feedbacks").OrderByDescending("createdAt").GetSnapshotAsync();
 
             foreach (var doc in snapshot.Documents)
             {

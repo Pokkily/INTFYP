@@ -18,6 +18,7 @@ namespace YourNamespace
             if (!IsPostBack)
             {
                 LoadStudentResult();
+                LoadScholarships(); // Load scholarships from Firestore
             }
         }
 
@@ -47,41 +48,94 @@ namespace YourNamespace
 
             if (snapshot.Count > 0)
             {
-                // Assume latest submission
                 DocumentSnapshot doc = snapshot.Documents.OrderByDescending(d => d.CreateTime).First();
                 Dictionary<string, object> data = doc.ToDictionary();
 
                 lblSubmittedTime.Text = doc.CreateTime?.ToDateTime().ToString("yyyy-MM-dd HH:mm") ?? "-";
-                lblStatus.Text = data.ContainsKey("Status") ? data["Status"].ToString() : "Unknown";
+                string status = data.ContainsKey("Status") ? data["Status"].ToString() : "Unknown";
+                lblStatus.Text = status;
 
-                // Extract subjects and grades
-                List<SubjectGrade> subjectGrades = new List<SubjectGrade>();
-                for (int i = 1; i <= 15; i++)
+                if (status == "Verified")
                 {
-                    if (data.ContainsKey($"Subject{i}") && data.ContainsKey($"Grade{i}"))
+                    List<SubjectGrade> subjectGrades = new List<SubjectGrade>();
+                    for (int i = 1; i <= 15; i++)
                     {
-                        subjectGrades.Add(new SubjectGrade
+                        if (data.ContainsKey($"Subject{i}") && data.ContainsKey($"Grade{i}"))
                         {
-                            Subject = data[$"Subject{i}"].ToString(),
-                            Grade = data[$"Grade{i}"].ToString()
-                        });
+                            subjectGrades.Add(new SubjectGrade
+                            {
+                                Subject = data[$"Subject{i}"].ToString(),
+                                Grade = data[$"Grade{i}"].ToString()
+                            });
+                        }
                     }
-                }
 
-                rptSubjects.DataSource = subjectGrades;
-                rptSubjects.DataBind();
+                    rptSubjects.DataSource = subjectGrades;
+                    rptSubjects.DataBind();
+                    rptSubjects.Visible = true;
+                }
+                else
+                {
+                    rptSubjects.Visible = false;
+                }
             }
             else
             {
                 lblSubmittedTime.Text = "-";
                 lblStatus.Text = "No Submission Found";
+                rptSubjects.Visible = false;
             }
         }
+
+        private async void LoadScholarships()
+        {
+            try
+            {
+                CollectionReference scholarshipsRef = db.Collection("scholarships");
+                QuerySnapshot snapshot = await scholarshipsRef.GetSnapshotAsync();
+
+                List<ScholarshipItem> scholarshipList = new List<ScholarshipItem>();
+
+                foreach (DocumentSnapshot doc in snapshot.Documents)
+                {
+                    Dictionary<string, object> data = doc.ToDictionary();
+
+                    scholarshipList.Add(new ScholarshipItem
+                    {
+                        Title = data.ContainsKey("Title") ? data["Title"].ToString() : "",
+                        Requirement = data.ContainsKey("Requirement") ? data["Requirement"].ToString() : "",
+                        Terms = data.ContainsKey("Terms") ? data["Terms"].ToString() : "",
+                        Courses = data.ContainsKey("Courses") ? data["Courses"].ToString() : "",
+                        Link = data.ContainsKey("Link") ? data["Link"].ToString() : "#"
+                    });
+                }
+
+                rptScholarships.DataSource = scholarshipList;
+                rptScholarships.DataBind();
+
+                // Debug
+                Console.WriteLine("Scholarships loaded: " + scholarshipList.Count);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error loading scholarships: " + ex.Message);
+            }
+        }
+
 
         public class SubjectGrade
         {
             public string Subject { get; set; }
             public string Grade { get; set; }
+        }
+
+        public class ScholarshipItem
+        {
+            public string Title { get; set; }
+            public string Requirement { get; set; }
+            public string Terms { get; set; }
+            public string Courses { get; set; }
+            public string Link { get; set; }
         }
     }
 }
