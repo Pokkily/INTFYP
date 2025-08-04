@@ -328,8 +328,19 @@
     <Content Include="Global.asax" />
     <Content Include="Images\dprofile.jpg" />
     <Content Include="Images\logo.png" />
-    <Content Include="KoreanCSL1.aspx" />
+    <Content Include="KoreanQuestions\KoreanCSL1.aspx" />
     <Content Include="Korean.aspx" />
+    <Content Include="KoreanQuestions\KoreanCSL2.aspx" />
+    <Content Include="KoreanQuestions\KoreanCSL3.aspx" />
+    <Content Include="KoreanQuestions\KoreanMKL1.aspx" />
+    <Content Include="KoreanQuestions\KoreanMKL2.aspx" />
+    <Content Include="KoreanQuestions\KoreanMKL3.aspx" />
+    <Content Include="KoreanQuestions\KoreanRTL1.aspx" />
+    <Content Include="KoreanQuestions\KoreanRTL2.aspx" />
+    <Content Include="KoreanQuestions\KoreanRTL3.aspx" />
+    <Content Include="KoreanQuestions\KoreanTRL1.aspx" />
+    <Content Include="KoreanQuestions\KoreanTRL2.aspx" />
+    <Content Include="KoreanQuestions\KoreanTRL3.aspx" />
     <Content Include="LanguageLearning\KLesson1\audio\Coffee.mp3" />
     <Content Include="LanguageLearning\KLesson1\audio\Juice.mp3" />
     <Content Include="LanguageLearning\KLesson1\audio\Tea.mp3" />
@@ -503,11 +514,11 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="KoreanCSL1.aspx.cs">
+    <Compile Include="KoreanQuestions\KoreanCSL1.aspx.cs">
       <DependentUpon>KoreanCSL1.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="KoreanCSL1.aspx.designer.cs">
+    <Compile Include="KoreanQuestions\KoreanCSL1.aspx.designer.cs">
       <DependentUpon>KoreanCSL1.aspx</DependentUpon>
     </Compile>
     <Compile Include="Korean.aspx.cs">
@@ -516,6 +527,83 @@
     </Compile>
     <Compile Include="Korean.aspx.designer.cs">
       <DependentUpon>Korean.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanCSL2.aspx.cs">
+      <DependentUpon>KoreanCSL2.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanCSL2.aspx.designer.cs">
+      <DependentUpon>KoreanCSL2.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanCSL3.aspx.cs">
+      <DependentUpon>KoreanCSL3.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanCSL3.aspx.designer.cs">
+      <DependentUpon>KoreanCSL3.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanMKL1.aspx.cs">
+      <DependentUpon>KoreanMKL1.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanMKL1.aspx.designer.cs">
+      <DependentUpon>KoreanMKL1.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanMKL2.aspx.cs">
+      <DependentUpon>KoreanMKL2.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanMKL2.aspx.designer.cs">
+      <DependentUpon>KoreanMKL2.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanMKL3.aspx.cs">
+      <DependentUpon>KoreanMKL3.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanMKL3.aspx.designer.cs">
+      <DependentUpon>KoreanMKL3.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanRTL1.aspx.cs">
+      <DependentUpon>KoreanRTL1.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanRTL1.aspx.designer.cs">
+      <DependentUpon>KoreanRTL1.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanRTL2.aspx.cs">
+      <DependentUpon>KoreanRTL2.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanRTL2.aspx.designer.cs">
+      <DependentUpon>KoreanRTL2.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanRTL3.aspx.cs">
+      <DependentUpon>KoreanRTL3.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanRTL3.aspx.designer.cs">
+      <DependentUpon>KoreanRTL3.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanTRL1.aspx.cs">
+      <DependentUpon>KoreanTRL1.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanTRL1.aspx.designer.cs">
+      <DependentUpon>KoreanTRL1.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanTRL2.aspx.cs">
+      <DependentUpon>KoreanTRL2.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanTRL2.aspx.designer.cs">
+      <DependentUpon>KoreanTRL2.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanTRL3.aspx.cs">
+      <DependentUpon>KoreanTRL3.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="KoreanQuestions\KoreanTRL3.aspx.designer.cs">
+      <DependentUpon>KoreanTRL3.aspx</DependentUpon>
     </Compile>
     <Compile Include="LearningReport.aspx.cs">
       <DependentUpon>LearningReport.aspx</DependentUpon>
