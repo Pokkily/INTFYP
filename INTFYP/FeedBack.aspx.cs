@@ -161,8 +161,12 @@ namespace YourProjectNamespace
                     Username = data["username"]?.ToString(),
                     Description = data["description"]?.ToString(),
                     MediaUrl = data.ContainsKey("mediaUrl") ? data["mediaUrl"]?.ToString() : null,
-                    Likes = (data["likes"] as System.Collections.Generic.IEnumerable<object>)?.Count() ?? 0
+                    Likes = (data["likes"] as System.Collections.Generic.IEnumerable<object>)?.Count() ?? 0,
+                    CreatedAt = data.ContainsKey("createdAt")
+                    ? ((Timestamp)data["createdAt"]).ToDateTime()
+                    : DateTime.Now
                 });
+
             }
 
             rptFeedback.DataSource = feedbacks;

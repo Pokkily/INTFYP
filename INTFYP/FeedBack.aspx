@@ -13,10 +13,9 @@
         </div>
     </section>
 
-    <!-- Two-Column Layout -->
     <div class="container mb-5">
         <div class="row">
-            <!-- LEFT: Student Info -->
+            <!-- Student Info -->
             <div class="col-md-4">
                 <div class="card p-3 shadow-sm">
                     <h5 class="fw-bold mb-3">Student Information</h5>
@@ -28,44 +27,69 @@
                     <p><strong>Birthdate:</strong> <asp:Label ID="lblBirthdate" runat="server" /></p>
                     <p><strong>Position:</strong> <asp:Label ID="lblPosition" runat="server" /></p>
                     <p><strong>Address:</strong> <asp:Label ID="lblAddress" runat="server" /></p>
+                </div>
 
-                    <!-- Trigger Modal -->
-                    <button type="button" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#feedbackModal">
+                <!-- Submit Button Full Width -->
+                <div class="mt-3">
+                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#feedbackModal">
                         Submit Feedback
                     </button>
                 </div>
             </div>
 
-            <!-- RIGHT: Feedback Posts -->
+            <!-- Feedback Cards -->
             <div class="col-md-8">
                 <asp:Repeater ID="rptFeedback" runat="server" OnItemCommand="rptFeedback_ItemCommand">
                     <HeaderTemplate>
-                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                        <div class="row row-cols-1 row-cols-md-2 g-3">
                     </HeaderTemplate>
                     <ItemTemplate>
                         <div class="col">
-                            <div class="card h-100 shadow-sm p-3">
-                                <h6 class="fw-bold"><%# Eval("Username") %></h6>
-                                <p><%# Eval("Description") %></p>
+                            <div class="card h-100 shadow-sm">
+                                <div class="row g-0 h-100">
+                                    <!-- Image -->
+                                    <div class="col-5">
+                                        <img src='<%# Eval("MediaUrl") %>' alt="Media"
+                                             class="img-fluid w-100 h-100 object-cover rounded-start zoom-effect"
+                                             style="object-fit: cover; cursor: pointer;"
+                                             data-bs-toggle="modal"
+                                             data-bs-target='<%# "#imgModal" + Eval("PostId") %>' />
+                                    </div>
 
-                                <div class="mb-2">
-                                    <%# GetMediaHtml(Eval("MediaUrl")?.ToString()) %>
+                                    <!-- Text -->
+                                    <div class="col-7">
+                                        <div class="card-body d-flex flex-column justify-content-between h-100">
+                                            <div>
+                                                <h6 class="fw-bold mb-1 mb-0"><%# Eval("Username") %></h6>
+                                                <small class="text-muted d-block mb-2"><%# Eval("CreatedAt", "{0:dd MMM yyyy hh:mm tt}") %></small>
+                                                <p class="mb-2"><%# Eval("Description") %></p>
+                                            </div>
+                                            <div class="d-flex gap-2 mt-auto">
+                                                <asp:Button ID="btnLike" runat="server"
+                                                    Text='<%# "👍 " + Eval("Likes") %>'
+                                                    CommandName="Like"
+                                                    CommandArgument='<%# Eval("PostId") %>'
+                                                    CssClass="btn btn-sm btn-outline-danger" />
+
+                                                <asp:Button ID="btnComment" runat="server"
+                                                    Text="💬 Comment"
+                                                    CommandName="Comment"
+                                                    CommandArgument='<%# Eval("PostId") %>'
+                                                    CssClass="btn btn-sm btn-outline-secondary" />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
+                            </div>
 
-                                <hr class="my-2" />
-
-                                <div class="d-flex justify-content-between">
-                                    <asp:Button ID="btnLike" runat="server"
-                                        Text='<%# String.Format("👍 {0}", Eval("Likes")) %>'
-                                        CommandName="Like"
-                                        CommandArgument='<%# Eval("PostId") %>'
-                                        CssClass="btn btn-sm btn-outline-primary" />
-
-                                    <asp:Button ID="btnComment" runat="server"
-                                        Text="💬 Comment"
-                                        CommandName="Comment"
-                                        CommandArgument='<%# Eval("PostId") %>'
-                                        CssClass="btn btn-sm btn-outline-secondary" />
+                            <!-- Image Modal -->
+                            <div class="modal fade" id='<%# "imgModal" + Eval("PostId") %>' tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-xl">
+                                    <div class="modal-content">
+                                        <div class="modal-body text-center p-0">
+                                            <img src='<%# Eval("MediaUrl") %>' class="img-fluid w-100" style="max-height:90vh; object-fit: contain;" />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -78,7 +102,7 @@
         </div>
     </div>
 
-    <!-- Bootstrap Modal for Submit Feedback -->
+    <!-- Feedback Modal -->
     <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -111,4 +135,19 @@
             </div>
         </div>
     </div>
+
+    <!-- Zoom Hover CSS -->
+    <style>
+        .zoom-effect {
+            transition: transform 0.3s ease;
+        }
+
+        .zoom-effect:hover {
+            transform: scale(1.03);
+        }
+
+        .object-cover {
+            object-fit: cover;
+        }
+    </style>
 </asp:Content>
