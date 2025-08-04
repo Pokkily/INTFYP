@@ -336,6 +336,7 @@
     <Content Include="LanguageLearning\KLesson1\image\Coffee.png" />
     <Content Include="LanguageLearning\KLesson1\image\Juice.png" />
     <Content Include="LanguageLearning\KLesson1\image\Tea.png" />
+    <Content Include="LearningReport.aspx" />
     <Content Include="Library.aspx" />
     <Content Include="MainPage.aspx" />
     <Content Include="ManageClassroom.aspx" />
@@ -515,6 +516,13 @@
     </Compile>
     <Compile Include="Korean.aspx.designer.cs">
       <DependentUpon>Korean.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="LearningReport.aspx.cs">
+      <DependentUpon>LearningReport.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="LearningReport.aspx.designer.cs">
+      <DependentUpon>LearningReport.aspx</DependentUpon>
     </Compile>
     <Compile Include="QuizModels.cs" />
     <Compile Include="ClassDetails.aspx.cs">

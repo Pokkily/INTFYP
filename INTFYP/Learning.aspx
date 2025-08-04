@@ -27,7 +27,9 @@
                 </div>             
 
                 <div class="d-grid">
-                    <button class="btn btn-danger"><i class="bi bi-flag-fill"></i> Report</button>
+                    <a href="LearningReport.aspx" class="btn btn-danger">
+                        <i class="bi bi-flag-fill"></i> Report
+                    </a>
                 </div>
             </div>
 
