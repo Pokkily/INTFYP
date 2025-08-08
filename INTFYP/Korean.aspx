@@ -17,7 +17,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
 
-            <!-- Topic 0: Travel -->
+            <!-- Topic 1: Travel -->
             <div class="card mb-3 shadow-sm">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Topic: Travel</h5>

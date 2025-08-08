@@ -222,7 +222,7 @@ namespace KoreanApp
                     string status = $"{Math.Round(percentage)}%";
 
                     DocumentReference userDoc = db.Collection("users").Document(userId);
-                    CollectionReference resultCol = userDoc.Collection("KoreanCSL1_Results");
+                    CollectionReference resultCol = userDoc.Collection("KoreanCoffeShopLesson1Result");
 
                     Dictionary<string, object> resultData = new Dictionary<string, object>
                     {
