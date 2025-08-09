@@ -220,9 +220,11 @@ namespace KoreanApp
 
                     double percentage = ((double)correctCount / questions.Count) * 100;
                     string status = $"{Math.Round(percentage)}%";
-
+                   
                     DocumentReference userDoc = db.Collection("users").Document(userId);
-                    CollectionReference resultCol = userDoc.Collection("KoreanRestaurantLesson1Result");
+                    CollectionReference resultsCol = userDoc.Collection("results");
+                    DocumentReference lessonDoc = resultsCol.Document("KoreanRestaurantLesson1Result");
+                    CollectionReference attemptsCol = lessonDoc.Collection("attempts");
 
                     Dictionary<string, object> resultData = new Dictionary<string, object>
                     {
@@ -235,7 +237,7 @@ namespace KoreanApp
                         { "timestamp", Timestamp.GetCurrentTimestamp() }
                     };
 
-                    await resultCol.AddAsync(resultData);
+                    await attemptsCol.AddAsync(resultData);
 
                     lblQuestion.Text = $"🎉 Lesson Complete!<br/>You got {correctCount} out of {questions.Count} correct!" +
                                        $"<br/>Time taken: {duration.TotalSeconds:F1} seconds.";
@@ -250,7 +252,7 @@ namespace KoreanApp
                 btnNext.Visible = false;
                 lblFeedback.Visible = false;
 
-                string script = "<script>setTimeout(function() { window.location.href = 'Korean.aspx'; }, 3500);</script>";
+                string script = "<script>setTimeout(function() { window.location.href = '/Korean.aspx'; }, 3500);</script>";
                 ClientScript.RegisterStartupScript(this.GetType(), "RedirectAfterDelay", script);
             }
             else

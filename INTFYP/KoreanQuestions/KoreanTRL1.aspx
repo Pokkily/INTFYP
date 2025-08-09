@@ -1,4 +1,4 @@
-﻿<%@ Page Async="true" Title="KoreanTRL1" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeBehind="KoreanTRL1.aspx.cs" Inherits="KoreanApp.KoreanTRL1" %>
+﻿<%@ Page Async="true" Title="KoreanTRL1" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeFile="KoreanTRL1.aspx.cs" Inherits="KoreanApp.KoreanTRL1" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
     Korean Lesson 1

@@ -45,32 +45,38 @@ namespace YourNamespace
                 return;
 
             // Travel
-            await LoadLessonStatus("KoreanTravel1_Results", travelLesson1StatusLiteral);
-            await LoadLessonStatus("KoreanTravel2_Results", travelLesson2StatusLiteral);
-            await LoadLessonStatus("KoreanTravel3_Results", travelLesson3StatusLiteral);
+            await LoadLessonStatus("KoreanTravelLesson1Result", travelLesson1StatusLiteral);
+            await LoadLessonStatus("KoreanTravelLesson2Result", travelLesson2StatusLiteral);
+            await LoadLessonStatus("KoreanTravelLesson3Result", travelLesson3StatusLiteral);
 
             // Coffee Shop
-            await LoadLessonStatus("KoreanCSL1_Results", lesson1StatusLiteral);
-            await LoadLessonStatus("KoreanCSL2_Results", lesson2StatusLiteral);
-            await LoadLessonStatus("KoreanCSL3_Results", lesson3StatusLiteral);
+            await LoadLessonStatus("KoreanCoffeeShopLesson1Result", lesson1StatusLiteral);
+            await LoadLessonStatus("KoreanCoffeeShopLesson2Result", lesson2StatusLiteral);
+            await LoadLessonStatus("KoreanCoffeeShopLesson3Result", lesson3StatusLiteral);
 
             // Market
-            await LoadLessonStatus("KoreanMarket1_Results", marketLesson1StatusLiteral);
-            await LoadLessonStatus("KoreanMarket2_Results", marketLesson2StatusLiteral);
-            await LoadLessonStatus("KoreanMarket3_Results", marketLesson3StatusLiteral);
+            await LoadLessonStatus("KoreanMarketLesson1Result", marketLesson1StatusLiteral);
+            await LoadLessonStatus("KoreanMarketLesson2Result", marketLesson2StatusLiteral);
+            await LoadLessonStatus("KoreanMarketLesson3Result", marketLesson3StatusLiteral);
 
             // Restaurant
-            await LoadLessonStatus("KoreanRestaurant1_Results", restLesson1StatusLiteral);
-            await LoadLessonStatus("KoreanRestaurant2_Results", restLesson2StatusLiteral);
-            await LoadLessonStatus("KoreanRestaurant3_Results", restLesson3StatusLiteral);
+            await LoadLessonStatus("KoreanRestaurantLesson1Result", restLesson1StatusLiteral);
+            await LoadLessonStatus("KoreanRestaurantLesson2Result", restLesson2StatusLiteral);
+            await LoadLessonStatus("KoreanRestaurantLesson3Result", restLesson3StatusLiteral);
         }
 
 
-        private async Task LoadLessonStatus(string collectionName, System.Web.UI.WebControls.Literal statusLiteral)
+        private async Task LoadLessonStatus(string lessonName, System.Web.UI.WebControls.Literal statusLiteral)
         {
             DocumentReference userDoc = db.Collection("users").Document(Session["userId"].ToString());
-            CollectionReference resultCol = userDoc.Collection(collectionName);
-            QuerySnapshot snapshot = await resultCol.GetSnapshotAsync();
+
+            // Navigate to: users/[userId]/results/[lessonName]/attempts
+            CollectionReference attemptsCol = userDoc
+                .Collection("results")
+                .Document(lessonName)
+                .Collection("attempts");
+
+            QuerySnapshot snapshot = await attemptsCol.GetSnapshotAsync();
 
             double highestScore = -1;
             DateTime earliestTime = DateTime.MaxValue;
@@ -104,13 +110,14 @@ namespace YourNamespace
 
             if (highestScore >= 0 && !string.IsNullOrEmpty(bestStatus))
             {
-                statusLiteral.Text = $"<div style='color: green;'>Progress: {bestStatus}<br/>Score: {highestScore}<br/>Taken on: {malaysiaTime:g}</div>";
+                statusLiteral.Text = $"<div style='color: green;'>Progress: {bestStatus}<br/>Score: {highestScore}<br/></div>";
             }
             else
             {
                 statusLiteral.Text = "<div style='color: red;'>Status: No Progress!</div>";
             }
         }
+
 
 
 
