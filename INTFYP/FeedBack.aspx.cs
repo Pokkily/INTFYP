@@ -15,6 +15,7 @@ namespace YourProjectNamespace
     public partial class Feedback : System.Web.UI.Page
     {
         private static FirestoreDb db;
+        private Dictionary<string, bool> commentBoxStates = new Dictionary<string, bool>();
 
         protected async void Page_Load(object sender, EventArgs e)
         {
@@ -94,7 +95,7 @@ namespace YourProjectNamespace
                 description,
                 mediaUrl,
                 likes = new string[] { },
-                comments = new object[] { },
+                comments = new List<object>(),
                 createdAt = Timestamp.GetCurrentTimestamp()
             };
 
@@ -217,7 +218,6 @@ namespace YourProjectNamespace
             }
         }
 
-
         protected async void rptFeedback_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             if (e.CommandName == "Like")
@@ -255,59 +255,70 @@ namespace YourProjectNamespace
                     };
 
                     await postRef.UpdateAsync(updates);
-                    await LoadAllFeedbacks(); // Refresh
+                    await LoadAllFeedbacks();
                 }
             }
-        }
-
-        protected async void btnSubmitComment_Click(object sender, EventArgs e)
-        {
-            lblCommentMessage.Visible = true;
-            string userId = Session["userId"]?.ToString();
-            string username = Session["username"]?.ToString() ?? "Anonymous";
-
-            if (string.IsNullOrEmpty(userId))
+            else if (e.CommandName == "SubmitComment")
             {
-                lblCommentMessage.CssClass = "text-danger";
-                lblCommentMessage.Text = "You must be logged in to comment.";
-                return;
-            }
+                string postId = e.CommandArgument.ToString();
+                string userId = Session["userId"]?.ToString();
+                string username = Session["username"]?.ToString() ?? "Anonymous";
 
-            string postId = hfPostId.Value;
-            string commentText = txtComment.Text.Trim();
+                var txtCommentInput = (TextBox)e.Item.FindControl("txtCommentInput");
+                string commentText = txtCommentInput?.Text.Trim();
 
-            if (string.IsNullOrWhiteSpace(commentText))
-            {
-                lblCommentMessage.CssClass = "text-danger";
-                lblCommentMessage.Text = "Comment cannot be empty.";
-                return;
-            }
+                if (string.IsNullOrEmpty(userId))
+                {
+                    var lblCommentError = (Label)e.Item.FindControl("lblCommentError");
+                    if (lblCommentError != null)
+                    {
+                        lblCommentError.Text = "Please login to comment";
+                        lblCommentError.Visible = true;
+                    }
+                    return;
+                }
 
-            var commentData = new Dictionary<string, object>
-            {
-                { "userId", userId },
-                { "username", username },
-                { "text", commentText },
-                { "createdAt", Timestamp.GetCurrentTimestamp() }
-            };
+                if (string.IsNullOrWhiteSpace(commentText))
+                {
+                    var lblCommentError = (Label)e.Item.FindControl("lblCommentError");
+                    if (lblCommentError != null)
+                    {
+                        lblCommentError.Text = "Comment cannot be empty";
+                        lblCommentError.Visible = true;
+                    }
+                    return;
+                }
 
-            try
-            {
-                await db.Collection("feedbacks").Document(postId).Collection("comments").AddAsync(commentData);
+                var commentData = new Dictionary<string, object>
+                {
+                    { "userId", userId },
+                    { "username", username },
+                    { "text", commentText },
+                    { "createdAt", Timestamp.GetCurrentTimestamp() }
+                };
 
-                lblCommentMessage.CssClass = "text-success";
-                lblCommentMessage.Text = "Comment submitted successfully!";
+                try
+                {
+                    await db.Collection("feedbacks").Document(postId).Collection("comments").AddAsync(commentData);
 
-                txtComment.Text = "";
+                    // Clear the comment input
+                    if (txtCommentInput != null) txtCommentInput.Text = "";
 
-                ScriptManager.RegisterStartupScript(this, GetType(), "closeModal", "var modal = bootstrap.Modal.getInstance(document.getElementById('commentModal')); if(modal) modal.hide();", true);
+                    // Hide any previous error
+                    var lblCommentError = (Label)e.Item.FindControl("lblCommentError");
+                    if (lblCommentError != null) lblCommentError.Visible = false;
 
-                await LoadAllFeedbacks(); // Refresh comments display
-            }
-            catch (Exception ex)
-            {
-                lblCommentMessage.CssClass = "text-danger";
-                lblCommentMessage.Text = "Error submitting comment: " + ex.Message;
+                    await LoadAllFeedbacks();
+                }
+                catch (Exception ex)
+                {
+                    var lblCommentError = (Label)e.Item.FindControl("lblCommentError");
+                    if (lblCommentError != null)
+                    {
+                        lblCommentError.Text = "Error submitting comment: " + ex.Message;
+                        lblCommentError.Visible = true;
+                    }
+                }
             }
         }
     }
@@ -319,7 +330,4 @@ namespace YourProjectNamespace
             return dict.ContainsKey(key) ? dict[key] : defaultValue;
         }
     }
-
-
-
 }
