@@ -13,6 +13,35 @@
         </div>
     </section>
 
+<div class="container mb-4">
+  <div class="row">
+    <div class="col-md-6">
+      <h4>Lessons Completed vs Not Completed</h4>
+      <canvas id="donutChart" width="400" height="400"></canvas>
+    </div>
+    <div class="col-md-6">
+      <h4>Time Spent Learning (Daily)</h4>
+      <canvas id="dailyBarChart" width="400" height="400"></canvas>
+      <asp:Literal ID="TotalTimeAfterDailyBar" runat="server" />
+</div>
+
+  </div>
+</div>
+
+
+
+<style>
+  #donutChart {
+    width: 400px !important;
+    height: 400px !important;
+  }
+  #dailyBarChart {
+    width: 600px !important;
+    height: 400px !important;
+  }
+</style>
+
+
     <!-- Sorting controls -->
     <div class="container mb-3">
         <div class="row">
@@ -25,8 +54,7 @@
                     <asp:ListItem Value="older" Text="Older" />
                     <asp:ListItem Value="shortest_duration" Text="Shortest Duration" />
                     <asp:ListItem Value="longest_duration" Text="Longest Duration" />
-                    <asp:ListItem Value="most_correct" Text="Most Correct" />
-                    <asp:ListItem Value="most_incorrect" Text="Most Incorrect" />                  
+                    <asp:ListItem Value="most_correct" Text="Most Correct" />              
                 </asp:DropDownList>
             </div>
         </div>
@@ -40,6 +68,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Optional styling -->
     <style>
