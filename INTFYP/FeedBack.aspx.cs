@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.UI;
+using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
@@ -157,6 +158,20 @@ namespace YourProjectNamespace
                 var data = doc.ToDictionary();
                 var likesList = data.ContainsKey("likes") ? (data["likes"] as IEnumerable<object>)?.ToList() : new List<object>();
 
+                // Load comments for this feedback post
+                var commentsSnapshot = await db.Collection("feedbacks").Document(doc.Id).Collection("comments").OrderBy("createdAt").GetSnapshotAsync();
+
+                var comments = commentsSnapshot.Documents.Select(c =>
+                {
+                    var cData = c.ToDictionary();
+                    return new
+                    {
+                        username = cData.GetValueOrDefault("username", "Anonymous").ToString(),
+                        text = cData.GetValueOrDefault("text", "").ToString(),
+                        createdAt = cData.ContainsKey("createdAt") ? ((Timestamp)cData["createdAt"]).ToDateTime() : DateTime.Now
+                    };
+                }).ToList();
+
                 feedbacks.Add(new
                 {
                     PostId = doc.Id,
@@ -166,13 +181,42 @@ namespace YourProjectNamespace
                     Likes = likesList?.Count ?? 0,
                     CreatedAt = data.ContainsKey("createdAt")
                         ? ((Timestamp)data["createdAt"]).ToDateTime()
-                        : DateTime.Now
+                        : DateTime.Now,
+                    Comments = comments
                 });
             }
 
             rptFeedback.DataSource = feedbacks;
             rptFeedback.DataBind();
         }
+
+        protected void rptFeedback_ItemDataBound(object sender, RepeaterItemEventArgs e)
+        {
+            if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem)
+            {
+                var feedback = (dynamic)e.Item.DataItem;
+                var rptComments = (Repeater)e.Item.FindControl("rptComments");
+                var noCommentsDiv = (HtmlGenericControl)e.Item.FindControl("noCommentsDiv");
+
+                if (rptComments != null)
+                {
+                    rptComments.DataSource = feedback.Comments;
+                    rptComments.DataBind();
+
+                    if (feedback.Comments.Count == 0)
+                    {
+                        if (noCommentsDiv != null) noCommentsDiv.Style["display"] = "block";
+                        rptComments.Visible = false;
+                    }
+                    else
+                    {
+                        if (noCommentsDiv != null) noCommentsDiv.Style["display"] = "none";
+                        rptComments.Visible = true;
+                    }
+                }
+            }
+        }
+
 
         protected async void rptFeedback_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
@@ -257,6 +301,8 @@ namespace YourProjectNamespace
                 txtComment.Text = "";
 
                 ScriptManager.RegisterStartupScript(this, GetType(), "closeModal", "var modal = bootstrap.Modal.getInstance(document.getElementById('commentModal')); if(modal) modal.hide();", true);
+
+                await LoadAllFeedbacks(); // Refresh comments display
             }
             catch (Exception ex)
             {
@@ -273,4 +319,7 @@ namespace YourProjectNamespace
             return dict.ContainsKey(key) ? dict[key] : defaultValue;
         }
     }
+
+
+
 }

@@ -39,7 +39,7 @@
 
             <!-- Feedback Cards -->
             <div class="col-md-8">
-                <asp:Repeater ID="rptFeedback" runat="server" OnItemCommand="rptFeedback_ItemCommand">
+                <asp:Repeater ID="rptFeedback" runat="server" OnItemCommand="rptFeedback_ItemCommand" OnItemDataBound="rptFeedback_ItemDataBound">
                     <HeaderTemplate>
                         <div class="row row-cols-1 row-cols-md-2 g-3">
                     </HeaderTemplate>
@@ -64,7 +64,7 @@
                                                 <small class="text-muted d-block mb-2"><%# Eval("CreatedAt", "{0:dd MMM yyyy hh:mm tt}") %></small>
                                                 <p class="mb-2"><%# Eval("Description") %></p>
                                             </div>
-                                            <div class="d-flex gap-2 mt-auto">
+                                            <div class="d-flex gap-2 mt-auto mb-2">
                                                 <asp:Button ID="btnLike" runat="server"
                                                     Text='<%# "👍 " + Eval("Likes") %>'
                                                     CommandName="Like"
@@ -75,6 +75,25 @@
                                                     Text="💬 Comment"
                                                     CssClass="btn btn-sm btn-outline-secondary"
                                                     OnClientClick='<%# "openCommentModal(\"" + Eval("PostId") + "\"); return false;" %>' />
+                                            </div>
+
+                                            <!-- Comments List -->
+                                            <div class="mt-3 border-top pt-2">
+                                                <strong>Comments:</strong>
+
+                                                <asp:Repeater ID="rptComments" runat="server">
+                                                    <ItemTemplate>
+                                                        <div class="comment mb-2 p-2 rounded border bg-light">
+                                                            <small class="fw-bold"><%# Eval("username") %></small>
+                                                            <small class="text-muted ms-2"><%# Eval("createdAt", "{0:dd MMM yyyy hh:mm tt}") %></small>
+                                                            <p class="mb-0"><%# Eval("text") %></p>
+                                                        </div>
+                                                    </ItemTemplate>
+                                                </asp:Repeater>
+
+                                                <div id="noCommentsDiv" runat="server" style="display:none;" class="text-muted fst-italic">
+                                                    No comments yet.
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
