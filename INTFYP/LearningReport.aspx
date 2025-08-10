@@ -13,11 +13,29 @@
         </div>
     </section>
 
+    <!-- Sorting controls -->
+    <div class="container mb-3">
+        <div class="row">
+            <div class="col-md-4 d-flex align-items-center gap-2">
+                <label for="SortSelect" class="form-label mb-0 fw-bold">Sort By:</label>
+                <asp:DropDownList ID="SortSelect" runat="server" AutoPostBack="true" OnSelectedIndexChanged="SortSelect_SelectedIndexChanged" CssClass="form-select form-select-sm w-auto">
+                    <asp:ListItem Value="name_asc" Text="Name A-Z" />
+                    <asp:ListItem Value="name_desc" Text="Name Z-A" />
+                    <asp:ListItem Value="newest" Text="Newest" Selected="True" />
+                    <asp:ListItem Value="older" Text="Older" />
+                    <asp:ListItem Value="shortest_duration" Text="Shortest Duration" />
+                    <asp:ListItem Value="longest_duration" Text="Longest Duration" />
+                    <asp:ListItem Value="most_correct" Text="Most Correct" />
+                    <asp:ListItem Value="most_incorrect" Text="Most Incorrect" />                  
+                </asp:DropDownList>
+            </div>
+        </div>
+    </div>
+
     <!-- Report Container -->
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <!-- Literal will render lesson cards -->
                 <asp:Literal ID="ReportLiteral" runat="server"></asp:Literal>
             </div>
         </div>

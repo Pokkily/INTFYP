@@ -16,12 +16,7 @@
     <div class="container">
         <div class="row">
             <!-- LEFT SIDEBAR -->
-            <div class="col-md-3">
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-header bg-white fw-bold">Language Joined</div>
-                    <ul class="list-group list-group-flush">
-                    </ul>
-                </div>             
+            <div class="col-md-3">          
 
                 <div class="d-grid">
                     <a href="LearningReport.aspx" class="btn btn-danger">
@@ -50,68 +45,8 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-md-4">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title ms-2">French</h5>
-                                <p class="card-text ms-2">Français</p>
-                                <div class="d-flex justify-content-end">
-                                    <button class="btn btn-outline-primary me-2">Start</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title ms-2">Japanese</h5>
-                                <p class="card-text ms-2">日本語</p>
-                                <div class="d-flex justify-content-end">
-                                    <button class="btn btn-outline-primary me-2">Start</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title ms-2">Spanish</h5>
-                                <p class="card-text ms-2">español</p>
-                                <div class="d-flex justify-content-end">
-                                    <button class="btn btn-outline-primary me-2">Start</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title ms-2">Thai</h5>
-                                <p class="card-text ms-2">แบบไทย</p>
-                                <div class="d-flex justify-content-end">
-                                    <button class="btn btn-outline-primary me-2">Start</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4">
-                        <div class="card h-100 shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title ms-2">Russian</h5>
-                                <p class="card-text ms-2">русский</p>
-                                <div class="d-flex justify-content-end">
-                                    <button class="btn btn-outline-primary me-2">Start</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>         
             </div>
         </div>
-    </div>
+      </div>
 </asp:Content>

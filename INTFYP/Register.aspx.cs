@@ -16,10 +16,25 @@ namespace YourProjectNamespace
         private static FirestoreDb db;
         private static readonly object dbLock = new object();
 
-        // SendGrid configuration from web.config
-        private static readonly string SendGridApiKey = ConfigurationManager.AppSettings["SendGridApiKey"];
-        private static readonly string SendGridFromEmail = ConfigurationManager.AppSettings["SendGridFromEmail"];
-        private static readonly string SendGridFromName = ConfigurationManager.AppSettings["SendGridFromName"];
+        // SendGrid configuration with fallback to environment variables
+        private static readonly string SendGridApiKey = GetConfigValue("SendGridApiKey");
+        private static readonly string SendGridFromEmail = GetConfigValue("SendGridFromEmail");
+        private static readonly string SendGridFromName = GetConfigValue("SendGridFromName");
+
+        // Helper method to get configuration values with environment variable fallback
+        private static string GetConfigValue(string key)
+        {
+            // First try to get from web.config/appSettings.config
+            string value = ConfigurationManager.AppSettings[key];
+
+            // If not found or empty, try environment variable
+            if (string.IsNullOrEmpty(value))
+            {
+                value = Environment.GetEnvironmentVariable(key);
+            }
+
+            return value;
+        }
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -53,10 +68,21 @@ namespace YourProjectNamespace
                     {
                         try
                         {
+                            // Try multiple paths for service account key
                             string path = Server.MapPath("~/serviceAccountKey.json");
+
+                            // Alternative: try environment variable for service account path
                             if (!System.IO.File.Exists(path))
                             {
-                                throw new FileNotFoundException($"Service account key not found at: {path}");
+                                string envPath = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
+                                if (!string.IsNullOrEmpty(envPath) && System.IO.File.Exists(envPath))
+                                {
+                                    path = envPath;
+                                }
+                                else
+                                {
+                                    throw new FileNotFoundException($"Service account key not found at: {path}. Please ensure serviceAccountKey.json exists or set GOOGLE_APPLICATION_CREDENTIALS environment variable.");
+                                }
                             }
 
                             Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
@@ -82,6 +108,13 @@ namespace YourProjectNamespace
             try
             {
                 System.Diagnostics.Debug.WriteLine("Registration process started");
+
+                // Validate API keys are configured
+                if (string.IsNullOrEmpty(SendGridApiKey))
+                {
+                    ShowErrorMessage("Email service is not configured. Please contact administrator.");
+                    return;
+                }
 
                 // Get form values
                 var firstName = txtFirstName.Text.Trim();
