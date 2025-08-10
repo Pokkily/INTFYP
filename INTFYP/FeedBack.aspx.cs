@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -150,7 +149,7 @@ namespace YourProjectNamespace
 
         private async Task LoadAllFeedbacks()
         {
-            var feedbacks = new System.Collections.Generic.List<dynamic>();
+            var feedbacks = new List<dynamic>();
             QuerySnapshot snapshot = await db.Collection("feedbacks").OrderByDescending("createdAt").GetSnapshotAsync();
 
             foreach (var doc in snapshot.Documents)
@@ -173,18 +172,6 @@ namespace YourProjectNamespace
 
             rptFeedback.DataSource = feedbacks;
             rptFeedback.DataBind();
-        }
-
-
-        public string GetMediaHtml(string url)
-        {
-            if (string.IsNullOrEmpty(url)) return string.Empty;
-
-            string ext = Path.GetExtension(url).ToLower();
-            if (ext == ".mp4" || ext == ".webm")
-                return $"<video controls width='100%' src='{url}' class='mb-2'></video>";
-            else
-                return $"<img src='{url}' class='img-fluid mb-2' />";
         }
 
         protected async void rptFeedback_ItemCommand(object source, RepeaterCommandEventArgs e)
@@ -219,9 +206,9 @@ namespace YourProjectNamespace
                     }
 
                     Dictionary<string, object> updates = new Dictionary<string, object>
-            {
-                { "likes", likes }
-            };
+                    {
+                        { "likes", likes }
+                    };
 
                     await postRef.UpdateAsync(updates);
                     await LoadAllFeedbacks(); // Refresh
@@ -229,11 +216,59 @@ namespace YourProjectNamespace
             }
         }
 
+        protected async void btnSubmitComment_Click(object sender, EventArgs e)
+        {
+            lblCommentMessage.Visible = true;
+            string userId = Session["userId"]?.ToString();
+            string username = Session["username"]?.ToString() ?? "Anonymous";
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                lblCommentMessage.CssClass = "text-danger";
+                lblCommentMessage.Text = "You must be logged in to comment.";
+                return;
+            }
+
+            string postId = hfPostId.Value;
+            string commentText = txtComment.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(commentText))
+            {
+                lblCommentMessage.CssClass = "text-danger";
+                lblCommentMessage.Text = "Comment cannot be empty.";
+                return;
+            }
+
+            var commentData = new Dictionary<string, object>
+            {
+                { "userId", userId },
+                { "username", username },
+                { "text", commentText },
+                { "createdAt", Timestamp.GetCurrentTimestamp() }
+            };
+
+            try
+            {
+                await db.Collection("feedbacks").Document(postId).Collection("comments").AddAsync(commentData);
+
+                lblCommentMessage.CssClass = "text-success";
+                lblCommentMessage.Text = "Comment submitted successfully!";
+
+                txtComment.Text = "";
+
+                ScriptManager.RegisterStartupScript(this, GetType(), "closeModal", "var modal = bootstrap.Modal.getInstance(document.getElementById('commentModal')); if(modal) modal.hide();", true);
+            }
+            catch (Exception ex)
+            {
+                lblCommentMessage.CssClass = "text-danger";
+                lblCommentMessage.Text = "Error submitting comment: " + ex.Message;
+            }
+        }
     }
 
     public static class FirestoreExtensions
     {
-        public static object GetValueOrDefault(this System.Collections.Generic.IDictionary<string, object> dict, string key, object defaultValue)
+        public static object GetValueOrDefault(this IDictionary<string, object> dict, string key, object defaultValue)
         {
             return dict.ContainsKey(key) ? dict[key] : defaultValue;
         }

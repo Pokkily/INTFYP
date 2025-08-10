@@ -73,9 +73,8 @@
 
                                                 <asp:Button ID="btnComment" runat="server"
                                                     Text="💬 Comment"
-                                                    CommandName="Comment"
-                                                    CommandArgument='<%# Eval("PostId") %>'
-                                                    CssClass="btn btn-sm btn-outline-secondary" />
+                                                    CssClass="btn btn-sm btn-outline-secondary"
+                                                    OnClientClick='<%# "openCommentModal(\"" + Eval("PostId") + "\"); return false;" %>' />
                                             </div>
                                         </div>
                                     </div>
@@ -120,7 +119,7 @@
 
                     <div class="mb-3">
                         <label for="txtDescription" class="form-label">Description</label>
-                        <asp:TextBox ID="txtDescription" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="4" placeholder="Enter your feedback here" />
+                        <asp:TextBox ID="txtDescription" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="4" Placeholder="Enter your feedback here" />
                     </div>
 
                     <div class="mb-3">
@@ -130,6 +129,27 @@
                 </div>
                 <div class="modal-footer">
                     <asp:Button ID="btnSubmit" runat="server" CssClass="btn btn-primary" Text="Submit Feedback" OnClick="btnSubmit_Click" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comment Modal -->
+    <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="commentModalLabel">Add Comment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <asp:Label ID="lblCommentMessage" runat="server" Visible="false" CssClass="text-danger" />
+                    <asp:HiddenField ID="hfPostId" runat="server" />
+                    <asp:TextBox ID="txtComment" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="4" Placeholder="Write your comment here..." />
+                </div>
+                <div class="modal-footer">
+                    <asp:Button ID="btnSubmitComment" runat="server" Text="Submit Comment" CssClass="btn btn-primary" OnClick="btnSubmitComment_Click" />
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
@@ -150,4 +170,20 @@
             object-fit: cover;
         }
     </style>
+
+    <script>
+        function openCommentModal(postId) {
+            var hf = document.getElementById('<%= hfPostId.ClientID %>');
+            hf.value = postId;
+
+            var lbl = document.getElementById('<%= lblCommentMessage.ClientID %>');
+            if (lbl) lbl.style.display = 'none';
+
+            var txt = document.getElementById('<%= txtComment.ClientID %>');
+            if (txt) txt.value = '';
+
+            var modal = new bootstrap.Modal(document.getElementById('commentModal'));
+            modal.show();
+        }
+    </script>
 </asp:Content>
