@@ -353,7 +353,6 @@
     <Content Include="ManageClassroom.aspx" />
     <Content Include="Quiz.aspx" />
     <Content Include="QuizDetail.aspx" />
-    <Content Include="QuizResult.aspx" />
     <Content Include="Register.aspx" />
     <Content Include="Scholarship.aspx" />
     <Content Include="ResultManagement.aspx" />
@@ -690,13 +689,6 @@
     </Compile>
     <Compile Include="QuizDetail.aspx.designer.cs">
       <DependentUpon>QuizDetail.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="QuizResult.aspx.cs">
-      <DependentUpon>QuizResult.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="QuizResult.aspx.designer.cs">
-      <DependentUpon>QuizResult.aspx</DependentUpon>
     </Compile>
     <Compile Include="Register.aspx.cs">
       <DependentUpon>Register.aspx</DependentUpon>
