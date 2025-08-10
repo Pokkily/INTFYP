@@ -5,7 +5,7 @@ using Google.Cloud.Firestore;
 
 namespace KoreanApp
 {
-    public partial class KLesson1 : System.Web.UI.Page
+    public partial class KoreanCSL1 : System.Web.UI.Page
     {
         FirestoreDb db;
         static readonly object dbLock = new object();
@@ -62,6 +62,10 @@ namespace KoreanApp
             quizPanel.Visible = true;
             currentQuestionIndex = 0;
             correctCount = 0;
+
+            // Record start time
+            ViewState["StartTime"] = DateTime.UtcNow;
+
             ShowQuestion();
         }
 
@@ -206,27 +210,40 @@ namespace KoreanApp
             currentQuestionIndex++;
             if (currentQuestionIndex >= questions.Count)
             {
+                // End of quiz
                 string userId = Session["userId"]?.ToString();
                 if (!string.IsNullOrEmpty(userId))
                 {
-                    DocumentReference userDoc = db.Collection("users").Document(userId);
-                    CollectionReference resultCol = userDoc.Collection("KLesson1_Results");
+                    DateTime startTime = ViewState["StartTime"] != null ? (DateTime)ViewState["StartTime"] : DateTime.UtcNow;
+                    DateTime endTime = DateTime.UtcNow;
+                    TimeSpan duration = endTime - startTime;
 
                     double percentage = ((double)correctCount / questions.Count) * 100;
                     string status = $"{Math.Round(percentage)}%";
 
+                    DocumentReference userDoc = db.Collection("users").Document(userId);
+                    CollectionReference resultCol = userDoc.Collection("KoreanCoffeShopLesson1Result");
+
                     Dictionary<string, object> resultData = new Dictionary<string, object>
-            {
-                { "score", correctCount },
-                { "total", questions.Count },
-                { "status", status },
-                { "timestamp", Timestamp.GetCurrentTimestamp() }
-            };
+                    {
+                        { "score", correctCount },
+                        { "total", questions.Count },
+                        { "status", status },
+                        { "startTime", Timestamp.FromDateTime(startTime) },
+                        { "endTime", Timestamp.FromDateTime(endTime) },
+                        { "durationSeconds", duration.TotalSeconds },
+                        { "timestamp", Timestamp.GetCurrentTimestamp() }
+                    };
 
                     await resultCol.AddAsync(resultData);
-                }
 
-                lblQuestion.Text = $"🎉 Lesson Complete!<br/>You got {correctCount} out of {questions.Count} correct!";
+                    lblQuestion.Text = $"🎉 Lesson Complete!<br/>You got {correctCount} out of {questions.Count} correct!" +
+                                       $"<br/>Time taken: {duration.TotalSeconds:F1} seconds.";
+                }
+                else
+                {
+                    lblQuestion.Text = $"🎉 Lesson Complete!<br/>You got {correctCount} out of {questions.Count} correct!";
+                }
 
                 imageOptions.Visible = textOptions.Visible = false;
                 imgQuestion.Visible = audioQuestion.Visible = false;
@@ -241,6 +258,5 @@ namespace KoreanApp
                 ShowQuestion();
             }
         }
-
     }
 }

@@ -11,7 +11,7 @@ namespace KoreanApp
 {
 
 
-    public partial class KLesson1
+    public partial class KoreanRTL3
     {
 
         /// <summary>

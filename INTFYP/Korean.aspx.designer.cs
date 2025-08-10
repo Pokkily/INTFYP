@@ -15,6 +15,33 @@ namespace YourNamespace
     {
 
         /// <summary>
+        /// travelLesson1StatusLiteral control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal travelLesson1StatusLiteral;
+
+        /// <summary>
+        /// travelLesson2StatusLiteral control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal travelLesson2StatusLiteral;
+
+        /// <summary>
+        /// travelLesson3StatusLiteral control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal travelLesson3StatusLiteral;
+
+        /// <summary>
         /// lesson1StatusLiteral control.
         /// </summary>
         /// <remarks>
@@ -22,5 +49,77 @@ namespace YourNamespace
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal lesson1StatusLiteral;
+
+        /// <summary>
+        /// lesson2StatusLiteral control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal lesson2StatusLiteral;
+
+        /// <summary>
+        /// lesson3StatusLiteral control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal lesson3StatusLiteral;
+
+        /// <summary>
+        /// marketLesson1StatusLiteral control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal marketLesson1StatusLiteral;
+
+        /// <summary>
+        /// marketLesson2StatusLiteral control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal marketLesson2StatusLiteral;
+
+        /// <summary>
+        /// marketLesson3StatusLiteral control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal marketLesson3StatusLiteral;
+
+        /// <summary>
+        /// restLesson1StatusLiteral control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal restLesson1StatusLiteral;
+
+        /// <summary>
+        /// restLesson2StatusLiteral control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal restLesson2StatusLiteral;
+
+        /// <summary>
+        /// restLesson3StatusLiteral control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal restLesson3StatusLiteral;
     }
 }

@@ -1,4 +1,4 @@
-﻿<%@ Page Title="Korean Learning" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeBehind="Korean.aspx.cs" Inherits="YourNamespace.Korean" %>
+﻿<%@ Page Async="true" Title="Korean Learning" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeBehind="Korean.aspx.cs" Inherits="YourNamespace.Korean" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
     Korean Learning
@@ -14,51 +14,181 @@
     </section>
 
     <div class="container">
-        <div class="row">
-            <!-- Left Sidebar -->
-            <div class="col-md-3">
-                <div class="card mb-3 shadow-sm ms-2">
-                    <div class="card-header fw-bold">Language Joined</div>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between small">Mandarin Chinese <span>50%</span></li>
-                        <li class="list-group-item d-flex justify-content-between small">French <span>28%</span></li>
-                        <li class="list-group-item d-flex justify-content-between small">Japanese <span>87%</span></li>
-                    </ul>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <!-- Topic 1: Travel -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Topic: Travel</h5>
+                    <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#travelLessons" aria-expanded="false" aria-controls="travelLessons">
+                        View Lessons
+                    </button>
+                </div>
+                <div class="collapse" id="travelLessons">
+                    <div class="card-body">
+                        <!-- Travel Lessons -->
+                        <div class="card mb-2 shadow-sm">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-1">Travel Lesson 1</h6>
+                                    <asp:Literal ID="travelLesson1StatusLiteral" runat="server" />
+                                </div>
+                                <a href="KoreanQuestion/KoreanTravel1.aspx" class="btn btn-primary">Start</a>
+                            </div>
+                        </div>
+                        <div class="card mb-2 shadow-sm">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-1">Travel Lesson 2</h6>
+                                    <asp:Literal ID="travelLesson2StatusLiteral" runat="server" />
+                                </div>
+                                <a href="KoreanQuestion/KoreanTravel2.aspx" class="btn btn-primary">Start</a>
+                            </div>
+                        </div>
+                        <div class="card mb-2 shadow-sm">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-1">Travel Lesson 3</h6>
+                                    <asp:Literal ID="travelLesson3StatusLiteral" runat="server" />
+                                </div>
+                                <a href="KoreanQuestion/KoreanTravel3.aspx" class="btn btn-primary">Start</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right Content: Korean Lessons -->
-            <div class="col-md-9">
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-body d-flex justify-content-between align-items-center">
-                        <div class="ms-2">
-                            <h5 class="card-title mb-1">Korean Lesson 1</h5>
-                            <asp:Literal ID="lesson1StatusLiteral" runat="server" />
-                        </div>
-                        <a href="Klesson1.aspx" class="btn btn-dark me-2">Start</a>
-                    </div>
+            <!-- Topic 2: Coffee Shop -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Topic: Coffee Shop</h5>
+                    <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#coffeeLessons" aria-expanded="false" aria-controls="coffeeLessons">
+                        View Lessons
+                    </button>
                 </div>
-
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-body d-flex justify-content-between align-items-center">
-                        <div class="ms-2">
-                            <h5 class="card-title mb-1">Korean Lesson 2</h5>
-                            <p class="mb-0">Done <i class="bi bi-check-circle-fill text-success"></i></p>
+                <div class="collapse" id="coffeeLessons">
+                    <div class="card-body">
+                        <!-- Lesson cards -->
+                        <div class="card mb-2 shadow-sm">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-1">Coffee Shop Lesson 1</h6>
+                                    <asp:Literal ID="lesson1StatusLiteral" runat="server" />
+                                </div>
+                                <a href="KoreanQuestion/KoreanCSL1.aspx" class="btn btn-dark">Start</a>
+                            </div>
                         </div>
-                        <button class="btn btn-dark me-2">Review</button>
-                    </div>
-                </div>
-
-                <div class="card mb-3 shadow-sm">
-                    <div class="card-body d-flex justify-content-between align-items-center">
-                        <div class="ms-2">
-                            <h5 class="card-title mb-1">Korean Lesson 3</h5>
-                            <p class="mb-0">Progress 20%</p>
+                        <div class="card mb-2 shadow-sm">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-1">Coffee Shop Lesson 2</h6>
+                                    <asp:Literal ID="lesson2StatusLiteral" runat="server" />
+                                </div>
+                                <a href="KoreanQuestion/KoreanCSL2.aspx" class="btn btn-dark">Start</a>
+                            </div>
                         </div>
-                        <button class="btn btn-dark me-2">Continue</button>
+                        <div class="card mb-2 shadow-sm">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-1">Coffee Shop Lesson 3</h6>
+                                    <asp:Literal ID="lesson3StatusLiteral" runat="server" />
+                                </div>
+                                <a href="KoreanQuestion/KoreanCSL3.aspx" class="btn btn-dark">Start</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- Topic 3: Market -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Topic: Market</h5>
+                    <button class="btn btn-sm btn-outline-success" type="button" data-bs-toggle="collapse" data-bs-target="#marketLessons" aria-expanded="false" aria-controls="marketLessons">
+                        View Lessons
+                    </button>
+                </div>
+                <div class="collapse" id="marketLessons">
+                    <div class="card-body">
+                        <!-- Lesson cards -->
+                        <div class="card mb-2 shadow-sm">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-1">Market Lesson 1</h6>
+                                    <asp:Literal ID="marketLesson1StatusLiteral" runat="server" />
+                                </div>
+                                <a href="KoreanQuestion/KoreanMarket1.aspx" class="btn btn-success">Start</a>
+                            </div>
+                        </div>
+                        <div class="card mb-2 shadow-sm">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-1">Market Lesson 2</h6>
+                                    <asp:Literal ID="marketLesson2StatusLiteral" runat="server" />
+                                </div>
+                                <a href="KoreanQuestion/KoreanMarket1.aspx" class="btn btn-success">Start</a>
+                            </div>
+                        </div>
+                        <div class="card mb-2 shadow-sm">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-1">Market Lesson 3</h6>
+                                    <asp:Literal ID="marketLesson3StatusLiteral" runat="server" />
+                                </div>
+                                <a href="KoreanQuestion/KoreanMarket1.aspx" class="btn btn-success">Start</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topic 4: Restaurant -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Topic: Restaurant</h5>
+                    <button class="btn btn-sm btn-outline-danger" type="button" data-bs-toggle="collapse" data-bs-target="#restaurantLessons" aria-expanded="false" aria-controls="restaurantLessons">
+                        View Lessons
+                    </button>
+                </div>
+                <div class="collapse" id="restaurantLessons">
+                    <div class="card-body">
+                        <!-- Lesson cards -->
+                        <div class="card mb-2 shadow-sm">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-1">Restaurant Lesson 1</h6>
+                                    <asp:Literal ID="restLesson1StatusLiteral" runat="server" />
+                                </div>
+                                <a href="KoreanQuestion/KoreanRestaurant1.aspx" class="btn btn-danger">Start</a>
+                            </div>
+                        </div>
+                        <div class="card mb-2 shadow-sm">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-1">Restaurant Lesson 2</h6>
+                                    <asp:Literal ID="restLesson2StatusLiteral" runat="server" />
+                                </div>
+                                <a href="KoreanQuestion/KoreanRestaurant1.aspx" class="btn btn-danger">Start</a>
+                            </div>
+                        </div>
+                        <div class="card mb-2 shadow-sm">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title mb-1">Restaurant Lesson 3</h6>
+                                    <asp:Literal ID="restLesson3StatusLiteral" runat="server" />
+                                </div>
+                                <a href="KoreanQuestion/KoreanRestaurant1.aspx" class="btn btn-danger">Start</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
+</div>
+
+
+
 </asp:Content>
