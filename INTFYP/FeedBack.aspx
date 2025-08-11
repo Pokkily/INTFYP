@@ -5,11 +5,225 @@
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
-    <!-- Header -->
-    <section class="text-center bg-light py-4 border rounded mb-4">
+    <style>
+        /* Design System Variables */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --spacing-xs: 8px;
+            --spacing-sm: 15px;
+            --spacing-md: 20px;
+            --spacing-lg: 25px;
+            --spacing-xl: 30px;
+        }
+
+        /* Glass Morphism Effects */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Page Header */
+        .page-header {
+            background: var(--primary-gradient);
+            color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(50px) rotate(2deg); }
+            to { opacity: 1; transform: translateY(0) rotate(0deg); }
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(103, 126, 234, 0.3);
+            border: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(103, 126, 234, 0.4);
+        }
+
+        /* Enhanced Feedback Card Styles */
+        .feedback-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            animation: cardEntrance 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+
+        .feedback-image-container {
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .feedback-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .feedback-image:hover {
+            transform: scale(1.05);
+        }
+
+        .feedback-content {
+            padding: var(--spacing-md);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .feedback-header {
+            margin-bottom: 0.5rem;
+        }
+
+        .feedback-username {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .feedback-date {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .feedback-description {
+            margin-bottom: var(--spacing-sm);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.5;
+            flex-grow: 1;
+        }
+
+        .feedback-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+
+        .btn-sm {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        /* Comment Modal Styles */
+        .modal-header {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+        
+        .comment-input textarea {
+            resize: none;
+            border: 2px solid #e9ecef;
+            transition: border-color 0.3s ease;
+        }
+        
+        .comment-input textarea:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .comment {
+            transition: all 0.2s ease;
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 12px;
+            background: rgba(248, 249, 250, 0.8);
+        }
+        
+        .comment:hover {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+        }
+        
+        .comments-list {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+        
+        .comments-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .comments-list::-webkit-scrollbar-track {
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .comments-list::-webkit-scrollbar-thumb {
+            background: #dee2e6;
+            border-radius: 10px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .feedback-image-container {
+                height: 150px;
+            }
+            
+            .feedback-description {
+                -webkit-line-clamp: 2;
+            }
+            
+            .row-cols-md-2 {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+
+    <!-- Header with Gradient Background -->
+    <section class="page-header text-center">
         <div class="container">
             <h1 class="display-5 fw-bold">Student Feedback</h1>
-            <p class="lead text-muted">Submit your feedback with description, image, or video</p>
+            <p class="lead">Submit your feedback with description, image, or video</p>
         </div>
     </section>
 
@@ -17,7 +231,7 @@
         <div class="row">
             <!-- Student Info -->
             <div class="col-md-4">
-                <div class="card p-3 shadow-sm">
+                <div class="glass-card p-3 mb-3">
                     <h5 class="fw-bold mb-3">Student Information</h5>
                     <p><strong>Name:</strong> <asp:Label ID="lblName" runat="server" /></p>
                     <p><strong>Username:</strong> <asp:Label ID="lblUsername" runat="server" /></p>
@@ -39,148 +253,144 @@
 
             <!-- Feedback Cards -->
             <div class="col-md-8">
-<asp:Repeater ID="rptFeedback" runat="server" OnItemCommand="rptFeedback_ItemCommand" OnItemDataBound="rptFeedback_ItemDataBound">
-    <HeaderTemplate>
-        <div class="row row-cols-1 row-cols-md-2 g-3">
-    </HeaderTemplate>
-    <ItemTemplate>
-        <div class="col">
-            <div class="card h-100 shadow-sm">
-                <div class="row g-0 h-100">
-                    <!-- Image -->
-                    <div class="col-5">
-                        <img src='<%# Eval("MediaUrl") %>' alt="Media"
-                             class="img-fluid w-100 h-100 object-cover rounded-start zoom-effect"
-                             style="object-fit: cover; cursor: pointer;"
-                             data-bs-toggle="modal"
-                             data-bs-target='<%# "#imgModal" + Eval("PostId") %>' />
-                    </div>
-
-                    <!-- Text -->
-                    <div class="col-7">
-                        <div class="card-body d-flex flex-column justify-content-between h-100">
-                            <div>
-                                <h6 class="fw-bold mb-1 mb-0"><%# Eval("Username") %></h6>
-                                <small class="text-muted d-block mb-2"><%# Eval("CreatedAt", "{0:dd MMM yyyy hh:mm tt}") %></small>
-                                <p class="mb-2"><%# Eval("Description") %></p>
-                            </div>
-                            <div class="d-flex gap-2 mt-auto mb-2">
-                                <!-- Like Button -->
-                                <asp:Button ID="btnLike" runat="server"
-                                    Text='<%# "👍 " + Eval("Likes") %>'
-                                    CommandName="Like"
-                                    CommandArgument='<%# Eval("PostId") %>'
-                                    CssClass="btn btn-sm btn-outline-danger" />
-
-                                <!-- Comment Button (Modal Trigger) -->
-                                <button type="button"
-                                    class="btn btn-sm btn-outline-secondary"
-                                    data-bs-toggle="modal"
-                                    data-bs-target='<%# "#commentModal" + Eval("PostId") %>'
-                                    onclick="loadCommentsInModal('<%# Eval("PostId") %>')">
-                                    💬 Comments (<%# ((System.Collections.ICollection)Eval("Comments")).Count %>)
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Comment Modal for each post -->
-            <div class="modal fade" id='<%# "commentModal" + Eval("PostId") %>' tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title fw-bold">
-                                <i class="fas fa-comments me-2"></i>Comments - <%# Eval("Username") %>
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <!-- Original Post Info -->
-                            <div class="border-bottom pb-3 mb-4">
-                                <div class="d-flex align-items-center mb-2">
-                                    <h6 class="fw-bold mb-0 me-3"><%# Eval("Username") %></h6>
-                                    <small class="text-muted"><%# Eval("CreatedAt", "{0:dd MMM yyyy hh:mm tt}") %></small>
+                <asp:Repeater ID="rptFeedback" runat="server" OnItemCommand="rptFeedback_ItemCommand" OnItemDataBound="rptFeedback_ItemDataBound">
+                    <HeaderTemplate>
+                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <div class="col">
+                            <div class="glass-card feedback-card h-100" style='animation-delay: calc(<%# Container.ItemIndex %> * 0.1s)'>
+                                <!-- Image Section -->
+                                <div class="feedback-image-container">
+                                    <img src='<%# Eval("MediaUrl") %>' alt="Feedback media"
+                                         class="feedback-image"
+                                         data-bs-toggle="modal"
+                                         data-bs-target='<%# "#imgModal" + Eval("PostId") %>' />
                                 </div>
-                                <p class="mb-0"><%# Eval("Description") %></p>
-                            </div>
-
-                            <!-- Comment Input Section -->
-                            <div class="comment-input mb-4">
-                                <label class="form-label fw-bold">Add a Comment</label>
-                                <asp:TextBox ID="txtCommentInput" runat="server" 
-                                    TextMode="MultiLine" 
-                                    Rows="3" 
-                                    CssClass="form-control mb-2" 
-                                    placeholder="Write your comment..." />
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <asp:Label ID="lblCommentError" runat="server" CssClass="text-danger small" Visible="false" />
-                                    <asp:Button ID="btnSubmitComment" runat="server"
-                                        Text="Post Comment"
-                                        CommandName="SubmitComment"
-                                        CommandArgument='<%# Eval("PostId") %>'
-                                        CssClass="btn btn-primary" />
-                                </div>
-                            </div>
-
-                            <!-- Comments List -->
-                            <div class="comments-section">
-                                <h6 class="fw-bold mb-3 border-bottom pb-2">
-                                    All Comments (<%# ((System.Collections.ICollection)Eval("Comments")).Count %>)
-                                </h6>
                                 
-                                <div class="comments-list" style="max-height: 400px; overflow-y: auto;">
-                                    <asp:Repeater ID="rptComments" runat="server">
-                                        <ItemTemplate>
-                                            <div class="comment mb-3 p-3 rounded border bg-light">
-                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" 
-                                                             style="width: 32px; height: 32px; font-size: 14px;">
-                                                            <%# Eval("username").ToString().Substring(0, 1).ToUpper() %>
-                                                        </div>
-                                                        <small class="fw-bold"><%# Eval("username") %></small>
-                                                    </div>
-                                                    <small class="text-muted"><%# Eval("createdAt", "{0:dd MMM yyyy hh:mm tt}") %></small>
-                                                </div>
-                                                <p class="mb-0 ps-5"><%# Eval("text") %></p>
-                                            </div>
-                                        </ItemTemplate>
-                                    </asp:Repeater>
+                                <!-- Content Section -->
+                                <div class="feedback-content">
+                                    <div class="feedback-header">
+                                        <div class="feedback-username"><%# Eval("Username") %></div>
+                                        <div class="feedback-date"><%# Eval("CreatedAt", "{0:dd MMM yyyy hh:mm tt}") %></div>
+                                    </div>
+                                    
+                                    <p class="feedback-description"><%# Eval("Description") %></p>
+                                    
+                                    <div class="feedback-actions">
+                                        <!-- Like Button -->
+                                        <asp:Button ID="btnLike" runat="server"
+                                            Text='<%# "👍 " + Eval("Likes") %>'
+                                            CommandName="Like"
+                                            CommandArgument='<%# Eval("PostId") %>'
+                                            CssClass="btn btn-sm btn-outline-danger" />
 
-                                    <!-- No Comments Message -->
-                                    <div id="noCommentsDiv" runat="server" style="display:none;" class="text-center text-muted py-5">
-                                        <i class="fas fa-comment-slash fa-3x mb-3 opacity-50"></i>
-                                        <p class="mb-0">No comments yet. Be the first to comment!</p>
+                                        <!-- Comment Button -->
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-secondary"
+                                            data-bs-toggle="modal"
+                                            data-bs-target='<%# "#commentModal" + Eval("PostId") %>'
+                                            onclick="loadCommentsInModal('<%# Eval("PostId") %>')">
+                                            💬 <%# ((System.Collections.ICollection)Eval("Comments")).Count %>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Comment Modal for each post -->
+                            <div class="modal fade" id='<%# "commentModal" + Eval("PostId") %>' tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-lg modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title fw-bold">
+                                                <i class="fas fa-comments me-2"></i>Comments - <%# Eval("Username") %>
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- Original Post Info -->
+                                            <div class="border-bottom pb-3 mb-4">
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <h6 class="fw-bold mb-0 me-3"><%# Eval("Username") %></h6>
+                                                    <small class="text-muted"><%# Eval("CreatedAt", "{0:dd MMM yyyy hh:mm tt}") %></small>
+                                                </div>
+                                                <p class="mb-0"><%# Eval("Description") %></p>
+                                            </div>
+
+                                            <!-- Comment Input Section -->
+                                            <div class="comment-input mb-4">
+                                                <label class="form-label fw-bold">Add a Comment</label>
+                                                <asp:TextBox ID="txtCommentInput" runat="server" 
+                                                    TextMode="MultiLine" 
+                                                    Rows="3" 
+                                                    CssClass="form-control mb-2" 
+                                                    placeholder="Write your comment..." />
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <asp:Label ID="lblCommentError" runat="server" CssClass="text-danger small" Visible="false" />
+                                                    <asp:Button ID="btnSubmitComment" runat="server"
+                                                        Text="Post Comment"
+                                                        CommandName="SubmitComment"
+                                                        CommandArgument='<%# Eval("PostId") %>'
+                                                        CssClass="btn btn-primary" />
+                                                </div>
+                                            </div>
+
+                                            <!-- Comments List -->
+                                            <div class="comments-section">
+                                                <h6 class="fw-bold mb-3 border-bottom pb-2">
+                                                    All Comments (<%# ((System.Collections.ICollection)Eval("Comments")).Count %>)
+                                                </h6>
+                                                
+                                                <div class="comments-list">
+                                                    <asp:Repeater ID="rptComments" runat="server">
+                                                        <ItemTemplate>
+                                                            <div class="comment">
+                                                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                    <div class="d-flex align-items-center">
+                                                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" 
+                                                                             style="width: 32px; height: 32px; font-size: 14px;">
+                                                                            <%# Eval("username").ToString().Substring(0, 1).ToUpper() %>
+                                                                        </div>
+                                                                        <small class="fw-bold"><%# Eval("username") %></small>
+                                                                    </div>
+                                                                    <small class="text-muted"><%# Eval("createdAt", "{0:dd MMM yyyy hh:mm tt}") %></small>
+                                                                </div>
+                                                                <p class="mb-0 ps-5"><%# Eval("text") %></p>
+                                                            </div>
+                                                        </ItemTemplate>
+                                                    </asp:Repeater>
+
+                                                    <!-- No Comments Message -->
+                                                    <div id="noCommentsDiv" runat="server" style="display:none;" class="text-center text-muted py-5">
+                                                        <i class="fas fa-comment-slash fa-3x mb-3 opacity-50"></i>
+                                                        <p class="mb-0">No comments yet. Be the first to comment!</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Image Modal -->
+                            <div class="modal fade" id='<%# "imgModal" + Eval("PostId") %>' tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-xl">
+                                    <div class="modal-content">
+                                        <div class="modal-body text-center p-0">
+                                            <img src='<%# Eval("MediaUrl") %>' class="img-fluid w-100" style="max-height:90vh; object-fit: contain;" />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </ItemTemplate>
+                    <FooterTemplate>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Image Modal -->
-            <div class="modal fade" id='<%# "imgModal" + Eval("PostId") %>' tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-body text-center p-0">
-                            <img src='<%# Eval("MediaUrl") %>' class="img-fluid w-100" style="max-height:90vh; object-fit: contain;" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </ItemTemplate>
-    <FooterTemplate>
-        </div>
-    </FooterTemplate>
-</asp:Repeater>
-
+                    </FooterTemplate>
+                </asp:Repeater>
             </div>
         </div>
     </div>
@@ -221,56 +431,6 @@
         </div>
     </div>
 
-    <!-- Styles -->
-    <style>
-        .zoom-effect {
-            transition: transform 0.3s ease;
-        }
-        .zoom-effect:hover {
-            transform: scale(1.03);
-        }
-        .object-cover {
-            object-fit: cover;
-        }
-        .comment {
-            transition: all 0.2s ease;
-        }
-        .comment:hover {
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
-            transform: translateY(-1px);
-        }
-        .comments-list::-webkit-scrollbar {
-            width: 6px;
-        }
-        .comments-list::-webkit-scrollbar-track {
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-        .comments-list::-webkit-scrollbar-thumb {
-            background: #dee2e6;
-            border-radius: 10px;
-        }
-        .comments-list::-webkit-scrollbar-thumb:hover {
-            background: #adb5bd;
-        }
-        .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .modal-header .btn-close {
-            filter: invert(1);
-        }
-        .comment-input textarea {
-            resize: none;
-            border: 2px solid #e9ecef;
-            transition: border-color 0.3s ease;
-        }
-        .comment-input textarea:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-    </style>
-
     <!-- Include Required Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -281,17 +441,29 @@
         $(document).ready(function () {
             console.log('Feedback page loaded with modal comments');
 
-            // Optional: Add some animation when modals open
+            // Add hover effects to all glass cards
+            const cards = document.querySelectorAll('.glass-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-8px)';
+                    card.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.15)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = '';
+                    card.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.1)';
+                });
+            });
+
+            // Animation when modals open
             $('.modal').on('shown.bs.modal', function () {
                 $(this).find('.modal-dialog').addClass('animate__animated animate__fadeInUp');
             });
         });
 
-        // Function to load comments (optional - for future AJAX loading)
+        // Function to load comments
         function loadCommentsInModal(postId) {
             console.log('Opening comment modal for post:', postId);
             // You can add AJAX loading logic here if needed
-            // For now, comments are already loaded via Repeater
         }
 
         // Page load function for postbacks
@@ -300,12 +472,12 @@
             // Re-initialize any JavaScript if needed after postback
         }
 
-        // Optional: Auto-focus on comment input when modal opens
+        // Auto-focus on comment input when modal opens
         $(document).on('shown.bs.modal', '[id^="commentModal"]', function () {
             $(this).find('textarea[id*="txtCommentInput"]').focus();
         });
 
-        // Optional: Clear comment input and errors when modal closes
+        // Clear comment input and errors when modal closes
         $(document).on('hidden.bs.modal', '[id^="commentModal"]', function () {
             var modal = $(this);
             modal.find('textarea[id*="txtCommentInput"]').val('');
