@@ -113,7 +113,41 @@ namespace INTFYP
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnSubmit;
 
+        /// <summary>
+        /// filePdf control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
         protected global::System.Web.UI.WebControls.FileUpload filePdf;
+
+        /// <summary>
+        /// lblBookStatus control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblBookStatus;
+
+        /// <summary>
+        /// rptBooks control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptBooks;
+
+        /// <summary>
+        /// pnlNoBooks control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlNoBooks;
 
     }
 }

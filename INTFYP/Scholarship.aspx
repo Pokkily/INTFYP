@@ -49,34 +49,51 @@
                 </div>
             </div>
 
-            <!-- RIGHT SIDE: Scholarships -->
-            <div class="col-md-9">
-                <h3 class="fw-bold mb-3">Scholarships</h3>
-
-                <asp:Repeater ID="rptScholarships" runat="server">
-                    <ItemTemplate>
-                        <div class="card mb-4 shadow-sm">
-                            <div class="card-body">
-                                <h5 class="card-title"><%# Eval("Title") %></h5>
-
-                                <p><strong>Requirements:</strong><br />
-                                    <asp:Literal ID="litRequirement" runat="server" Text='<%# Eval("Requirement").ToString().Replace("\n", "<br/>") %>' />
-                                </p>
-
-                                <p><strong>Terms:</strong><br />
-                                    <asp:Literal ID="litTerms" runat="server" Text='<%# Eval("Terms").ToString().Replace("\n", "<br/>") %>' />
-                                </p>
-
-                                <p><strong>Courses:</strong><br />
-                                    <asp:Literal ID="litCourses" runat="server" Text='<%# Eval("Courses").ToString().Replace("\n", "<br/>") %>' />
-                                </p>
-
-                                <a href='<%# Eval("Link") %>' target="_blank" class="btn btn-outline-primary">View Scholarship</a>
-                            </div>
+<!-- RIGHT SIDE: Scholarships -->
+<div class="col-md-9">
+    <asp:Repeater ID="rptScholarships" runat="server">
+        <ItemTemplate>
+            <!-- Each Scholarship as Collapsible Card -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><%# Eval("Title") %></h5>
+                    <button class="btn btn-sm btn-outline-primary" type="button" 
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#scholarship<%# Container.ItemIndex %>" 
+                            aria-expanded="false" 
+                            aria-controls="scholarship<%# Container.ItemIndex %>">
+                        View Details
+                    </button>
+                </div>
+                <div class="collapse" id="scholarship<%# Container.ItemIndex %>">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <strong>Requirements:</strong><br />
+                            <asp:Literal ID="litRequirement" runat="server" Text='<%# Eval("Requirement").ToString().Replace("\n", "<br/>") %>' />
                         </div>
-                    </ItemTemplate>
-                </asp:Repeater>
+
+                        <div class="mb-3">
+                            <strong>Terms:</strong><br />
+                            <asp:Literal ID="litTerms" runat="server" Text='<%# Eval("Terms").ToString().Replace("\n", "<br/>") %>' />
+                        </div>
+
+                        <div class="mb-4">
+                            <strong>Courses:</strong><br />
+                            <asp:Literal ID="litCourses" runat="server" Text='<%# Eval("Courses").ToString().Replace("\n", "<br/>") %>' />
+                        </div>
+
+                        <!-- Link Button at Bottom -->
+                        <div class="d-grid">
+                            <a href='<%# Eval("Link") %>' target="_blank" class="btn btn-primary">
+                                Apply for This Scholarship
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
+        </ItemTemplate>
+    </asp:Repeater>
+</div>
 
         </div>
     </div>
