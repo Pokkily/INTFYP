@@ -497,7 +497,6 @@
     </Compile>
     <Compile Include="GeminiAi.aspx.cs">
       <DependentUpon>GeminiAi.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="GeminiAi.aspx.designer.cs">
       <DependentUpon>GeminiAi.aspx</DependentUpon>
