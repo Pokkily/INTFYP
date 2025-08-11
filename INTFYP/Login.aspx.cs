@@ -156,7 +156,7 @@ namespace YourProjectNamespace
                 Session["position"] = userData["position"];
 
                 string position = userData["position"]?.ToString()?.ToLower();
-                string redirectPage = position == "administrator" ? "admin.aspx" : "mainpage.aspx";
+                string redirectPage = position == "administrator" ? "admin.aspx" : "class.aspx";
 
                 ShowSuccess("Login successful! Redirecting...");
                 ClientScript.RegisterStartupScript(this.GetType(), "redirect",
