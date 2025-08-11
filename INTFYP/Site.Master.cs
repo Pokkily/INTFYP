@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-namespace YourProjectNamespace
 
+namespace YourProjectNamespace
 {
     public partial class Site : MasterPage
     {
@@ -20,6 +20,7 @@ namespace YourProjectNamespace
                 SetActiveMenu(lnkScholarship, "scholarship.aspx", currentPage);
                 SetActiveMenu(lnkFeedback, "feedback.aspx", currentPage);
                 SetActiveMenu(lnkManage, "createclassroom.aspx", currentPage);
+                SetActiveMenu(lnkChatbot, "chatbot.aspx", currentPage);
 
                 if (Session["position"]?.ToString() == "Teacher")
                 {
@@ -48,14 +49,13 @@ namespace YourProjectNamespace
         {
             if (currentPage.Equals(pageName, StringComparison.OrdinalIgnoreCase))
             {
-                link.CssClass = "menu-link mainpage"; // add 'mainpage' class
+                link.CssClass = "menu-link mainpage";
             }
             else
             {
-                link.CssClass = "menu-link"; // remove active style if not current
+                link.CssClass = "menu-link";
             }
         }
-
 
         protected string GetPageClass(string page)
         {
