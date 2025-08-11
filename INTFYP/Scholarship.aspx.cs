@@ -17,7 +17,6 @@ namespace YourNamespace
 
             if (!IsPostBack)
             {
-                LoadStudentResult();
                 LoadScholarships(); // Load scholarships from Firestore
             }
         }
@@ -35,55 +34,6 @@ namespace YourNamespace
                         db = FirestoreDb.Create("intorannetto");
                     }
                 }
-            }
-        }
-
-        private async void LoadStudentResult()
-        {
-            string userId = Session["userId"] as string;
-            if (string.IsNullOrEmpty(userId)) return;
-
-            Query query = db.Collection("results").WhereEqualTo("StudentId", userId);
-            QuerySnapshot snapshot = await query.GetSnapshotAsync();
-
-            if (snapshot.Count > 0)
-            {
-                DocumentSnapshot doc = snapshot.Documents.OrderByDescending(d => d.CreateTime).First();
-                Dictionary<string, object> data = doc.ToDictionary();
-
-                lblSubmittedTime.Text = doc.CreateTime?.ToDateTime().ToString("yyyy-MM-dd HH:mm") ?? "-";
-                string status = data.ContainsKey("Status") ? data["Status"].ToString() : "Unknown";
-                lblStatus.Text = status;
-
-                if (status == "Verified")
-                {
-                    List<SubjectGrade> subjectGrades = new List<SubjectGrade>();
-                    for (int i = 1; i <= 15; i++)
-                    {
-                        if (data.ContainsKey($"Subject{i}") && data.ContainsKey($"Grade{i}"))
-                        {
-                            subjectGrades.Add(new SubjectGrade
-                            {
-                                Subject = data[$"Subject{i}"].ToString(),
-                                Grade = data[$"Grade{i}"].ToString()
-                            });
-                        }
-                    }
-
-                    rptSubjects.DataSource = subjectGrades;
-                    rptSubjects.DataBind();
-                    rptSubjects.Visible = true;
-                }
-                else
-                {
-                    rptSubjects.Visible = false;
-                }
-            }
-            else
-            {
-                lblSubmittedTime.Text = "-";
-                lblStatus.Text = "No Submission Found";
-                rptSubjects.Visible = false;
             }
         }
 

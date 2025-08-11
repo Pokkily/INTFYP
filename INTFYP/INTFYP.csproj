@@ -33,6 +33,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -53,6 +54,9 @@
     <Reference Include="DotnetGeminiSDK, Version=1.0.8.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DotnetGeminiSDK.1.0.14\lib\netstandard2.0\DotnetGeminiSDK.dll</HintPath>
     </Reference>
+    <Reference Include="FirebaseAdmin, Version=3.3.0.0, Culture=neutral, PublicKeyToken=97c8d00c348326ed, processorArchitecture=MSIL">
+      <HintPath>..\packages\FirebaseAdmin.3.3.0\lib\net462\FirebaseAdmin.dll</HintPath>
+    </Reference>
     <Reference Include="Google.Api.CommonProtos, Version=2.17.0.0, Culture=neutral, PublicKeyToken=3ec5ea7f18953e47, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Api.CommonProtos.2.17.0\lib\net461\Google.Api.CommonProtos.dll</HintPath>
     </Reference>
@@ -61,6 +65,9 @@
     </Reference>
     <Reference Include="Google.Api.Gax.Grpc, Version=4.10.0.0, Culture=neutral, PublicKeyToken=3ec5ea7f18953e47, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Api.Gax.Grpc.4.10.0\lib\net462\Google.Api.Gax.Grpc.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Api.Gax.Rest, Version=4.8.0.0, Culture=neutral, PublicKeyToken=3ec5ea7f18953e47, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Api.Gax.Rest.4.8.0\lib\net462\Google.Api.Gax.Rest.dll</HintPath>
     </Reference>
     <Reference Include="Google.Apis, Version=1.70.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Apis.1.70.0\lib\net462\Google.Apis.dll</HintPath>
@@ -160,8 +167,8 @@
     <Reference Include="System.CodeDom, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.CodeDom.7.0.0\lib\net462\System.CodeDom.dll</HintPath>
     </Reference>
-    <Reference Include="System.Collections.Immutable, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Collections.Immutable.6.0.0\lib\net461\System.Collections.Immutable.dll</HintPath>
+    <Reference Include="System.Collections.Immutable, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Collections.Immutable.8.0.0\lib\net462\System.Collections.Immutable.dll</HintPath>
     </Reference>
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -295,6 +302,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="AddBook.aspx" />
+    <Content Include="AddLanguage.aspx" />
+    <Content Include="AddLanguageCard.aspx" />
+    <Content Include="AddQuestion.aspx" />
     <Content Include="AddScholarship.aspx" />
     <Content Include="CitationGenerator.aspx" />
     <Content Include="Class.aspx" />
@@ -328,19 +338,7 @@
     <Content Include="Global.asax" />
     <Content Include="Images\dprofile.jpg" />
     <Content Include="Images\logo.png" />
-    <Content Include="KoreanQuestions\KoreanCSL1.aspx" />
     <Content Include="Korean.aspx" />
-    <Content Include="KoreanQuestions\KoreanCSL2.aspx" />
-    <Content Include="KoreanQuestions\KoreanCSL3.aspx" />
-    <Content Include="KoreanQuestions\KoreanMKL1.aspx" />
-    <Content Include="KoreanQuestions\KoreanMKL2.aspx" />
-    <Content Include="KoreanQuestions\KoreanMKL3.aspx" />
-    <Content Include="KoreanQuestions\KoreanRTL1.aspx" />
-    <Content Include="KoreanQuestions\KoreanRTL2.aspx" />
-    <Content Include="KoreanQuestions\KoreanRTL3.aspx" />
-    <Content Include="KoreanQuestions\KoreanTRL1.aspx" />
-    <Content Include="KoreanQuestions\KoreanTRL2.aspx" />
-    <Content Include="KoreanQuestions\KoreanTRL3.aspx" />
     <Content Include="LanguageLearning\KLesson1\audio\Coffee.mp3" />
     <Content Include="LanguageLearning\KLesson1\audio\Juice.mp3" />
     <Content Include="LanguageLearning\KLesson1\audio\Tea.mp3" />
@@ -349,13 +347,11 @@
     <Content Include="LanguageLearning\KLesson1\image\Tea.png" />
     <Content Include="LearningReport.aspx" />
     <Content Include="Library.aspx" />
-    <Content Include="MainPage.aspx" />
     <Content Include="ManageClassroom.aspx" />
     <Content Include="Quiz.aspx" />
     <Content Include="QuizDetail.aspx" />
     <Content Include="Register.aspx" />
     <Content Include="Scholarship.aspx" />
-    <Content Include="ResultManagement.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -466,6 +462,27 @@
     <Compile Include="AddBook.aspx.designer.cs">
       <DependentUpon>AddBook.aspx</DependentUpon>
     </Compile>
+    <Compile Include="AddLanguage.aspx.cs">
+      <DependentUpon>AddLanguage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AddLanguage.aspx.designer.cs">
+      <DependentUpon>AddLanguage.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="AddLanguageCard.aspx.cs">
+      <DependentUpon>AddLanguageCard.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AddLanguageCard.aspx.designer.cs">
+      <DependentUpon>AddLanguageCard.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="AddQuestion.aspx.cs">
+      <DependentUpon>AddQuestion.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AddQuestion.aspx.designer.cs">
+      <DependentUpon>AddQuestion.aspx</DependentUpon>
+    </Compile>
     <Compile Include="AddScholarship.aspx.cs">
       <DependentUpon>AddScholarship.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -513,96 +530,12 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="KoreanQuestions\KoreanCSL1.aspx.cs">
-      <DependentUpon>KoreanCSL1.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanCSL1.aspx.designer.cs">
-      <DependentUpon>KoreanCSL1.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Korean.aspx.cs">
       <DependentUpon>Korean.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Korean.aspx.designer.cs">
       <DependentUpon>Korean.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanCSL2.aspx.cs">
-      <DependentUpon>KoreanCSL2.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanCSL2.aspx.designer.cs">
-      <DependentUpon>KoreanCSL2.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanCSL3.aspx.cs">
-      <DependentUpon>KoreanCSL3.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanCSL3.aspx.designer.cs">
-      <DependentUpon>KoreanCSL3.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanMKL1.aspx.cs">
-      <DependentUpon>KoreanMKL1.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanMKL1.aspx.designer.cs">
-      <DependentUpon>KoreanMKL1.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanMKL2.aspx.cs">
-      <DependentUpon>KoreanMKL2.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanMKL2.aspx.designer.cs">
-      <DependentUpon>KoreanMKL2.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanMKL3.aspx.cs">
-      <DependentUpon>KoreanMKL3.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanMKL3.aspx.designer.cs">
-      <DependentUpon>KoreanMKL3.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanRTL1.aspx.cs">
-      <DependentUpon>KoreanRTL1.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanRTL1.aspx.designer.cs">
-      <DependentUpon>KoreanRTL1.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanRTL2.aspx.cs">
-      <DependentUpon>KoreanRTL2.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanRTL2.aspx.designer.cs">
-      <DependentUpon>KoreanRTL2.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanRTL3.aspx.cs">
-      <DependentUpon>KoreanRTL3.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanRTL3.aspx.designer.cs">
-      <DependentUpon>KoreanRTL3.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanTRL1.aspx.cs">
-      <DependentUpon>KoreanTRL1.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanTRL1.aspx.designer.cs">
-      <DependentUpon>KoreanTRL1.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanTRL2.aspx.cs">
-      <DependentUpon>KoreanTRL2.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanTRL2.aspx.designer.cs">
-      <DependentUpon>KoreanTRL2.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanTRL3.aspx.cs">
-      <DependentUpon>KoreanTRL3.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="KoreanQuestions\KoreanTRL3.aspx.designer.cs">
-      <DependentUpon>KoreanTRL3.aspx</DependentUpon>
     </Compile>
     <Compile Include="LearningReport.aspx.cs">
       <DependentUpon>LearningReport.aspx</DependentUpon>
@@ -661,13 +594,6 @@
     <Compile Include="Library.aspx.designer.cs">
       <DependentUpon>Library.aspx</DependentUpon>
     </Compile>
-    <Compile Include="MainPage.aspx.cs">
-      <DependentUpon>MainPage.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="MainPage.aspx.designer.cs">
-      <DependentUpon>MainPage.aspx</DependentUpon>
-    </Compile>
     <Compile Include="ManageClassroom.aspx.cs">
       <DependentUpon>ManageClassroom.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -710,13 +636,6 @@
     </Compile>
     <Compile Include="Scholarship.aspx.designer.cs">
       <DependentUpon>Scholarship.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="ResultManagement.aspx.cs">
-      <DependentUpon>ResultManagement.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="ResultManagement.aspx.designer.cs">
-      <DependentUpon>ResultManagement.aspx</DependentUpon>
     </Compile>
     <Compile Include="Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>

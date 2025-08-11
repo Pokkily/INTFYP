@@ -7,218 +7,182 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace KoreanApp
+namespace INTFYP
 {
 
 
-    public partial class KoreanRTL3
+    public partial class AddLanguageCard
     {
 
         /// <summary>
-        /// startScreen control.
+        /// pnlAlert control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl startScreen;
+        protected global::System.Web.UI.WebControls.Panel pnlAlert;
 
         /// <summary>
-        /// btnStart control.
+        /// alertDiv control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnStart;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl alertDiv;
 
         /// <summary>
-        /// quizPanel control.
+        /// lblMessage control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl quizPanel;
+        protected global::System.Web.UI.WebControls.Label lblMessage;
 
         /// <summary>
-        /// imgQuestion control.
+        /// pnlBackButton control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Image imgQuestion;
+        protected global::System.Web.UI.WebControls.Panel pnlBackButton;
 
         /// <summary>
-        /// audioQuestion control.
+        /// btnBack control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlAudio audioQuestion;
+        protected global::System.Web.UI.WebControls.LinkButton btnBack;
 
         /// <summary>
-        /// audioSource control.
+        /// pnlLanguages control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlSource audioSource;
+        protected global::System.Web.UI.WebControls.Panel pnlLanguages;
 
         /// <summary>
-        /// lblQuestion control.
+        /// rptLanguages control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblQuestion;
+        protected global::System.Web.UI.WebControls.Repeater rptLanguages;
 
         /// <summary>
-        /// imageOptions control.
+        /// pnlNoLanguages control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl imageOptions;
+        protected global::System.Web.UI.WebControls.Panel pnlNoLanguages;
 
         /// <summary>
-        /// imgOption1 control.
+        /// pnlLessons control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton imgOption1;
+        protected global::System.Web.UI.WebControls.Panel pnlLessons;
 
         /// <summary>
-        /// img1 control.
+        /// lblSelectedLanguage control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlImage img1;
+        protected global::System.Web.UI.WebControls.Label lblSelectedLanguage;
 
         /// <summary>
-        /// lblImgText1 control.
+        /// rptLessons control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblImgText1;
+        protected global::System.Web.UI.WebControls.Repeater rptLessons;
 
         /// <summary>
-        /// imgOption2 control.
+        /// pnlNoLessons control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton imgOption2;
+        protected global::System.Web.UI.WebControls.Panel pnlNoLessons;
 
         /// <summary>
-        /// img2 control.
+        /// pnlQuestions control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlImage img2;
+        protected global::System.Web.UI.WebControls.Panel pnlQuestions;
 
         /// <summary>
-        /// lblImgText2 control.
+        /// lblSelectedLesson control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblImgText2;
+        protected global::System.Web.UI.WebControls.Label lblSelectedLesson;
 
         /// <summary>
-        /// imgOption3 control.
+        /// lblQuestionCount control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.LinkButton imgOption3;
+        protected global::System.Web.UI.WebControls.Label lblQuestionCount;
 
         /// <summary>
-        /// img3 control.
+        /// rptQuestions control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlImage img3;
+        protected global::System.Web.UI.WebControls.Repeater rptQuestions;
 
         /// <summary>
-        /// lblImgText3 control.
+        /// pnlNoQuestions control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblImgText3;
+        protected global::System.Web.UI.WebControls.Panel pnlNoQuestions;
 
         /// <summary>
-        /// textOptions control.
+        /// hdnSelectedLanguageId control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl textOptions;
+        protected global::System.Web.UI.WebControls.HiddenField hdnSelectedLanguageId;
 
         /// <summary>
-        /// btnOption1 control.
+        /// hdnSelectedLessonId control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnOption1;
-
-        /// <summary>
-        /// btnOption2 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnOption2;
-
-        /// <summary>
-        /// btnOption3 control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnOption3;
-
-        /// <summary>
-        /// lblFeedback control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblFeedback;
-
-        /// <summary>
-        /// btnNext control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnNext;
+        protected global::System.Web.UI.WebControls.HiddenField hdnSelectedLessonId;
     }
 }

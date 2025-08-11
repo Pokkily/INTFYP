@@ -1,4 +1,4 @@
-﻿<%@ Page Async="true" Title="Language Learning" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeBehind="Learning.aspx.cs" Inherits="YourNamespace.Learning" %>
+﻿<%@ Page Async="true" Title="Language Learning" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeBehind="Learning.aspx.cs" Inherits="INTFYP.Learning" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
     Language Learning
@@ -10,15 +10,18 @@
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --reverse-gradient: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            --accent-gradient: linear-gradient(90deg, #ff6b6b, #4ecdc4);
             --glass-bg: rgba(255, 255, 255, 0.95);
             --glass-border: rgba(255, 255, 255, 0.2);
             --text-primary: #2c3e50;
             --text-secondary: #7f8c8d;
+            --text-muted: #95a5a6;
             --spacing-xs: 8px;
             --spacing-sm: 15px;
             --spacing-md: 20px;
             --spacing-lg: 25px;
             --spacing-xl: 30px;
+            --spacing-2xl: 40px;
         }
 
         /* Glass Card Effect */
@@ -29,75 +32,212 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
             border: 1px solid var(--glass-border);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Page Header - match Library */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Page Header */
         .page-header {
             background: var(--primary-gradient);
             color: rgba(255, 255, 255, 0.9);
             border-radius: 20px;
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
+            padding: var(--spacing-2xl);
+            margin-bottom: var(--spacing-xl);
+            text-align: center;
             animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
 
-        /* Glass Input - match Library */
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        /* Search Bar */
+        .search-section {
+            margin-bottom: var(--spacing-xl);
+        }
+
         .glass-input {
             background: var(--glass-bg);
             backdrop-filter: blur(5px);
             border: 1px solid var(--glass-border);
             border-radius: 30px;
-            padding: 10px 20px;
+            padding: 15px 25px;
+            font-size: 16px;
+            width: 100%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Top Lessons Box */
-        .top-lessons-box {
+        .glass-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+            transform: scale(1.02);
+        }
+
+        /* Language Cards */
+        .language-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
             padding: var(--spacing-lg);
-            overflow-x: auto; /* allow scroll if needed */
+            height: 100%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: slideInFromBottom 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            animation-fill-mode: both;
         }
 
-        .top-lessons-header {
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-            padding-bottom: var(--spacing-sm);
+        .language-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        .language-card:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .language-header {
+            text-align: center;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .language-flag {
+            font-size: 4rem;
             margin-bottom: var(--spacing-sm);
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
         }
 
-        /* Gradient Button */
-        .btn-primary {
+        .language-title {
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .language-code {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .language-description {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin: var(--spacing-sm) 0;
+            line-height: 1.5;
+        }
+
+        .student-count {
+            background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            color: var(--text-primary);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 15px;
+            font-size: 0.85rem;
+            text-align: center;
+            margin: var(--spacing-sm) 0;
+            font-weight: 500;
+        }
+
+        /* Join Button */
+        .btn-join {
             background: var(--primary-gradient);
             color: white;
             border: none;
             border-radius: 25px;
-            padding: 8px 20px;
+            padding: 12px 24px;
             font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .btn-primary:hover {
-            background: var(--reverse-gradient);
-        }
-
-        /* Table Styling */
-        .lesson-table {
             width: 100%;
-            table-layout: fixed; /* prevent float issues */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
-        .lesson-table th, 
-        .lesson-table td {
-            word-wrap: break-word;
-            white-space: normal;
-            padding: var(--spacing-xs) 4px;
+
+        .btn-join:hover {
+            background: var(--reverse-gradient);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
-        .lesson-table th {
-            color: var(--text-secondary);
-            font-weight: 600;
-            text-align: left;
+
+        .btn-join:active {
+            transform: scale(0.98);
         }
-        .lesson-table td {
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+
+        .btn-joined {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            cursor: default;
         }
-        .lesson-table tr:last-child td {
-            border-bottom: none;
+
+        .btn-joined:hover {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            transform: none;
+            box-shadow: 0 4px 15px rgba(86, 171, 47, 0.3);
+        }
+
+        /* Alert System */
+        .alert-glass {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: var(--spacing-sm) var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+            border: 1px solid var(--glass-border);
+            animation: slideInFromTop 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .alert-success-glass {
+            border-left: 4px solid #56ab2f;
+            color: #2d5016;
+        }
+
+        .alert-danger-glass {
+            border-left: 4px solid #ff6b6b;
+            color: #721c24;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: var(--spacing-2xl);
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: var(--spacing-md);
+            opacity: 0.5;
         }
 
         /* Animations */
@@ -105,78 +245,194 @@
             from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
+        @keyframes slideInFromTop {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInFromBottom {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Staggered Animation */
+        .language-card:nth-child(1) { animation-delay: 0.1s; }
+        .language-card:nth-child(2) { animation-delay: 0.2s; }
+        .language-card:nth-child(3) { animation-delay: 0.3s; }
+        .language-card:nth-child(4) { animation-delay: 0.4s; }
+        .language-card:nth-child(5) { animation-delay: 0.5s; }
+        .language-card:nth-child(6) { animation-delay: 0.6s; }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: var(--spacing-md);
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+        }
     </style>
 
-    <!-- Header -->
-    <section class="page-header text-center mb-5">
+    <!-- Alert Messages -->
+    <asp:Panel ID="pnlAlert" runat="server" Visible="false">
         <div class="container">
-            <h1 class="display-4 fw-bold mb-3">Language Learning</h1>
-            <p class="lead fs-5">Master new languages with interactive lessons</p>
+            <div class="alert-glass" id="alertDiv" runat="server">
+                <i class="fas fa-info-circle me-2"></i>
+                <asp:Label ID="lblMessage" runat="server"></asp:Label>
+            </div>
+        </div>
+    </asp:Panel>
+
+    <!-- Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-3">
+                <i class="fas fa-globe me-3"></i>
+                Language Learning
+            </h1>
+            <p class="lead fs-5">Master new languages with interactive courses</p>
         </div>
     </section>
 
     <div class="container">
-        <div class="row g-4">
-            <!-- LEFT SIDEBAR - widened to col-lg-4 -->
-            <div class="col-lg-4">
-                <div class="glass-card top-lessons-box">
-                    <div class="top-lessons-header">
-                        <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history me-2"></i>Top Lessons by Attempts</h5>
-                    </div>
-                    <asp:Repeater ID="rptTopLessons" runat="server">
-                        <HeaderTemplate>
-                            <table class="lesson-table">
-                                <thead>
-                                    <tr>
-                                        <th>Lesson</th>
-                                        <th class="text-end">Attempts</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                        </HeaderTemplate>
-                        <ItemTemplate>
-                            <tr>
-                                <td><%# Eval("LessonName") %></td>
-                                <td class="text-end"><%# Eval("Attempts") %></td>
-                            </tr>
-                        </ItemTemplate>
-                        <FooterTemplate>
-                                </tbody>
-                            </table>
-                        </FooterTemplate>
-                    </asp:Repeater>
-                </div>
-
-                <!-- REPORT BUTTON -->
-                <div class="d-grid mt-4">
-                    <a href="LearningReport.aspx" class="btn btn-primary py-2">
-                        <i class="bi bi-flag-fill me-2"></i>Learning Report
-                    </a>
-                </div>
+        <!-- Search Bar -->
+        <div class="search-section">
+            <div class="glass-card p-3 d-flex align-items-center gap-3">
+                <i class="fas fa-search text-muted"></i>
+                <input type="text" id="searchInput" class="glass-input flex-grow-1" 
+                       placeholder="🔍 Search for languages to learn..." 
+                       style="border: none; background: transparent;">
             </div>
+        </div>
 
-            <!-- MAIN CONTENT - shrunk to col-lg-8 -->
-            <div class="col-lg-8">
-                <!-- SEARCH BAR - match Library -->
-                <div class="glass-card p-3 mb-4 d-flex align-items-center gap-2">
-                    <input type="text" class="glass-input flex-grow-1" placeholder="Search languages...">
-                </div>
-
-                <!-- LANGUAGE GRID -->
-                <div class="row g-4">
-                    <div class="col-md-6 col-lg-4">
-                        <div class="glass-card h-100 p-4">
-                            <h3 class="card-title">Korean</h3>
-                            <p class="card-text text-muted mb-4">한국어</p>
-                            <div class="d-flex justify-content-end">
-                                <a href="Korean.aspx" class="btn btn-primary">
-                                    <i class="bi bi-play-fill me-2"></i>Start
-                                </a>
+        <!-- Language Cards Grid -->
+        <div class="row g-4" id="languageGrid">
+            <asp:Repeater ID="rptLanguages" runat="server" OnItemCommand="rptLanguages_ItemCommand">
+                <ItemTemplate>
+                    <div class="col-md-6 col-lg-4 language-item" 
+                         data-name="<%# Eval("Name").ToString().ToLower() %>" 
+                         data-code="<%# Eval("Code").ToString().ToLower() %>">
+                        <div class="language-card glass-card">
+                            <div class="language-header">
+                                <div class="language-flag"><%# Eval("Flag") %></div>
+                                <h3 class="language-title"><%# Eval("Name") %></h3>
+                                <p class="language-code"><%# Eval("Code") %></p>
+                            </div>
+                            
+                            <p class="language-description"><%# Eval("Description") %></p>
+                            
+                            <div class="student-count">
+                                <i class="fas fa-users me-2"></i>
+                                <%# Eval("StudentCount") %> students learning
+                            </div>
+                            
+                            <div class="d-grid mt-4">
+                                <asp:Button ID="btnJoinLanguage" runat="server" 
+                                          CssClass="btn-join" 
+                                          CommandName="JoinLanguage" 
+                                          CommandArgument='<%# Eval("Id") %>' 
+                                          Text='<%# IsStudentEnrolled(Eval("Id").ToString()) ? "✅ Enrolled" : "🚀 Join Course" %>'
+                                          Enabled='<%# !IsStudentEnrolled(Eval("Id").ToString()) %>' />
+                            </div>
+                            
+                            <div class="mt-2 text-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    Added <%# Eval("CreatedDate", "{0:MMM yyyy}") %>
+                                </small>
                             </div>
                         </div>
                     </div>
+                </ItemTemplate>
+            </asp:Repeater>
+        </div>
+        
+        <!-- Empty State -->
+        <asp:Panel ID="pnlNoLanguages" runat="server" Visible="false">
+            <div class="glass-card">
+                <div class="empty-state">
+                    <i class="fas fa-globe"></i>
+                    <h4>No Language Courses Available</h4>
+                    <p>Check back later for new language courses!</p>
                 </div>
             </div>
-        </div>
+        </asp:Panel>
     </div>
+
+    <script>
+        // Search functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('searchInput');
+            const languageItems = document.querySelectorAll('.language-item');
+
+            searchInput.addEventListener('input', function () {
+                const searchTerm = this.value.toLowerCase();
+
+                languageItems.forEach(item => {
+                    const name = item.getAttribute('data-name');
+                    const code = item.getAttribute('data-code');
+                    const isVisible = name.includes(searchTerm) || code.includes(searchTerm);
+
+                    if (isVisible) {
+                        item.style.display = 'block';
+                        item.style.animation = 'fadeInUp 0.3s ease-out';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+
+            // Auto-hide alerts
+            setTimeout(function () {
+                var alert = document.querySelector('.alert-glass');
+                if (alert) {
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateY(-20px)';
+                    alert.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                    setTimeout(function () {
+                        alert.style.display = 'none';
+                    }, 500);
+                }
+            }, 5000);
+
+            // Enhanced card animations
+            const cards = document.querySelectorAll('.language-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+
+                card.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateY(-8px) scale(1.05)';
+                });
+
+                card.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Search input focus effect
+            searchInput.addEventListener('focus', function () {
+                this.parentElement.style.transform = 'scale(1.02)';
+                this.parentElement.style.boxShadow = '0 12px 30px rgba(102, 126, 234, 0.2)';
+            });
+
+            searchInput.addEventListener('blur', function () {
+                this.parentElement.style.transform = 'scale(1)';
+                this.parentElement.style.boxShadow = '0 8px 20px rgba(0, 0, 0, 0.15)';
+            });
+        });
+
+        // Smooth animations
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </script>
 </asp:Content>
