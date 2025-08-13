@@ -6,162 +6,397 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Design System Variables */
-        :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --glass-bg: rgba(255, 255, 255, 0.95);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --text-primary: #2c3e50;
-            --text-secondary: #7f8c8d;
-            --spacing-xs: 8px;
-            --spacing-sm: 15px;
-            --spacing-md: 20px;
-            --spacing-lg: 25px;
-            --spacing-xl: 30px;
+        /* Enhanced Library Page with Classes Design Formula */
+        
+        .library-page {
+            padding: 40px 20px;
+            font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
         }
 
-        /* Glass Morphism Effects */
-        .glass-card {
-            background: var(--glass-bg);
+        /* Animated background elements */
+        .library-page::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+            animation: backgroundFloat 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes backgroundFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-20px, -20px) rotate(1deg); }
+            50% { transform: translate(20px, -10px) rotate(-1deg); }
+            75% { transform: translate(-10px, 10px) rotate(0.5deg); }
+        }
+
+        .library-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideInFromTop 1s ease-out;
+        }
+
+        @keyframes slideInFromTop {
+            from { 
+                opacity: 0; 
+                transform: translateY(-50px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        .page-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            display: inline-block;
+        }
+
+        .page-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            border-radius: 2px;
+            animation: expandWidth 1.5s ease-out 0.5s both;
+        }
+
+        @keyframes expandWidth {
+            from { width: 0; }
+            to { width: 60px; }
+        }
+
+        .page-subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            margin: 0;
+        }
+
+        /* Sidebar Card */
+        .sidebar-card {
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 25px;
+            margin-bottom: 20px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: slideInFromLeft 0.8s ease-out 0.2s both;
         }
 
-        .glass-card:hover {
+        @keyframes slideInFromLeft {
+            from { 
+                opacity: 0; 
+                transform: translateX(-50px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+
+        .sidebar-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #ff6b6b, #4ecdc4);
+            background-size: 400% 100%;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .sidebar-card:hover {
             transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
         }
 
-        /* Page Header */
-        .page-header {
-            background: var(--primary-gradient);
-            color: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
-            padding: var(--spacing-lg);
-            margin-bottom: var(--spacing-lg);
-            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        .sidebar-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        /* Animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes cardEntrance {
-            from { opacity: 0; transform: translateY(50px) rotate(2deg); }
-            to { opacity: 1; transform: translateY(0) rotate(0deg); }
-        }
-
-        /* Buttons */
-        .btn-primary {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(103, 126, 234, 0.3);
-            border: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(103, 126, 234, 0.4);
-        }
-
-        .btn-dark {
-            background: #2c3e50;
-            border-radius: 25px;
-            transition: all 0.3s ease;
-        }
-
-        /* Custom Button Styles */
-        .btn-lavender {
-            background-color: #d8b5f0;
-            color: var(--text-primary);
-            border-radius: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-young-sage {
-            background-color: #9caf88;
-            color: var(--text-primary);
-            border-radius: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-outline-black {
-            background-color: transparent;
-            color: var(--text-primary);
-            border: 1px solid var(--text-primary);
-            border-radius: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-outline-black:hover {
-            background-color: var(--text-primary);
-            color: white;
+        .sidebar-title::before {
+            content: '🔍';
+            font-size: 24px;
         }
 
         /* Search Input */
-        .glass-input {
-            background: var(--glass-bg);
+        .search-input {
+            background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(5px);
-            border: 1px solid var(--glass-border);
-            border-radius: 30px;
-            padding: 10px 20px;
+            border: 1px solid rgba(103, 126, 234, 0.2);
+            border-radius: 25px;
+            padding: 12px 20px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 20px;
         }
 
-        /* Badge */
-        .category-badge {
-            background: rgba(103, 126, 234, 0.1);
-            color: #667eea;
-            border-radius: 20px;
-            padding: 5px 12px;
-            font-size: 0.8rem;
-            display: inline-block;
-            margin-bottom: var(--spacing-sm);
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(103, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 1);
         }
 
-        /* Enhanced Book Card Styles */
+        /* Navigation Buttons */
+        .nav-button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .nav-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.6s ease;
+        }
+
+        .nav-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .nav-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .nav-button-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(103, 126, 234, 0.3);
+        }
+
+        .nav-button-primary:hover {
+            box-shadow: 0 8px 25px rgba(103, 126, 234, 0.4);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .nav-button-secondary {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .nav-button-secondary:hover {
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+            background: linear-gradient(135deg, #44a08d 0%, #4ecdc4 100%);
+        }
+
+        /* Main Content Card - MADE SMALLER */
+        .main-content-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 15px; /* Reduced from 25px */
+            margin-bottom: 15px; /* Reduced from 20px */
+            border-radius: 15px; /* Reduced from 20px */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Reduced shadow */
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideInFromRight 0.8s ease-out 0.3s both;
+        }
+
+        @keyframes slideInFromRight {
+            from { 
+                opacity: 0; 
+                transform: translateX(50px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+
+        .content-header {
+            text-align: center;
+            margin-bottom: 15px; /* Reduced from 25px */
+        }
+
+        .content-title {
+            font-size: 20px; /* Reduced from 24px */
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0 0 10px 0; /* Reduced bottom margin */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px; /* Reduced from 10px */
+        }
+
+        .content-title::before {
+            content: '📚';
+            font-size: 22px; /* Reduced from 28px */
+        }
+
+        /* Book Cards - Grid made more compact */
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); /* Reduced from 280px */
+            gap: 15px; /* Reduced from 20px */
+            animation: slideInFromBottom 1s ease-out 0.4s both;
+        }
+
+        @keyframes slideInFromBottom {
+            from { 
+                opacity: 0; 
+                transform: translateY(50px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
         .book-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 18px; /* Reduced from 20px */
+            border-radius: 18px; /* Reduced from 20px */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Reduced shadow */
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: cardEntrance 0.8s ease-out both;
+            animation-delay: calc(var(--card-index, 0) * 0.1s);
             height: 100%;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
-            animation: cardEntrance 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-            opacity: 0;
         }
 
-        .book-card-content {
-            padding: var(--spacing-md);
-            flex: 1;
+        @keyframes cardEntrance {
+            from { 
+                opacity: 0; 
+                transform: translateX(-30px) rotate(-1deg); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0) rotate(0deg); 
+            }
+        }
+
+        .book-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #ff6b6b, #4ecdc4);
+            background-size: 400% 100%;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        .book-card:hover {
+            transform: translateY(-6px) translateX(3px) scale(1.01); /* Reduced from -8px and scale(1.02) */
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15); /* Reduced shadow */
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .book-icon {
+            width: 50px; /* Reduced from 60px */
+            height: 50px; /* Reduced from 60px */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px; /* Reduced from 12px */
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px; /* Reduced from 15px */
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(103, 126, 234, 0.2);
+        }
+
+        .book-icon::before {
+            content: '📖';
+            font-size: 20px; /* Reduced from 24px */
+            opacity: 0.9;
+        }
+
+        .book-card:hover .book-icon {
+            transform: scale(1.05) rotate(3deg); /* Reduced from scale(1.1) and rotate(5deg) */
+            box-shadow: 0 6px 20px rgba(103, 126, 234, 0.3); /* Reduced shadow */
         }
 
         .book-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
+            font-size: 16px; /* Reduced from 18px */
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 6px; /* Reduced from 8px */
+            line-height: 1.3;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
-            min-height: 3em;
-            line-height: 1.4;
+            min-height: 2.4em; /* Slightly reduced */
         }
 
         .book-author {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-bottom: var(--spacing-sm);
+            color: #7f8c8d;
+            font-size: 13px; /* Reduced from 14px */
+            font-weight: 500;
+            margin-bottom: 10px; /* Reduced from 12px */
             display: -webkit-box;
             -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
@@ -169,121 +404,344 @@
             text-overflow: ellipsis;
         }
 
+        .category-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px; /* Reduced from 6px */
+            padding: 5px 10px; /* Reduced from 6px 12px */
+            border-radius: 12px; /* Reduced from 15px */
+            font-size: 11px; /* Reduced from 12px */
+            font-weight: 600;
+            margin-bottom: 12px; /* Reduced from 15px */
+            background: rgba(103, 126, 234, 0.1);
+            color: #667eea;
+            border: 1px solid rgba(103, 126, 234, 0.2);
+        }
+
         .book-actions {
-            margin-top: auto;
-            padding-top: var(--spacing-sm);
             display: flex;
-            gap: var(--spacing-xs);
+            gap: 6px; /* Reduced from 8px */
+            margin-top: auto;
+            flex-wrap: wrap;
         }
 
-        .btn-sm {
-            padding: 0.35rem 0.75rem;
-            font-size: 0.85rem;
-            white-space: nowrap;
+        .book-action-btn {
+            padding: 7px 12px; /* Reduced from 8px 15px */
+            border-radius: 18px; /* Reduced from 20px */
+            border: none;
+            cursor: pointer;
+            font-size: 11px; /* Reduced from 12px */
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px; /* Reduced from 5px */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            flex: 1;
+            justify-content: center;
+            min-width: 75px; /* Reduced from 80px */
         }
 
-        /* Responsive Grid */
+        .book-action-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.6s ease;
+        }
+
+        .book-action-btn:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .book-action-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        /* DEFAULT STATES for buttons */
+        .btn-recommend {
+            background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%);
+            color: #2c3e50;
+            box-shadow: 0 4px 15px rgba(200, 200, 200, 0.3);
+        }
+
+        .btn-recommend:hover {
+            background: linear-gradient(135deg, #d8b5f0 0%, #c9a9e0 100%);
+            box-shadow: 0 8px 25px rgba(216, 181, 240, 0.4);
+        }
+
+        /* ACTIVE STATE - When user has recommended the book */
+        .btn-recommend.active {
+            background: linear-gradient(135deg, #d8b5f0 0%, #c9a9e0 100%) !important;
+            box-shadow: 0 8px 25px rgba(216, 181, 240, 0.5) !important;
+            color: #ffffff !important;
+        }
+
+        .btn-recommend.active:hover {
+            background: linear-gradient(135deg, #c9a9e0 0%, #b899d0 100%) !important;
+            box-shadow: 0 10px 30px rgba(216, 181, 240, 0.6) !important;
+        }
+
+        .btn-favorite {
+            background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%);
+            color: #2c3e50;
+            box-shadow: 0 4px 15px rgba(200, 200, 200, 0.3);
+        }
+
+        .btn-favorite:hover {
+            background: linear-gradient(135deg, #9caf88 0%, #8a9c78 100%);
+            box-shadow: 0 8px 25px rgba(156, 175, 136, 0.4);
+        }
+
+        /* ACTIVE STATE - When user has favorited the book */
+        .btn-favorite.active {
+            background: linear-gradient(135deg, #9caf88 0%, #8a9c78 100%) !important;
+            box-shadow: 0 8px 25px rgba(156, 175, 136, 0.5) !important;
+            color: #ffffff !important;
+        }
+
+        .btn-favorite.active:hover {
+            background: linear-gradient(135deg, #8a9c78 0%, #7a8c68 100%) !important;
+            box-shadow: 0 10px 30px rgba(156, 175, 136, 0.6) !important;
+        }
+
+        /* Temporary click animation for both buttons */
+        .btn-recommend.clicked,
+        .btn-favorite.clicked {
+            animation: buttonPulse 0.6s ease-out;
+        }
+
+        @keyframes buttonPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            border: 2px solid rgba(103, 126, 234, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-outline:hover {
+            background: rgba(103, 126, 234, 0.1);
+            border-color: #667eea;
+            box-shadow: 0 8px 25px rgba(103, 126, 234, 0.2);
+        }
+
+        /* No Books Message */
+        .no-books {
+            text-align: center;
+            padding: 40px 30px; /* Reduced from 60px 40px */
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px; /* Reduced from 20px */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.9);
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(40px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        .no-books-icon {
+            font-size: 48px; /* Reduced from 64px */
+            margin-bottom: 15px; /* Reduced from 20px */
+            opacity: 0.7;
+            animation: iconBounce 2s ease-in-out infinite;
+        }
+
+        @keyframes iconBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .no-books h3 {
+            font-size: 20px; /* Reduced from 24px */
+            font-weight: 600;
+            margin-bottom: 8px; /* Reduced from 10px */
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .no-books p {
+            font-size: 14px; /* Reduced from 16px */
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0;
+        }
+
+        /* Responsive design */
         @media (max-width: 768px) {
-            .book-title {
-                font-size: 1rem;
+            .library-page {
+                padding: 20px 15px;
             }
-            .book-author {
-                font-size: 0.85rem;
+
+            .books-grid {
+                grid-template-columns: 1fr;
+                gap: 12px; /* Reduced from 15px */
             }
+
+            .content-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px; /* Reduced from 15px */
+            }
+
+            .search-input {
+                width: 100%;
+            }
+
+            .book-actions {
+                flex-direction: column;
+                gap: 6px; /* Reduced from 8px */
+            }
+
+            .book-action-btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 28px;
+            }
+
+            .sidebar-card,
+            .main-content-card {
+                padding: 15px; /* Reduced from 20px */
+                margin-bottom: 12px; /* Reduced from 15px */
+                border-radius: 12px; /* Reduced from 15px */
+            }
+
+            .book-card {
+                padding: 12px; /* Reduced from 15px */
+                border-radius: 12px; /* Reduced from 15px */
+            }
+        }
+
+        /* Loading states */
+        .book-card.loading {
+            opacity: 0;
+            animation: cardLoad 0.6s ease-out forwards;
+        }
+
+        @keyframes cardLoad {
+            to { opacity: 1; }
         }
     </style>
 
-    <!-- Header with Gradient Background -->
-    <section class="page-header text-center">
-        <div class="container">
-            <h1 class="display-5 fw-bold">Welcome to Library</h1>
-            <p class="lead">All Materials You Need</p>
-        </div>
-    </section>
-
-    <div class="container mb-5">
-        <div class="row">
-            <!-- Sidebar -->
-            <div class="col-md-3 mb-4">
-                <div class="glass-card p-4 mb-4">
-                    <h5 class="fw-bold mb-3">Search by Category</h5>
-                    <asp:TextBox ID="txtCategorySearch" runat="server" 
-                        CssClass="glass-input form-control mb-3"
-                        placeholder="Type category..." AutoPostBack="true"
-                        OnTextChanged="txtCategorySearch_TextChanged" />
-
-                    <div class="d-grid gap-2">
-                        <button type="button" class="btn btn-primary" onclick="location.href='FavBooks.aspx';">Favorite Book</button>
-                        <button type="button" class="btn btn-primary" onclick="location.href='CitationGenerator.aspx';">Citation Generator</button>
-                    </div>
-                </div>
+    <div class="library-page">
+        <div class="library-container">
+            <div class="page-header">
+                <h2 class="page-title">Welcome to Library</h2>
+                <p class="page-subtitle">All Materials You Need</p>
             </div>
 
-            <!-- Main Content -->
-            <div class="col-md-9">
-                <div class="glass-card p-4 mb-4">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h3 class="fw-bold mb-0">Books</h3>
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-md-3 mb-4">
+                    <div class="sidebar-card">
+                        <h5 class="sidebar-title">Search Books</h5>
+                        
                         <asp:TextBox ID="txtBookSearch" runat="server" 
-                            CssClass="glass-input form-control"
-                            placeholder="Search by title/author..." AutoPostBack="true"
+                            CssClass="search-input"
+                            placeholder="Search by title, author, or category..." AutoPostBack="true"
                             OnTextChanged="txtBookSearch_TextChanged" />
+
+                        <div class="d-grid gap-2">
+                            <button type="button" class="nav-button nav-button-primary" onclick="location.href='FavBooks.aspx';">
+                                ⭐ Favorite Books
+                            </button>
+                            <button type="button" class="nav-button nav-button-secondary" onclick="location.href='CitationGenerator.aspx';">
+                                📝 Citation Generator
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <asp:Repeater ID="Repeater1" runat="server" OnItemCommand="Repeater1_ItemCommand">
-                    <HeaderTemplate>
-                        <div class="row row-cols-1 row-cols-md-3 g-4">
-                    </HeaderTemplate>
-                    <ItemTemplate>
-                        <div class="col">
-                            <div class="glass-card book-card h-100" 
-                                style='animation-delay: calc(<%# Container.ItemIndex %> * 0.1s)'>
+                <!-- Main Content -->
+                <div class="col-md-9">
+                    <div class="main-content-card">
+                        <div class="content-header">
+                            <h3 class="content-title">Books Collection</h3>
+                        </div>
+                    </div>
+
+                    <asp:Panel ID="pnlNoBooks" runat="server" Visible="false" CssClass="no-books">
+                        <div class="no-books-icon">📚</div>
+                        <h3>No Books Found</h3>
+                        <p>Try adjusting your search criteria or browse all books!</p>
+                    </asp:Panel>
+
+                    <asp:Repeater ID="Repeater1" runat="server" OnItemCommand="Repeater1_ItemCommand">
+                        <HeaderTemplate>
+                            <div class="books-grid">
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <div class="book-card" style="--card-index: <%# Container.ItemIndex %>;">
+                                <div class="book-icon"></div>
+                                
                                 <a href='<%# "PreviewBook.aspx?pdfUrl=" + HttpUtility.UrlEncode(Eval("PdfUrl").ToString()) %>' 
-                                   style="text-decoration: none; color: inherit;">
-                                    <div class="book-card-content">
-                                        <h5 class="book-title"><%# Eval("Title") %></h5>
-                                        <p class="book-author"><%# Eval("Author") %></p>
-                                        <span class="category-badge">#<%# Eval("Category") %></span>
-                                        <div class="book-actions">
-                                            <asp:Button ID="btnRecommend" runat="server"
-                                                Text='<%# String.Format("{0} ❤️", Eval("Recommendations")) %>'
-                                                CommandName="Recommend"
-                                                CommandArgument='<%# Eval("DocumentId") %>'
-                                                CssClass='<%# (bool)Eval("IsRecommended") ? "btn btn-lavender btn-sm" : "btn btn-outline-black btn-sm" %>' />
-                                            <asp:Button ID="btnFavorite" runat="server"
-                                                Text="⭐"
-                                                CommandName="Favorite"
-                                                CommandArgument='<%# Eval("DocumentId") %>'
-                                                CssClass='<%# (bool)Eval("IsFavorited") ? "btn btn-young-sage btn-sm" : "btn btn-outline-black btn-sm" %>' />
-                                        </div>
-                                    </div>
+                                   style="text-decoration: none; color: inherit; flex: 1; display: flex; flex-direction: column;">
+                                    
+                                    <h5 class="book-title"><%# Eval("Title") %></h5>
+                                    <p class="book-author"><%# Eval("Author") %></p>
+                                    <span class="category-badge">#<%# Eval("Category") %></span>
                                 </a>
+                                
+                                <div class="book-actions">
+                                    <asp:Button ID="btnRecommend" runat="server"
+                                        Text='<%# String.Format("{0} ❤️", Eval("Recommendations")) %>'
+                                        CommandName="Recommend"
+                                        CommandArgument='<%# Eval("DocumentId") %>'
+                                        CssClass='<%# "book-action-btn btn-recommend" + (Convert.ToBoolean(Eval("IsRecommended")) ? " active" : "") %>'
+                                        OnClientClick="addClickEffect(this); return true;" />
+                                    <asp:Button ID="btnFavorite" runat="server"
+                                        Text="⭐"
+                                        CommandName="Favorite"
+                                        CommandArgument='<%# Eval("DocumentId") %>'
+                                        CssClass='<%# "book-action-btn btn-favorite" + (Convert.ToBoolean(Eval("IsFavorited")) ? " active" : "") %>'
+                                        OnClientClick="addClickEffect(this); return true;" />
+                                </div>
                             </div>
-                        </div>
-                    </ItemTemplate>
-                    <FooterTemplate>
-                        </div>
-                    </FooterTemplate>
-                </asp:Repeater>
+                        </ItemTemplate>
+                        <FooterTemplate>
+                            </div>
+                        </FooterTemplate>
+                    </asp:Repeater>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Add hover effects to all glass cards
-            const cards = document.querySelectorAll('.glass-card');
-            cards.forEach(card => {
-                card.addEventListener('mouseenter', () => {
-                    card.style.transform = 'translateY(-8px) scale(1.02)';
-                    card.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.15)';
-                });
-                card.addEventListener('mouseleave', () => {
-                    card.style.transform = '';
-                    card.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.1)';
-                });
-            });
-        });
+        function addClickEffect(button) {
+            // Add clicked class for animation
+            button.classList.add('clicked');
+
+            // Remove the class after animation completes
+            setTimeout(function () {
+                button.classList.remove('clicked');
+            }, 600);
+        }
     </script>
+
+    <!-- Font Awesome for additional icons if needed -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 </asp:Content>

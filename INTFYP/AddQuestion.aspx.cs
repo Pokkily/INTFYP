@@ -16,6 +16,7 @@ namespace KoreanApp
         FirestoreDb db;
         Cloudinary cloudinary;
         static readonly object dbLock = new object();
+        private string selectedLessonId = "";
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -92,11 +93,18 @@ namespace KoreanApp
             rbTextQuestion.Checked = true;
             ToggleQuestionInputs();
 
-            // Reset form state
+            // Reset question form state
             hfEditingQuestionId.Value = "";
             lblFormTitle.Text = "Add New Question";
             btnSaveQuestion.Text = "Save Question";
             btnCancelEdit.Visible = false;
+
+            // Reset lesson form state
+            hfEditingLessonId.Value = "";
+            lblLessonFormTitle.Text = "Create New Lesson";
+            btnSaveLesson.Text = "Create Lesson";
+            btnCancelLessonEdit.Visible = false;
+            ClearLessonForm();
         }
 
         private void ShowMessage(string message, string cssClass)
@@ -214,6 +222,8 @@ namespace KoreanApp
             }
         }
 
+        // LESSON MANAGEMENT METHODS
+
         private async Task LoadLessons(string language, string topic)
         {
             try
@@ -224,17 +234,30 @@ namespace KoreanApp
                     .Document(topic);
 
                 CollectionReference lessonsRef = topicRef.Collection("lessons");
-                QuerySnapshot snapshot = await lessonsRef.GetSnapshotAsync();
+                QuerySnapshot snapshot = await lessonsRef.OrderBy("createdAt").GetSnapshotAsync();
 
-                ddlLesson.Items.Clear();
-                ddlLesson.Items.Add(new ListItem("Select Lesson", ""));
-                ddlLesson.Items.Add(new ListItem("+ Create New Lesson", "NEW_LESSON"));
-
-                foreach (DocumentSnapshot document in snapshot.Documents)
+                // Convert documents to a list for the repeater
+                var lessonsList = new List<object>();
+                foreach (DocumentSnapshot doc in snapshot.Documents)
                 {
-                    string lessonName = document.Id;
-                    ddlLesson.Items.Add(new ListItem(lessonName, lessonName));
+                    var createdAt = doc.ContainsField("createdAt") ? doc.GetValue<Timestamp>("createdAt").ToDateTime().ToString("MMM dd, yyyy") : "Unknown";
+
+                    lessonsList.Add(new
+                    {
+                        Id = doc.Id,
+                        Name = doc.ContainsField("name") ? doc.GetValue<string>("name") : doc.Id,
+                        Description = doc.ContainsField("description") ? doc.GetValue<string>("description") : "",
+                        CreatedAt = createdAt
+                    });
                 }
+
+                rptExistingLessons.DataSource = lessonsList;
+                rptExistingLessons.DataBind();
+
+                lblLessonCount.Text = $"Current Lessons: {snapshot.Count}";
+
+                // Clear any previous lesson selection
+                ClearLessonForm();
             }
             catch (Exception ex)
             {
@@ -242,29 +265,9 @@ namespace KoreanApp
             }
         }
 
-        protected async void ddlLesson_SelectedIndexChanged(object sender, EventArgs e)
+        protected async void btnSaveLesson_Click(object sender, EventArgs e)
         {
-            if (ddlLesson.SelectedValue == "NEW_LESSON")
-            {
-                panelNewLesson.Visible = true;
-                panelQuestionForm.Visible = false;
-            }
-            else if (!string.IsNullOrEmpty(ddlLesson.SelectedValue))
-            {
-                panelNewLesson.Visible = false;
-                panelQuestionForm.Visible = true;
-                await LoadExistingQuestions();
-            }
-            else
-            {
-                panelNewLesson.Visible = false;
-                panelQuestionForm.Visible = false;
-            }
-        }
-
-        protected async void btnCreateLesson_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(txtNewLessonName.Text))
+            if (string.IsNullOrWhiteSpace(txtLessonName.Text))
             {
                 ShowMessage("Please enter a lesson name.", "alert alert-warning");
                 return;
@@ -272,42 +275,202 @@ namespace KoreanApp
 
             try
             {
-                string lessonName = txtNewLessonName.Text.Trim();
+                string lessonName = txtLessonName.Text.Trim();
+                string lessonDescription = txtLessonDescription.Text.Trim();
+
+                var lessonData = new Dictionary<string, object>
+                {
+                    { "name", lessonName },
+                    { "createdBy", Session["teacherId"]?.ToString() ?? "unknown" }
+                };
+
+                if (!string.IsNullOrWhiteSpace(lessonDescription))
+                {
+                    lessonData["description"] = lessonDescription;
+                }
+
+                CollectionReference lessonsRef = db.Collection("languages")
+                    .Document(ddlLanguage.SelectedValue)
+                    .Collection("topics")
+                    .Document(ddlTopic.SelectedValue)
+                    .Collection("lessons");
+
+                if (string.IsNullOrEmpty(hfEditingLessonId.Value))
+                {
+                    // Creating new lesson
+                    lessonData["createdAt"] = Timestamp.GetCurrentTimestamp();
+
+                    DocumentReference lessonRef = lessonsRef.Document(lessonName);
+                    await lessonRef.SetAsync(lessonData);
+
+                    ShowMessage("Lesson created successfully!", "alert alert-success");
+                }
+                else
+                {
+                    // Updating existing lesson
+                    lessonData["updatedAt"] = Timestamp.GetCurrentTimestamp();
+
+                    DocumentReference lessonRef = lessonsRef.Document(hfEditingLessonId.Value);
+                    await lessonRef.UpdateAsync(lessonData);
+
+                    CancelLessonEdit();
+                    ShowMessage("Lesson updated successfully!", "alert alert-success");
+                }
+
+                // Clear form and reload lessons
+                ClearLessonForm();
+                await LoadLessons(ddlLanguage.SelectedValue, ddlTopic.SelectedValue);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error saving lesson: {ex.Message}", "alert alert-danger");
+            }
+        }
+
+        protected async void btnSelectLesson_Click(object sender, EventArgs e)
+        {
+            Button btn = (Button)sender;
+            string lessonId = btn.CommandArgument;
+
+            try
+            {
+                // Set the selected lesson
+                selectedLessonId = lessonId;
+
+                // Show the question form
+                panelQuestionForm.Visible = true;
+                await LoadExistingQuestions();
+
+                ShowMessage($"Lesson '{lessonId}' selected. You can now add questions.", "alert alert-success");
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error selecting lesson: {ex.Message}", "alert alert-danger");
+            }
+        }
+
+        protected async void btnEditLesson_Click(object sender, EventArgs e)
+        {
+            Button btn = (Button)sender;
+            string lessonId = btn.CommandArgument;
+
+            try
+            {
+                await LoadLessonForEdit(lessonId);
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error loading lesson for edit: {ex.Message}", "alert alert-danger");
+            }
+        }
+
+        private async Task LoadLessonForEdit(string lessonId)
+        {
+            try
+            {
                 DocumentReference lessonRef = db.Collection("languages")
                     .Document(ddlLanguage.SelectedValue)
                     .Collection("topics")
                     .Document(ddlTopic.SelectedValue)
                     .Collection("lessons")
-                    .Document(lessonName);
+                    .Document(lessonId);
 
-                Dictionary<string, object> lessonData = new Dictionary<string, object>
+                DocumentSnapshot lessonDoc = await lessonRef.GetSnapshotAsync();
+
+                if (lessonDoc.Exists)
                 {
-                    { "name", lessonName },
-                    { "createdAt", Timestamp.GetCurrentTimestamp() },
-                    { "createdBy", Session["teacherId"]?.ToString() ?? "unknown" }
-                };
+                    // Set editing mode
+                    hfEditingLessonId.Value = lessonId;
+                    lblLessonFormTitle.Text = "Edit Lesson";
+                    btnSaveLesson.Text = "Update Lesson";
+                    btnCancelLessonEdit.Visible = true;
 
-                await lessonRef.SetAsync(lessonData);
+                    // Load lesson data into form
+                    txtLessonName.Text = lessonDoc.ContainsField("name") ? lessonDoc.GetValue<string>("name") : lessonId;
+                    txtLessonDescription.Text = lessonDoc.ContainsField("description") ? lessonDoc.GetValue<string>("description") : "";
 
-                // Refresh lessons dropdown
-                await LoadLessons(ddlLanguage.SelectedValue, ddlTopic.SelectedValue);
-
-                // Select the newly created lesson
-                ddlLesson.SelectedValue = lessonName;
-
-                panelNewLesson.Visible = false;
-                panelQuestionForm.Visible = true;
-                txtNewLessonName.Text = "";
-
-                await LoadExistingQuestions();
-
-                ShowMessage("Lesson created successfully!", "alert alert-success");
+                    ShowMessage("Lesson loaded for editing. Make your changes and click 'Update Lesson'.", "alert alert-info");
+                }
             }
             catch (Exception ex)
             {
-                ShowMessage($"Error creating lesson: {ex.Message}", "alert alert-danger");
+                throw new Exception($"Failed to load lesson: {ex.Message}");
             }
         }
+
+        protected void btnCancelLessonEdit_Click(object sender, EventArgs e)
+        {
+            CancelLessonEdit();
+        }
+
+        private void CancelLessonEdit()
+        {
+            hfEditingLessonId.Value = "";
+            lblLessonFormTitle.Text = "Create New Lesson";
+            btnSaveLesson.Text = "Create Lesson";
+            btnCancelLessonEdit.Visible = false;
+            ClearLessonForm();
+            ShowMessage("Lesson edit cancelled.", "alert alert-info");
+        }
+
+        private void ClearLessonForm()
+        {
+            txtLessonName.Text = "";
+            txtLessonDescription.Text = "";
+        }
+
+        protected async void btnDeleteLesson_Click(object sender, EventArgs e)
+        {
+            Button btn = (Button)sender;
+            string lessonId = btn.CommandArgument;
+
+            try
+            {
+                DocumentReference lessonRef = db.Collection("languages")
+                    .Document(ddlLanguage.SelectedValue)
+                    .Collection("topics")
+                    .Document(ddlTopic.SelectedValue)
+                    .Collection("lessons")
+                    .Document(lessonId);
+
+                // First, delete all questions in this lesson
+                CollectionReference questionsRef = lessonRef.Collection("questions");
+                QuerySnapshot questionsSnapshot = await questionsRef.GetSnapshotAsync();
+
+                // Delete all questions
+                foreach (DocumentSnapshot questionDoc in questionsSnapshot.Documents)
+                {
+                    await questionDoc.Reference.DeleteAsync();
+                }
+
+                // Then delete the lesson itself
+                await lessonRef.DeleteAsync();
+
+                // Reload lessons
+                await LoadLessons(ddlLanguage.SelectedValue, ddlTopic.SelectedValue);
+
+                // Cancel edit if we're editing the deleted lesson
+                if (hfEditingLessonId.Value == lessonId)
+                {
+                    CancelLessonEdit();
+                }
+
+                // Hide question form if this lesson was selected
+                if (selectedLessonId == lessonId)
+                {
+                    panelQuestionForm.Visible = false;
+                    selectedLessonId = "";
+                }
+
+                ShowMessage("Lesson and all its questions deleted successfully!", "alert alert-success");
+            }
+            catch (Exception ex)
+            {
+                ShowMessage($"Error deleting lesson: {ex.Message}", "alert alert-danger");
+            }
+        }
+
+        // QUESTION MANAGEMENT METHODS
 
         private async Task LoadExistingQuestions()
         {
@@ -318,7 +481,7 @@ namespace KoreanApp
                     .Collection("topics")
                     .Document(ddlTopic.SelectedValue)
                     .Collection("lessons")
-                    .Document(ddlLesson.SelectedValue);
+                    .Document(selectedLessonId);
 
                 CollectionReference questionsRef = lessonRef.Collection("questions");
                 QuerySnapshot snapshot = await questionsRef.OrderBy("order").GetSnapshotAsync();
@@ -439,7 +602,7 @@ namespace KoreanApp
                     .Collection("topics")
                     .Document(ddlTopic.SelectedValue)
                     .Collection("lessons")
-                    .Document(ddlLesson.SelectedValue)
+                    .Document(selectedLessonId)
                     .Collection("questions");
 
                 if (string.IsNullOrEmpty(hfEditingQuestionId.Value))
@@ -542,7 +705,7 @@ namespace KoreanApp
                     .Collection("topics")
                     .Document(ddlTopic.SelectedValue)
                     .Collection("lessons")
-                    .Document(ddlLesson.SelectedValue)
+                    .Document(selectedLessonId)
                     .Collection("questions")
                     .Document(questionId);
 
@@ -619,7 +782,7 @@ namespace KoreanApp
                     .Collection("topics")
                     .Document(ddlTopic.SelectedValue)
                     .Collection("lessons")
-                    .Document(ddlLesson.SelectedValue)
+                    .Document(selectedLessonId)
                     .Collection("questions")
                     .Document(questionId);
 

@@ -3,6 +3,7 @@
 <asp:Content ID="AddQuestionContent" ContentPlaceHolderID="TeacherMainContent" runat="server">
     <!-- Hidden Fields for Form State -->
     <asp:HiddenField ID="hfEditingQuestionId" runat="server" />
+    <asp:HiddenField ID="hfEditingLessonId" runat="server" />
     
     <style>
         .form-section {
@@ -232,36 +233,69 @@
 
     <!-- Lessons Section -->
     <asp:Panel ID="panelLessons" runat="server" Visible="false">
+        <!-- Existing Lessons Display -->
         <div class="form-section">
             <h3 class="form-header">
-                <i class="fas fa-book me-2"></i>Step 3: Select or Create Lesson
+                <i class="fas fa-book me-2"></i>Step 3: Existing Lessons
             </h3>
+            <asp:Label ID="lblLessonCount" runat="server" CssClass="question-counter" Text="Current Lessons: 0" />
+            
+            <asp:Repeater ID="rptExistingLessons" runat="server">
+                <ItemTemplate>
+                    <div class="existing-question">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <strong>Lesson:</strong> <%# Eval("Name") %>
+                                <br><small class="text-muted">Created: <%# Eval("CreatedAt") %></small>
+                                <%# !string.IsNullOrEmpty(Eval("Description").ToString()) ? "<br><em>" + Eval("Description") + "</em>" : "" %>
+                            </div>
+                            <div>
+                                <asp:Button ID="btnSelectLesson" runat="server" Text="Select" 
+                                    CssClass="btn btn-success btn-sm me-2" 
+                                    CommandArgument='<%# Eval("Id") %>'
+                                    OnClick="btnSelectLesson_Click" />
+                                <asp:Button ID="btnEditLesson" runat="server" Text="Edit" 
+                                    CssClass="btn btn-secondary btn-sm me-2" 
+                                    CommandArgument='<%# Eval("Id") %>'
+                                    OnClick="btnEditLesson_Click" />
+                                <asp:Button ID="btnDeleteLesson" runat="server" Text="Delete" 
+                                    CssClass="btn btn-danger btn-sm" 
+                                    CommandArgument='<%# Eval("Id") %>'
+                                    OnClick="btnDeleteLesson_Click"
+                                    OnClientClick="return confirm('Are you sure you want to delete this lesson and all its questions?');" />
+                            </div>
+                        </div>
+                    </div>
+                </ItemTemplate>
+            </asp:Repeater>
+        </div>
+
+        <!-- Add/Edit Lesson Form -->
+        <div class="form-section">
+            <h3 class="form-header">
+                <i class="fas fa-plus me-2"></i><asp:Label ID="lblLessonFormTitle" runat="server" Text="Create New Lesson" />
+            </h3>
+            
             <div class="row">
                 <div class="col-md-6">
-                    <label for="ddlLesson" class="form-label">Choose Lesson</label>
-                    <asp:DropDownList ID="ddlLesson" runat="server" CssClass="form-select" AutoPostBack="true"
-                        OnSelectedIndexChanged="ddlLesson_SelectedIndexChanged">
-                    </asp:DropDownList>
+                    <label for="txtLessonName" class="form-label">Lesson Name</label>
+                    <asp:TextBox ID="txtLessonName" runat="server" CssClass="form-control" 
+                        placeholder="e.g., Basic Greetings, Ordering Food"></asp:TextBox>
+                </div>
+                <div class="col-md-6">
+                    <label for="txtLessonDescription" class="form-label">Description (Optional)</label>
+                    <asp:TextBox ID="txtLessonDescription" runat="server" CssClass="form-control" 
+                        placeholder="Brief description of the lesson"></asp:TextBox>
                 </div>
             </div>
 
-            <!-- New Lesson Panel -->
-            <asp:Panel ID="panelNewLesson" runat="server" Visible="false" CssClass="mt-3">
-                <div class="section-header">
-                    <h5><i class="fas fa-plus me-2"></i>Create New Lesson</h5>
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <label for="txtNewLessonName" class="form-label">Lesson Name</label>
-                        <asp:TextBox ID="txtNewLessonName" runat="server" CssClass="form-control" 
-                            placeholder="e.g., Basic Greetings, Ordering Food"></asp:TextBox>
-                    </div>
-                    <div class="col-md-6 d-flex align-items-end">
-                        <asp:Button ID="btnCreateLesson" runat="server" Text="Create Lesson" 
-                            CssClass="btn btn-success" OnClick="btnCreateLesson_Click" />
-                    </div>
-                </div>
-            </asp:Panel>
+            <!-- Save/Cancel Buttons -->
+            <div class="d-flex justify-content-end mt-3 gap-2">
+                <asp:Button ID="btnCancelLessonEdit" runat="server" Text="Cancel Edit" 
+                    CssClass="btn btn-secondary" OnClick="btnCancelLessonEdit_Click" Visible="false" />
+                <asp:Button ID="btnSaveLesson" runat="server" Text="Create Lesson" 
+                    CssClass="btn btn-success" OnClick="btnSaveLesson_Click" />
+            </div>
         </div>
     </asp:Panel>
 
@@ -333,7 +367,6 @@
                             Text="Audio Question" AutoPostBack="true" OnCheckedChanged="QuestionType_CheckedChanged" />
                         <br><small class="text-muted">Question with audio and text answers</small>
                     </div>
-
                 </div>
             </div>
 
@@ -387,8 +420,6 @@
                     </div>
                 </div>
             </asp:Panel>
-
-
 
             <!-- Save/Cancel Buttons -->
             <div class="d-flex justify-content-end mt-4 gap-2">

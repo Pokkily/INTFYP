@@ -339,12 +339,6 @@
     <Content Include="Images\dprofile.jpg" />
     <Content Include="Images\logo.png" />
     <Content Include="Korean.aspx" />
-    <Content Include="LanguageLearning\KLesson1\audio\Coffee.mp3" />
-    <Content Include="LanguageLearning\KLesson1\audio\Juice.mp3" />
-    <Content Include="LanguageLearning\KLesson1\audio\Tea.mp3" />
-    <Content Include="LanguageLearning\KLesson1\image\Coffee.png" />
-    <Content Include="LanguageLearning\KLesson1\image\Juice.png" />
-    <Content Include="LanguageLearning\KLesson1\image\Tea.png" />
     <Content Include="LearningReport.aspx" />
     <Content Include="Library.aspx" />
     <Content Include="ManageClassroom.aspx" />
@@ -508,7 +502,6 @@
     </Compile>
     <Compile Include="GeminiAi.aspx.cs">
       <DependentUpon>GeminiAi.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="GeminiAi.aspx.designer.cs">
       <DependentUpon>GeminiAi.aspx</DependentUpon>

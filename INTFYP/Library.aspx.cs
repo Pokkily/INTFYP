@@ -22,7 +22,6 @@ namespace INTFYP
             }
         }
 
-
         private void InitFirestore()
         {
             string path = Server.MapPath("~/serviceAccountKey.json");
@@ -47,6 +46,7 @@ namespace INTFYP
 
                 book.DocumentId = doc.Id;
 
+                // Set the state based on whether current user has liked/favorited
                 book.IsRecommended = book.RecommendedBy.Contains(CurrentUserId);
                 book.IsFavorited = book.FavoritedBy.Contains(CurrentUserId);
 
@@ -54,65 +54,77 @@ namespace INTFYP
             }
 
             bookList = bookList.OrderByDescending(b => b.Recommendations).ToList();
-            Repeater1.DataSource = bookList;
+
+            // Show "No Books" panel if no books found
+            if (bookList.Count == 0)
+            {
+                pnlNoBooks.Visible = true;
+                Repeater1.DataSource = null;
+            }
+            else
+            {
+                pnlNoBooks.Visible = false;
+                Repeater1.DataSource = bookList;
+            }
+
             Repeater1.DataBind();
         }
 
-        protected async void txtCategorySearch_TextChanged(object sender, EventArgs e)
-        {
-            string keyword = txtCategorySearch.Text.ToLower();
-            QuerySnapshot snapshot = await db.Collection("books").GetSnapshotAsync();
-
-            var results = snapshot.Documents
-                .Select(doc =>
-                {
-                    var book = doc.ConvertTo<LibraryBook>();
-                    book.DocumentId = doc.Id;
-
-                    if (book.RecommendedBy == null) book.RecommendedBy = new List<string>();
-                    if (book.FavoritedBy == null) book.FavoritedBy = new List<string>();
-                    if (book.Recommendations == null) book.Recommendations = 0;
-
-                    book.IsRecommended = book.RecommendedBy.Contains(CurrentUserId);
-                    book.IsFavorited = book.FavoritedBy.Contains(CurrentUserId);
-
-                    return book;
-                })
-                .Where(b => b.Category?.ToLower().Contains(keyword) == true)
-                .OrderByDescending(b => b.Recommendations ?? 0)
-                .ToList();
-
-            Repeater1.DataSource = results;
-            Repeater1.DataBind();
-        }
-
+        // COMBINED search functionality - searches by title, author, AND category in ONE search bar
         protected async void txtBookSearch_TextChanged(object sender, EventArgs e)
         {
-            string keyword = txtBookSearch.Text.ToLower();
+            string keyword = txtBookSearch.Text.ToLower().Trim();
+
             QuerySnapshot snapshot = await db.Collection("books").GetSnapshotAsync();
+            List<LibraryBook> results = new List<LibraryBook>();
 
-            var results = snapshot.Documents
-                .Select(doc =>
+            if (string.IsNullOrEmpty(keyword))
+            {
+                // If search is empty, load all books
+                await LoadBooks();
+                return;
+            }
+
+            foreach (var doc in snapshot.Documents)
+            {
+                var book = doc.ConvertTo<LibraryBook>();
+                book.DocumentId = doc.Id;
+
+                if (book.RecommendedBy == null) book.RecommendedBy = new List<string>();
+                if (book.FavoritedBy == null) book.FavoritedBy = new List<string>();
+                if (book.Recommendations == null) book.Recommendations = 0;
+
+                // Set the state based on whether current user has liked/favorited
+                book.IsRecommended = book.RecommendedBy.Contains(CurrentUserId);
+                book.IsFavorited = book.FavoritedBy.Contains(CurrentUserId);
+
+                // COMBINED SEARCH: Search across title, author, AND category
+                bool matchesSearch =
+                    (book.Title?.ToLower().Contains(keyword) ?? false) ||
+                    (book.Author?.ToLower().Contains(keyword) ?? false) ||
+                    (book.Category?.ToLower().Contains(keyword) ?? false);
+
+                if (matchesSearch)
                 {
-                    var book = doc.ConvertTo<LibraryBook>();
-                    book.DocumentId = doc.Id;
+                    results.Add(book);
+                }
+            }
 
-                    if (book.RecommendedBy == null) book.RecommendedBy = new List<string>();
-                    if (book.FavoritedBy == null) book.FavoritedBy = new List<string>();
-                    if (book.Recommendations == null) book.Recommendations = 0;
+            // Order by recommendations (most recommended first)
+            results = results.OrderByDescending(b => b.Recommendations ?? 0).ToList();
 
-                    book.IsRecommended = book.RecommendedBy.Contains(CurrentUserId);
-                    book.IsFavorited = book.FavoritedBy.Contains(CurrentUserId);
+            // Show appropriate content based on results
+            if (results.Count == 0)
+            {
+                pnlNoBooks.Visible = true;
+                Repeater1.DataSource = null;
+            }
+            else
+            {
+                pnlNoBooks.Visible = false;
+                Repeater1.DataSource = results;
+            }
 
-                    return book;
-                })
-                .Where(b =>
-                    (b.Title?.ToLower().Contains(keyword) ?? false) ||
-                    (b.Author?.ToLower().Contains(keyword) ?? false))
-                .OrderByDescending(b => b.Recommendations ?? 0)
-                .ToList();
-
-            Repeater1.DataSource = results;
             Repeater1.DataBind();
         }
 
@@ -133,9 +145,7 @@ namespace INTFYP
 
             var bookData = bookSnap.ToDictionary();
             var bookUpdates = new Dictionary<string, object>();
-            var userUpdates = new Dictionary<string, object>();
 
-            // Favorite button logic (you already had this)
             if (e.CommandName == "Favorite")
             {
                 var favoritedBy = bookData.ContainsKey("FavoritedBy")
@@ -154,11 +164,8 @@ namespace INTFYP
                 }
 
                 bookUpdates["FavoritedBy"] = favoritedBy;
-
                 await bookRef.UpdateAsync(bookUpdates);
             }
-
-
             else if (e.CommandName == "Recommend")
             {
                 var recommendedBy = bookData.ContainsKey("RecommendedBy")
@@ -184,13 +191,21 @@ namespace INTFYP
 
                 bookUpdates["RecommendedBy"] = recommendedBy;
                 bookUpdates["Recommendations"] = recommendations;
-
                 await bookRef.UpdateAsync(bookUpdates);
             }
 
-            await LoadBooks();
+            // Reload based on current search state
+            if (!string.IsNullOrEmpty(txtBookSearch.Text.Trim()))
+            {
+                // If there's a search term, rerun the search
+                txtBookSearch_TextChanged(txtBookSearch, EventArgs.Empty);
+            }
+            else
+            {
+                // If no search term, load all books
+                LoadBooks();
+            }
         }
-
 
         [FirestoreData]
         public class LibraryBook

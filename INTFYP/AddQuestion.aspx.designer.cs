@@ -21,6 +21,15 @@ namespace KoreanApp
         protected global::System.Web.UI.WebControls.HiddenField hfEditingQuestionId;
 
         /// <summary>
+        /// hfEditingLessonId control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfEditingLessonId;
+
+        /// <summary>
         /// lblMessage control.
         /// </summary>
         /// <remarks>
@@ -93,40 +102,67 @@ namespace KoreanApp
         protected global::System.Web.UI.WebControls.Panel panelLessons;
 
         /// <summary>
-        /// ddlLesson control.
+        /// lblLessonCount control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlLesson;
+        protected global::System.Web.UI.WebControls.Label lblLessonCount;
 
         /// <summary>
-        /// panelNewLesson control.
+        /// rptExistingLessons control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel panelNewLesson;
+        protected global::System.Web.UI.WebControls.Repeater rptExistingLessons;
 
         /// <summary>
-        /// txtNewLessonName control.
+        /// lblLessonFormTitle control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtNewLessonName;
+        protected global::System.Web.UI.WebControls.Label lblLessonFormTitle;
 
         /// <summary>
-        /// btnCreateLesson control.
+        /// txtLessonName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnCreateLesson;
+        protected global::System.Web.UI.WebControls.TextBox txtLessonName;
+
+        /// <summary>
+        /// txtLessonDescription control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtLessonDescription;
+
+        /// <summary>
+        /// btnCancelLessonEdit control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnCancelLessonEdit;
+
+        /// <summary>
+        /// btnSaveLesson control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnSaveLesson;
 
         /// <summary>
         /// panelQuestionForm control.

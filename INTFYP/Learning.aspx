@@ -11,6 +11,8 @@
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --reverse-gradient: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
             --accent-gradient: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            --success-gradient: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            --danger-gradient: linear-gradient(45deg, #ff6b6b, #ff8e8e);
             --glass-bg: rgba(255, 255, 255, 0.95);
             --glass-border: rgba(255, 255, 255, 0.2);
             --text-primary: #2c3e50;
@@ -171,7 +173,20 @@
             font-weight: 500;
         }
 
-        /* Join Button */
+        /* Enrollment Status */
+        .enrollment-status {
+            background: linear-gradient(45deg, rgba(86, 171, 47, 0.1), rgba(168, 230, 207, 0.1));
+            color: var(--text-primary);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 15px;
+            font-size: 0.85rem;
+            text-align: center;
+            margin: var(--spacing-xs) 0;
+            font-weight: 500;
+            border: 1px solid rgba(86, 171, 47, 0.2);
+        }
+
+        /* Button Styles */
         .btn-join {
             background: var(--primary-gradient);
             color: white;
@@ -195,15 +210,47 @@
             transform: scale(0.98);
         }
 
-        .btn-joined {
-            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
-            cursor: default;
+        .btn-learn {
+            background: var(--success-gradient);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: var(--spacing-xs);
         }
 
-        .btn-joined:hover {
-            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
-            transform: none;
-            box-shadow: 0 4px 15px rgba(86, 171, 47, 0.3);
+        .btn-learn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(86, 171, 47, 0.4);
+        }
+
+        .btn-quit {
+            background: var(--danger-gradient);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 24px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-quit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-quit:active {
+            transform: scale(0.98);
+        }
+
+        /* Enrolled Actions Container */
+        .enrolled-actions {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-xs);
         }
 
         /* Alert System */
@@ -331,16 +378,43 @@
                             
                             <div class="student-count">
                                 <i class="fas fa-users me-2"></i>
-                                <%# Eval("StudentCount") %> students learning
+                                <%# Eval("StudentCount") %> students joined
+                            </div>
+
+                            <div class="student-count" style="font-size: 0.8rem; margin-top: 5px; opacity: 0.8;">
+                                <i class="fas fa-chart-line me-1"></i>
+                                <%# Eval("JoinCount") %> total joins
                             </div>
                             
-                            <div class="d-grid mt-4">
-                                <asp:Button ID="btnJoinLanguage" runat="server" 
-                                          CssClass="btn-join" 
-                                          CommandName="JoinLanguage" 
-                                          CommandArgument='<%# Eval("Id") %>' 
-                                          Text='<%# IsStudentEnrolled(Eval("Id").ToString()) ? "✅ Enrolled" : "🚀 Join Course" %>'
-                                          Enabled='<%# !IsStudentEnrolled(Eval("Id").ToString()) %>' />
+                            <!-- Action Buttons -->
+                            <div class="mt-4">
+                                <!-- Show Join button if not enrolled -->
+                                <asp:Panel ID="pnlJoinButton" runat="server" Visible='<%# !IsStudentEnrolled(Eval("Id").ToString()) %>'>
+                                    <div class="d-grid">
+                                        <asp:Button ID="btnJoinLanguage" runat="server" 
+                                                  CssClass="btn-join" 
+                                                  CommandName="JoinLanguage" 
+                                                  CommandArgument='<%# Eval("Id") %>' 
+                                                  Text="🚀 Join Course" />
+                                    </div>
+                                </asp:Panel>
+
+                                <!-- Show Learn and Quit buttons if enrolled -->
+                                <asp:Panel ID="pnlEnrolledButtons" runat="server" Visible='<%# IsStudentEnrolled(Eval("Id").ToString()) %>'>
+                                    <div class="enrolled-actions">
+                                        <asp:Button ID="btnLearnLanguage" runat="server" 
+                                                  CssClass="btn-learn w-100" 
+                                                  CommandName="LearnLanguage" 
+                                                  CommandArgument='<%# Eval("Id") %>' 
+                                                  Text="📚 Start Learning" />
+                                        <asp:Button ID="btnQuitLanguage" runat="server" 
+                                                  CssClass="btn-quit w-100" 
+                                                  CommandName="QuitLanguage" 
+                                                  CommandArgument='<%# Eval("Id") %>' 
+                                                  Text="❌ Quit Course"
+                                                  OnClientClick="return confirm('Are you sure you want to quit this course?');" />
+                                    </div>
+                                </asp:Panel>
                             </div>
                             
                             <div class="mt-2 text-center">
