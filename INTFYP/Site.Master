@@ -290,6 +290,24 @@
             color: white;
         }
 
+        /* Logout button specific styles */
+        .btn-logout {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-logout::before {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-logout:hover {
+            background: linear-gradient(135deg, #c0392b, #a93226);
+            box-shadow: 0 6px 25px rgba(231, 76, 60, 0.4);
+            color: white;
+        }
+
         .username {
             font-size: 15px;
             font-weight: 600;
@@ -470,6 +488,11 @@
                 });
             });
         });
+
+        // Logout confirmation function
+        function confirmLogout() {
+            return confirm('Are you sure you want to logout?');
+        }
     </script>
 </head>
 <body>
@@ -513,7 +536,11 @@
             <div class="right-panel">
                 
                 <asp:PlaceHolder ID="phLoggedIn" runat="server" Visible="false">
-                    <a href="Logout.aspx" class="btn">Logout</a>
+                    <asp:Button ID="btnLogout" runat="server" 
+                        Text="Logout" 
+                        OnClick="btnLogout_Click" 
+                        CssClass="btn btn-logout"
+                        OnClientClick="return confirmLogout();" />
                 </asp:PlaceHolder>
 
                 <asp:PlaceHolder ID="phGuest" runat="server" Visible="false">
