@@ -306,6 +306,7 @@
     <Content Include="AddLanguageCard.aspx" />
     <Content Include="AddQuestion.aspx" />
     <Content Include="AddScholarship.aspx" />
+    <Content Include="Admin.aspx" />
     <Content Include="CitationGenerator.aspx" />
     <Content Include="Class.aspx" />
     <Content Include="ClassDetails.aspx" />
@@ -483,6 +484,13 @@
     </Compile>
     <Compile Include="AddScholarship.aspx.designer.cs">
       <DependentUpon>AddScholarship.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin.aspx.cs">
+      <DependentUpon>Admin.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin.aspx.designer.cs">
+      <DependentUpon>Admin.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />

@@ -45,6 +45,9 @@ namespace YourProjectNamespace
 
                 if (!IsPostBack)
                 {
+                    // Clear any existing sessions
+                    Session.Clear();
+
                     // Show login form by default
                     loginPanel.Visible = true;
                     forgotPasswordPanel.Visible = false;
@@ -99,6 +102,11 @@ namespace YourProjectNamespace
             }
         }
 
+        private string GetRedirectPageForPosition(string position)
+        {
+            return position?.ToLower() == "administrator" ? "Admin.aspx" : "class.aspx";
+        }
+
         protected async void btnLogin_Click(object sender, EventArgs e)
         {
             lblMessage.Visible = false;
@@ -113,6 +121,8 @@ namespace YourProjectNamespace
                     ShowError("Please enter both username/email and password.");
                     return;
                 }
+
+                System.Diagnostics.Debug.WriteLine($"Login attempt for: {input}");
 
                 QuerySnapshot querySnapshot;
                 if (input.Contains("@"))
@@ -132,7 +142,7 @@ namespace YourProjectNamespace
 
                 if (querySnapshot.Count == 0)
                 {
-                    ShowError("User not found.");
+                    ShowError("Invalid email/username or password.");
                     return;
                 }
 
@@ -142,21 +152,59 @@ namespace YourProjectNamespace
                 string storedPassword = userData["password"]?.ToString();
                 if (storedPassword != password)
                 {
-                    ShowError("Incorrect password.");
+                    ShowError("Invalid email/username or password.");
                     return;
                 }
 
-                // Update lastLogin
-                await db.Collection("users").Document(userDoc.Id).UpdateAsync("lastLogin", Timestamp.GetCurrentTimestamp());
+                // Get user status and other details
+                var userStatus = userData.ContainsKey("status") ? userData["status"]?.ToString() : "pending";
+                var firstName = userData["firstName"]?.ToString() ?? "";
+                var lastName = userData["lastName"]?.ToString() ?? "";
+                var position = userData["position"]?.ToString() ?? "";
+                var rejectionReason = userData.ContainsKey("rejectionReason") ? userData["rejectionReason"]?.ToString() : null;
 
-                // Save session info
-                Session["userId"] = userDoc.Id;
-                Session["username"] = userData["username"];
-                Session["email"] = userData["email"];
-                Session["position"] = userData["position"];
+                System.Diagnostics.Debug.WriteLine($"User found: {firstName} {lastName}, Status: {userStatus}, Position: {position}");
 
-                string position = userData["position"]?.ToString()?.ToLower();
-                string redirectPage = position == "administrator" ? "admin.aspx" : "class.aspx";
+                // Check user approval status
+                switch (userStatus.ToLower())
+                {
+                    case "pending":
+                        ShowPendingMessage(firstName);
+                        return;
+
+                    case "rejected":
+                        ShowRejectedMessage(firstName, rejectionReason);
+                        return;
+
+                    case "approved":
+                        // User is approved, proceed with login
+                        break;
+
+                    default:
+                        // Handle legacy users or unknown status - treat as pending for safety
+                        ShowPendingMessage(firstName);
+                        return;
+                }
+
+                // Update lastLogin timestamp
+                var updates = new Dictionary<string, object>
+                {
+                    {"lastLogin", Timestamp.GetCurrentTimestamp()},
+                    {"lastUpdated", Timestamp.GetCurrentTimestamp()}
+                };
+                await db.Collection("users").Document(userDoc.Id).UpdateAsync(updates);
+
+                // Set session variables
+                Session["UserId"] = userDoc.Id;
+                Session["UserEmail"] = userData["email"];
+                Session["UserName"] = $"{firstName} {lastName}";
+                Session["UserRole"] = position;
+                Session["IsLoggedIn"] = true;
+
+                System.Diagnostics.Debug.WriteLine($"User {input} logged in successfully with role: {position}");
+
+                // Redirect based on user role
+                string redirectPage = GetRedirectPageForPosition(position);
 
                 ShowSuccess("Login successful! Redirecting...");
                 ClientScript.RegisterStartupScript(this.GetType(), "redirect",
@@ -164,9 +212,48 @@ namespace YourProjectNamespace
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Login error: {ex}");
+                System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
                 ShowError("An error occurred while trying to log in. Please try again.");
             }
+        }
+
+        private void ShowPendingMessage(string firstName)
+        {
+            string message = $@"
+                <div class='d-flex align-items-center'>
+                    <i class='bi bi-clock-history me-3' style='font-size: 1.5rem; color: #f6c23e;'></i>
+                    <div>
+                        <strong>Account Pending Approval</strong><br>
+                        <small>Hello {firstName}! Your account is currently pending administrative approval. 
+                        You will receive an email notification once your account has been reviewed and approved.</small>
+                    </div>
+                </div>";
+
+            lblMessage.Text = message;
+            lblMessage.CssClass = "alert alert-warning";
+            lblMessage.Visible = true;
+        }
+
+        private void ShowRejectedMessage(string firstName, string rejectionReason)
+        {
+            string reasonText = !string.IsNullOrEmpty(rejectionReason)
+                ? $"<br><strong>Reason:</strong> {rejectionReason}"
+                : "";
+
+            string message = $@"
+                <div class='d-flex align-items-center'>
+                    <i class='bi bi-x-circle me-3' style='font-size: 1.5rem; color: #e74a3b;'></i>
+                    <div>
+                        <strong>Account Registration Rejected</strong><br>
+                        <small>Hello {firstName}! Unfortunately, your account registration was not approved.{reasonText}
+                        <br>You may submit a new registration if you believe this was an error.</small>
+                    </div>
+                </div>";
+
+            lblMessage.Text = message;
+            lblMessage.CssClass = "alert alert-danger";
+            lblMessage.Visible = true;
         }
 
         protected void btnShowForgotPassword_Click(object sender, EventArgs e)
@@ -235,6 +322,25 @@ namespace YourProjectNamespace
                 var userDoc = emailQuery.Documents[0];
                 var userData = userDoc.ToDictionary();
                 var firstName = userData["firstName"]?.ToString() ?? "User";
+                var userStatus = userData.ContainsKey("status") ? userData["status"]?.ToString() : "pending";
+
+                // Check if user account is approved before allowing password reset
+                if (userStatus.ToLower() != "approved")
+                {
+                    if (userStatus.ToLower() == "pending")
+                    {
+                        ShowError("Your account is still pending approval. Please wait for admin approval before resetting your password.");
+                    }
+                    else if (userStatus.ToLower() == "rejected")
+                    {
+                        ShowError("Your account registration was rejected. Please contact support for assistance.");
+                    }
+                    else
+                    {
+                        ShowError("Your account is not active. Please contact support for assistance.");
+                    }
+                    return;
+                }
 
                 // Generate reset code
                 var resetCode = new Random().Next(100000, 999999).ToString();
