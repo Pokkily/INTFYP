@@ -5,328 +5,329 @@ using System.Threading.Tasks;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using Google.Cloud.Firestore;
-using System.Web;
 
 namespace INTFYP
 {
     public partial class Learning : System.Web.UI.Page
     {
         private static FirestoreDb db;
-        private static readonly object dbLock = new object();
 
-        // Data Models (same as teacher side)
-        [FirestoreData]
-        public class Language
-        {
-            [FirestoreProperty]
-            public string Id { get; set; }
-
-            [FirestoreProperty]
-            public string Name { get; set; }
-
-            [FirestoreProperty]
-            public string Code { get; set; }
-
-            [FirestoreProperty]
-            public string Description { get; set; }
-
-            [FirestoreProperty]
-            public string Flag { get; set; }
-
-            [FirestoreProperty]
-            public string Difficulty { get; set; }
-
-            [FirestoreProperty]
-            public DateTime CreatedDate { get; set; }
-
-            [FirestoreProperty]
-            public int StudentCount { get; set; }
-
-            [FirestoreProperty]
-            public bool IsActive { get; set; }
-        }
-
-        [FirestoreData]
-        public class StudentEnrollment
-        {
-            [FirestoreProperty]
-            public string Id { get; set; }
-
-            [FirestoreProperty]
-            public string LanguageId { get; set; }
-
-            [FirestoreProperty]
-            public string StudentId { get; set; }
-
-            [FirestoreProperty]
-            public string StudentName { get; set; }
-
-            [FirestoreProperty]
-            public string StudentEmail { get; set; }
-
-            [FirestoreProperty]
-            public DateTime EnrollmentDate { get; set; }
-
-            [FirestoreProperty]
-            public string Status { get; set; }
-        }
-
-        // Store enrolled language IDs for quick checking
-        private HashSet<string> enrolledLanguageIds = new HashSet<string>();
+        // Use same session approach as Library
+        public string CurrentUserId => Session["userId"]?.ToString();
 
         protected async void Page_Load(object sender, EventArgs e)
         {
+            InitFirestore();
+
             if (!IsPostBack)
             {
-                try
-                {
-                    InitializeFirestore();
-                    await LoadLanguagesAsync();
-                }
-                catch (Exception ex)
-                {
-                    ShowAlert($"Error loading page: {ex.Message}", "error");
-                    // Show empty state if there's an error
-                    pnlNoLanguages.Visible = true;
-                }
+                await LoadLanguages();
             }
         }
 
-        private void InitializeFirestore()
+        private void InitFirestore()
         {
-            if (db == null)
-            {
-                lock (dbLock)
-                {
-                    if (db == null)
-                    {
-                        try
-                        {
-                            string path = Server.MapPath("~/serviceAccountKey.json");
-                            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
-                            db = FirestoreDb.Create("intorannetto");
-                        }
-                        catch (Exception ex)
-                        {
-                            // If Firebase fails, just log and continue with empty data
-                            System.Diagnostics.Debug.WriteLine($"Firebase init error: {ex.Message}");
-                            throw; // Let the caller handle this
-                        }
-                    }
-                }
-            }
+            string path = Server.MapPath("~/serviceAccountKey.json");
+            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
+            db = FirestoreDb.Create("intorannetto");
         }
 
-        private async Task LoadLanguagesAsync()
+        private async Task LoadLanguages()
         {
             try
             {
-                // First get student's enrolled languages for quick checking
-                await LoadStudentEnrollments();
-
-                // Then get all available languages
-                var languages = await GetAllAvailableLanguages();
-
-                if (languages.Any())
+                // Generate userId if not exists (like Library)
+                if (string.IsNullOrEmpty(CurrentUserId))
                 {
-                    rptLanguages.DataSource = languages.OrderBy(l => l.Name);
-                    rptLanguages.DataBind();
-                    pnlNoLanguages.Visible = false;
+                    Session["userId"] = "user_" + Guid.NewGuid().ToString("N").Substring(0, 8);
+                }
+
+                System.Diagnostics.Debug.WriteLine("Session userId: " + Session["userId"]);
+
+                QuerySnapshot snapshot = await db.Collection("languages").GetSnapshotAsync();
+                List<LanguageClass> languageList = new List<LanguageClass>();
+
+                foreach (var doc in snapshot.Documents)
+                {
+                    var language = doc.ConvertTo<LanguageClass>();
+                    language.DocumentId = doc.Id;
+
+                    // Check if current user is enrolled by looking at enrollments collection
+                    language.IsEnrolled = await CheckUserEnrollment(doc.Id);
+
+                    languageList.Add(language);
+                }
+
+                // Show languages ordered by name
+                languageList = languageList.OrderBy(l => l.Name).ToList();
+
+                if (languageList.Count == 0)
+                {
+                    pnlNoLanguages.Visible = true;
+                    rptLanguages.DataSource = null;
                 }
                 else
                 {
-                    rptLanguages.DataSource = null;
-                    rptLanguages.DataBind();
-                    pnlNoLanguages.Visible = true;
+                    pnlNoLanguages.Visible = false;
+                    rptLanguages.DataSource = languageList;
                 }
+
+                rptLanguages.DataBind();
             }
             catch (Exception ex)
             {
-                ShowAlert($"Error loading language courses: {ex.Message}", "error");
+                ShowAlert($"Error loading languages: {ex.Message}", "error");
                 pnlNoLanguages.Visible = true;
             }
         }
 
-        private async Task LoadStudentEnrollments()
+        // Check if current user is enrolled in a specific language
+        private async Task<bool> CheckUserEnrollment(string languageId)
         {
             try
             {
-                string studentId = GetCurrentStudentId();
-                enrolledLanguageIds.Clear();
+                if (string.IsNullOrEmpty(CurrentUserId)) return false;
 
-                Query query = db.Collection("enrollments")
-                               .WhereEqualTo("StudentId", studentId)
-                               .WhereEqualTo("Status", "Active");
+                // Query the enrollments subcollection under the specific language
+                Query query = db.Collection("languages")
+                    .Document(languageId)
+                    .Collection("enrollments")
+                    .WhereEqualTo("UserId", CurrentUserId)
+                    .WhereEqualTo("Status", "Active");
 
-                // Add timeout to prevent hanging
-                var timeoutTask = Task.Delay(5000); // 5 second timeout
-                var queryTask = query.GetSnapshotAsync();
+                QuerySnapshot snapshot = await query.GetSnapshotAsync();
+                return snapshot.Documents.Count > 0;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error checking enrollment: {ex.Message}");
+                return false;
+            }
+        }
 
-                var completedTask = await Task.WhenAny(queryTask, timeoutTask);
+        // Search functionality like Library
+        protected async void txtLanguageSearch_TextChanged(object sender, EventArgs e)
+        {
+            string keyword = ((TextBox)sender).Text.ToLower().Trim();
 
-                if (completedTask == timeoutTask)
+            try
+            {
+                QuerySnapshot snapshot = await db.Collection("languages").GetSnapshotAsync();
+                List<LanguageClass> results = new List<LanguageClass>();
+
+                if (string.IsNullOrEmpty(keyword))
                 {
-                    System.Diagnostics.Debug.WriteLine("Enrollment query timed out");
+                    // If search is empty, load all languages
+                    await LoadLanguages();
                     return;
                 }
 
-                QuerySnapshot snapshot = await queryTask;
-
-                foreach (DocumentSnapshot doc in snapshot.Documents)
+                foreach (var doc in snapshot.Documents)
                 {
-                    var enrollment = doc.ConvertTo<StudentEnrollment>();
-                    enrolledLanguageIds.Add(enrollment.LanguageId);
-                }
-            }
-            catch (Exception ex)
-            {
-                // Continue with empty enrollment list if error
-                System.Diagnostics.Debug.WriteLine($"Error loading enrollments: {ex.Message}");
-                enrolledLanguageIds.Clear();
-            }
-        }
+                    var language = doc.ConvertTo<LanguageClass>();
+                    language.DocumentId = doc.Id;
 
-        private async Task<List<Language>> GetAllAvailableLanguages()
-        {
-            var languages = new List<Language>();
+                    // Check enrollment status
+                    language.IsEnrolled = await CheckUserEnrollment(doc.Id);
 
-            try
-            {
-                // Get all active languages with timeout
-                CollectionReference languagesRef = db.Collection("languages");
-                Query query = languagesRef.WhereEqualTo("IsActive", true);
+                    // Search across name, code, and description
+                    bool matchesSearch =
+                        (language.Name?.ToLower().Contains(keyword) ?? false) ||
+                        (language.Code?.ToLower().Contains(keyword) ?? false) ||
+                        (language.Description?.ToLower().Contains(keyword) ?? false);
 
-                // Add timeout to prevent hanging
-                var timeoutTask = Task.Delay(10000); // 10 second timeout
-                var queryTask = query.GetSnapshotAsync();
-
-                var completedTask = await Task.WhenAny(queryTask, timeoutTask);
-
-                if (completedTask == timeoutTask)
-                {
-                    throw new TimeoutException("Database query timed out - please check your internet connection");
-                }
-
-                QuerySnapshot snapshot = await queryTask;
-
-                foreach (DocumentSnapshot document in snapshot.Documents)
-                {
-                    if (document.Exists)
+                    if (matchesSearch)
                     {
-                        var language = document.ConvertTo<Language>();
-
-                        // Get student count quickly with timeout
-                        language.StudentCount = await GetStudentCountForLanguage(language.Id);
-
-                        languages.Add(language);
+                        results.Add(language);
                     }
                 }
+
+                // Order by name
+                results = results.OrderBy(l => l.Name).ToList();
+
+                if (results.Count == 0)
+                {
+                    pnlNoLanguages.Visible = true;
+                    rptLanguages.DataSource = null;
+                }
+                else
+                {
+                    pnlNoLanguages.Visible = false;
+                    rptLanguages.DataSource = results;
+                }
+
+                rptLanguages.DataBind();
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error getting languages: {ex.Message}");
-                throw; // Let caller handle the error
-            }
-
-            return languages;
-        }
-
-        private async Task<int> GetStudentCountForLanguage(string languageId)
-        {
-            try
-            {
-                Query query = db.Collection("enrollments")
-                               .WhereEqualTo("LanguageId", languageId)
-                               .WhereEqualTo("Status", "Active");
-
-                // Add timeout for count query
-                var timeoutTask = Task.Delay(3000); // 3 second timeout
-                var queryTask = query.GetSnapshotAsync();
-
-                var completedTask = await Task.WhenAny(queryTask, timeoutTask);
-
-                if (completedTask == timeoutTask)
-                {
-                    return 0; // Return 0 if timeout
-                }
-
-                QuerySnapshot snapshot = await queryTask;
-                return snapshot.Documents.Count;
-            }
-            catch
-            {
-                return 0; // Return 0 if error
+                ShowAlert($"Error searching languages: {ex.Message}", "error");
             }
         }
 
         protected async void rptLanguages_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
-            if (e.CommandName == "JoinLanguage")
-            {
-                string languageId = e.CommandArgument.ToString();
-                await JoinLanguageCourse(languageId);
-            }
-        }
+            System.Diagnostics.Debug.WriteLine("Session userId: " + Session["userId"]);
 
-        private async Task JoinLanguageCourse(string languageId)
-        {
+            if (string.IsNullOrEmpty(CurrentUserId)) return;
+
+            string languageId = e.CommandArgument.ToString();
+
             try
             {
-                string studentId = GetCurrentStudentId();
-                string studentName = GetCurrentStudentName();
-                string studentEmail = GetCurrentStudentEmail();
-
-                // Quick check using our cached enrolled IDs
-                if (enrolledLanguageIds.Contains(languageId))
+                if (e.CommandName == "JoinClass")
                 {
-                    ShowAlert("You are already enrolled in this language course!", "error");
-                    return;
+                    await JoinLanguageClass(languageId);
+                }
+                else if (e.CommandName == "QuitClass")
+                {
+                    await QuitLanguageClass(languageId);
+                }
+                else if (e.CommandName == "StartLearning")
+                {
+                    await StartLearning(languageId);
                 }
 
-                // Get language name for success message
-                string languageName = await GetLanguageName(languageId);
-
-                // Create enrollment record
-                var enrollment = new StudentEnrollment
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    LanguageId = languageId,
-                    StudentId = studentId,
-                    StudentName = studentName,
-                    StudentEmail = studentEmail,
-                    EnrollmentDate = DateTime.UtcNow,
-                    Status = "Active"
-                };
-
-                // Add enrollment to Firebase with timeout
-                DocumentReference docRef = db.Collection("enrollments").Document(enrollment.Id);
-
-                var timeoutTask = Task.Delay(8000); // 8 second timeout
-                var setTask = docRef.SetAsync(enrollment);
-
-                var completedTask = await Task.WhenAny(setTask, timeoutTask);
-
-                if (completedTask == timeoutTask)
-                {
-                    throw new TimeoutException("Enrollment request timed out");
-                }
-
-                await setTask;
-
-                // Update cached enrollment
-                enrolledLanguageIds.Add(languageId);
-
-                // Update the language's student count (don't wait for this)
-                _ = Task.Run(() => UpdateLanguageStudentCount(languageId));
-
-                ShowAlert($"🎉 Successfully joined {languageName} course!", "success");
-
-                // Refresh the page to show updated enrollment status
-                await LoadLanguagesAsync();
+                // Reload languages to show updated state
+                await LoadLanguages();
             }
             catch (Exception ex)
             {
-                ShowAlert($"Error joining course: {ex.Message}", "error");
+                ShowAlert($"Error: {ex.Message}", "error");
+                System.Diagnostics.Debug.WriteLine($"Error in ItemCommand: {ex}");
+            }
+        }
+
+        private async Task JoinLanguageClass(string languageId)
+        {
+            try
+            {
+                // Check if already enrolled
+                bool isEnrolled = await CheckUserEnrollment(languageId);
+                if (isEnrolled)
+                {
+                    ShowAlert("You are already enrolled in this class!", "error");
+                    return;
+                }
+
+                // Get language name for message
+                string languageName = await GetLanguageName(languageId);
+
+                // Create enrollment record in the language's enrollments subcollection
+                var enrollment = new Enrollment
+                {
+                    UserId = CurrentUserId,
+                    JoinedDate = Timestamp.GetCurrentTimestamp(),
+                    Status = "Active"
+                };
+
+                // Add to enrollments subcollection under the specific language
+                await db.Collection("languages")
+                    .Document(languageId)
+                    .Collection("enrollments")
+                    .AddAsync(enrollment);
+
+                ShowAlert($"Successfully joined {languageName} class! 🎉", "success");
+            }
+            catch (Exception ex)
+            {
+                ShowAlert($"Error joining class: {ex.Message}", "error");
+                System.Diagnostics.Debug.WriteLine($"Error joining class: {ex}");
+            }
+        }
+
+        private async Task QuitLanguageClass(string languageId)
+        {
+            try
+            {
+                // Find active enrollment in the language's enrollments subcollection
+                Query query = db.Collection("languages")
+                    .Document(languageId)
+                    .Collection("enrollments")
+                    .WhereEqualTo("UserId", CurrentUserId)
+                    .WhereEqualTo("Status", "Active");
+
+                QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+                if (snapshot.Documents.Count == 0)
+                {
+                    ShowAlert("You are not enrolled in this class.", "error");
+                    return;
+                }
+
+                // Get language name for message
+                string languageName = await GetLanguageName(languageId);
+
+                // Update enrollment status to quit
+                DocumentSnapshot enrollmentDoc = snapshot.Documents.First();
+                await enrollmentDoc.Reference.UpdateAsync(new Dictionary<string, object>
+                {
+                    { "Status", "Quit" },
+                    { "QuitDate", Timestamp.GetCurrentTimestamp() }
+                });
+
+                ShowAlert($"You have quit the {languageName} class. You can rejoin anytime!", "success");
+            }
+            catch (Exception ex)
+            {
+                ShowAlert($"Error quitting class: {ex.Message}", "error");
+                System.Diagnostics.Debug.WriteLine($"Error quitting class: {ex}");
+            }
+        }
+
+        private async Task StartLearning(string languageId)
+        {
+            try
+            {
+                // Check if user is enrolled
+                bool isEnrolled = await CheckUserEnrollment(languageId);
+                if (!isEnrolled)
+                {
+                    ShowAlert("Please join the class first before starting to learn!", "error");
+                    return;
+                }
+
+                // Get language name for message
+                string languageName = await GetLanguageName(languageId);
+
+                // Update last access date
+                await UpdateLastAccessDate(languageId);
+
+                ShowAlert($"Starting {languageName} learning session! 📚", "success");
+
+                // TODO: Redirect to learning page
+                // Response.Redirect($"~/LearningSession.aspx?languageId={languageId}");
+            }
+            catch (Exception ex)
+            {
+                ShowAlert($"Error starting learning session: {ex.Message}", "error");
+            }
+        }
+
+        private async Task UpdateLastAccessDate(string languageId)
+        {
+            try
+            {
+                // Find active enrollment in the language's enrollments subcollection
+                Query query = db.Collection("languages")
+                    .Document(languageId)
+                    .Collection("enrollments")
+                    .WhereEqualTo("UserId", CurrentUserId)
+                    .WhereEqualTo("Status", "Active");
+
+                QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+                if (snapshot.Documents.Count > 0)
+                {
+                    DocumentSnapshot enrollmentDoc = snapshot.Documents.First();
+                    await enrollmentDoc.Reference.UpdateAsync(new Dictionary<string, object>
+                    {
+                        { "LastAccessDate", Timestamp.GetCurrentTimestamp() }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error updating last access date: {ex.Message}");
             }
         }
 
@@ -335,96 +336,85 @@ namespace INTFYP
             try
             {
                 DocumentReference languageRef = db.Collection("languages").Document(languageId);
+                DocumentSnapshot snapshot = await languageRef.GetSnapshotAsync();
 
-                var timeoutTask = Task.Delay(3000);
-                var getTask = languageRef.GetSnapshotAsync();
-
-                var completedTask = await Task.WhenAny(getTask, timeoutTask);
-
-                if (completedTask == timeoutTask)
-                {
-                    return "this language";
-                }
-
-                DocumentSnapshot snapshot = await getTask;
-
-                if (snapshot.Exists)
+                if (snapshot.Exists && snapshot.ContainsField("Name"))
                 {
                     return snapshot.GetValue<string>("Name");
                 }
+                return "this language";
             }
-            catch
+            catch (Exception ex)
             {
-                // Ignore error
+                System.Diagnostics.Debug.WriteLine($"Error getting language name: {ex.Message}");
+                return "this language";
             }
-
-            return "this language";
         }
 
-        private async Task UpdateLanguageStudentCount(string languageId)
+        protected void rptLanguages_ItemDataBound(object sender, RepeaterItemEventArgs e)
         {
-            try
+            if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem)
             {
-                int count = await GetStudentCountForLanguage(languageId);
-                DocumentReference languageRef = db.Collection("languages").Document(languageId);
+                var language = (LanguageClass)e.Item.DataItem;
 
-                await languageRef.UpdateAsync(new Dictionary<string, object>
+                // Find the panels
+                Panel pnlJoinButton = (Panel)e.Item.FindControl("pnlJoinButton");
+                Panel pnlEnrolledActions = (Panel)e.Item.FindControl("pnlEnrolledActions");
+
+                // Show appropriate panel based on enrollment status
+                if (language.IsEnrolled)
                 {
-                    { "StudentCount", count }
-                });
+                    pnlJoinButton.Visible = false;
+                    pnlEnrolledActions.Visible = true;
+                }
+                else
+                {
+                    pnlJoinButton.Visible = true;
+                    pnlEnrolledActions.Visible = false;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"Language {language.Name}: IsEnrolled = {language.IsEnrolled}");
             }
-            catch
-            {
-                // Ignore errors for count updates
-            }
-        }
-
-        // Helper method to check if student is enrolled (for UI binding)
-        protected bool IsStudentEnrolled(string languageId)
-        {
-            // Use cached enrollment data instead of async call
-            return enrolledLanguageIds.Contains(languageId);
-        }
-
-        // Student session management (simplified)
-        private string GetCurrentStudentId()
-        {
-            if (Session["StudentId"] != null)
-                return Session["StudentId"].ToString();
-
-            // Generate a simple student ID
-            string studentId = "STUDENT_" + Session.SessionID;
-            Session["StudentId"] = studentId;
-            return studentId;
-        }
-
-        private string GetCurrentStudentName()
-        {
-            if (Session["StudentName"] != null)
-                return Session["StudentName"].ToString();
-
-            string demoName = "Language Learner";
-            Session["StudentName"] = demoName;
-            return demoName;
-        }
-
-        private string GetCurrentStudentEmail()
-        {
-            if (Session["StudentEmail"] != null)
-                return Session["StudentEmail"].ToString();
-
-            string demoEmail = "learner@example.com";
-            Session["StudentEmail"] = demoEmail;
-            return demoEmail;
         }
 
         private void ShowAlert(string message, string type)
         {
-            pnlAlert.Visible = true;
             lblMessage.Text = message;
+            pnlAlert.Visible = true;
 
-            string cssClass = type == "success" ? "alert-success-glass" : "alert-danger-glass";
-            alertDiv.Attributes["class"] = $"alert-glass {cssClass}";
+            if (type == "success")
+            {
+                alertDiv.Attributes["class"] = "alert-glass alert-success-glass";
+            }
+            else
+            {
+                alertDiv.Attributes["class"] = "alert-glass alert-danger-glass";
+            }
+        }
+
+        [FirestoreData]
+        public class LanguageClass
+        {
+            [FirestoreProperty] public string Name { get; set; }
+            [FirestoreProperty] public string Code { get; set; }
+            [FirestoreProperty] public string Description { get; set; }
+            [FirestoreProperty] public string Flag { get; set; }
+            [FirestoreProperty] public string Difficulty { get; set; }
+            [FirestoreProperty] public Timestamp CreatedDate { get; set; }
+            [FirestoreProperty] public bool IsActive { get; set; }
+
+            public string DocumentId { get; set; }
+            public bool IsEnrolled { get; set; }
+        }
+
+        [FirestoreData]
+        public class Enrollment
+        {
+            [FirestoreProperty] public string UserId { get; set; }
+            [FirestoreProperty] public Timestamp JoinedDate { get; set; }
+            [FirestoreProperty] public Timestamp LastAccessDate { get; set; }
+            [FirestoreProperty] public Timestamp QuitDate { get; set; }
+            [FirestoreProperty] public string Status { get; set; }
         }
     }
 }

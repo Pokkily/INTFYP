@@ -16,7 +16,13 @@ namespace KoreanApp
         FirestoreDb db;
         Cloudinary cloudinary;
         static readonly object dbLock = new object();
-        private string selectedLessonId = "";
+
+        // Use ViewState to persist selected lesson ID across postbacks
+        public string SelectedLessonId
+        {
+            get { return ViewState["SelectedLessonId"] as string ?? ""; }
+            set { ViewState["SelectedLessonId"] = value; }
+        }
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -105,6 +111,9 @@ namespace KoreanApp
             btnSaveLesson.Text = "Create Lesson";
             btnCancelLessonEdit.Visible = false;
             ClearLessonForm();
+
+            // Clear selected lesson
+            SelectedLessonId = "";
         }
 
         private void ShowMessage(string message, string cssClass)
@@ -122,12 +131,14 @@ namespace KoreanApp
                 panelTopics.Visible = true;
                 panelLessons.Visible = false;
                 panelQuestionForm.Visible = false;
+                SelectedLessonId = ""; // Clear selected lesson when language changes
             }
             else
             {
                 panelTopics.Visible = false;
                 panelLessons.Visible = false;
                 panelQuestionForm.Visible = false;
+                SelectedLessonId = "";
             }
         }
 
@@ -162,6 +173,7 @@ namespace KoreanApp
                 panelNewTopic.Visible = true;
                 panelLessons.Visible = false;
                 panelQuestionForm.Visible = false;
+                SelectedLessonId = ""; // Clear selected lesson when topic changes
             }
             else if (!string.IsNullOrEmpty(ddlTopic.SelectedValue))
             {
@@ -169,12 +181,14 @@ namespace KoreanApp
                 await LoadLessons(ddlLanguage.SelectedValue, ddlTopic.SelectedValue);
                 panelLessons.Visible = true;
                 panelQuestionForm.Visible = false;
+                SelectedLessonId = ""; // Clear selected lesson when topic changes
             }
             else
             {
                 panelNewTopic.Visible = false;
                 panelLessons.Visible = false;
                 panelQuestionForm.Visible = false;
+                SelectedLessonId = "";
             }
         }
 
@@ -258,6 +272,7 @@ namespace KoreanApp
 
                 // Clear any previous lesson selection
                 ClearLessonForm();
+                SelectedLessonId = "";
             }
             catch (Exception ex)
             {
@@ -334,8 +349,8 @@ namespace KoreanApp
 
             try
             {
-                // Set the selected lesson
-                selectedLessonId = lessonId;
+                // Set the selected lesson using ViewState property
+                SelectedLessonId = lessonId;
 
                 // Show the question form
                 panelQuestionForm.Visible = true;
@@ -456,10 +471,10 @@ namespace KoreanApp
                 }
 
                 // Hide question form if this lesson was selected
-                if (selectedLessonId == lessonId)
+                if (SelectedLessonId == lessonId)
                 {
                     panelQuestionForm.Visible = false;
-                    selectedLessonId = "";
+                    SelectedLessonId = "";
                 }
 
                 ShowMessage("Lesson and all its questions deleted successfully!", "alert alert-success");
@@ -476,12 +491,31 @@ namespace KoreanApp
         {
             try
             {
+                // Add validation
+                if (string.IsNullOrEmpty(ddlLanguage.SelectedValue))
+                {
+                    ShowMessage("Please select a language first.", "alert alert-warning");
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(ddlTopic.SelectedValue))
+                {
+                    ShowMessage("Please select a topic first.", "alert alert-warning");
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(SelectedLessonId))
+                {
+                    ShowMessage("Please select a lesson first.", "alert alert-warning");
+                    return;
+                }
+
                 DocumentReference lessonRef = db.Collection("languages")
                     .Document(ddlLanguage.SelectedValue)
                     .Collection("topics")
                     .Document(ddlTopic.SelectedValue)
                     .Collection("lessons")
-                    .Document(selectedLessonId);
+                    .Document(SelectedLessonId);
 
                 CollectionReference questionsRef = lessonRef.Collection("questions");
                 QuerySnapshot snapshot = await questionsRef.OrderBy("order").GetSnapshotAsync();
@@ -552,11 +586,42 @@ namespace KoreanApp
         {
             try
             {
-                // Validate inputs
+                // Validate all required inputs
                 if (string.IsNullOrWhiteSpace(txtQuestionText.Text))
                 {
                     ShowMessage("Please enter question text.", "alert alert-warning");
                     return;
+                }
+
+                if (string.IsNullOrEmpty(ddlLanguage.SelectedValue))
+                {
+                    ShowMessage("Please select a language.", "alert alert-warning");
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(ddlTopic.SelectedValue))
+                {
+                    ShowMessage("Please select a topic.", "alert alert-warning");
+                    return;
+                }
+
+                if (string.IsNullOrEmpty(SelectedLessonId))
+                {
+                    ShowMessage("Please select a lesson first.", "alert alert-warning");
+                    return;
+                }
+
+                // Validate text options if it's a text-based question
+                if (rbTextQuestion.Checked || rbImageQuestion.Checked || rbAudioQuestion.Checked)
+                {
+                    if (string.IsNullOrWhiteSpace(txtOption1.Text) ||
+                        string.IsNullOrWhiteSpace(txtOption2.Text) ||
+                        string.IsNullOrWhiteSpace(txtOption3.Text) ||
+                        string.IsNullOrWhiteSpace(txtCorrectAnswer.Text))
+                    {
+                        ShowMessage("Please fill in all answer options and the correct answer.", "alert alert-warning");
+                        return;
+                    }
                 }
 
                 var questionData = new Dictionary<string, object>
@@ -578,10 +643,26 @@ namespace KoreanApp
                     questionData["options"] = new[] { txtOption1.Text.Trim(), txtOption2.Text.Trim(), txtOption3.Text.Trim() };
                     questionData["answer"] = txtCorrectAnswer.Text.Trim();
 
+                    // Handle image upload
                     if (fuQuestionImage.HasFile)
                     {
-                        string imageUrl = await UploadToCloudinary(fuQuestionImage, "image");
-                        questionData["imagePath"] = imageUrl;
+                        try
+                        {
+                            string imageUrl = await UploadToCloudinary(fuQuestionImage, "image");
+                            questionData["imagePath"] = imageUrl;
+                            System.Diagnostics.Debug.WriteLine($"Image uploaded: {imageUrl}");
+                        }
+                        catch (Exception uploadEx)
+                        {
+                            ShowMessage($"Image upload failed: {uploadEx.Message}", "alert alert-danger");
+                            return;
+                        }
+                    }
+                    else if (string.IsNullOrEmpty(hfEditingQuestionId.Value))
+                    {
+                        // For new image questions, require an image
+                        ShowMessage("Please select an image file for image questions.", "alert alert-warning");
+                        return;
                     }
                 }
                 else if (rbAudioQuestion.Checked)
@@ -590,10 +671,26 @@ namespace KoreanApp
                     questionData["options"] = new[] { txtOption1.Text.Trim(), txtOption2.Text.Trim(), txtOption3.Text.Trim() };
                     questionData["answer"] = txtCorrectAnswer.Text.Trim();
 
+                    // Handle audio upload
                     if (fuQuestionAudio.HasFile)
                     {
-                        string audioUrl = await UploadToCloudinary(fuQuestionAudio, "video");
-                        questionData["audioPath"] = audioUrl;
+                        try
+                        {
+                            string audioUrl = await UploadToCloudinary(fuQuestionAudio, "audio");
+                            questionData["audioPath"] = audioUrl;
+                            System.Diagnostics.Debug.WriteLine($"Audio uploaded: {audioUrl}");
+                        }
+                        catch (Exception uploadEx)
+                        {
+                            ShowMessage($"Audio upload failed: {uploadEx.Message}", "alert alert-danger");
+                            return;
+                        }
+                    }
+                    else if (string.IsNullOrEmpty(hfEditingQuestionId.Value))
+                    {
+                        // For new audio questions, require an audio file
+                        ShowMessage("Please select an audio file for audio questions.", "alert alert-warning");
+                        return;
                     }
                 }
 
@@ -602,7 +699,7 @@ namespace KoreanApp
                     .Collection("topics")
                     .Document(ddlTopic.SelectedValue)
                     .Collection("lessons")
-                    .Document(selectedLessonId)
+                    .Document(SelectedLessonId)
                     .Collection("questions");
 
                 if (string.IsNullOrEmpty(hfEditingQuestionId.Value))
@@ -638,6 +735,8 @@ namespace KoreanApp
             catch (Exception ex)
             {
                 ShowMessage($"Error saving question: {ex.Message}", "alert alert-danger");
+                System.Diagnostics.Debug.WriteLine($"Full error: {ex}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             }
         }
 
@@ -645,21 +744,72 @@ namespace KoreanApp
         {
             try
             {
+                if (!fileUpload.HasFile)
+                {
+                    throw new Exception("No file selected for upload.");
+                }
+
                 using (var stream = new MemoryStream(fileUpload.FileBytes))
                 {
-                    var uploadParams = new ImageUploadParams()
-                    {
-                        File = new FileDescription(fileUpload.FileName, stream),
-                        Folder = $"language_learning/{ddlLanguage.SelectedValue}/{ddlTopic.SelectedValue}"
-                    };
+                    UploadResult uploadResult = null;
 
-                    var uploadResult = await cloudinary.UploadAsync(uploadParams);
+                    // Use different upload methods based on resource type
+                    if (resourceType == "image")
+                    {
+                        var uploadParams = new ImageUploadParams()
+                        {
+                            File = new FileDescription(fileUpload.FileName, stream),
+                            Folder = $"language_learning/{ddlLanguage.SelectedValue}/{ddlTopic.SelectedValue}"
+                        };
+
+                        uploadResult = await cloudinary.UploadAsync(uploadParams);
+                    }
+                    else if (resourceType == "video" || resourceType == "audio")
+                    {
+                        var uploadParams = new VideoUploadParams()
+                        {
+                            File = new FileDescription(fileUpload.FileName, stream),
+                            Folder = $"language_learning/{ddlLanguage.SelectedValue}/{ddlTopic.SelectedValue}"
+                        };
+
+                        uploadResult = await cloudinary.UploadAsync(uploadParams);
+                    }
+                    else
+                    {
+                        // Fallback to raw upload for other file types
+                        var uploadParams = new RawUploadParams()
+                        {
+                            File = new FileDescription(fileUpload.FileName, stream),
+                            Folder = $"language_learning/{ddlLanguage.SelectedValue}/{ddlTopic.SelectedValue}"
+                        };
+
+                        uploadResult = await cloudinary.UploadAsync(uploadParams);
+                    }
+
+                    // Check if upload was successful
+                    if (uploadResult == null)
+                    {
+                        throw new Exception("Upload failed - no result returned from Cloudinary.");
+                    }
+
+                    if (uploadResult.Error != null)
+                    {
+                        throw new Exception($"Cloudinary upload error: {uploadResult.Error.Message}");
+                    }
+
+                    if (uploadResult.SecureUrl == null)
+                    {
+                        throw new Exception("Upload completed but no URL was returned.");
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"File uploaded successfully: {uploadResult.SecureUrl}");
                     return uploadResult.SecureUrl.ToString();
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception($"Failed to upload file: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Upload error: {ex.Message}");
+                throw new Exception($"Failed to upload file '{fileUpload.FileName}': {ex.Message}");
             }
         }
 
@@ -700,12 +850,18 @@ namespace KoreanApp
         {
             try
             {
+                if (string.IsNullOrEmpty(SelectedLessonId))
+                {
+                    ShowMessage("No lesson selected. Please select a lesson first.", "alert alert-warning");
+                    return;
+                }
+
                 DocumentReference questionRef = db.Collection("languages")
                     .Document(ddlLanguage.SelectedValue)
                     .Collection("topics")
                     .Document(ddlTopic.SelectedValue)
                     .Collection("lessons")
-                    .Document(selectedLessonId)
+                    .Document(SelectedLessonId)
                     .Collection("questions")
                     .Document(questionId);
 
@@ -777,12 +933,18 @@ namespace KoreanApp
 
             try
             {
+                if (string.IsNullOrEmpty(SelectedLessonId))
+                {
+                    ShowMessage("No lesson selected. Cannot delete question.", "alert alert-warning");
+                    return;
+                }
+
                 DocumentReference questionRef = db.Collection("languages")
                     .Document(ddlLanguage.SelectedValue)
                     .Collection("topics")
                     .Document(ddlTopic.SelectedValue)
                     .Collection("lessons")
-                    .Document(selectedLessonId)
+                    .Document(SelectedLessonId)
                     .Collection("questions")
                     .Document(questionId);
 
