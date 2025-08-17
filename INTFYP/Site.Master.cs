@@ -18,7 +18,7 @@ namespace YourProjectNamespace
                 SetActiveMenu(lnkStudyHub, "studyhub.aspx", currentPage);
                 SetActiveMenu(lnkLibrary, "library.aspx", currentPage);
                 SetActiveMenu(lnkQuiz, "quiz.aspx", currentPage);
-                SetActiveMenu(lnkLearning, "learning.aspx", currentPage);
+                SetActiveMenu(lnkLearning, "language.aspx", currentPage);
                 SetActiveMenu(lnkScholarship, "scholarship.aspx", currentPage);
                 SetActiveMenu(lnkFeedback, "feedback.aspx", currentPage);
                 SetActiveMenu(lnkManage, "createclassroom.aspx", currentPage);

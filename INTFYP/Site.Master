@@ -522,10 +522,10 @@
                 <asp:HyperLink ID="lnkStudyHub" runat="server" NavigateUrl="StudyHub.aspx" Text="StudyHub" CssClass="menu-link" />
                 <asp:HyperLink ID="lnkLibrary" runat="server" NavigateUrl="Library.aspx" Text="Library" CssClass="menu-link" />
                 <asp:HyperLink ID="lnkQuiz" runat="server" NavigateUrl="Quiz.aspx" Text="Quiz" CssClass="menu-link" />
-                <asp:HyperLink ID="lnkLearning" runat="server" NavigateUrl="Learning.aspx" Text="Learning" CssClass="menu-link" />
+                <asp:HyperLink ID="lnkLearning" runat="server" NavigateUrl="Language.aspx" Text="Language" CssClass="menu-link" />
                 <asp:HyperLink ID="lnkScholarship" runat="server" NavigateUrl="Scholarship.aspx" Text="Scholarship" CssClass="menu-link" />
                 <asp:HyperLink ID="lnkFeedback" runat="server" NavigateUrl="Feedback.aspx" Text="Feedback" CssClass="menu-link" />
-                <asp:HyperLink ID="lnkChatbot" runat="server" NavigateUrl="Chatbot.aspx" Text="Chatbot" CssClass="menu-link" />
+                <asp:HyperLink ID="lnkChatbot" runat="server" NavigateUrl="GeminiAi.aspx" Text="Chatbot" CssClass="menu-link" />
 
                 <asp:PlaceHolder ID="phTeacherMenu" runat="server" Visible="false">
                     <asp:HyperLink ID="lnkManage" runat="server" NavigateUrl="CreateClassroom.aspx" Text="Manage" CssClass="menu-link" />

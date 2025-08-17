@@ -20,6 +20,7 @@ namespace YourProjectNamespace
         private static readonly string SendGridApiKey = GetConfigValue("SendGridApiKey");
         private static readonly string SendGridFromEmail = GetConfigValue("SendGridFromEmail");
         private static readonly string SendGridFromName = GetConfigValue("SendGridFromName");
+        private static readonly string AdminEmail = GetConfigValue("AdminEmail"); // Admin notification email
 
         // Helper method to get configuration values with environment variable fallback
         private static string GetConfigValue(string key)
@@ -377,8 +378,8 @@ namespace YourProjectNamespace
 
                 System.Diagnostics.Debug.WriteLine("OTP verified successfully, completing registration");
 
-                // OTP verified - proceed with registration
-                await CompleteRegistration(registrationData);
+                // OTP verified - proceed with registration (now with pending status)
+                await CompleteRegistrationWithApproval(registrationData);
 
                 // Delete OTP record
                 await db.Collection("otps").Document(email).DeleteAsync();
@@ -456,7 +457,7 @@ namespace YourProjectNamespace
             registrationComplete.Visible = false;
         }
 
-        private async Task CompleteRegistration(RegistrationData registrationData)
+        private async Task CompleteRegistrationWithApproval(RegistrationData registrationData)
         {
             try
             {
@@ -465,7 +466,7 @@ namespace YourProjectNamespace
                 // Hash password (in production, use proper hashing like BCrypt)
                 var hashedPassword = registrationData.Password; // Replace with actual hashing
 
-                // Create user data
+                // Create user data with pending status
                 var uid = Guid.NewGuid().ToString();
                 var userData = new Dictionary<string, object>
                 {
@@ -483,9 +484,11 @@ namespace YourProjectNamespace
                     {"address", registrationData.Address},
                     {"createdAt", Timestamp.GetCurrentTimestamp()},
                     {"lastUpdated", Timestamp.GetCurrentTimestamp()},
-                    {"isActive", true},
+                    {"isActive", false}, // User is not active until approved
                     {"lastLogin", null},
-                    {"isEmailVerified", true}
+                    {"isEmailVerified", true},
+                    {"status", "pending"}, // Pending admin approval
+                    {"submittedForApproval", Timestamp.GetCurrentTimestamp()}
                 };
 
                 // Save to Firestore
@@ -493,12 +496,133 @@ namespace YourProjectNamespace
                 await docRef.SetAsync(userData);
 
                 System.Diagnostics.Debug.WriteLine("User data saved to Firestore with UID: " + uid);
+
+                // Send notification to user about pending approval
+                await SendPendingApprovalNotification(registrationData);
+
+                // Send notification to admin about new registration
+                await SendAdminNotification(registrationData);
+
+                System.Diagnostics.Debug.WriteLine("Notifications sent successfully");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error completing registration: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
                 throw;
+            }
+        }
+
+        private async Task SendPendingApprovalNotification(RegistrationData userData)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"Sending pending approval notification to: {userData.Email}");
+
+                var client = new SendGridClient(SendGridApiKey);
+                var from = new EmailAddress(SendGridFromEmail, SendGridFromName);
+                var to = new EmailAddress(userData.Email, $"{userData.FirstName} {userData.LastName}");
+                var subject = "Registration Submitted - Pending Approval";
+
+                var plainTextContent = $@"
+Hello {userData.FirstName}!
+
+Thank you for registering with us. Your registration has been successfully submitted and is currently pending administrative approval.
+
+Registration Details:
+- Name: {userData.FirstName} {userData.LastName}
+- Email: {userData.Email}
+- Username: {userData.Username}
+- Position: {userData.Position}
+
+What happens next?
+1. Our administrators will review your registration details
+2. You will receive an email notification once your account is approved or if additional information is needed
+3. After approval, you can log in using your email and password
+
+Please note: You will not be able to log in until your account has been approved by an administrator.
+
+If you have any questions, please contact our support team.
+
+Thank you for your patience!
+
+Best regards,
+The Registration Team
+                ";
+
+                var htmlContent = CreatePendingApprovalEmailTemplate(userData);
+
+                var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+                var response = await client.SendEmailAsync(msg);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var responseBody = await response.Body.ReadAsStringAsync();
+                    throw new Exception($"SendGrid API error: {response.StatusCode} - {responseBody}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error sending pending approval notification: {ex.Message}");
+                throw;
+            }
+        }
+
+        private async Task SendAdminNotification(RegistrationData userData)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(AdminEmail))
+                {
+                    System.Diagnostics.Debug.WriteLine("Admin email not configured, skipping admin notification");
+                    return;
+                }
+
+                System.Diagnostics.Debug.WriteLine($"Sending admin notification to: {AdminEmail}");
+
+                var client = new SendGridClient(SendGridApiKey);
+                var from = new EmailAddress(SendGridFromEmail, SendGridFromName);
+                var to = new EmailAddress(AdminEmail, "Administrator");
+                var subject = "🔔 New User Registration Pending Approval";
+
+                var plainTextContent = $@"
+A new user has registered and is pending your approval.
+
+User Details:
+- Name: {userData.FirstName} {userData.LastName}
+- Email: {userData.Email}
+- Username: {userData.Username}
+- Position: {userData.Position}
+- Gender: {userData.Gender}
+- Phone: {userData.Phone ?? "Not provided"}
+- Birthdate: {userData.Birthdate ?? "Not provided"}
+- Address: {userData.Address ?? "Not provided"}
+- Registration Date: {DateTime.Now:MMM dd, yyyy HH:mm}
+
+Please log in to the admin dashboard to review and approve/reject this registration.
+
+Admin Dashboard: [Your Admin Dashboard URL]
+
+Best regards,
+System Administrator
+                ";
+
+                var htmlContent = CreateAdminNotificationEmailTemplate(userData);
+
+                var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
+                var response = await client.SendEmailAsync(msg);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var responseBody = await response.Body.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"Failed to send admin notification: {response.StatusCode} - {responseBody}");
+                    // Don't throw exception for admin notification failure - it's not critical for user flow
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error sending admin notification: {ex.Message}");
+                // Don't throw exception for admin notification failure
             }
         }
 
@@ -557,6 +681,279 @@ The Registration Team
                 System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
                 throw new Exception($"Failed to send OTP email: {ex.Message}");
             }
+        }
+
+        private string CreatePendingApprovalEmailTemplate(RegistrationData userData)
+        {
+            return $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Registration Pending Approval</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }}
+        .container {{ max-width: 600px; margin: 0 auto; background-color: white; }}
+        .header {{ background: linear-gradient(135deg, #f6c23e 0%, #e4a900 100%); color: white; padding: 30px 20px; text-align: center; }}
+        .header h1 {{ margin: 0; font-size: 28px; }}
+        .content {{ padding: 40px 30px; }}
+        .status-section {{ text-align: center; margin: 30px 0; }}
+        .status-icon {{ font-size: 64px; color: #f6c23e; margin-bottom: 20px; }}
+        .info-box {{ 
+            background-color: #fff3cd; 
+            border: 1px solid #ffeaa7; 
+            border-radius: 8px; 
+            padding: 20px; 
+            margin: 25px 0;
+        }}
+        .info-box h3 {{ margin-top: 0; color: #856404; }}
+        .user-details {{ 
+            background-color: #f8f9fc; 
+            border-radius: 8px; 
+            padding: 20px; 
+            margin: 20px 0;
+        }}
+        .detail-row {{ 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 8px 0; 
+            border-bottom: 1px solid #e3e6f0;
+        }}
+        .detail-row:last-child {{ border-bottom: none; }}
+        .detail-label {{ font-weight: bold; color: #5a5c69; }}
+        .detail-value {{ color: #3a3b45; }}
+        .next-steps {{ 
+            background-color: #d1ecf1; 
+            border: 1px solid #bee5eb; 
+            border-radius: 8px; 
+            padding: 20px; 
+            margin: 25px 0;
+        }}
+        .next-steps h3 {{ margin-top: 0; color: #0c5460; }}
+        .footer {{ 
+            background-color: #f8f9fc; 
+            padding: 20px; 
+            text-align: center; 
+            border-top: 1px solid #e3e6f0;
+            font-size: 14px;
+            color: #666;
+        }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>⏳ Registration Submitted</h1>
+        </div>
+        
+        <div class='content'>
+            <div class='status-section'>
+                <div class='status-icon'>📝</div>
+                <h2>Hello {userData.FirstName}!</h2>
+                <p style='font-size: 18px; color: #666;'>Your registration has been successfully submitted.</p>
+            </div>
+            
+            <p>Thank you for registering with us! Your registration details have been submitted and are currently pending administrative approval.</p>
+            
+            <div class='user-details'>
+                <h3 style='margin-top: 0; color: #5a5c69;'>📋 Your Registration Details:</h3>
+                <div class='detail-row'>
+                    <span class='detail-label'>Name:</span>
+                    <span class='detail-value'>{userData.FirstName} {userData.LastName}</span>
+                </div>
+                <div class='detail-row'>
+                    <span class='detail-label'>Email:</span>
+                    <span class='detail-value'>{userData.Email}</span>
+                </div>
+                <div class='detail-row'>
+                    <span class='detail-label'>Username:</span>
+                    <span class='detail-value'>{userData.Username}</span>
+                </div>
+                <div class='detail-row'>
+                    <span class='detail-label'>Position:</span>
+                    <span class='detail-value'>{userData.Position}</span>
+                </div>
+            </div>
+            
+            <div class='next-steps'>
+                <h3>🔄 What Happens Next?</h3>
+                <ol style='margin: 10px 0; padding-left: 20px;'>
+                    <li><strong>Review Process:</strong> Our administrators will review your registration details</li>
+                    <li><strong>Email Notification:</strong> You'll receive an email once your account is approved or if we need additional information</li>
+                    <li><strong>Account Access:</strong> After approval, you can log in using your email and password</li>
+                </ol>
+            </div>
+            
+            <div class='info-box'>
+                <h3>⚠️ Important Note:</h3>
+                <p style='margin: 0;'><strong>You will not be able to log in until your account has been approved by an administrator.</strong> Please wait for the approval email before attempting to access your account.</p>
+            </div>
+            
+            <p>We appreciate your patience during the review process. If you have any questions, please don't hesitate to contact our support team.</p>
+            
+            <p>Thank you for choosing our platform!</p>
+            
+            <p>Best regards,<br><strong>The Registration Team</strong></p>
+        </div>
+        
+        <div class='footer'>
+            <p>🤖 This is an automated email. Please do not reply to this message.</p>
+            <p>© 2024 Your Company Name. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>";
+        }
+
+        private string CreateAdminNotificationEmailTemplate(RegistrationData userData)
+        {
+            return $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>New User Registration - Admin Approval Required</title>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f4f4f4; }}
+        .container {{ max-width: 600px; margin: 0 auto; background-color: white; }}
+        .header {{ background: linear-gradient(135deg, #4e73df 0%, #3a5bc7 100%); color: white; padding: 30px 20px; text-align: center; }}
+        .header h1 {{ margin: 0; font-size: 28px; }}
+        .content {{ padding: 40px 30px; }}
+        .alert-section {{ text-align: center; margin: 30px 0; }}
+        .alert-icon {{ font-size: 64px; color: #4e73df; margin-bottom: 20px; }}
+        .user-card {{ 
+            background-color: #f8f9fc; 
+            border: 2px solid #4e73df; 
+            border-radius: 12px; 
+            padding: 25px; 
+            margin: 25px 0;
+        }}
+        .user-card h3 {{ margin-top: 0; color: #4e73df; }}
+        .detail-grid {{ 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+            margin: 20px 0;
+        }}
+        .detail-item {{ 
+            background-color: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }}
+        .detail-label {{ font-weight: bold; color: #5a5c69; font-size: 14px; }}
+        .detail-value {{ color: #3a3b45; margin-top: 5px; }}
+        .cta-section {{ 
+            background: linear-gradient(135deg, #1cc88a 0%, #17a673 100%); 
+            color: white; 
+            border-radius: 12px; 
+            padding: 25px; 
+            text-align: center; 
+            margin: 30px 0;
+        }}
+        .cta-button {{ 
+            display: inline-block; 
+            background-color: white; 
+            color: #1cc88a; 
+            padding: 15px 30px; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            font-weight: bold;
+            margin: 15px 0;
+        }}
+        .footer {{ 
+            background-color: #f8f9fc; 
+            padding: 20px; 
+            text-align: center; 
+            border-top: 1px solid #e3e6f0;
+            font-size: 14px;
+            color: #666;
+        }}
+        @media (max-width: 600px) {{
+            .detail-grid {{ grid-template-columns: 1fr; }}
+        }}
+    </style>
+</head>
+<body>
+    <div class='container'>
+        <div class='header'>
+            <h1>🔔 New Registration Alert</h1>
+        </div>
+        
+        <div class='content'>
+            <div class='alert-section'>
+                <div class='alert-icon'>👤</div>
+                <h2>Action Required</h2>
+                <p style='font-size: 18px; color: #666;'>A new user has registered and requires approval.</p>
+            </div>
+            
+            <div class='user-card'>
+                <h3>📝 User Registration Details</h3>
+                <div class='detail-grid'>
+                    <div class='detail-item'>
+                        <div class='detail-label'>Full Name</div>
+                        <div class='detail-value'>{userData.FirstName} {userData.LastName}</div>
+                    </div>
+                    <div class='detail-item'>
+                        <div class='detail-label'>Email Address</div>
+                        <div class='detail-value'>{userData.Email}</div>
+                    </div>
+                    <div class='detail-item'>
+                        <div class='detail-label'>Username</div>
+                        <div class='detail-value'>{userData.Username}</div>
+                    </div>
+                    <div class='detail-item'>
+                        <div class='detail-label'>Position</div>
+                        <div class='detail-value'>{userData.Position}</div>
+                    </div>
+                    <div class='detail-item'>
+                        <div class='detail-label'>Gender</div>
+                        <div class='detail-value'>{userData.Gender}</div>
+                    </div>
+                    <div class='detail-item'>
+                        <div class='detail-label'>Phone</div>
+                        <div class='detail-value'>{userData.Phone ?? "Not provided"}</div>
+                    </div>
+                    {(!string.IsNullOrEmpty(userData.Birthdate) ? $@"
+                    <div class='detail-item'>
+                        <div class='detail-label'>Birthdate</div>
+                        <div class='detail-value'>{userData.Birthdate}</div>
+                    </div>" : "")}
+                    {(!string.IsNullOrEmpty(userData.Address) ? $@"
+                    <div class='detail-item'>
+                        <div class='detail-label'>Address</div>
+                        <div class='detail-value'>{userData.Address}</div>
+                    </div>" : "")}
+                    <div class='detail-item'>
+                        <div class='detail-label'>Registration Time</div>
+                        <div class='detail-value'>{DateTime.Now:MMM dd, yyyy HH:mm}</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class='cta-section'>
+                <h3 style='margin-top: 0;'>⚡ Ready to Review?</h3>
+                <p>Please log in to the admin dashboard to approve or reject this registration.</p>
+                <a href='#' class='cta-button'>Open Admin Dashboard</a>
+            </div>
+            
+            <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 20px; margin: 20px 0;'>
+                <h4 style='margin-top: 0; color: #856404;'>📊 Quick Stats:</h4>
+                <p style='margin: 0; color: #856404;'>The user has completed email verification and is awaiting your approval to access the platform.</p>
+            </div>
+            
+            <p>Best regards,<br><strong>System Administrator</strong></p>
+        </div>
+        
+        <div class='footer'>
+            <p>🤖 This is an automated notification from the registration system.</p>
+            <p>© 2024 Your Company Name. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>";
         }
 
         private string CreateOtpEmailTemplate(string firstName, string otp)
