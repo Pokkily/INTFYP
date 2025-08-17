@@ -446,6 +446,7 @@
     <Content Include="Login.aspx" />
     <Content Include="StudyHubGroup.aspx" />
     <Content Include="SubmitResult.aspx" />
+    <Content Include="TakeQuiz.aspx" />
     <Content Include="ViewSwitcher.ascx" />
     <Content Include="Web.config" />
     <Content Include="Bundle.config" />
@@ -680,6 +681,13 @@
     </Compile>
     <Compile Include="SubmitResult.aspx.designer.cs">
       <DependentUpon>SubmitResult.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="TakeQuiz.aspx.cs">
+      <DependentUpon>TakeQuiz.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TakeQuiz.aspx.designer.cs">
+      <DependentUpon>TakeQuiz.aspx</DependentUpon>
     </Compile>
     <Compile Include="TeacherSite.Master.cs">
       <DependentUpon>TeacherSite.Master</DependentUpon>

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Configuration;
 using System.Collections.Generic;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using System.Linq;
 using Google.Cloud.Firestore;
 
 namespace INTFYP
@@ -150,12 +152,9 @@ namespace INTFYP
                         totalLessons += ((dynamic)topic).LessonCount;
                     }
 
-                    // Find and update sidebar labels
-                    Label lblQuickTopics = (Label)Page.Master.FindControl("MainContent").FindControl("lblQuickTopics");
-                    Label lblQuickLessons = (Label)Page.Master.FindControl("MainContent").FindControl("lblQuickLessons");
-
-                    if (lblQuickTopics != null) lblQuickTopics.Text = totalTopics.ToString();
-                    if (lblQuickLessons != null) lblQuickLessons.Text = totalLessons.ToString();
+                    // Update sidebar labels directly
+                    lblQuickTopics.Text = totalTopics.ToString();
+                    lblQuickLessons.Text = totalLessons.ToString();
                 }
                 else
                 {
@@ -235,7 +234,7 @@ namespace INTFYP
             }
         }
 
-        protected async void rptLessons_ItemCommand(object source, RepeaterCommandEventArgs e)
+        protected void rptLessons_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             // Parse the command argument which contains "lessonId|topicName"
             string[] args = e.CommandArgument.ToString().Split('|');
@@ -249,7 +248,9 @@ namespace INTFYP
                 if (e.CommandName == "StartLesson")
                 {
                     // Redirect to the lesson/quiz page for this specific lesson
-                    Response.Redirect($"TakeQuiz.aspx?languageId={currentLanguageId}&topicName={Server.UrlEncode(topicName)}&lessonId={Server.UrlEncode(lessonId)}");
+                    string redirectUrl = $"TakeQuiz.aspx?languageId={currentLanguageId}&topicName={Server.UrlEncode(topicName)}&lessonId={Server.UrlEncode(lessonId)}";
+                    Response.Redirect(redirectUrl, false);
+                    Context.ApplicationInstance.CompleteRequest();
                 }
             }
             catch (Exception ex)
