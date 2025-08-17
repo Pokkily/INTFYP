@@ -150,6 +150,24 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.HyperLink lnkManage;
 
         /// <summary>
+        /// phAdminMenu control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.PlaceHolder phAdminMenu;
+
+        /// <summary>
+        /// lnkAdmin control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HyperLink lnkAdmin;
+
+        /// <summary>
         /// phLoggedIn control.
         /// </summary>
         /// <remarks>
@@ -175,6 +193,15 @@ namespace YourProjectNamespace
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.PlaceHolder phGuest;
+
+        /// <summary>
+        /// phTeacherStats control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.PlaceHolder phTeacherStats;
 
         /// <summary>
         /// MainContent control.
