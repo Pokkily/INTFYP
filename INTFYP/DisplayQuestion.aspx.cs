@@ -13,6 +13,7 @@ namespace INTFYP
         private static FirestoreDb db;
         private static readonly object dbLock = new object();
         private string currentLanguageId;
+        private string currentUserId;
 
         protected async void Page_Load(object sender, EventArgs e)
         {
@@ -20,6 +21,7 @@ namespace INTFYP
 
             // Get language ID from query parameter
             currentLanguageId = Request.QueryString["languageId"];
+            currentUserId = GetCurrentUserId();
 
             if (string.IsNullOrEmpty(currentLanguageId))
             {
@@ -50,6 +52,24 @@ namespace INTFYP
             }
         }
 
+        private string GetCurrentUserId()
+        {
+            // Check if user is logged in
+            if (Session["UserId"] != null)
+                return Session["UserId"].ToString();
+
+            // Check if we have a demo user
+            if (Session["DemoUserId"] != null)
+                return Session["DemoUserId"].ToString();
+
+            // Generate a demo user ID if none exists
+            string demoUserId = "DEMO_" + DateTime.Now.Ticks.ToString();
+            Session["DemoUserId"] = demoUserId;
+
+            System.Diagnostics.Debug.WriteLine($"🆔 Generated demo user ID: {demoUserId}");
+            return demoUserId;
+        }
+
         private async System.Threading.Tasks.Task LoadLanguageInfo()
         {
             try
@@ -70,6 +90,9 @@ namespace INTFYP
                     var stats = await GetLanguageStatistics(currentLanguageId);
                     lblTotalQuestions.Text = stats.QuestionCount.ToString();
                     lblTotalLessons.Text = stats.LessonCount.ToString();
+
+                    // Load user progress overview
+                    await LoadUserProgressOverview();
                 }
                 else
                 {
@@ -80,6 +103,35 @@ namespace INTFYP
             {
                 System.Diagnostics.Debug.WriteLine("Error loading language info: " + ex.Message);
                 ShowErrorMessage("Error loading language information.");
+            }
+        }
+
+        private async System.Threading.Tasks.Task LoadUserProgressOverview()
+        {
+            try
+            {
+                DocumentReference userProgressRef = db.Collection("users")
+                    .Document(currentUserId)
+                    .Collection("progress")
+                    .Document(currentLanguageId);
+
+                DocumentSnapshot progressSnap = await userProgressRef.GetSnapshotAsync();
+
+                if (progressSnap.Exists)
+                {
+                    var data = progressSnap.ToDictionary();
+
+                    // Display user progress (add these labels to your UI if needed)
+                    int completedLessons = data.ContainsKey("completedLessons") ? Convert.ToInt32(data["completedLessons"]) : 0;
+                    double averageScore = data.ContainsKey("averageScore") ? Convert.ToDouble(data["averageScore"]) : 0;
+                    int currentStreak = data.ContainsKey("currentStreak") ? Convert.ToInt32(data["currentStreak"]) : 0;
+
+                    System.Diagnostics.Debug.WriteLine($"👤 User Progress: {completedLessons} lessons completed, {averageScore:F1}% average, {currentStreak} day streak");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading user progress: {ex.Message}");
             }
         }
 
@@ -116,6 +168,9 @@ namespace INTFYP
                         int questionCount = questionsSnapshot.Documents.Count;
                         totalQuestionsInTopic += questionCount;
 
+                        // Get user's progress for this lesson
+                        var lessonProgress = await GetUserLessonProgress(currentUserId, currentLanguageId, topicName, lessonName);
+
                         lessons.Add(new
                         {
                             Id = lessonDoc.Id,
@@ -123,7 +178,14 @@ namespace INTFYP
                             Description = lessonData.ContainsKey("description") ? lessonData["description"].ToString() : "",
                             QuestionCount = questionCount,
                             CreatedAt = lessonData.ContainsKey("createdAt") ? lessonData["createdAt"] : "",
-                            TopicName = topicName
+                            TopicName = topicName,
+
+                            // User progress data
+                            IsCompleted = lessonProgress.IsCompleted,
+                            BestScore = lessonProgress.BestScore,
+                            TotalAttempts = lessonProgress.TotalAttempts,
+                            Status = lessonProgress.Status,
+                            ProgressBadge = GetProgressBadge(lessonProgress.Status, lessonProgress.BestScore)
                         });
                     }
 
@@ -170,7 +232,73 @@ namespace INTFYP
             }
         }
 
-        private async System.Threading.Tasks.Task<(int LessonCount, int QuestionCount, int StudentCount)> GetLanguageStatistics(string languageId)
+        private async System.Threading.Tasks.Task<dynamic> GetUserLessonProgress(string userId, string languageId, string topicName, string lessonId)
+        {
+            try
+            {
+                DocumentReference progressRef = db.Collection("users")
+                    .Document(userId)
+                    .Collection("progress")
+                    .Document(languageId)
+                    .Collection("topics")
+                    .Document(topicName)
+                    .Collection("lessons")
+                    .Document(lessonId);
+
+                DocumentSnapshot progressSnap = await progressRef.GetSnapshotAsync();
+
+                if (progressSnap.Exists)
+                {
+                    var data = progressSnap.ToDictionary();
+                    return new
+                    {
+                        IsCompleted = data.ContainsKey("isCompleted") && Convert.ToBoolean(data["isCompleted"]),
+                        BestScore = data.ContainsKey("bestScore") ? Convert.ToInt32(data["bestScore"]) : 0,
+                        TotalAttempts = data.ContainsKey("totalAttempts") ? Convert.ToInt32(data["totalAttempts"]) : 0,
+                        Status = data.ContainsKey("status") ? data["status"].ToString() : "NOT_STARTED"
+                    };
+                }
+                else
+                {
+                    return new
+                    {
+                        IsCompleted = false,
+                        BestScore = 0,
+                        TotalAttempts = 0,
+                        Status = "NOT_STARTED"
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error getting lesson progress: {ex.Message}");
+                return new
+                {
+                    IsCompleted = false,
+                    BestScore = 0,
+                    TotalAttempts = 0,
+                    Status = "NOT_STARTED"
+                };
+            }
+        }
+
+        private string GetProgressBadge(string status, int bestScore)
+        {
+            switch (status)
+            {
+                case "COMPLETED":
+                    if (bestScore >= 90) return "🌟 Mastered";
+                    if (bestScore >= 80) return "✅ Completed";
+                    return "✅ Passed";
+                case "IN_PROGRESS":
+                    return "🔄 In Progress";
+                case "NOT_STARTED":
+                default:
+                    return "⭕ Not Started";
+            }
+        }
+
+        private async System.Threading.Tasks.Task<(int LessonCount, int QuestionCount)> GetLanguageStatistics(string languageId)
         {
             try
             {
@@ -197,17 +325,12 @@ namespace INTFYP
                     }
                 }
 
-                // Get student enrollment count
-                Query studentsQuery = db.Collection("enrollments").WhereEqualTo("LanguageId", languageId).WhereEqualTo("Status", "Active");
-                QuerySnapshot studentsSnapshot = await studentsQuery.GetSnapshotAsync();
-                int studentCount = studentsSnapshot.Documents.Count;
-
-                return (lessonCount, questionCount, studentCount);
+                return (lessonCount, questionCount);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine("Error getting language statistics: " + ex.Message);
-                return (0, 0, 0);
+                return (0, 0);
             }
         }
 
@@ -256,43 +379,6 @@ namespace INTFYP
             catch (Exception ex)
             {
                 ShowErrorMessage("Error: " + ex.Message);
-            }
-        }
-
-        private async System.Threading.Tasks.Task DeleteLesson(string topicName, string lessonId)
-        {
-            try
-            {
-                DocumentReference lessonRef = db.Collection("languages")
-                    .Document(currentLanguageId)
-                    .Collection("topics")
-                    .Document(topicName)
-                    .Collection("lessons")
-                    .Document(lessonId);
-
-                // First, delete all questions in this lesson
-                CollectionReference questionsRef = lessonRef.Collection("questions");
-                QuerySnapshot questionsSnapshot = await questionsRef.GetSnapshotAsync();
-
-                // Delete all questions
-                foreach (DocumentSnapshot questionDoc in questionsSnapshot.Documents)
-                {
-                    await questionDoc.Reference.DeleteAsync();
-                }
-
-                // Then delete the lesson itself
-                await lessonRef.DeleteAsync();
-
-                ShowSuccessMessage("Lesson and all its questions deleted successfully!");
-
-                // Reload topics and lessons
-                await LoadTopicsAndLessons();
-                await LoadLanguageInfo(); // Refresh statistics
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Error deleting lesson: " + ex.Message);
-                ShowErrorMessage("Error deleting lesson. Please try again.");
             }
         }
 

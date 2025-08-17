@@ -20,6 +20,7 @@ namespace INTFYP
         private string currentLessonId;
         private List<QuestionData> quizQuestions;
         private Dictionary<int, string> userAnswers;
+        private DateTime quizStartTime;
 
         // Question data model
         public class QuestionData
@@ -29,7 +30,7 @@ namespace INTFYP
             public string Type { get; set; }
             public int Order { get; set; }
             public List<string> Options { get; set; }
-            public List<string> ShuffledOptions { get; set; } // NEW: for randomized display
+            public List<string> ShuffledOptions { get; set; }
             public string CorrectAnswer { get; set; }
             public string ImagePath { get; set; }
             public string AudioPath { get; set; }
@@ -52,10 +53,25 @@ namespace INTFYP
 
             if (!IsPostBack)
             {
+                // Record quiz start time
+                quizStartTime = DateTime.Now;
+                Session["QuizStartTime"] = quizStartTime;
+                System.Diagnostics.Debug.WriteLine($"⏰ Quiz started at: {quizStartTime}");
+
                 await InitializeQuiz();
             }
             else
             {
+                // Restore quiz start time
+                if (Session["QuizStartTime"] != null)
+                {
+                    quizStartTime = (DateTime)Session["QuizStartTime"];
+                }
+                else
+                {
+                    quizStartTime = DateTime.Now.AddMinutes(-5); // Fallback
+                }
+
                 // Restore quiz state from hidden fields
                 RestoreQuizState();
             }
@@ -72,6 +88,7 @@ namespace INTFYP
                         string path = Server.MapPath("~/serviceAccountKey.json");
                         Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
                         db = FirestoreDb.Create("intorannetto");
+                        System.Diagnostics.Debug.WriteLine("🔥 Firebase initialized successfully");
                     }
                 }
             }
@@ -94,7 +111,7 @@ namespace INTFYP
                     return;
                 }
 
-                // NEW: Randomize options for all questions
+                // Randomize options for all questions
                 RandomizeQuestionOptions();
 
                 // Initialize user answers dictionary
@@ -119,7 +136,7 @@ namespace INTFYP
             }
         }
 
-        // NEW METHOD: Randomize options for all questions
+        // Randomize options for all questions
         private void RandomizeQuestionOptions()
         {
             Random random = new Random();
@@ -214,69 +231,40 @@ namespace INTFYP
 
                     System.Diagnostics.Debug.WriteLine($"\n📋 Processing Question ID: {questionDoc.Id}");
 
-                    // Log all fields in this question document
-                    System.Diagnostics.Debug.WriteLine("📊 All fields in this question:");
-                    foreach (var field in questionData)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"   {field.Key}: {field.Value} (Type: {field.Value?.GetType().Name})");
-                    }
-
-                    // FIXED: Properly extract options from Firestore
+                    // Extract options from Firestore
                     var options = new List<string>();
 
                     if (questionData.ContainsKey("options"))
                     {
-                        System.Diagnostics.Debug.WriteLine($"✅ Found 'options' field");
-
-                        // Handle different types of options storage
                         var optionsField = questionData["options"];
 
                         if (optionsField is object[] optionsArray)
                         {
-                            System.Diagnostics.Debug.WriteLine($"📝 Options stored as array with {optionsArray.Length} items:");
-
                             for (int i = 0; i < optionsArray.Length; i++)
                             {
                                 string optionText = optionsArray[i]?.ToString()?.Trim() ?? "";
                                 if (!string.IsNullOrEmpty(optionText))
                                 {
                                     options.Add(optionText);
-                                    System.Diagnostics.Debug.WriteLine($"   Option {i + 1}: '{optionText}'");
                                 }
                             }
                         }
                         else if (optionsField is List<object> optionsList)
                         {
-                            System.Diagnostics.Debug.WriteLine($"📝 Options stored as list with {optionsList.Count} items:");
-
                             for (int i = 0; i < optionsList.Count; i++)
                             {
                                 string optionText = optionsList[i]?.ToString()?.Trim() ?? "";
                                 if (!string.IsNullOrEmpty(optionText))
                                 {
                                     options.Add(optionText);
-                                    System.Diagnostics.Debug.WriteLine($"   Option {i + 1}: '{optionText}'");
                                 }
                             }
                         }
-                        else
-                        {
-                            System.Diagnostics.Debug.WriteLine($"❌ Options field exists but unexpected type: {optionsField.GetType().Name}");
-                            System.Diagnostics.Debug.WriteLine($"   Value: {optionsField}");
-                        }
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine($"❌ No 'options' field found in question {questionDoc.Id}");
                     }
 
-                    // If we still don't have options, there's a problem with the database
                     if (options.Count == 0)
                     {
-                        System.Diagnostics.Debug.WriteLine($"⚠️ WARNING: Question {questionDoc.Id} has no valid options!");
-                        System.Diagnostics.Debug.WriteLine($"   This question will be skipped or needs to be fixed in AddQuestion.");
-
-                        // Skip this question rather than add default options
+                        System.Diagnostics.Debug.WriteLine($"⚠️ WARNING: Question {questionDoc.Id} has no valid options! Skipping...");
                         continue;
                     }
 
@@ -285,16 +273,10 @@ namespace INTFYP
                     if (questionData.ContainsKey("answer"))
                     {
                         correctAnswer = questionData["answer"]?.ToString()?.Trim() ?? "";
-                        System.Diagnostics.Debug.WriteLine($"✅ Correct answer: '{correctAnswer}'");
                     }
-                    else
+                    else if (options.Count > 0)
                     {
-                        System.Diagnostics.Debug.WriteLine($"❌ No answer field found for question {questionDoc.Id}");
-                        if (options.Count > 0)
-                        {
-                            correctAnswer = options[0];
-                            System.Diagnostics.Debug.WriteLine($"🔧 Using first option as correct answer: '{correctAnswer}'");
-                        }
+                        correctAnswer = options[0];
                     }
 
                     // Create question object
@@ -304,8 +286,8 @@ namespace INTFYP
                         Text = questionData.ContainsKey("text") ? questionData["text"]?.ToString() ?? "" : $"Question {questionDoc.Id}",
                         Type = questionData.ContainsKey("questionType") ? questionData["questionType"]?.ToString() ?? "text" : "text",
                         Order = questionData.ContainsKey("order") ? Convert.ToInt32(questionData["order"]) : quizQuestions.Count + 1,
-                        Options = options, // Original order preserved
-                        ShuffledOptions = new List<string>(), // Will be filled by RandomizeQuestionOptions
+                        Options = options,
+                        ShuffledOptions = new List<string>(),
                         CorrectAnswer = correctAnswer,
                         ImagePath = questionData.ContainsKey("imagePath") ? questionData["imagePath"]?.ToString() ?? "" : "",
                         AudioPath = questionData.ContainsKey("audioPath") ? questionData["audioPath"]?.ToString() ?? "" : ""
@@ -313,8 +295,6 @@ namespace INTFYP
 
                     quizQuestions.Add(question);
                     System.Diagnostics.Debug.WriteLine($"✅ Question '{question.Text}' added with {options.Count} options");
-                    System.Diagnostics.Debug.WriteLine($"   Options: [{string.Join(", ", options)}]");
-                    System.Diagnostics.Debug.WriteLine($"   Correct: '{correctAnswer}'");
                 }
 
                 if (quizQuestions.Count == 0)
@@ -373,11 +353,6 @@ namespace INTFYP
 
                 var currentQuestion = quizQuestions[currentIndex];
 
-                System.Diagnostics.Debug.WriteLine($"\n📺 Displaying question {currentIndex + 1}:");
-                System.Diagnostics.Debug.WriteLine($"   Text: {currentQuestion.Text}");
-                System.Diagnostics.Debug.WriteLine($"   Shuffled Options: [{string.Join(", ", currentQuestion.ShuffledOptions ?? new List<string>())}]");
-                System.Diagnostics.Debug.WriteLine($"   Correct: {currentQuestion.CorrectAnswer}");
-
                 // Update question display
                 lblQuestionNumber.Text = (currentIndex + 1).ToString();
                 lblCurrentQuestion.Text = (currentIndex + 1).ToString();
@@ -402,21 +377,14 @@ namespace INTFYP
                     audioSource.Src = currentQuestion.AudioPath;
                 }
 
-                // UPDATED: Bind SHUFFLED answer options instead of original order
+                // Bind SHUFFLED answer options
                 if (currentQuestion.ShuffledOptions != null && currentQuestion.ShuffledOptions.Count > 0)
                 {
-                    rptAnswerOptions.DataSource = currentQuestion.ShuffledOptions; // Use shuffled options
+                    rptAnswerOptions.DataSource = currentQuestion.ShuffledOptions;
                     rptAnswerOptions.DataBind();
-
-                    System.Diagnostics.Debug.WriteLine($"✅ Bound {currentQuestion.ShuffledOptions.Count} SHUFFLED options to UI:");
-                    for (int i = 0; i < currentQuestion.ShuffledOptions.Count; i++)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"   UI Option {i + 1}: '{currentQuestion.ShuffledOptions[i]}'");
-                    }
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"❌ Question {currentIndex + 1} has no shuffled options!");
                     ShowErrorMessage($"Question {currentIndex + 1} has no answer options. Please check the question data in your database.");
                     return;
                 }
@@ -464,8 +432,6 @@ namespace INTFYP
         {
             int currentIndex = GetCurrentQuestionIndex();
             lblCurrentQuestion.Text = (currentIndex + 1).ToString();
-
-            // Progress will be updated via JavaScript
         }
 
         private int GetCurrentQuestionIndex()
@@ -522,7 +488,7 @@ namespace INTFYP
             }
         }
 
-        protected void btnSubmit_Click(object sender, EventArgs e)
+        protected async void btnSubmit_Click(object sender, EventArgs e)
         {
             try
             {
@@ -534,14 +500,16 @@ namespace INTFYP
                 // Calculate score
                 int score = CalculateScore();
 
-                // Display results
+                // Save to dual storage structure
+                await SaveQuizResultToDualStorage(score);
+
+                // Display results after save is complete
                 DisplayQuizResults(score);
             }
             catch (Exception ex)
             {
                 ShowErrorMessage("Error submitting quiz: " + ex.Message);
                 System.Diagnostics.Debug.WriteLine($"❌ btnSubmit_Click Error: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"❌ Stack Trace: {ex.StackTrace}");
             }
         }
 
@@ -604,6 +572,439 @@ namespace INTFYP
             return score;
         }
 
+        // Save to simplified dual storage structure
+        private async System.Threading.Tasks.Task SaveQuizResultToDualStorage(int score)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("💾 Starting simplified dual storage save...");
+
+                string userId = GetCurrentUserId();
+                DateTime completedTime = DateTime.Now;
+                DateTime startTime = quizStartTime;
+                if (Session["QuizStartTime"] != null)
+                {
+                    startTime = (DateTime)Session["QuizStartTime"];
+                }
+
+                TimeSpan timeSpent = completedTime - startTime;
+                int correctAnswers = (int)Math.Round((score / 100.0) * quizQuestions.Count);
+                bool isPassed = score >= 70; // 70% passing grade
+
+                // Get attempt number for this lesson
+                int attemptNumber = await GetNextAttemptNumber(userId, currentLanguageId, currentTopicName, currentLessonId);
+
+                // Generate unique result ID
+                string resultId = $"{userId}_{currentLanguageId}_{currentTopicName}_{currentLessonId}_{attemptNumber}_{DateTime.Now.Ticks}";
+
+                // 1. Save to nested user progress structure
+                await SaveToUserProgressStructure(userId, resultId, score, correctAnswers, isPassed, startTime, completedTime, timeSpent, attemptNumber);
+
+                // 2. Save to flat analytics collection (minimal data) - FIXED: Now uses languageResults
+                await SaveToLanguageResultsCollection(resultId, userId, score, correctAnswers, isPassed, startTime, completedTime, timeSpent, attemptNumber);
+
+                System.Diagnostics.Debug.WriteLine($"✅ SUCCESS: Quiz result saved to both collections!");
+                ShowSuccessMessage($"🎉 Quiz completed with {score}% score! Your result has been saved successfully.");
+
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ SAVE ERROR: {ex.Message}");
+                ShowErrorMessage($"Quiz completed with {score}% score! However, there was an error saving your result: {ex.Message}");
+            }
+        }
+
+        // Save to nested user progress structure: users/{userId}/progress/{languageId}/topics/{topicName}/lessons/{lessonId}
+        private async System.Threading.Tasks.Task SaveToUserProgressStructure(string userId, string resultId, int score,
+            int correctAnswers, bool isPassed, DateTime startTime, DateTime completedTime, TimeSpan timeSpent, int attemptNumber)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("📁 Saving to user progress structure...");
+
+                // Create user answers for detailed tracking
+                var userAnswersDetailed = new Dictionary<string, object>();
+                for (int i = 0; i < quizQuestions.Count; i++)
+                {
+                    string userAnswer = userAnswers.ContainsKey(i) ? userAnswers[i] : "";
+                    string correctAnswer = quizQuestions[i].CorrectAnswer;
+                    bool isCorrect = string.Equals(userAnswer.Trim(), correctAnswer.Trim(), StringComparison.OrdinalIgnoreCase);
+
+                    userAnswersDetailed[i.ToString()] = new
+                    {
+                        selectedAnswer = userAnswer,
+                        correctAnswer = correctAnswer,
+                        isCorrect = isCorrect
+                    };
+                }
+
+                // Save attempt data
+                var attemptData = new
+                {
+                    attemptNumber = attemptNumber,
+                    score = score,
+                    totalQuestions = quizQuestions.Count,
+                    correctAnswers = correctAnswers,
+                    timeSpentSeconds = (int)timeSpent.TotalSeconds,
+                    isPassed = isPassed,
+                    completedAt = Timestamp.FromDateTime(completedTime.ToUniversalTime()),
+                    userAnswers = userAnswersDetailed
+                };
+
+                DocumentReference attemptRef = db.Collection("users")
+                    .Document(userId)
+                    .Collection("progress")
+                    .Document(currentLanguageId)
+                    .Collection("topics")
+                    .Document(currentTopicName)
+                    .Collection("lessons")
+                    .Document(currentLessonId)
+                    .Collection("attempts")
+                    .Document(resultId);
+
+                await attemptRef.SetAsync(attemptData);
+
+                // Update lesson summary
+                await UpdateLessonSummary(userId, score, isPassed, attemptNumber, timeSpent);
+
+                // Update topic summary
+                await UpdateTopicSummary(userId);
+
+                // Update language summary
+                await UpdateLanguageSummary(userId);
+
+                System.Diagnostics.Debug.WriteLine("✅ User progress structure updated successfully!");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Error saving to user structure: {ex.Message}");
+                throw;
+            }
+        }
+
+        // FIXED: Save to flat analytics collection: languageResults/{resultId} (minimal data only, no userType)
+        private async System.Threading.Tasks.Task SaveToLanguageResultsCollection(string resultId, string userId, int score,
+            int correctAnswers, bool isPassed, DateTime startTime, DateTime completedTime, TimeSpan timeSpent, int attemptNumber)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("📊 Saving to language results collection...");
+
+                var languageResultData = new
+                {
+                    userId = userId,
+                    languageId = currentLanguageId,
+                    languageName = lblLanguageName.Text,
+                    topicName = currentTopicName,
+                    lessonId = currentLessonId,
+                    lessonName = lblLessonName.Text,
+                    attemptNumber = attemptNumber,
+                    score = score,
+                    totalQuestions = quizQuestions.Count,
+                    correctAnswers = correctAnswers,
+                    timeSpentSeconds = (int)timeSpent.TotalSeconds,
+                    isPassed = isPassed,
+                    completedAt = Timestamp.FromDateTime(completedTime.ToUniversalTime()),
+                    createdAt = Timestamp.GetCurrentTimestamp()
+                };
+
+                DocumentReference resultRef = db.Collection("languageResults").Document(resultId);
+                await resultRef.SetAsync(languageResultData);
+
+                System.Diagnostics.Debug.WriteLine("✅ Language results collection updated successfully!");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Error saving to results collection: {ex.Message}");
+                throw;
+            }
+        }
+
+        // Helper method to get next attempt number
+        private async System.Threading.Tasks.Task<int> GetNextAttemptNumber(string userId, string languageId, string topicName, string lessonId)
+        {
+            try
+            {
+                CollectionReference attemptsRef = db.Collection("users")
+                    .Document(userId)
+                    .Collection("progress")
+                    .Document(languageId)
+                    .Collection("topics")
+                    .Document(topicName)
+                    .Collection("lessons")
+                    .Document(lessonId)
+                    .Collection("attempts");
+
+                QuerySnapshot snapshot = await attemptsRef.GetSnapshotAsync();
+                return snapshot.Documents.Count + 1;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error getting attempt number: {ex.Message}");
+                return 1;
+            }
+        }
+
+        // Update lesson summary with aggregated data
+        private async System.Threading.Tasks.Task UpdateLessonSummary(string userId, int score, bool isPassed, int attemptNumber, TimeSpan timeSpent)
+        {
+            try
+            {
+                DocumentReference lessonRef = db.Collection("users")
+                    .Document(userId)
+                    .Collection("progress")
+                    .Document(currentLanguageId)
+                    .Collection("topics")
+                    .Document(currentTopicName)
+                    .Collection("lessons")
+                    .Document(currentLessonId);
+
+                // Get existing data
+                DocumentSnapshot lessonSnap = await lessonRef.GetSnapshotAsync();
+
+                int totalAttempts = attemptNumber;
+                int bestScore = score;
+                int latestScore = score;
+                double averageScore = score;
+                double totalTimeSpent = timeSpent.TotalMinutes;
+                bool isCompleted = isPassed;
+                string status = isPassed ? "COMPLETED" : "IN_PROGRESS";
+
+                if (lessonSnap.Exists)
+                {
+                    var existingData = lessonSnap.ToDictionary();
+
+                    if (existingData.ContainsKey("bestScore"))
+                    {
+                        int existingBestScore = Convert.ToInt32(existingData["bestScore"]);
+                        bestScore = Math.Max(score, existingBestScore);
+                    }
+
+                    if (existingData.ContainsKey("totalTimeSpent"))
+                    {
+                        double existingTime = Convert.ToDouble(existingData["totalTimeSpent"]);
+                        totalTimeSpent += existingTime;
+                    }
+
+                    if (existingData.ContainsKey("averageScore") && existingData.ContainsKey("totalAttempts"))
+                    {
+                        double existingAverage = Convert.ToDouble(existingData["averageScore"]);
+                        int existingAttempts = Convert.ToInt32(existingData["totalAttempts"]);
+                        averageScore = ((existingAverage * existingAttempts) + score) / totalAttempts;
+                    }
+                }
+
+                var lessonSummary = new
+                {
+                    lessonName = lblLessonName.Text,
+                    totalAttempts = totalAttempts,
+                    bestScore = bestScore,
+                    latestScore = latestScore,
+                    averageScore = Math.Round(averageScore, 1),
+                    isCompleted = isCompleted,
+                    isPassed = isPassed,
+                    status = status,
+                    totalTimeSpent = Math.Round(totalTimeSpent, 2),
+                    lastAttemptDate = Timestamp.GetCurrentTimestamp()
+                };
+
+                await lessonRef.SetAsync(lessonSummary, SetOptions.MergeAll);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error updating lesson summary: {ex.Message}");
+            }
+        }
+
+        // Update topic summary
+        private async System.Threading.Tasks.Task UpdateTopicSummary(string userId)
+        {
+            try
+            {
+                DocumentReference topicRef = db.Collection("users")
+                    .Document(userId)
+                    .Collection("progress")
+                    .Document(currentLanguageId)
+                    .Collection("topics")
+                    .Document(currentTopicName);
+
+                // Get all lessons in this topic
+                CollectionReference lessonsRef = topicRef.Collection("lessons");
+                QuerySnapshot lessonsSnapshot = await lessonsRef.GetSnapshotAsync();
+
+                int lessonsInTopic = lessonsSnapshot.Documents.Count;
+                int completedLessons = 0;
+                double totalTopicScore = 0;
+                double totalTopicTime = 0;
+
+                foreach (DocumentSnapshot lessonDoc in lessonsSnapshot.Documents)
+                {
+                    if (lessonDoc.Exists)
+                    {
+                        var lessonData = lessonDoc.ToDictionary();
+
+                        if (lessonData.ContainsKey("isCompleted") && Convert.ToBoolean(lessonData["isCompleted"]))
+                        {
+                            completedLessons++;
+                        }
+
+                        if (lessonData.ContainsKey("bestScore"))
+                        {
+                            totalTopicScore += Convert.ToDouble(lessonData["bestScore"]);
+                        }
+
+                        if (lessonData.ContainsKey("totalTimeSpent"))
+                        {
+                            totalTopicTime += Convert.ToDouble(lessonData["totalTimeSpent"]);
+                        }
+                    }
+                }
+
+                var topicSummary = new
+                {
+                    topicName = currentTopicName,
+                    lessonsInTopic = lessonsInTopic,
+                    completedLessons = completedLessons,
+                    topicProgress = lessonsInTopic > 0 ? Math.Round((double)completedLessons / lessonsInTopic * 100, 1) : 0,
+                    averageTopicScore = lessonsInTopic > 0 ? Math.Round(totalTopicScore / lessonsInTopic, 1) : 0,
+                    totalTopicTime = Math.Round(totalTopicTime, 2)
+                };
+
+                await topicRef.SetAsync(topicSummary, SetOptions.MergeAll);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error updating topic summary: {ex.Message}");
+            }
+        }
+
+        // Update language summary
+        private async System.Threading.Tasks.Task UpdateLanguageSummary(string userId)
+        {
+            try
+            {
+                DocumentReference languageRef = db.Collection("users")
+                    .Document(userId)
+                    .Collection("progress")
+                    .Document(currentLanguageId);
+
+                // Get all topics in this language
+                CollectionReference topicsRef = languageRef.Collection("topics");
+                QuerySnapshot topicsSnapshot = await topicsRef.GetSnapshotAsync();
+
+                int totalLessonsCompleted = 0;
+                double totalTimeSpent = 0;
+                double totalScores = 0;
+                int totalAttempts = 0;
+
+                foreach (DocumentSnapshot topicDoc in topicsSnapshot.Documents)
+                {
+                    if (topicDoc.Exists)
+                    {
+                        var topicData = topicDoc.ToDictionary();
+
+                        if (topicData.ContainsKey("completedLessons"))
+                        {
+                            totalLessonsCompleted += Convert.ToInt32(topicData["completedLessons"]);
+                        }
+
+                        if (topicData.ContainsKey("totalTopicTime"))
+                        {
+                            totalTimeSpent += Convert.ToDouble(topicData["totalTopicTime"]);
+                        }
+
+                        // Get lessons for more detailed stats
+                        CollectionReference lessonsRef = topicDoc.Reference.Collection("lessons");
+                        QuerySnapshot lessonsSnapshot = await lessonsRef.GetSnapshotAsync();
+
+                        foreach (DocumentSnapshot lessonDoc in lessonsSnapshot.Documents)
+                        {
+                            if (lessonDoc.Exists)
+                            {
+                                var lessonData = lessonDoc.ToDictionary();
+
+                                if (lessonData.ContainsKey("totalAttempts"))
+                                {
+                                    totalAttempts += Convert.ToInt32(lessonData["totalAttempts"]);
+                                }
+
+                                if (lessonData.ContainsKey("bestScore"))
+                                {
+                                    totalScores += Convert.ToDouble(lessonData["bestScore"]);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Calculate current streak (simplified) - FIXED: Now uses languageResults
+                int currentStreak = await CalculateUserStreak(userId, currentLanguageId);
+
+                var languageSummary = new
+                {
+                    languageName = lblLanguageName.Text,
+                    totalAttempts = totalAttempts,
+                    completedLessons = totalLessonsCompleted,
+                    averageScore = totalLessonsCompleted > 0 ? Math.Round(totalScores / totalLessonsCompleted, 1) : 0,
+                    totalTimeSpent = Math.Round(totalTimeSpent, 2),
+                    currentStreak = currentStreak,
+                    lastAttemptDate = Timestamp.GetCurrentTimestamp()
+                };
+
+                await languageRef.SetAsync(languageSummary, SetOptions.MergeAll);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error updating language summary: {ex.Message}");
+            }
+        }
+
+        // FIXED: Simple streak calculation - now uses languageResults collection
+        private async System.Threading.Tasks.Task<int> CalculateUserStreak(string userId, string languageId)
+        {
+            try
+            {
+                Query recentQuery = db.Collection("languageResults")
+                    .WhereEqualTo("userId", userId)
+                    .WhereEqualTo("languageId", languageId)
+                    .OrderByDescending("completedAt")
+                    .Limit(7);
+
+                QuerySnapshot snapshot = await recentQuery.GetSnapshotAsync();
+
+                if (snapshot.Documents.Count == 0) return 1;
+
+                var attempts = snapshot.Documents
+                    .Select(doc => ((Timestamp)doc.ToDictionary()["completedAt"]).ToDateTime().Date)
+                    .Distinct()
+                    .OrderByDescending(date => date)
+                    .ToList();
+
+                int streak = 0;
+                DateTime currentDate = DateTime.Today;
+
+                foreach (var attemptDate in attempts)
+                {
+                    if (attemptDate == currentDate || attemptDate == currentDate.AddDays(-streak - 1))
+                    {
+                        streak++;
+                        currentDate = attemptDate;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
+                return Math.Max(streak, 1);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error calculating user streak: {ex.Message}");
+                return 1;
+            }
+        }
+
         private void DisplayQuizResults(int score)
         {
             try
@@ -628,9 +1029,6 @@ namespace INTFYP
                 }
 
                 System.Diagnostics.Debug.WriteLine($"✅ Quiz results displayed successfully!");
-
-                // Save quiz result (optional - you can implement this)
-                // await SaveQuizResult(score);
             }
             catch (Exception ex)
             {
@@ -666,147 +1064,50 @@ namespace INTFYP
 
         protected void btnNextLesson_Click(object sender, EventArgs e)
         {
-            // This would require logic to find the next lesson
-            // For now, redirect back to lessons page
             Response.Redirect($"DisplayQuestion.aspx?languageId={currentLanguageId}");
+        }
+
+        // FIXED: Removed userType session tracking
+        private string GetCurrentUserId()
+        {
+            if (Session["UserId"] != null)
+                return Session["UserId"].ToString();
+
+            if (Session["DemoUserId"] != null)
+                return Session["DemoUserId"].ToString();
+
+            string demoUserId = "DEMO_" + DateTime.Now.Ticks.ToString();
+            Session["DemoUserId"] = demoUserId;
+
+            System.Diagnostics.Debug.WriteLine($"🆔 Generated new demo user ID: {demoUserId}");
+            return demoUserId;
         }
 
         private void ShowErrorMessage(string message)
         {
-            ScriptManager.RegisterStartupScript(this, GetType(), "alert",
-                $"alert('{HttpUtility.JavaScriptStringEncode(message)}');", true);
-        }
-
-        // Optional: Save quiz results to Firestore
-        private async System.Threading.Tasks.Task SaveQuizResult(int score)
-        {
             try
             {
-                string userId = GetCurrentUserId(); // Implement this based on your auth system
-
-                var quizResult = new
-                {
-                    UserId = userId,
-                    LanguageId = currentLanguageId,
-                    TopicName = currentTopicName,
-                    LessonId = currentLessonId,
-                    Score = score,
-                    TotalQuestions = quizQuestions.Count,
-                    CorrectAnswers = (int)Math.Round((score / 100.0) * quizQuestions.Count),
-                    CompletedAt = Timestamp.GetCurrentTimestamp(),
-                    UserAnswers = userAnswers,
-                    TimeSpent = 0, // You can implement time tracking
-                    OptionsWereShuffled = true // NEW: Track that options were randomized
-                };
-
-                await db.Collection("quizResults").AddAsync(quizResult);
-                System.Diagnostics.Debug.WriteLine($"✅ Quiz result saved to Firestore");
+                System.Diagnostics.Debug.WriteLine($"🚨 ERROR MESSAGE: {message}");
+                ScriptManager.RegisterStartupScript(this, GetType(), "error",
+                    $"alert('❌ {HttpUtility.JavaScriptStringEncode(message)}');", true);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Error saving quiz result: " + ex.Message);
-                // Don't throw - this is optional functionality
+                System.Diagnostics.Debug.WriteLine($"❌ Failed to show error message: {ex.Message}");
             }
         }
 
-        private string GetCurrentUserId()
-        {
-            // Implement based on your authentication system
-            if (Session["UserId"] != null)
-                return Session["UserId"].ToString();
-
-            // Generate a demo user ID if none exists
-            string demoUserId = "DEMO_" + DateTime.Now.Ticks.ToString();
-            Session["UserId"] = demoUserId;
-            return demoUserId;
-        }
-
-        // Method to get user's quiz history
-        public async System.Threading.Tasks.Task<List<object>> GetUserQuizHistory(string userId)
+        private void ShowSuccessMessage(string message)
         {
             try
             {
-                Query quizResultsQuery = db.Collection("quizResults")
-                    .WhereEqualTo("UserId", userId)
-                    .OrderByDescending("CompletedAt");
-
-                QuerySnapshot snapshot = await quizResultsQuery.GetSnapshotAsync();
-
-                var results = new List<object>();
-                foreach (DocumentSnapshot doc in snapshot.Documents)
-                {
-                    var data = doc.ToDictionary();
-                    results.Add(new
-                    {
-                        Id = doc.Id,
-                        LanguageId = data.ContainsKey("LanguageId") ? data["LanguageId"].ToString() : "",
-                        TopicName = data.ContainsKey("TopicName") ? data["TopicName"].ToString() : "",
-                        LessonId = data.ContainsKey("LessonId") ? data["LessonId"].ToString() : "",
-                        Score = data.ContainsKey("Score") ? Convert.ToInt32(data["Score"]) : 0,
-                        CompletedAt = data.ContainsKey("CompletedAt") ? data["CompletedAt"] : Timestamp.GetCurrentTimestamp(),
-                        OptionsWereShuffled = data.ContainsKey("OptionsWereShuffled") ? Convert.ToBoolean(data["OptionsWereShuffled"]) : false
-                    });
-                }
-
-                return results;
+                System.Diagnostics.Debug.WriteLine($"✅ SUCCESS MESSAGE: {message}");
+                ScriptManager.RegisterStartupScript(this, GetType(), "success",
+                    $"alert('✅ {HttpUtility.JavaScriptStringEncode(message)}');", true);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine("Error getting quiz history: " + ex.Message);
-                return new List<object>();
-            }
-        }
-
-        // NEW: Method to get quiz statistics
-        public async System.Threading.Tasks.Task<object> GetQuizStatistics(string languageId, string topicName, string lessonId)
-        {
-            try
-            {
-                Query statsQuery = db.Collection("quizResults")
-                    .WhereEqualTo("LanguageId", languageId)
-                    .WhereEqualTo("TopicName", topicName)
-                    .WhereEqualTo("LessonId", lessonId);
-
-                QuerySnapshot snapshot = await statsQuery.GetSnapshotAsync();
-
-                var scores = new List<int>();
-                var shuffledCount = 0;
-
-                foreach (DocumentSnapshot doc in snapshot.Documents)
-                {
-                    var data = doc.ToDictionary();
-                    if (data.ContainsKey("Score"))
-                    {
-                        scores.Add(Convert.ToInt32(data["Score"]));
-                    }
-                    if (data.ContainsKey("OptionsWereShuffled") && Convert.ToBoolean(data["OptionsWereShuffled"]))
-                    {
-                        shuffledCount++;
-                    }
-                }
-
-                return new
-                {
-                    TotalAttempts = scores.Count,
-                    AverageScore = scores.Count > 0 ? scores.Average() : 0,
-                    HighestScore = scores.Count > 0 ? scores.Max() : 0,
-                    LowestScore = scores.Count > 0 ? scores.Min() : 0,
-                    PassRate = scores.Count > 0 ? (scores.Count(s => s >= 70) * 100.0 / scores.Count) : 0,
-                    ShuffledOptionsCount = shuffledCount
-                };
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Error getting quiz statistics: " + ex.Message);
-                return new
-                {
-                    TotalAttempts = 0,
-                    AverageScore = 0,
-                    HighestScore = 0,
-                    LowestScore = 0,
-                    PassRate = 0,
-                    ShuffledOptionsCount = 0
-                };
+                System.Diagnostics.Debug.WriteLine($"❌ Failed to show success message: {ex.Message}");
             }
         }
     }
