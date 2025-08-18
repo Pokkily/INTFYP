@@ -522,11 +522,19 @@
                 <div class="col-md-3 mb-4">
                     <div class="sidebar-card">
                         <h5 class="sidebar-title">Search Languages</h5>
-                        
+        
                         <asp:TextBox ID="txtLanguageSearch" runat="server" 
                             CssClass="search-input"
                             placeholder="Search by language name..." AutoPostBack="true"
                             OnTextChanged="txtLanguageSearch_TextChanged" />
+        
+                        <!-- Student Report Button -->
+                        <div class="d-grid">
+                            <asp:Button ID="btnStudentReport" runat="server" 
+                                Text="📊 Student Reports" 
+                                CssClass="nav-button nav-button-secondary"
+                                OnClick="btnStudentReport_Click" />
+                        </div>
                     </div>
                 </div>
 

@@ -324,7 +324,7 @@
         }
 
         .content-title::before {
-            content: '❓';
+            content: '📄';
             font-size: 22px;
         }
 

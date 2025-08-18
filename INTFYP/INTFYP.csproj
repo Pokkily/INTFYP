@@ -335,7 +335,7 @@
     <Content Include="Images\logo.png" />
     <Content Include="Korean.aspx" />
     <Content Include="Language.aspx" />
-    <Content Include="LearningReport.aspx" />
+    <Content Include="LanguageReports.aspx" />
     <Content Include="Library.aspx" />
     <Content Include="ManageClassroom.aspx" />
     <Content Include="Quiz.aspx" />
@@ -352,6 +352,7 @@
     <Content Include="libman.json" />
     <Content Include="PreviewBook.aspx" />
     <Content Include="Feedback.aspx" />
+    <Content Include="StudentReports.aspx" />
     <Content Include="StudyHub.aspx" />
     <Content Include="protos\google\type\timeofday.proto" />
     <Content Include="protos\google\type\quaternion.proto" />
@@ -540,12 +541,12 @@
     <Compile Include="Language.aspx.designer.cs">
       <DependentUpon>Language.aspx</DependentUpon>
     </Compile>
-    <Compile Include="LearningReport.aspx.cs">
-      <DependentUpon>LearningReport.aspx</DependentUpon>
+    <Compile Include="LanguageReports.aspx.cs">
+      <DependentUpon>LanguageReports.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="LearningReport.aspx.designer.cs">
-      <DependentUpon>LearningReport.aspx</DependentUpon>
+    <Compile Include="LanguageReports.aspx.designer.cs">
+      <DependentUpon>LanguageReports.aspx</DependentUpon>
     </Compile>
     <Compile Include="QuizModels.cs" />
     <Compile Include="ClassDetails.aspx.cs">
@@ -653,6 +654,13 @@
     </Compile>
     <Compile Include="Site.Mobile.Master.designer.cs">
       <DependentUpon>Site.Mobile.Master</DependentUpon>
+    </Compile>
+    <Compile Include="StudentReports.aspx.cs">
+      <DependentUpon>StudentReports.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="StudentReports.aspx.designer.cs">
+      <DependentUpon>StudentReports.aspx</DependentUpon>
     </Compile>
     <Compile Include="StudyHubGroup.aspx.cs">
       <DependentUpon>StudyHubGroup.aspx</DependentUpon>
