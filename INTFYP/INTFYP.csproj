@@ -303,7 +303,6 @@
   <ItemGroup>
     <Content Include="AddBook.aspx" />
     <Content Include="AddLanguage.aspx" />
-    <Content Include="AddLanguageCard.aspx" />
     <Content Include="AddQuestion.aspx" />
     <Content Include="AddScholarship.aspx" />
     <Content Include="Admin.aspx" />
@@ -465,13 +464,6 @@
     </Compile>
     <Compile Include="AddLanguage.aspx.designer.cs">
       <DependentUpon>AddLanguage.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="AddLanguageCard.aspx.cs">
-      <DependentUpon>AddLanguageCard.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="AddLanguageCard.aspx.designer.cs">
-      <DependentUpon>AddLanguageCard.aspx</DependentUpon>
     </Compile>
     <Compile Include="AddQuestion.aspx.cs">
       <DependentUpon>AddQuestion.aspx</DependentUpon>

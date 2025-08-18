@@ -85,17 +85,23 @@ namespace YourProjectNamespace
                     Description = "All Language You need",
                     Link = "AddLanguage.aspx",
                     IsActive = ""
-                },
-                new TeacherNavItem {
-                    Text = "Lesson",
-                    Description = "All Language You need",
-                    Link = "AddLanguageCard.aspx",
-                    IsActive = ""
-                },
+                },                
                 new TeacherNavItem {
                     Text = "Question",
                     Description = "All Language You need",
                     Link = "AddQuestion.aspx",
+                    IsActive = ""
+                },
+                new TeacherNavItem {
+                    Text = "Scholarship",
+                    Description = "All Scholarship You need",
+                    Link = "ScholarshipManagement.aspx",
+                    IsActive = ""
+                },
+                new TeacherNavItem {
+                    Text = "Language Report",
+                    Description = "All Report You need",
+                    Link = "LanguageReport.aspx",
                     IsActive = ""
                 }
 
