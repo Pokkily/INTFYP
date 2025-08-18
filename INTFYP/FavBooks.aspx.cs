@@ -48,6 +48,7 @@ namespace INTFYP
                 book.IsRecommended = book.RecommendedBy.Contains(CurrentUserId);
                 book.IsFavorited = book.FavoritedBy.Contains(CurrentUserId);
 
+                // Only add books that are favorited by the current user
                 if (book.IsFavorited)
                 {
                     bookList.Add(book);
@@ -55,65 +56,81 @@ namespace INTFYP
             }
 
             bookList = bookList.OrderByDescending(b => b.Recommendations).ToList();
-            Repeater1.DataSource = bookList;
+
+            // Show "No Books" panel if no favorite books found
+            if (bookList.Count == 0)
+            {
+                pnlNoBooks.Visible = true;
+                Repeater1.DataSource = null;
+            }
+            else
+            {
+                pnlNoBooks.Visible = false;
+                Repeater1.DataSource = bookList;
+            }
+
             Repeater1.DataBind();
         }
 
-        protected async void txtCategorySearch_TextChanged(object sender, EventArgs e)
+        // COMBINED search functionality - searches by title, author, AND category in ONE search bar
+        // Only shows results from user's favorite books
+        protected async void txtBookSearch_TextChanged(object sender, EventArgs e)
         {
-            string category = txtCategorySearch.Text.ToLower();
+            string keyword = txtBookSearch.Text.ToLower().Trim();
+
             QuerySnapshot snapshot = await db.Collection("books").GetSnapshotAsync();
-            List<LibraryBook> filteredBooks = new List<LibraryBook>();
+            List<LibraryBook> results = new List<LibraryBook>();
+
+            if (string.IsNullOrEmpty(keyword))
+            {
+                // If search is empty, load all favorite books
+                await LoadBooks();
+                return;
+            }
 
             foreach (var doc in snapshot.Documents)
             {
                 var book = doc.ConvertTo<LibraryBook>();
+                book.DocumentId = doc.Id;
+
                 if (book.RecommendedBy == null) book.RecommendedBy = new List<string>();
                 if (book.FavoritedBy == null) book.FavoritedBy = new List<string>();
+                if (book.Recommendations == null) book.Recommendations = 0;
 
-                book.DocumentId = doc.Id;
                 book.IsRecommended = book.RecommendedBy.Contains(CurrentUserId);
                 book.IsFavorited = book.FavoritedBy.Contains(CurrentUserId);
 
-                if (book.IsFavorited && book.Category.ToLower().Contains(category))
+                // Only process books that are favorited by the current user
+                if (book.IsFavorited)
                 {
-                    filteredBooks.Add(book);
+                    // COMBINED SEARCH: Search across title, author, AND category
+                    bool matchesSearch =
+                        (book.Title?.ToLower().Contains(keyword) ?? false) ||
+                        (book.Author?.ToLower().Contains(keyword) ?? false) ||
+                        (book.Category?.ToLower().Contains(keyword) ?? false);
+
+                    if (matchesSearch)
+                    {
+                        results.Add(book);
+                    }
                 }
             }
 
-            filteredBooks = filteredBooks.OrderByDescending(b => b.Recommendations).ToList();
-            Repeater1.DataSource = filteredBooks;
-            Repeater1.DataBind();
-        }
+            // Order by recommendations (most recommended first)
+            results = results.OrderByDescending(b => b.Recommendations ?? 0).ToList();
 
-        protected async void txtBookSearch_TextChanged(object sender, EventArgs e)
-        {
-            string keyword = txtBookSearch.Text.ToLower();
-            QuerySnapshot snapshot = await db.Collection("books").GetSnapshotAsync();
+            // Show appropriate content based on results
+            if (results.Count == 0)
+            {
+                pnlNoBooks.Visible = true;
+                Repeater1.DataSource = null;
+            }
+            else
+            {
+                pnlNoBooks.Visible = false;
+                Repeater1.DataSource = results;
+            }
 
-            var results = snapshot.Documents
-                .Select(doc =>
-                {
-                    var book = doc.ConvertTo<LibraryBook>();
-                    book.DocumentId = doc.Id;
-
-                    if (book.RecommendedBy == null) book.RecommendedBy = new List<string>();
-                    if (book.FavoritedBy == null) book.FavoritedBy = new List<string>();
-                    if (book.Recommendations == null) book.Recommendations = 0;
-
-                    book.IsRecommended = book.RecommendedBy.Contains(CurrentUserId);
-                    book.IsFavorited = book.FavoritedBy.Contains(CurrentUserId);
-
-                    return book;
-                })
-                .Where(b =>
-                    b.IsFavorited && (
-                    (b.Title?.ToLower().Contains(keyword) ?? false) ||
-                    (b.Author?.ToLower().Contains(keyword) ?? false)))
-                .OrderByDescending(b => b.Recommendations ?? 0)
-                .ToList();
-
-            Repeater1.DataSource = results;
             Repeater1.DataBind();
         }
 
@@ -174,9 +191,17 @@ namespace INTFYP
                 await bookRef.UpdateAsync(bookUpdates);
             }
 
-            await LoadBooks();
+            // Reload based on current search state (same as Library page)
+            if (!string.IsNullOrEmpty(txtBookSearch.Text.Trim()))
+            {
+                // If there's a search term, rerun the search
+                txtBookSearch_TextChanged(txtBookSearch, EventArgs.Empty);
+            }
+            else
+            {
+                // If no search term, load all favorite books
+                await LoadBooks();
+            }
         }
-
-
     }
 }

@@ -121,7 +121,9 @@ namespace YourProjectNamespace
 
             try
             {
-                var input = txtUsernameOrEmail.Text.Trim().ToLower();
+                System.Diagnostics.Debug.WriteLine("Login button clicked - starting authentication");
+
+                var input = txtUsernameOrEmail.Text.Trim();
                 var password = txtPassword.Text;
 
                 if (string.IsNullOrWhiteSpace(input) || string.IsNullOrWhiteSpace(password))
@@ -132,21 +134,34 @@ namespace YourProjectNamespace
 
                 System.Diagnostics.Debug.WriteLine($"Login attempt for: {input}");
 
+                // Ensure Firestore is initialized
+                if (db == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("Firestore not initialized, initializing now");
+                    InitializeFirestore();
+                }
+
                 QuerySnapshot querySnapshot;
+                string searchInput = input.ToLower();
+
                 if (input.Contains("@"))
                 {
+                    System.Diagnostics.Debug.WriteLine("Searching by email");
                     querySnapshot = await db.Collection("users")
-                        .WhereEqualTo("email", input)
+                        .WhereEqualTo("email", searchInput)
                         .Limit(1)
                         .GetSnapshotAsync();
                 }
                 else
                 {
+                    System.Diagnostics.Debug.WriteLine("Searching by username");
                     querySnapshot = await db.Collection("users")
-                        .WhereEqualTo("username_lower", input)
+                        .WhereEqualTo("username_lower", searchInput)
                         .Limit(1)
                         .GetSnapshotAsync();
                 }
+
+                System.Diagnostics.Debug.WriteLine($"Query returned {querySnapshot.Count} results");
 
                 if (querySnapshot.Count == 0)
                 {
@@ -157,8 +172,8 @@ namespace YourProjectNamespace
                 var userDoc = querySnapshot.Documents[0];
                 var userData = userDoc.ToDictionary();
 
-                string storedPassword = userData["password"]?.ToString();
-                if (storedPassword != password)
+                string storedPassword = userData.ContainsKey("password") ? userData["password"]?.ToString() : "";
+                if (string.IsNullOrEmpty(storedPassword) || storedPassword != password)
                 {
                     ShowError("Invalid email/username or password.");
                     return;
@@ -166,9 +181,9 @@ namespace YourProjectNamespace
 
                 // Get user status and other details
                 var userStatus = userData.ContainsKey("status") ? userData["status"]?.ToString() : "pending";
-                var firstName = userData["firstName"]?.ToString() ?? "";
-                var lastName = userData["lastName"]?.ToString() ?? "";
-                var position = userData["position"]?.ToString() ?? "";
+                var firstName = userData.ContainsKey("firstName") ? userData["firstName"]?.ToString() ?? "" : "";
+                var lastName = userData.ContainsKey("lastName") ? userData["lastName"]?.ToString() ?? "" : "";
+                var position = userData.ContainsKey("position") ? userData["position"]?.ToString() ?? "" : "";
                 var rejectionReason = userData.ContainsKey("rejectionReason") ? userData["rejectionReason"]?.ToString() : null;
 
                 System.Diagnostics.Debug.WriteLine($"User found: {firstName} {lastName}, Status: {userStatus}, Position: {position}");
@@ -189,42 +204,67 @@ namespace YourProjectNamespace
                         break;
 
                     default:
-                        // Handle legacy users or unknown status - treat as pending for safety
+                        // Handle legacy users or unknown status - treat as approved for existing users
+                        if (string.IsNullOrEmpty(userStatus))
+                        {
+                            System.Diagnostics.Debug.WriteLine("User has no status, treating as approved for legacy user");
+                            break;
+                        }
                         ShowPendingMessage(firstName);
                         return;
                 }
 
-                // Update lastLogin timestamp
-                var updates = new Dictionary<string, object>
+                // Update lastLogin timestamp (don't let this fail the login)
+                try
                 {
-                    {"lastLogin", Timestamp.GetCurrentTimestamp()},
-                    {"lastUpdated", Timestamp.GetCurrentTimestamp()}
-                };
-                await db.Collection("users").Document(userDoc.Id).UpdateAsync(updates);
+                    var updates = new Dictionary<string, object>
+            {
+                {"lastLogin", Timestamp.GetCurrentTimestamp()},
+                {"lastUpdated", Timestamp.GetCurrentTimestamp()}
+            };
+                    await db.Collection("users").Document(userDoc.Id).UpdateAsync(updates);
+                    System.Diagnostics.Debug.WriteLine("User lastLogin updated");
+                }
+                catch (Exception updateEx)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to update lastLogin: {updateEx.Message}");
+                    // Continue with login even if update fails
+                }
 
-                // Set session variables - FIXED: Using consistent session variable names
+                // Set session variables
                 Session["userId"] = userDoc.Id;
-                Session["email"] = userData["email"];
-                Session["username"] = $"{firstName} {lastName}"; // Full name for display
+                Session["email"] = userData.ContainsKey("email") ? userData["email"]?.ToString() : "";
+                Session["username"] = $"{firstName} {lastName}".Trim(); // Full name for display
                 Session["firstName"] = firstName;
                 Session["lastName"] = lastName;
-                Session["position"] = position; // FIXED: Using "position" instead of "UserRole"
+                Session["position"] = position;
                 Session["isLoggedIn"] = true;
 
                 System.Diagnostics.Debug.WriteLine($"User {input} logged in successfully with position: {position}");
 
-                // Redirect based on user role
+                // Determine redirect page
                 string redirectPage = GetRedirectPageForPosition(position);
+                System.Diagnostics.Debug.WriteLine($"Redirecting to: {redirectPage}");
 
+                // Show success message and redirect
                 ShowSuccess("Login successful! Redirecting...");
-                ClientScript.RegisterStartupScript(this.GetType(), "redirect",
-                    $"setTimeout(function(){{ window.location='{redirectPage}'; }}, 2000);", true);
+
+                // Use JavaScript redirect to avoid postback issues
+                string script = $@"
+            <script type='text/javascript'>
+                setTimeout(function() {{
+                    window.location.href = '{redirectPage}';
+                }}, 1500);
+            </script>";
+
+                ClientScript.RegisterStartupScript(this.GetType(), "redirect", script, false);
+
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Login error: {ex.Message}");
                 System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-                ShowError("An error occurred while trying to log in. Please try again.");
+                ShowError($"An error occurred while trying to log in: {ex.Message}");
             }
         }
 

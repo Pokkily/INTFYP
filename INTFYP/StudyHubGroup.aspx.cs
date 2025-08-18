@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using System.IO;
 
 namespace YourProjectNamespace
 {
@@ -15,6 +16,7 @@ namespace YourProjectNamespace
     {
         private FirestoreDb db;
         protected string currentUserId;
+        protected string currentUsername;
         protected string groupId;
 
         private static HashSet<string> editingPostIds = new HashSet<string>();
@@ -22,7 +24,7 @@ namespace YourProjectNamespace
 
         protected async void Page_Load(object sender, EventArgs e)
         {
-            if (Session["userId"] == null)
+            if (Session["userId"] == null || Session["username"] == null)
             {
                 Response.Redirect("Login.aspx");
                 return;
@@ -30,6 +32,7 @@ namespace YourProjectNamespace
 
             db = FirestoreDb.Create("intorannetto");
             currentUserId = Session["userId"].ToString();
+            currentUsername = Session["username"].ToString();
             groupId = Request.QueryString["groupId"];
 
             if (string.IsNullOrEmpty(groupId))
@@ -40,6 +43,39 @@ namespace YourProjectNamespace
 
             if (!IsPostBack)
                 await LoadGroup();
+        }
+
+        protected override void OnPreRender(EventArgs e)
+        {
+            base.OnPreRender(e);
+
+            // Add scroll position maintenance script
+            string scrollScript = @"
+                // Store scroll position before postback
+                function storeScrollPosition() {
+                    sessionStorage.setItem('scrollPosition', window.pageYOffset || document.documentElement.scrollTop);
+                }
+
+                // Restore scroll position after postback
+                function restoreScrollPosition() {
+                    var scrollPos = sessionStorage.getItem('scrollPosition');
+                    if (scrollPos) {
+                        window.scrollTo(0, parseInt(scrollPos));
+                        sessionStorage.removeItem('scrollPosition');
+                    }
+                }
+
+                // Store position before any postback
+                Sys.WebForms.PageRequestManager.getInstance().add_beginRequest(storeScrollPosition);
+                
+                // Restore position after partial postback
+                Sys.WebForms.PageRequestManager.getInstance().add_endRequest(restoreScrollPosition);
+
+                // Also restore on initial page load
+                window.addEventListener('load', restoreScrollPosition);
+            ";
+
+            ScriptManager.RegisterStartupScript(this, GetType(), "scrollMaintenance", scrollScript, true);
         }
 
         private async Task LoadGroup()
@@ -54,12 +90,38 @@ namespace YourProjectNamespace
                 }
 
                 var group = groupSnap.ToDictionary();
+                var members = group.ContainsKey("members") ? (List<object>)group["members"] : new List<object>();
+                var membersList = members.Cast<string>().ToList();
+
+                // Check if user is a member
+                if (!membersList.Contains(currentUserId))
+                {
+                    ShowMessage("You are not a member of this group.", "warning");
+                    Response.Redirect("StudyHub.aspx");
+                    return;
+                }
+
+                // Get group statistics
+                int memberCount = membersList.Count;
+                int postCount = await GetPostCount();
+                string lastActivity = await GetLastActivity();
+
                 ltGroupDetails.Text = $@"
-                    <div class='card mb-4'>
-                        <div class='card-body'>
-                            <h2 class='card-title'>{group["groupName"]}</h2>
-                            <p class='card-text'>{group["description"]}</p>
-                            <small class='text-muted'>Host: {group["hosterName"]}</small>
+                    <h1 class='group-title'>{group["groupName"]}</h1>
+                    <div class='group-meta'>🧑‍🏫 Hosted by {group["hosterName"]}</div>
+                    <div class='group-description'>{group.GetValueOrDefault("description", "")}</div>
+                    <div class='group-stats'>
+                        <div class='stat-item'>
+                            <span class='stat-icon'>👥</span>
+                            <span>{memberCount} members</span>
+                        </div>
+                        <div class='stat-item'>
+                            <span class='stat-icon'>📝</span>
+                            <span>{postCount} posts</span>
+                        </div>
+                        <div class='stat-item'>
+                            <span class='stat-icon'>⏰</span>
+                            <span>{lastActivity}</span>
                         </div>
                     </div>";
 
@@ -67,8 +129,53 @@ namespace YourProjectNamespace
             }
             catch (Exception ex)
             {
-                // Log error
-                ltGroupDetails.Text = "<div class='alert alert-danger'>Error loading group details.</div>";
+                ShowMessage("Error loading group details: " + ex.Message, "danger");
+            }
+        }
+
+        private async Task<int> GetPostCount()
+        {
+            try
+            {
+                var postsSnapshot = await db.Collection("studyHubs").Document(groupId)
+                    .Collection("posts").GetSnapshotAsync();
+                return postsSnapshot.Count;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        private async Task<string> GetLastActivity()
+        {
+            try
+            {
+                var lastPostSnapshot = await db.Collection("studyHubs").Document(groupId)
+                    .Collection("posts").OrderByDescending("timestamp").Limit(1).GetSnapshotAsync();
+
+                if (lastPostSnapshot.Count > 0)
+                {
+                    var lastPost = lastPostSnapshot.Documents[0].ToDictionary();
+                    if (lastPost.ContainsKey("timestamp"))
+                    {
+                        var timestamp = (Timestamp)lastPost["timestamp"];
+                        var timeAgo = DateTime.Now - timestamp.ToDateTime();
+
+                        if (timeAgo.TotalDays > 1)
+                            return $"{(int)timeAgo.TotalDays} days ago";
+                        else if (timeAgo.TotalHours > 1)
+                            return $"{(int)timeAgo.TotalHours} hours ago";
+                        else
+                            return "Recently";
+                    }
+                }
+
+                return "No recent activity";
+            }
+            catch
+            {
+                return "Unknown";
             }
         }
 
@@ -86,63 +193,115 @@ namespace YourProjectNamespace
                     string postId = postDoc.Id;
 
                     // Load comments
-                    var comments = new List<dynamic>();
-                    var commentSnaps = await postsRef.Document(postId).Collection("comments")
-                        .OrderBy("timestamp").GetSnapshotAsync();
+                    var comments = await LoadCommentsForPost(postId);
 
-                    foreach (var cDoc in commentSnaps.Documents)
-                    {
-                        var c = cDoc.ToDictionary();
-                        string commentId = cDoc.Id;
-                        string commentKey = postId + "|" + commentId;
-
-                        comments.Add(new
-                        {
-                            postId,
-                            commentId,
-                            username = c.GetValueOrDefault("commenterName", "Unknown").ToString(),
-                            content = c.GetValueOrDefault("text", "").ToString(),
-                            timestamp = c.ContainsKey("timestamp") ?
-                                ((Timestamp)c["timestamp"]).ToDateTime().ToString("MMM dd, yyyy 'at' h:mm tt") : "",
-                            isOwner = c.GetValueOrDefault("commenterId", "").ToString() == currentUserId,
-                            IsEditingComment = editingCommentKeys.Contains(commentKey)
-                        });
-                    }
-
-                    // Get likes and saves
+                    // Get engagement data
                     var likes = p.ContainsKey("likes") ? (List<object>)p["likes"] : new List<object>();
                     var saves = p.ContainsKey("saves") ? (List<object>)p["saves"] : new List<object>();
+                    var shares = p.ContainsKey("shares") ? (List<object>)p["shares"] : new List<object>();
 
-                    // Convert to string list for easier checking
                     var likesList = likes.Cast<string>().ToList();
                     var savesList = saves.Cast<string>().ToList();
+                    var sharesList = shares.Cast<string>().ToList();
+
+                    // Load attachments
+                    var attachments = await LoadAttachmentsForPost(postId);
 
                     posts.Add(new
                     {
                         postId,
                         content = p.GetValueOrDefault("content", "").ToString(),
-                        imageUrl = p.ContainsKey("imageUrl") ? p["imageUrl"].ToString() : "",
                         timestamp = p.ContainsKey("timestamp") ?
                             ((Timestamp)p["timestamp"]).ToDateTime().ToString("MMM dd, yyyy 'at' h:mm tt") : "",
                         creatorUsername = p.GetValueOrDefault("postedByName", "Unknown").ToString(),
                         isOwner = p.GetValueOrDefault("postedBy", "").ToString() == currentUserId,
                         IsEditingPost = editingPostIds.Contains(postId),
                         comments,
+                        commentCount = comments.Count,
                         likeCount = likesList.Count,
+                        shareCount = sharesList.Count,
                         isLiked = likesList.Contains(currentUserId),
-                        isSaved = savesList.Contains(currentUserId)
+                        isSaved = savesList.Contains(currentUserId),
+                        attachments
                     });
                 }
 
                 rptPosts.DataSource = posts;
                 rptPosts.DataBind();
+
+                pnlNoPosts.Visible = posts.Count == 0;
             }
             catch (Exception ex)
             {
-                // Log error
-                ScriptManager.RegisterStartupScript(this, GetType(), "error",
-                    "alert('Error loading posts.');", true);
+                ShowMessage("Error loading posts: " + ex.Message, "danger");
             }
+        }
+
+        private async Task<List<dynamic>> LoadCommentsForPost(string postId)
+        {
+            var comments = new List<dynamic>();
+            try
+            {
+                var commentSnaps = await db.Collection("studyHubs").Document(groupId)
+                    .Collection("posts").Document(postId)
+                    .Collection("comments").OrderBy("timestamp").GetSnapshotAsync();
+
+                foreach (var cDoc in commentSnaps.Documents)
+                {
+                    var c = cDoc.ToDictionary();
+                    string commentId = cDoc.Id;
+                    string commentKey = postId + "|" + commentId;
+
+                    comments.Add(new
+                    {
+                        postId,
+                        commentId,
+                        username = c.GetValueOrDefault("commenterName", "Unknown").ToString(),
+                        content = c.GetValueOrDefault("text", "").ToString(),
+                        timestamp = c.ContainsKey("timestamp") ?
+                            ((Timestamp)c["timestamp"]).ToDateTime().ToString("MMM dd 'at' h:mm tt") : "",
+                        isOwner = c.GetValueOrDefault("commenterId", "").ToString() == currentUserId,
+                        IsEditingComment = editingCommentKeys.Contains(commentKey),
+                        likes = c.ContainsKey("likes") ? ((List<object>)c["likes"]).Count : 0
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail
+            }
+
+            return comments;
+        }
+
+        private async Task<List<dynamic>> LoadAttachmentsForPost(string postId)
+        {
+            var attachments = new List<dynamic>();
+            try
+            {
+                var attachmentSnaps = await db.Collection("studyHubs").Document(groupId)
+                    .Collection("posts").Document(postId)
+                    .Collection("attachments").GetSnapshotAsync();
+
+                foreach (var aDoc in attachmentSnaps.Documents)
+                {
+                    var a = aDoc.ToDictionary();
+                    attachments.Add(new
+                    {
+                        fileName = a.GetValueOrDefault("fileName", "").ToString(),
+                        fileUrl = a.GetValueOrDefault("fileUrl", "").ToString(),
+                        fileType = a.GetValueOrDefault("fileType", "").ToString(),
+                        fileSize = a.GetValueOrDefault("fileSize", 0)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log error but don't fail
+                System.Diagnostics.Debug.WriteLine($"Error loading attachments: {ex.Message}");
+            }
+
+            return attachments;
         }
 
         protected async void btnPost_Click(object sender, EventArgs e)
@@ -150,73 +309,203 @@ namespace YourProjectNamespace
             try
             {
                 string content = txtPostContent.Text.Trim();
+                bool hasFiles = fileUpload.HasFiles && fileUpload.PostedFiles.Count > 0;
 
-                if (string.IsNullOrEmpty(content))
+                // Allow posts with either content OR files (or both)
+                if (string.IsNullOrEmpty(content) && !hasFiles)
                 {
-                    ScriptManager.RegisterStartupScript(this, GetType(), "validation",
-                        "alert('Please enter some content for your post.');", true);
+                    ShowMessage("Please enter some content or attach a file for your post.", "warning");
                     return;
                 }
 
-                string imageUrl = UploadImageToCloudinary();
-
+                // Create the post first
                 var postRef = db.Collection("studyHubs").Document(groupId).Collection("posts").Document();
+                string postId = postRef.Id;
 
                 var postData = new Dictionary<string, object>
                 {
-                    { "content", content },
+                    { "content", content ?? "" },
                     { "postedBy", currentUserId },
-                    { "postedByName", Session["username"]?.ToString() ?? "Unknown" },
-                    { "imageUrl", imageUrl },
+                    { "postedByName", chkAnonymous.Checked ? "Anonymous" : currentUsername },
                     { "timestamp", Timestamp.GetCurrentTimestamp() },
                     { "likes", new List<string>() },
-                    { "saves", new List<string>() }
+                    { "saves", new List<string>() },
+                    { "shares", new List<string>() },
+                    { "reports", new List<string>() },
+                    { "isAnonymous", chkAnonymous.Checked },
+                    { "hasAttachments", hasFiles }
                 };
 
                 await postRef.SetAsync(postData);
 
+                // Handle file attachments AFTER creating the post
+                if (hasFiles)
+                {
+                    bool uploadSuccess = await HandleFileUploads(postId);
+                    if (!uploadSuccess)
+                    {
+                        // If file upload fails, you might want to delete the post or show a warning
+                        ShowMessage("Post created but some files failed to upload. Please try again.", "warning");
+                    }
+                }
+
+                // Create activity log
+                await LogGroupActivity("post_created", $"New post created by {(chkAnonymous.Checked ? "Anonymous" : currentUsername)}");
+
+                // Clear form
                 txtPostContent.Text = "";
+                chkAnonymous.Checked = false;
+
+                // Clear file upload and file preview
+                fileUpload.Attributes.Clear();
+
+                // Add script to clear file preview on client side
+                ScriptManager.RegisterStartupScript(this, GetType(), "clearFiles", "clearFilesAfterPost();", true);
+
+                // Reload posts
                 await LoadPosts();
+
+                ShowMessage("Post created successfully!", "success");
             }
             catch (Exception ex)
             {
-                ScriptManager.RegisterStartupScript(this, GetType(), "error",
-                    "alert('Error creating post. Please try again.');", true);
+                ShowMessage("Error creating post: " + ex.Message, "danger");
+                System.Diagnostics.Debug.WriteLine($"Post creation error: {ex}");
             }
         }
 
-        private string UploadImageToCloudinary()
+        private async Task<bool> HandleFileUploads(string postId)
         {
+            bool allUploadsSuccessful = true;
+
             try
             {
-                if (!fileUpload.HasFile) return "";
+                // Verify Cloudinary configuration exists
+                string cloudName = ConfigurationManager.AppSettings["CloudinaryCloudName"];
+                string apiKey = ConfigurationManager.AppSettings["CloudinaryApiKey"];
+                string apiSecret = ConfigurationManager.AppSettings["CloudinaryApiSecret"];
 
-                var account = new Account(
-                    ConfigurationManager.AppSettings["CloudinaryCloudName"],
-                    ConfigurationManager.AppSettings["CloudinaryApiKey"],
-                    ConfigurationManager.AppSettings["CloudinaryApiSecret"]
-                );
+                if (string.IsNullOrEmpty(cloudName) || string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
+                {
+                    ShowMessage("Cloudinary configuration is missing. Please contact administrator.", "danger");
+                    return false;
+                }
 
+                var account = new Account(cloudName, apiKey, apiSecret);
                 var cloudinary = new Cloudinary(account);
 
-                var uploadParams = new ImageUploadParams
+                foreach (var file in fileUpload.PostedFiles)
                 {
-                    File = new FileDescription(fileUpload.FileName, fileUpload.PostedFile.InputStream),
-                    Folder = "studyhub_posts"
-                };
+                    if (file != null && file.ContentLength > 0)
+                    {
+                        try
+                        {
+                            // Check file size (limit to 10MB)
+                            if (file.ContentLength > 10 * 1024 * 1024)
+                            {
+                                ShowMessage($"File {file.FileName} is too large. Maximum size is 10MB.", "warning");
+                                allUploadsSuccessful = false;
+                                continue;
+                            }
 
-                var uploadResult = cloudinary.Upload(uploadParams);
+                            string uploadResult = "";
+                            string fileType = file.ContentType;
 
-                if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK)
-                    return uploadResult.SecureUrl.ToString();
-                else
-                    return "";
+                            // Reset stream position to beginning
+                            file.InputStream.Position = 0;
+
+                            if (fileType.StartsWith("image/"))
+                            {
+                                // Upload image
+                                var uploadParams = new ImageUploadParams
+                                {
+                                    File = new FileDescription(file.FileName, file.InputStream),
+                                    Folder = "studyhub_posts",
+                                    Transformation = new Transformation().Quality("auto").FetchFormat("auto"),
+                                    PublicId = $"post_{postId}_{DateTime.Now.Ticks}_{Path.GetFileNameWithoutExtension(file.FileName)}"
+                                };
+
+                                var result = await cloudinary.UploadAsync(uploadParams);
+
+                                if (result.StatusCode == System.Net.HttpStatusCode.OK)
+                                {
+                                    uploadResult = result.SecureUrl.ToString();
+                                }
+                                else
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"Cloudinary upload failed: {result.Error?.Message}");
+                                    allUploadsSuccessful = false;
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                // Upload other files (documents)
+                                var uploadParams = new RawUploadParams
+                                {
+                                    File = new FileDescription(file.FileName, file.InputStream),
+                                    Folder = "studyhub_documents",
+                                    PublicId = $"doc_{postId}_{DateTime.Now.Ticks}_{Path.GetFileNameWithoutExtension(file.FileName)}"
+                                };
+
+                                var result = await cloudinary.UploadAsync(uploadParams);
+
+                                if (result.StatusCode == System.Net.HttpStatusCode.OK)
+                                {
+                                    uploadResult = result.SecureUrl.ToString();
+                                }
+                                else
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"Cloudinary upload failed: {result.Error?.Message}");
+                                    allUploadsSuccessful = false;
+                                    continue;
+                                }
+                            }
+
+                            // Save attachment info to Firestore
+                            if (!string.IsNullOrEmpty(uploadResult))
+                            {
+                                var attachmentRef = db.Collection("studyHubs").Document(groupId)
+                                    .Collection("posts").Document(postId)
+                                    .Collection("attachments").Document();
+
+                                var attachmentData = new Dictionary<string, object>
+                                {
+                                    { "fileName", file.FileName },
+                                    { "fileUrl", uploadResult },
+                                    { "fileType", fileType },
+                                    { "fileSize", file.ContentLength },
+                                    { "uploadedBy", currentUserId },
+                                    { "uploadedAt", Timestamp.GetCurrentTimestamp() }
+                                };
+
+                                await attachmentRef.SetAsync(attachmentData);
+
+                                System.Diagnostics.Debug.WriteLine($"Successfully uploaded and saved: {file.FileName}");
+                            }
+                            else
+                            {
+                                allUploadsSuccessful = false;
+                                ShowMessage($"Failed to upload {file.FileName}", "warning");
+                            }
+                        }
+                        catch (Exception fileEx)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error uploading file {file.FileName}: {fileEx}");
+                            ShowMessage($"Error uploading {file.FileName}: {fileEx.Message}", "warning");
+                            allUploadsSuccessful = false;
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
-                // Log error
-                return "";
+                System.Diagnostics.Debug.WriteLine($"General file upload error: {ex}");
+                ShowMessage("Error uploading files: " + ex.Message, "danger");
+                allUploadsSuccessful = false;
             }
+
+            return allUploadsSuccessful;
         }
 
         protected async void rptPosts_ItemCommand(object source, RepeaterCommandEventArgs e)
@@ -242,22 +531,20 @@ namespace YourProjectNamespace
 
                         if (!string.IsNullOrEmpty(newContent))
                         {
-                            await postRef.UpdateAsync("content", newContent);
+                            await postRef.UpdateAsync(new Dictionary<string, object>
+                            {
+                                { "content", newContent },
+                                { "lastModified", Timestamp.GetCurrentTimestamp() },
+                                { "modifiedBy", currentUserId }
+                            });
                             editingPostIds.Remove(postId);
+
+                            await LogGroupActivity("post_edited", $"Post edited by {currentUsername}");
                         }
                         break;
 
                     case "DeletePost":
-                        // Verify ownership
-                        var postSnap = await postRef.GetSnapshotAsync();
-                        if (postSnap.Exists)
-                        {
-                            var postData = postSnap.ToDictionary();
-                            if (postData.GetValueOrDefault("postedBy", "").ToString() == currentUserId)
-                            {
-                                await postRef.DeleteAsync();
-                            }
-                        }
+                        await DeletePost(postRef, postId);
                         break;
 
                     case "ToggleLike":
@@ -268,26 +555,16 @@ namespace YourProjectNamespace
                         await HandleToggleSave(postRef);
                         break;
 
+                    case "InternalShare":
+                        await HandleInternalShare(postRef, postId);
+                        break;
+
                     case "ReportPost":
                         await HandleReportPost(postId);
                         break;
 
                     case "AddComment":
-                        var txtNewComment = (TextBox)e.Item.FindControl("txtNewComment");
-                        string commentTxt = txtNewComment.Text.Trim();
-
-                        if (!string.IsNullOrEmpty(commentTxt))
-                        {
-                            var cref = postRef.Collection("comments").Document();
-                            await cref.SetAsync(new Dictionary<string, object>
-                            {
-                                { "commenterId", currentUserId },
-                                { "commenterName", Session["username"]?.ToString() ?? "Unknown" },
-                                { "text", commentTxt },
-                                { "timestamp", Timestamp.GetCurrentTimestamp() }
-                            });
-                            txtNewComment.Text = "";
-                        }
+                        await HandleAddComment(e, postId);
                         break;
                 }
 
@@ -295,8 +572,56 @@ namespace YourProjectNamespace
             }
             catch (Exception ex)
             {
-                ScriptManager.RegisterStartupScript(this, GetType(), "error",
-                    "alert('An error occurred. Please try again.');", true);
+                ShowMessage("An error occurred: " + ex.Message, "danger");
+            }
+        }
+
+        private async Task DeletePost(DocumentReference postRef, string postId)
+        {
+            try
+            {
+                // Verify ownership
+                var postSnap = await postRef.GetSnapshotAsync();
+                if (postSnap.Exists)
+                {
+                    var postData = postSnap.ToDictionary();
+                    if (postData.GetValueOrDefault("postedBy", "").ToString() == currentUserId)
+                    {
+                        // Delete all subcollections first
+                        await DeleteSubcollection(postRef.Collection("comments"));
+                        await DeleteSubcollection(postRef.Collection("attachments"));
+
+                        // Delete the post
+                        await postRef.DeleteAsync();
+
+                        await LogGroupActivity("post_deleted", $"Post deleted by {currentUsername}");
+                        ShowMessage("Post deleted successfully.", "success");
+                    }
+                    else
+                    {
+                        ShowMessage("You can only delete your own posts.", "warning");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("Error deleting post: " + ex.Message, "danger");
+            }
+        }
+
+        private async Task DeleteSubcollection(CollectionReference collectionRef)
+        {
+            try
+            {
+                var snapshot = await collectionRef.GetSnapshotAsync();
+                foreach (var doc in snapshot.Documents)
+                {
+                    await doc.Reference.DeleteAsync();
+                }
+            }
+            catch
+            {
+                // Log error but don't fail the main operation
             }
         }
 
@@ -310,16 +635,28 @@ namespace YourProjectNamespace
                 ((List<object>)postData["likes"]).Cast<string>().ToList() :
                 new List<string>();
 
-            if (likes.Contains(currentUserId))
+            bool wasLiked = likes.Contains(currentUserId);
+
+            if (wasLiked)
             {
                 likes.Remove(currentUserId);
             }
             else
             {
                 likes.Add(currentUserId);
+
+                // Create notification for post owner
+                string postOwnerId = postData.GetValueOrDefault("postedBy", "").ToString();
+                if (postOwnerId != currentUserId)
+                {
+                    await CreateNotification(postOwnerId, "like", $"{currentUsername} liked your post");
+                }
             }
 
             await postRef.UpdateAsync("likes", likes);
+
+            // Log activity
+            await LogGroupActivity("post_liked", $"{currentUsername} {(wasLiked ? "unliked" : "liked")} a post");
         }
 
         private async Task HandleToggleSave(DocumentReference postRef)
@@ -335,39 +672,160 @@ namespace YourProjectNamespace
             if (saves.Contains(currentUserId))
             {
                 saves.Remove(currentUserId);
+                ShowMessage("Post removed from saved items.", "info");
             }
             else
             {
                 saves.Add(currentUserId);
+                ShowMessage("Post saved successfully!", "success");
+
+                // Save to user's saved posts collection
+                await SaveToUserCollection(postRef.Id);
             }
 
             await postRef.UpdateAsync("saves", saves);
+        }
+
+        private async Task SaveToUserCollection(string postId)
+        {
+            try
+            {
+                var userSaveRef = db.Collection("users").Document(currentUserId)
+                    .Collection("savedPosts").Document(postId);
+
+                await userSaveRef.SetAsync(new Dictionary<string, object>
+                {
+                    { "postId", postId },
+                    { "groupId", groupId },
+                    { "savedAt", Timestamp.GetCurrentTimestamp() }
+                });
+            }
+            catch
+            {
+                // Log error but don't fail
+            }
+        }
+
+        private async Task HandleInternalShare(DocumentReference postRef, string postId)
+        {
+            var postSnap = await postRef.GetSnapshotAsync();
+            if (!postSnap.Exists) return;
+
+            var postData = postSnap.ToDictionary();
+            var shares = postData.ContainsKey("shares") ?
+                ((List<object>)postData["shares"]).Cast<string>().ToList() :
+                new List<string>();
+
+            if (!shares.Contains(currentUserId))
+            {
+                shares.Add(currentUserId);
+                await postRef.UpdateAsync("shares", shares);
+
+                // Create a share activity
+                await CreateShareActivity(postId, postData);
+
+                ShowMessage("Post shared to your timeline!", "success");
+            }
+            else
+            {
+                ShowMessage("You have already shared this post.", "info");
+            }
+        }
+
+        private async Task CreateShareActivity(string postId, Dictionary<string, object> postData)
+        {
+            try
+            {
+                var shareRef = db.Collection("users").Document(currentUserId)
+                    .Collection("timeline").Document();
+
+                await shareRef.SetAsync(new Dictionary<string, object>
+                {
+                    { "type", "share" },
+                    { "originalPostId", postId },
+                    { "originalGroupId", groupId },
+                    { "originalContent", postData.GetValueOrDefault("content", "") },
+                    { "originalAuthor", postData.GetValueOrDefault("postedByName", "") },
+                    { "sharedBy", currentUserId },
+                    { "sharedByName", currentUsername },
+                    { "sharedAt", Timestamp.GetCurrentTimestamp() }
+                });
+
+                await LogGroupActivity("post_shared", $"{currentUsername} shared a post");
+            }
+            catch
+            {
+                // Log error but don't fail
+            }
         }
 
         private async Task HandleReportPost(string postId)
         {
             try
             {
-                // Add to reports collection
                 var reportRef = db.Collection("reports").Document();
                 await reportRef.SetAsync(new Dictionary<string, object>
                 {
                     { "reporterId", currentUserId },
-                    { "reporterName", Session["username"]?.ToString() ?? "Unknown" },
+                    { "reporterName", currentUsername },
                     { "postId", postId },
                     { "groupId", groupId },
-                    { "timestamp", Timestamp.GetCurrentTimestamp() },
                     { "type", "post" },
-                    { "status", "pending" }
+                    { "reason", "inappropriate_content" },
+                    { "status", "pending" },
+                    { "timestamp", Timestamp.GetCurrentTimestamp() }
                 });
 
-                ScriptManager.RegisterStartupScript(this, GetType(), "success",
-                    "alert('Post reported successfully. Thank you for helping keep our community safe.');", true);
+                ShowMessage("Post reported successfully. Thank you for helping keep our community safe.", "success");
             }
             catch (Exception ex)
             {
-                ScriptManager.RegisterStartupScript(this, GetType(), "error",
-                    "alert('Error submitting report. Please try again.');", true);
+                ShowMessage("Error submitting report: " + ex.Message, "danger");
+            }
+        }
+
+        private async Task HandleAddComment(RepeaterCommandEventArgs e, string postId)
+        {
+            var txtNewComment = (TextBox)e.Item.FindControl("txtNewComment");
+            var chkAnonymousComment = (CheckBox)e.Item.FindControl("chkAnonymousComment");
+
+            string commentText = txtNewComment.Text.Trim();
+
+            if (!string.IsNullOrEmpty(commentText))
+            {
+                var commentRef = db.Collection("studyHubs").Document(groupId)
+                    .Collection("posts").Document(postId)
+                    .Collection("comments").Document();
+
+                await commentRef.SetAsync(new Dictionary<string, object>
+                {
+                    { "commenterId", currentUserId },
+                    { "commenterName", chkAnonymousComment.Checked ? "Anonymous" : currentUsername },
+                    { "text", commentText },
+                    { "timestamp", Timestamp.GetCurrentTimestamp() },
+                    { "likes", new List<string>() },
+                    { "isAnonymous", chkAnonymousComment.Checked }
+                });
+
+                // Create notification for post owner
+                var postRef = db.Collection("studyHubs").Document(groupId).Collection("posts").Document(postId);
+                var postSnap = await postRef.GetSnapshotAsync();
+                if (postSnap.Exists)
+                {
+                    var postData = postSnap.ToDictionary();
+                    string postOwnerId = postData.GetValueOrDefault("postedBy", "").ToString();
+
+                    if (postOwnerId != currentUserId)
+                    {
+                        await CreateNotification(postOwnerId, "comment",
+                            $"{(chkAnonymousComment.Checked ? "Someone" : currentUsername)} commented on your post");
+                    }
+                }
+
+                txtNewComment.Text = "";
+                chkAnonymousComment.Checked = false;
+
+                await LogGroupActivity("comment_created", $"New comment by {(chkAnonymousComment.Checked ? "Anonymous" : currentUsername)}");
             }
         }
 
@@ -384,8 +842,6 @@ namespace YourProjectNamespace
                                     .Collection("posts").Document(postId)
                                     .Collection("comments").Document(commentId);
 
-                var container = (RepeaterItem)e.Item;
-
                 switch (e.CommandName)
                 {
                     case "EditComment":
@@ -397,13 +853,20 @@ namespace YourProjectNamespace
                         break;
 
                     case "SaveComment":
-                        var txtEditComment = (TextBox)container.FindControl("txtEditComment");
+                        var txtEditComment = (TextBox)e.Item.FindControl("txtEditComment");
                         string updatedText = txtEditComment.Text.Trim();
 
                         if (!string.IsNullOrEmpty(updatedText))
                         {
-                            await commentRef.UpdateAsync("text", updatedText);
+                            await commentRef.UpdateAsync(new Dictionary<string, object>
+                            {
+                                { "text", updatedText },
+                                { "lastModified", Timestamp.GetCurrentTimestamp() },
+                                { "modifiedBy", currentUserId }
+                            });
                             editingCommentKeys.Remove(key);
+
+                            await LogGroupActivity("comment_edited", $"Comment edited by {currentUsername}");
                         }
                         break;
 
@@ -416,6 +879,12 @@ namespace YourProjectNamespace
                             if (commentData.GetValueOrDefault("commenterId", "").ToString() == currentUserId)
                             {
                                 await commentRef.DeleteAsync();
+                                await LogGroupActivity("comment_deleted", $"Comment deleted by {currentUsername}");
+                                ShowMessage("Comment deleted successfully.", "success");
+                            }
+                            else
+                            {
+                                ShowMessage("You can only delete your own comments.", "warning");
                             }
                         }
                         break;
@@ -425,9 +894,68 @@ namespace YourProjectNamespace
             }
             catch (Exception ex)
             {
-                ScriptManager.RegisterStartupScript(this, GetType(), "error",
-                    "alert('An error occurred. Please try again.');", true);
+                ShowMessage("An error occurred: " + ex.Message, "danger");
             }
+        }
+
+        private async Task CreateNotification(string userId, string type, string message)
+        {
+            try
+            {
+                var notificationRef = db.Collection("users").Document(userId)
+                    .Collection("notifications").Document();
+
+                await notificationRef.SetAsync(new Dictionary<string, object>
+                {
+                    { "type", type },
+                    { "message", message },
+                    { "fromUserId", currentUserId },
+                    { "fromUsername", currentUsername },
+                    { "groupId", groupId },
+                    { "isRead", false },
+                    { "timestamp", Timestamp.GetCurrentTimestamp() }
+                });
+            }
+            catch
+            {
+                // Log error but don't fail the main operation
+            }
+        }
+
+        private async Task LogGroupActivity(string activityType, string description)
+        {
+            try
+            {
+                var activityRef = db.Collection("studyHubs").Document(groupId)
+                    .Collection("activities").Document();
+
+                await activityRef.SetAsync(new Dictionary<string, object>
+                {
+                    { "type", activityType },
+                    { "description", description },
+                    { "userId", currentUserId },
+                    { "username", currentUsername },
+                    { "timestamp", Timestamp.GetCurrentTimestamp() }
+                });
+            }
+            catch
+            {
+                // Log error but don't fail the main operation
+            }
+        }
+
+        private void ShowMessage(string message, string type)
+        {
+            string alertClass = type == "success" ? "alert-success" :
+                               type == "warning" ? "alert-warning" :
+                               type == "info" ? "alert-info" :
+                               "alert-danger";
+
+            string script = $@"
+                showNotification('{message.Replace("'", "\\'")}', '{type}');
+            ";
+
+            ScriptManager.RegisterStartupScript(this, GetType(), "showMessage", script, true);
         }
     }
 }

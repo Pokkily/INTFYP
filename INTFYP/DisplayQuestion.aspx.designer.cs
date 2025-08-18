@@ -7,92 +7,110 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace YourProjectNamespace
+namespace INTFYP
 {
 
 
-    public partial class StudyHub
+    public partial class DisplayQuestion
     {
 
         /// <summary>
-        /// btnCreateGroup control.
+        /// lblLanguageName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnCreateGroup;
+        protected global::System.Web.UI.WebControls.Label lblLanguageName;
 
         /// <summary>
-        /// btnJoinGroup control.
+        /// lblLanguageFlag control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnJoinGroup;
+        protected global::System.Web.UI.WebControls.Label lblLanguageFlag;
 
         /// <summary>
-        /// btnMyGroups control.
+        /// lblLanguageTitle control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnMyGroups;
+        protected global::System.Web.UI.WebControls.Label lblLanguageTitle;
 
         /// <summary>
-        /// txtSearch control.
+        /// lblLanguageDescription control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtSearch;
+        protected global::System.Web.UI.WebControls.Label lblLanguageDescription;
 
         /// <summary>
-        /// ddlSubject control.
+        /// lblTotalQuestions control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlSubject;
+        protected global::System.Web.UI.WebControls.Label lblTotalQuestions;
 
         /// <summary>
-        /// ddlSortBy control.
+        /// lblTotalLessons control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlSortBy;
+        protected global::System.Web.UI.WebControls.Label lblTotalLessons;
 
         /// <summary>
-        /// rptGroups control.
+        /// btnBackToLanguages control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptGroups;
+        protected global::System.Web.UI.WebControls.Button btnBackToLanguages;
 
         /// <summary>
-        /// pnlNoGroups control.
+        /// lblQuickTopics control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlNoGroups;
+        protected global::System.Web.UI.WebControls.Label lblQuickTopics;
 
         /// <summary>
-        /// btnFloatingCreate control.
+        /// lblQuickLessons control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnFloatingCreate;
+        protected global::System.Web.UI.WebControls.Label lblQuickLessons;
+
+        /// <summary>
+        /// pnlNoQuestions control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlNoQuestions;
+
+        /// <summary>
+        /// rptTopics control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptTopics;
     }
 }

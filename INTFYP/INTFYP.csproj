@@ -57,60 +57,29 @@
     <Reference Include="FirebaseAdmin, Version=3.3.0.0, Culture=neutral, PublicKeyToken=97c8d00c348326ed, processorArchitecture=MSIL">
       <HintPath>..\packages\FirebaseAdmin.3.3.0\lib\net462\FirebaseAdmin.dll</HintPath>
     </Reference>
-    <Reference Include="Google.Api.CommonProtos, Version=2.17.0.0, Culture=neutral, PublicKeyToken=3ec5ea7f18953e47, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Api.CommonProtos.2.17.0\lib\net461\Google.Api.CommonProtos.dll</HintPath>
+    <Reference Include="Google.Api.CommonProtos, Version=2.16.0.0, Culture=neutral, PublicKeyToken=3ec5ea7f18953e47, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Api.CommonProtos.2.16.0\lib\net461\Google.Api.CommonProtos.dll</HintPath>
     </Reference>
-    <Reference Include="Google.Api.Gax, Version=4.10.0.0, Culture=neutral, PublicKeyToken=3ec5ea7f18953e47, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Api.Gax.4.10.0\lib\net462\Google.Api.Gax.dll</HintPath>
+    <Reference Include="Google.Api.Gax, Version=4.9.0.0, Culture=neutral, PublicKeyToken=3ec5ea7f18953e47, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Api.Gax.4.9.0\lib\net462\Google.Api.Gax.dll</HintPath>
     </Reference>
-    <Reference Include="Google.Api.Gax.Grpc, Version=4.10.0.0, Culture=neutral, PublicKeyToken=3ec5ea7f18953e47, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Api.Gax.Grpc.4.10.0\lib\net462\Google.Api.Gax.Grpc.dll</HintPath>
+    <Reference Include="Google.Api.Gax.Grpc, Version=4.9.0.0, Culture=neutral, PublicKeyToken=3ec5ea7f18953e47, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Api.Gax.Grpc.4.9.0\lib\net462\Google.Api.Gax.Grpc.dll</HintPath>
     </Reference>
     <Reference Include="Google.Api.Gax.Rest, Version=4.8.0.0, Culture=neutral, PublicKeyToken=3ec5ea7f18953e47, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Api.Gax.Rest.4.8.0\lib\net462\Google.Api.Gax.Rest.dll</HintPath>
     </Reference>
-    <Reference Include="Google.Apis, Version=1.70.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Apis.1.70.0\lib\net462\Google.Apis.dll</HintPath>
+    <Reference Include="Google.Apis, Version=1.68.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Apis.1.68.0\lib\net462\Google.Apis.dll</HintPath>
     </Reference>
-    <Reference Include="Google.Apis.Auth, Version=1.70.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Apis.Auth.1.70.0\lib\net462\Google.Apis.Auth.dll</HintPath>
+    <Reference Include="Google.Apis.Auth, Version=1.68.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Apis.Auth.1.68.0\lib\net462\Google.Apis.Auth.dll</HintPath>
     </Reference>
-    <Reference Include="Google.Apis.Core, Version=1.70.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Apis.Core.1.70.0\lib\net462\Google.Apis.Core.dll</HintPath>
+    <Reference Include="Google.Apis.Core, Version=1.68.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Apis.Core.1.68.0\lib\net462\Google.Apis.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Google.Cloud.AIPlatform.V1, Version=3.32.0.0, Culture=neutral, PublicKeyToken=185c282632e132a0, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Cloud.AIPlatform.V1.3.32.0\lib\net462\Google.Cloud.AIPlatform.V1.dll</HintPath>
-    </Reference>
-    <Reference Include="Google.Cloud.Iam.V1, Version=3.4.0.0, Culture=neutral, PublicKeyToken=185c282632e132a0, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Cloud.Iam.V1.3.4.0\lib\net462\Google.Cloud.Iam.V1.dll</HintPath>
-    </Reference>
-    <Reference Include="Google.Protobuf, Version=3.31.1.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Protobuf.3.31.1\lib\net45\Google.Protobuf.dll</HintPath>
-    </Reference>
-    <Reference Include="Grpc.Auth, Version=2.0.0.0, Culture=neutral, PublicKeyToken=d754f35622e28bad, processorArchitecture=MSIL">
-      <HintPath>..\packages\Grpc.Auth.2.71.0\lib\net462\Grpc.Auth.dll</HintPath>
-    </Reference>
-    <Reference Include="Grpc.Core.Api, Version=2.0.0.0, Culture=neutral, PublicKeyToken=d754f35622e28bad, processorArchitecture=MSIL">
-      <HintPath>..\packages\Grpc.Core.Api.2.71.0\lib\net462\Grpc.Core.Api.dll</HintPath>
-    </Reference>
-    <Reference Include="Grpc.Net.Client, Version=2.0.0.0, Culture=neutral, PublicKeyToken=d754f35622e28bad, processorArchitecture=MSIL">
-      <HintPath>..\packages\Grpc.Net.Client.2.71.0\lib\net462\Grpc.Net.Client.dll</HintPath>
-    </Reference>
-    <Reference Include="Grpc.Net.Common, Version=2.0.0.0, Culture=neutral, PublicKeyToken=d754f35622e28bad, processorArchitecture=MSIL">
-      <HintPath>..\packages\Grpc.Net.Common.2.71.0\lib\netstandard2.0\Grpc.Net.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.8.0.0\lib\net462\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="netstandard" />
-    <Reference Include="Google.Apis.Drive.v3, Version=1.70.0.3834, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Apis.Drive.v3.1.70.0.3834\lib\net462\Google.Apis.Drive.v3.dll</HintPath>
-    </Reference>
-    <Reference Include="Google.Cloud.Firestore, Version=3.10.0.0, Culture=neutral, PublicKeyToken=185c282632e132a0, processorArchitecture=MSIL">
-      <HintPath>..\packages\Google.Cloud.Firestore.3.10.0\lib\net462\Google.Cloud.Firestore.dll</HintPath>
+    <Reference Include="Google.Cloud.Firestore, Version=3.7.0.0, Culture=neutral, PublicKeyToken=185c282632e132a0, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Cloud.Firestore.3.7.0\lib\net462\Google.Cloud.Firestore.dll</HintPath>
     </Reference>
     <Reference Include="Google.Cloud.Firestore.V1, Version=3.10.0.0, Culture=neutral, PublicKeyToken=185c282632e132a0, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Cloud.Firestore.V1.3.10.0\lib\net462\Google.Cloud.Firestore.V1.dll</HintPath>
@@ -121,8 +90,36 @@
     <Reference Include="Google.LongRunning, Version=3.3.0.0, Culture=neutral, PublicKeyToken=185c282632e132a0, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.LongRunning.3.3.0\lib\net462\Google.LongRunning.dll</HintPath>
     </Reference>
+    <Reference Include="Google.Protobuf, Version=3.28.2.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Protobuf.3.28.2\lib\net45\Google.Protobuf.dll</HintPath>
+    </Reference>
+    <Reference Include="Grpc.Auth, Version=2.0.0.0, Culture=neutral, PublicKeyToken=d754f35622e28bad, processorArchitecture=MSIL">
+      <HintPath>..\packages\Grpc.Auth.2.66.0\lib\net462\Grpc.Auth.dll</HintPath>
+    </Reference>
     <Reference Include="Grpc.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=d754f35622e28bad, processorArchitecture=MSIL">
       <HintPath>..\packages\Grpc.Core.2.46.6\lib\net45\Grpc.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Grpc.Core.Api, Version=2.0.0.0, Culture=neutral, PublicKeyToken=d754f35622e28bad, processorArchitecture=MSIL">
+      <HintPath>..\packages\Grpc.Core.Api.2.66.0\lib\net462\Grpc.Core.Api.dll</HintPath>
+    </Reference>
+    <Reference Include="Grpc.Net.Client, Version=2.0.0.0, Culture=neutral, PublicKeyToken=d754f35622e28bad, processorArchitecture=MSIL">
+      <HintPath>..\packages\Grpc.Net.Client.2.66.0\lib\net462\Grpc.Net.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Grpc.Net.Common, Version=2.0.0.0, Culture=neutral, PublicKeyToken=d754f35622e28bad, processorArchitecture=MSIL">
+      <HintPath>..\packages\Grpc.Net.Common.2.66.0\lib\netstandard2.0\Grpc.Net.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=8.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.8.0.0\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=8.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.DependencyInjection.Abstractions.8.0.0\lib\net462\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\lib\net461\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="netstandard" />
+    <Reference Include="Google.Apis.Drive.v3, Version=1.70.0.3834, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Apis.Drive.v3.1.70.0.3834\lib\net462\Google.Apis.Drive.v3.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNet.FriendlyUrls, Version=1.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.FriendlyUrls.Core.1.0.2\lib\net45\Microsoft.AspNet.FriendlyUrls.dll</HintPath>
@@ -134,9 +131,6 @@
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=6.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\lib\net461\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.ScriptManager.MSAjax, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.ScriptManager.MSAjax.5.0.0\lib\net45\Microsoft.ScriptManager.MSAjax.dll</HintPath>
     </Reference>
@@ -176,8 +170,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Diagnostics.DiagnosticSource, Version=6.0.0.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Diagnostics.DiagnosticSource.6.0.2\lib\net461\System.Diagnostics.DiagnosticSource.dll</HintPath>
+    <Reference Include="System.Diagnostics.DiagnosticSource, Version=9.0.0.8, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Diagnostics.DiagnosticSource.9.0.8\lib\net462\System.Diagnostics.DiagnosticSource.dll</HintPath>
     </Reference>
     <Reference Include="System.IO, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.4.3.0\lib\net462\System.IO.dll</HintPath>
@@ -303,7 +297,6 @@
   <ItemGroup>
     <Content Include="AddBook.aspx" />
     <Content Include="AddLanguage.aspx" />
-    <Content Include="AddLanguageCard.aspx" />
     <Content Include="AddQuestion.aspx" />
     <Content Include="AddScholarship.aspx" />
     <Content Include="Admin.aspx" />
@@ -333,6 +326,7 @@
     <Content Include="CreateQuiz.aspx" />
     <Content Include="CreateStudyGroup.aspx" />
     <Content Include="Default.aspx" />
+    <Content Include="DisplayQuestion.aspx" />
     <Content Include="FavBooks.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="GeminiAi.aspx" />
@@ -340,6 +334,7 @@
     <Content Include="Images\dprofile.jpg" />
     <Content Include="Images\logo.png" />
     <Content Include="Korean.aspx" />
+    <Content Include="Language.aspx" />
     <Content Include="LearningReport.aspx" />
     <Content Include="Library.aspx" />
     <Content Include="ManageClassroom.aspx" />
@@ -357,7 +352,6 @@
     <Content Include="libman.json" />
     <Content Include="PreviewBook.aspx" />
     <Content Include="Feedback.aspx" />
-    <Content Include="Learning.aspx" />
     <Content Include="StudyHub.aspx" />
     <Content Include="protos\google\type\timeofday.proto" />
     <Content Include="protos\google\type\quaternion.proto" />
@@ -445,6 +439,7 @@
     <Content Include="Login.aspx" />
     <Content Include="StudyHubGroup.aspx" />
     <Content Include="SubmitResult.aspx" />
+    <Content Include="TakeQuiz.aspx" />
     <Content Include="ViewSwitcher.ascx" />
     <Content Include="Web.config" />
     <Content Include="Bundle.config" />
@@ -463,13 +458,6 @@
     </Compile>
     <Compile Include="AddLanguage.aspx.designer.cs">
       <DependentUpon>AddLanguage.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="AddLanguageCard.aspx.cs">
-      <DependentUpon>AddLanguageCard.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="AddLanguageCard.aspx.designer.cs">
-      <DependentUpon>AddLanguageCard.aspx</DependentUpon>
     </Compile>
     <Compile Include="AddQuestion.aspx.cs">
       <DependentUpon>AddQuestion.aspx</DependentUpon>
@@ -508,6 +496,13 @@
     <Compile Include="Class.aspx.designer.cs">
       <DependentUpon>Class.aspx</DependentUpon>
     </Compile>
+    <Compile Include="DisplayQuestion.aspx.cs">
+      <DependentUpon>DisplayQuestion.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="DisplayQuestion.aspx.designer.cs">
+      <DependentUpon>DisplayQuestion.aspx</DependentUpon>
+    </Compile>
     <Compile Include="GeminiAi.aspx.cs">
       <DependentUpon>GeminiAi.aspx</DependentUpon>
     </Compile>
@@ -537,6 +532,13 @@
     </Compile>
     <Compile Include="Korean.aspx.designer.cs">
       <DependentUpon>Korean.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Language.aspx.cs">
+      <DependentUpon>Language.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Language.aspx.designer.cs">
+      <DependentUpon>Language.aspx</DependentUpon>
     </Compile>
     <Compile Include="LearningReport.aspx.cs">
       <DependentUpon>LearningReport.aspx</DependentUpon>
@@ -666,6 +668,13 @@
     <Compile Include="SubmitResult.aspx.designer.cs">
       <DependentUpon>SubmitResult.aspx</DependentUpon>
     </Compile>
+    <Compile Include="TakeQuiz.aspx.cs">
+      <DependentUpon>TakeQuiz.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TakeQuiz.aspx.designer.cs">
+      <DependentUpon>TakeQuiz.aspx</DependentUpon>
+    </Compile>
     <Compile Include="TeacherSite.Master.cs">
       <DependentUpon>TeacherSite.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -700,13 +709,6 @@
     </Compile>
     <Compile Include="Feedback.aspx.designer.cs">
       <DependentUpon>Feedback.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Learning.aspx.cs">
-      <DependentUpon>Learning.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Learning.aspx.designer.cs">
-      <DependentUpon>Learning.aspx</DependentUpon>
     </Compile>
     <Compile Include="StudyHub.aspx.cs">
       <DependentUpon>StudyHub.aspx</DependentUpon>
@@ -783,20 +785,20 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Grpc.Core.2.46.6\build\net45\Grpc.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Grpc.Core.2.46.6\build\net45\Grpc.Core.targets'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
-    <Error Condition="!Exists('..\packages\Google.Api.CommonProtos.2.17.0\build\Google.Api.CommonProtos.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Google.Api.CommonProtos.2.17.0\build\Google.Api.CommonProtos.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets'))" />
+    <Error Condition="!Exists('..\packages\Grpc.Core.2.46.6\build\net45\Grpc.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Grpc.Core.2.46.6\build\net45\Grpc.Core.targets'))" />
+    <Error Condition="!Exists('..\packages\Google.Api.CommonProtos.2.16.0\build\Google.Api.CommonProtos.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Google.Api.CommonProtos.2.16.0\build\Google.Api.CommonProtos.targets'))" />
   </Target>
   <Import Project="..\packages\Grpc.Core.2.46.5\build\net45\Grpc.Core.targets" Condition="Exists('..\packages\Grpc.Core.2.46.5\build\net45\Grpc.Core.targets')" />
-  <Import Project="..\packages\Grpc.Core.2.46.6\build\net45\Grpc.Core.targets" Condition="Exists('..\packages\Grpc.Core.2.46.6\build\net45\Grpc.Core.targets')" />
-  <Import Project="..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets" Condition="Exists('..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets')" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
     <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
     <Error Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
   </Target>
-  <Import Project="..\packages\Google.Api.CommonProtos.2.17.0\build\Google.Api.CommonProtos.targets" Condition="Exists('..\packages\Google.Api.CommonProtos.2.17.0\build\Google.Api.CommonProtos.targets')" />
+  <Import Project="..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets" Condition="Exists('..\packages\Microsoft.Extensions.Logging.Abstractions.6.0.0\build\Microsoft.Extensions.Logging.Abstractions.targets')" />
+  <Import Project="..\packages\Grpc.Core.2.46.6\build\net45\Grpc.Core.targets" Condition="Exists('..\packages\Grpc.Core.2.46.6\build\net45\Grpc.Core.targets')" />
+  <Import Project="..\packages\Google.Api.CommonProtos.2.16.0\build\Google.Api.CommonProtos.targets" Condition="Exists('..\packages\Google.Api.CommonProtos.2.16.0\build\Google.Api.CommonProtos.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
