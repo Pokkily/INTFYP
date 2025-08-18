@@ -349,5 +349,13 @@ namespace INTFYP
                 return new List<object>();
             }
         }
+        protected void btnStudentReport_Click(object sender, EventArgs e)
+        {
+            // Redirect to StudentReports page
+            // Since this is the language selection page, we don't have a specific language ID
+            // The StudentReports page should handle showing all languages or allow language selection
+            Response.Redirect("StudentReports.aspx", false);
+            Context.ApplicationInstance.CompleteRequest();
+        }
     }
 }

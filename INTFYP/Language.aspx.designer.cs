@@ -24,6 +24,15 @@ namespace INTFYP
         protected global::System.Web.UI.WebControls.TextBox txtLanguageSearch;
 
         /// <summary>
+        /// btnStudentReport control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnStudentReport;
+
+        /// <summary>
         /// pnlNoLanguages control.
         /// </summary>
         /// <remarks>

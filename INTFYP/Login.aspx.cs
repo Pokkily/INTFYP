@@ -104,7 +104,15 @@ namespace YourProjectNamespace
 
         private string GetRedirectPageForPosition(string position)
         {
-            return position?.ToLower() == "administrator" ? "Admin.aspx" : "class.aspx";
+            switch (position?.ToLower())
+            {
+                case "administrator":
+                    return "Admin.aspx";
+                case "teacher":
+                    return "Class.aspx"; // Teachers go to Class page with additional features
+                default:
+                    return "Class.aspx"; // Students and others go to Class page
+            }
         }
 
         protected async void btnLogin_Click(object sender, EventArgs e)
@@ -194,14 +202,16 @@ namespace YourProjectNamespace
                 };
                 await db.Collection("users").Document(userDoc.Id).UpdateAsync(updates);
 
-                // Set session variables
-                Session["UserId"] = userDoc.Id;
-                Session["UserEmail"] = userData["email"];
-                Session["UserName"] = $"{firstName} {lastName}";
-                Session["UserRole"] = position;
-                Session["IsLoggedIn"] = true;
+                // Set session variables - FIXED: Using consistent session variable names
+                Session["userId"] = userDoc.Id;
+                Session["email"] = userData["email"];
+                Session["username"] = $"{firstName} {lastName}"; // Full name for display
+                Session["firstName"] = firstName;
+                Session["lastName"] = lastName;
+                Session["position"] = position; // FIXED: Using "position" instead of "UserRole"
+                Session["isLoggedIn"] = true;
 
-                System.Diagnostics.Debug.WriteLine($"User {input} logged in successfully with role: {position}");
+                System.Diagnostics.Debug.WriteLine($"User {input} logged in successfully with position: {position}");
 
                 // Redirect based on user role
                 string redirectPage = GetRedirectPageForPosition(position);

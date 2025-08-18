@@ -101,7 +101,7 @@ namespace YourProjectNamespace
                 new TeacherNavItem {
                     Text = "Language Report",
                     Description = "All Report You need",
-                    Link = "LanguageReport.aspx",
+                    Link = "LanguageReports.aspx",
                     IsActive = ""
                 }
 
