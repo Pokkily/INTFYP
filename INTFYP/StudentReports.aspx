@@ -214,9 +214,9 @@
                             </div>
                             <div class="stat-card">
                                 <span class="stat-number">
-                                    <asp:Label ID="lblTotalTime" runat="server" Text="0" />h
+                                    <asp:Label ID="lblTotalTime" runat="server" Text="0" />
                                 </span>
-                                <span class="stat-label">Total Time</span>
+                                <span class="stat-label">Total Time (Minutes)</span>
                             </div>
                         </div>
                     </div>
@@ -268,14 +268,14 @@
                         <asp:Repeater ID="rptRecentActivity" runat="server">
                             <ItemTemplate>
                                 <div style="border-bottom: 1px solid #e9ecef; padding: 15px 0;">
-                                    <div style="display: flex; justify-content: between; align-items: center;">
-                                        <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                                        <div style="flex: 1;">
                                             <strong><%# Eval("LessonName") %></strong> - <%# Eval("TopicName") %>
                                             <br />
                                             <small style="color: #6c757d;"><%# Eval("CompletedAt") %></small>
                                         </div>
-                                        <div style="text-align: right;">
-                                            <span style="font-size: 18px; font-weight: 700; color: <%# Convert.ToInt32(Eval("Score")) >= 70 ? "#28a745" : "#dc3545" %>;">
+                                        <div style="text-align: right; margin-left: 20px;">
+                                            <span style="font-size: 18px; font-weight: 700; color: #000000;">
                                                 <%# Eval("Score") %>%
                                             </span>
                                         </div>

@@ -20,6 +20,37 @@
             --spacing-xl: 30px;
         }
 
+        /* Page Background with Library Style */
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background elements */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+            animation: backgroundFloat 20s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes backgroundFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(-20px, -20px) rotate(1deg); }
+            50% { transform: translate(20px, -10px) rotate(-1deg); }
+            75% { transform: translate(-10px, 10px) rotate(0.5deg); }
+        }
+
         /* Glass Morphism Effects */
         .glass-card {
             background: var(--glass-bg);
@@ -29,6 +60,24 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
+            position: relative;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #ff6b6b, #4ecdc4);
+            background-size: 400% 100%;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
         .glass-card:hover {
@@ -44,6 +93,33 @@
             padding: var(--spacing-lg);
             margin-bottom: var(--spacing-lg);
             animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .page-header h1 {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            display: inline-block;
+        }
+
+        .page-header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+            border-radius: 2px;
+            animation: expandWidth 1.5s ease-out 0.5s both;
+        }
+
+        @keyframes expandWidth {
+            from { width: 0; }
+            to { width: 60px; }
         }
 
         /* Animations */
@@ -57,7 +133,6 @@
             to { opacity: 1; transform: translateY(0) rotate(0deg); }
         }
 
-        /* Buttons */
         .btn-primary {
             background: var(--primary-gradient);
             color: white;
@@ -67,6 +142,26 @@
             box-shadow: 0 4px 15px rgba(103, 126, 234, 0.3);
             border: none;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.6s ease;
+        }
+
+        .btn-primary:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .btn-primary:hover {
@@ -75,7 +170,46 @@
             box-shadow: 0 8px 20px rgba(103, 126, 234, 0.4);
         }
 
-        /* Enhanced Feedback Card Styles */
+        /* Teal Submit Button - Matching Language Page Student Report Button */
+        .btn-submit-teal {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%) !important;
+            color: white !important;
+            padding: 10px 20px !important;
+            border-radius: 25px !important;
+            font-weight: 600 !important;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3) !important;
+            border: none !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative !important;
+            overflow: hidden !important;
+        }
+
+        .btn-submit-teal::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.6s ease;
+        }
+
+        .btn-submit-teal:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-submit-teal:hover {
+            background: linear-gradient(135deg, #44a08d 0%, #4ecdc4 100%) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4) !important;
+            color: white !important;
+        }
+
+        /* Enhanced Feedback Card Styles - PRESERVED */
         .feedback-card {
             height: 100%;
             display: flex;
@@ -142,6 +276,88 @@
             display: flex;
             gap: 0.5rem;
             margin-top: auto;
+        }
+
+        /* Library-Style Like Button - Dark Green (Same as Favorite Button) */
+        .btn-like {
+            padding: 0.35rem 0.75rem !important;
+            border-radius: 18px !important;
+            border: none !important;
+            cursor: pointer !important;
+            font-size: 0.85rem !important;
+            font-weight: 600 !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            flex: 1 !important;
+            justify-content: center !important;
+            min-width: 75px !important;
+            white-space: nowrap !important;
+            /* Override Bootstrap defaults */
+            font-family: inherit !important;
+            line-height: 1 !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            touch-action: manipulation !important;
+            user-select: none !important;
+
+            /* Default state - gray (same as Library buttons) */
+            background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%) !important;
+            color: #2c3e50 !important;
+            box-shadow: 0 4px 15px rgba(200, 200, 200, 0.3) !important;
+        }
+
+        .btn-like::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.6s ease;
+        }
+
+        .btn-like:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        /* Hover state - Dark Green (same as favorite button) */
+        .btn-like:hover {
+            transform: translateY(-2px) !important;
+            background: linear-gradient(135deg, #9caf88 0%, #8a9c78 100%) !important;
+            box-shadow: 0 8px 25px rgba(156, 175, 136, 0.4) !important;
+            color: white !important;
+        }
+
+        /* ACTIVE STATE - When user has liked (Dark Green) */
+        .btn-like.active {
+            background: linear-gradient(135deg, #9caf88 0%, #8a9c78 100%) !important;
+            box-shadow: 0 8px 25px rgba(156, 175, 136, 0.5) !important;
+            color: #ffffff !important;
+        }
+
+        .btn-like.active:hover {
+            background: linear-gradient(135deg, #8a9c78 0%, #7a8c68 100%) !important;
+            box-shadow: 0 10px 30px rgba(156, 175, 136, 0.6) !important;
+        }
+
+        /* Temporary click animation */
+        .btn-like.clicked {
+            animation: buttonPulse 0.6s ease-out !important;
+        }
+
+        @keyframes buttonPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         .btn-sm {
@@ -243,9 +459,9 @@
                     <p><strong>Address:</strong> <asp:Label ID="lblAddress" runat="server" /></p>
                 </div>
 
-                <!-- Submit Button Full Width -->
+                <!-- Submit Button Full Width - Now with Teal Color -->
                 <div class="mt-3">
-                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#feedbackModal">
+                    <button type="button" class="btn btn-submit-teal w-100" data-bs-toggle="modal" data-bs-target="#feedbackModal">
                         Submit Feedback
                     </button>
                 </div>
@@ -278,12 +494,13 @@
                                     <p class="feedback-description"><%# Eval("Description") %></p>
                                     
                                     <div class="feedback-actions">
-                                        <!-- Like Button -->
+                                        <!-- Like Button with Library Style - Now Dark Green with Active State -->
                                         <asp:Button ID="btnLike" runat="server"
-                                            Text='<%# "👍 " + Eval("Likes") %>'
+                                            Text='<%# "❤️ " + Eval("Likes") %>'
                                             CommandName="Like"
                                             CommandArgument='<%# Eval("PostId") %>'
-                                            CssClass="btn btn-sm btn-outline-danger" />
+                                            CssClass='<%# "btn-like" + (Convert.ToBoolean(Eval("IsLiked")) ? " active" : "") %>'
+                                            OnClientClick="addClickEffect(this); return true;" />
 
                                         <!-- Comment Button -->
                                         <button type="button"
@@ -384,7 +601,7 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+            </div>
                         </div>
                     </ItemTemplate>
                     <FooterTemplate>
@@ -424,7 +641,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <asp:Button ID="btnSubmit" runat="server" CssClass="btn btn-primary" Text="Submit Feedback" OnClick="btnSubmit_Click" />
+                    <!-- Submit Button in Modal - Also with Teal Color -->
+                    <asp:Button ID="btnSubmit" runat="server" CssClass="btn btn-submit-teal" Text="Submit Feedback" OnClick="btnSubmit_Click" />
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
@@ -439,7 +657,7 @@
     <!-- JavaScript -->
     <script type="text/javascript">
         $(document).ready(function () {
-            console.log('Feedback page loaded with modal comments');
+            console.log('Feedback page loaded with teal submit buttons (matching Language page)');
 
             // Add hover effects to all glass cards
             const cards = document.querySelectorAll('.glass-card');
@@ -459,6 +677,18 @@
                 $(this).find('.modal-dialog').addClass('animate__animated animate__fadeInUp');
             });
         });
+
+        // Library-style click effect for like button - Updated for proper active state
+        function addClickEffect(button) {
+            // Add clicked class for animation
+            button.classList.add('clicked');
+
+            // Remove only the clicked animation class after animation completes
+            // Don't manually add "active" class - let the server-side code handle it
+            setTimeout(function () {
+                button.classList.remove('clicked');
+            }, 600);
+        }
 
         // Function to load comments
         function loadCommentsInModal(postId) {

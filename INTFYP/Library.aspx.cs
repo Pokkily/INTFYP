@@ -203,7 +203,7 @@ namespace INTFYP
             else
             {
                 // If no search term, load all books
-                LoadBooks();
+                await LoadBooks();
             }
         }
 

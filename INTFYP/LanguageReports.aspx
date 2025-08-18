@@ -1,10 +1,6 @@
-﻿<%@ Page Async="true" Title="Language Reports" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeBehind="LanguageReports.aspx.cs" Inherits="INTFYP.LanguageReports" %>
+﻿<%@ Page Async="true" Title="Language Reports" Language="C#" MasterPageFile="~/TeacherSite.master" AutoEventWireup="true" CodeBehind="LanguageReports.aspx.cs" Inherits="INTFYP.LanguageReports" %>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
-    Language Reports
-</asp:Content>
-
-<asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
+<asp:Content ID="Content2" ContentPlaceHolderID="TeacherMainContent" runat="server">
     <style>
         .language-reports-page {
             padding: 40px 20px;
@@ -96,6 +92,10 @@
             padding: 20px;
             margin-bottom: 20px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .filters-section {
@@ -190,6 +190,27 @@
         .score-average { background-color: #fff3cd; color: #856404; }
         .score-poor { background-color: #f8d7da; color: #721c24; }
 
+        /* Charts Row - Ensure Equal Sizing */
+        .charts-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .chart-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .chart-card .chart-container {
+            height: 350px;
+        }
+
         @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -202,6 +223,11 @@
             
             .data-table {
                 font-size: 12px;
+            }
+
+            .charts-row {
+                grid-template-columns: 1fr;
+                gap: 20px;
             }
         }
     </style>
@@ -302,29 +328,25 @@
                 </div>
             </div>
 
-            <!-- Charts Row -->
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            📈 Score Distribution
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="scoreDistributionChart" width="400" height="300"></canvas>
-                            </div>
+            <!-- Charts Row with Equal Sizing -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="card-header">
+                        📈 Score Distribution
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="scoreDistributionChart"></canvas>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header">
-                            📅 Daily Activity
-                        </div>
-                        <div class="card-body">
-                            <div class="chart-container">
-                                <canvas id="dailyActivityChart" width="400" height="300"></canvas>
-                            </div>
+                <div class="chart-card">
+                    <div class="card-header">
+                        📅 Daily Activity
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="dailyActivityChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -384,7 +406,7 @@
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>Student ID</th>
+                                        <th>Student Name</th>
                                         <th>Language</th>
                                         <th>Topic</th>
                                         <th>Lesson</th>
@@ -397,7 +419,7 @@
                         </HeaderTemplate>
                         <ItemTemplate>
                             <tr>
-                                <td><%# Eval("UserId").ToString().Length > 10 ? Eval("UserId").ToString().Substring(0, 10) + "..." : Eval("UserId") %></td>
+                                <td><strong><%# Eval("UserName") %></strong></td>
                                 <td><%# Eval("LanguageName") %></td>
                                 <td><%# Eval("TopicName") %></td>
                                 <td><%# Eval("LessonName") %></td>
@@ -477,6 +499,7 @@
                     },
                     options: {
                         responsive: true,
+                        maintainAspectRatio: false,
                         plugins: {
                             title: {
                                 display: true,
@@ -510,6 +533,7 @@
                     },
                     options: {
                         responsive: true,
+                        maintainAspectRatio: false,
                         plugins: {
                             title: {
                                 display: true,

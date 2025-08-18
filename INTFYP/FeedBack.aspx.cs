@@ -152,6 +152,8 @@ namespace YourProjectNamespace
         private async Task LoadAllFeedbacks()
         {
             var feedbacks = new List<dynamic>();
+            string currentUserId = Session["userId"]?.ToString(); // Get current user ID
+
             QuerySnapshot snapshot = await db.Collection("feedbacks").OrderByDescending("createdAt").GetSnapshotAsync();
 
             foreach (var doc in snapshot.Documents)
@@ -183,7 +185,9 @@ namespace YourProjectNamespace
                     CreatedAt = data.ContainsKey("createdAt")
                         ? ((Timestamp)data["createdAt"]).ToDateTime()
                         : DateTime.Now,
-                    Comments = comments
+                    Comments = comments,
+
+                    IsLiked = !string.IsNullOrEmpty(currentUserId) && likesList != null && likesList.Contains(currentUserId)
                 });
             }
 

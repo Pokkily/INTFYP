@@ -245,6 +245,7 @@ namespace INTFYP
             }
         }
 
+        // UPDATED: LoadRecentActivity method to show student names
         private void LoadRecentActivity(List<Dictionary<string, object>> results)
         {
             try
@@ -254,7 +255,9 @@ namespace INTFYP
                     .Take(20)
                     .Select(r => new
                     {
-                        UserId = r["userId"].ToString(),
+                        // Use userName if available, fallback to userId for older records
+                        UserName = GetUserNameFromResult(r),
+                        UserId = r["userId"].ToString(), // Keep for reference if needed
                         LanguageName = r["languageName"].ToString(),
                         TopicName = r["topicName"].ToString(),
                         LessonName = r["lessonName"].ToString(),
@@ -264,13 +267,113 @@ namespace INTFYP
                     })
                     .ToList();
 
-                rptRecentActivity.DataSource = recentActivity;
-                rptRecentActivity.DataBind();
+                // Check if we have any recent activity
+                if (recentActivity.Count > 0)
+                {
+                    rptRecentActivity.DataSource = recentActivity;
+                    rptRecentActivity.DataBind();
+                    rptRecentActivity.Visible = true;
+
+                    System.Diagnostics.Debug.WriteLine($"✅ Loaded {recentActivity.Count} recent activity records with student names");
+                }
+                else
+                {
+                    // No recent activity found
+                    rptRecentActivity.Visible = false;
+                    System.Diagnostics.Debug.WriteLine("⚠️ No recent activity records found");
+                }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading recent activity: {ex.Message}");
+
+                // Hide repeater on error
+                rptRecentActivity.Visible = false;
             }
+        }
+
+        // NEW: Helper method to get user name with intelligent fallbacks
+        private string GetUserNameFromResult(Dictionary<string, object> result)
+        {
+            try
+            {
+                // First try to get userName (from newer records saved by TakeQuiz)
+                if (result.ContainsKey("userName") && result["userName"] != null)
+                {
+                    string userName = result["userName"].ToString().Trim();
+                    if (!string.IsNullOrEmpty(userName) && userName != "Guest User" && userName != "null")
+                    {
+                        System.Diagnostics.Debug.WriteLine($"📝 Found userName: {userName}");
+                        return userName;
+                    }
+                }
+
+                // Fallback: try to get userEmail (from newer records)
+                if (result.ContainsKey("userEmail") && result["userEmail"] != null)
+                {
+                    string userEmail = result["userEmail"].ToString().Trim();
+                    if (!string.IsNullOrEmpty(userEmail) && userEmail != "null")
+                    {
+                        // Extract name part from email (before @)
+                        string emailName = userEmail.Split('@')[0];
+                        string formattedName = emailName.Replace(".", " ").Replace("_", " ");
+                        System.Diagnostics.Debug.WriteLine($"📧 Using email-based name: {formattedName}");
+                        return CapitalizeWords(formattedName);
+                    }
+                }
+
+                // Final fallback: format userId for display
+                if (result.ContainsKey("userId") && result["userId"] != null)
+                {
+                    string userId = result["userId"].ToString();
+
+                    // If it's a demo user ID, make it more readable
+                    if (userId.StartsWith("DEMO_"))
+                    {
+                        System.Diagnostics.Debug.WriteLine("🎭 Using Demo User for demo ID");
+                        return "Demo User";
+                    }
+
+                    // If it's an email used as ID, extract the name part
+                    if (userId.Contains("@"))
+                    {
+                        string emailName = userId.Split('@')[0];
+                        string formattedName = emailName.Replace(".", " ").Replace("_", " ");
+                        System.Diagnostics.Debug.WriteLine($"🔗 Using userId as email name: {formattedName}");
+                        return CapitalizeWords(formattedName);
+                    }
+
+                    // Return shortened userId for display
+                    string shortId = userId.Length > 8 ? userId.Substring(0, 8) : userId;
+                    System.Diagnostics.Debug.WriteLine($"🆔 Using shortened userId: User {shortId}");
+                    return $"User {shortId}";
+                }
+
+                System.Diagnostics.Debug.WriteLine("❓ No valid user identifier found");
+                return "Unknown User";
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error getting user name: {ex.Message}");
+                return "Unknown User";
+            }
+        }
+
+        // NEW: Helper method to capitalize words properly
+        private string CapitalizeWords(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            var words = input.Split(' ');
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (!string.IsNullOrEmpty(words[i]))
+                {
+                    words[i] = char.ToUpper(words[i][0]) + words[i].Substring(1).ToLower();
+                }
+            }
+            return string.Join(" ", words);
         }
 
         private void GenerateChartData(List<Dictionary<string, object>> results)

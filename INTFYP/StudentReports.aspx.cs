@@ -20,6 +20,13 @@ namespace INTFYP
             InitializeFirestore();
             currentUserId = GetCurrentUserId();
 
+            // No demo users - require real authentication
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                Response.Redirect("Login.aspx"); // Redirect to your login page
+                return;
+            }
+
             if (!IsPostBack)
             {
                 await LoadAvailableLanguages();
@@ -52,22 +59,15 @@ namespace INTFYP
 
         private string GetCurrentUserId()
         {
-            if (Session["UserId"] != null)
-                return Session["UserId"].ToString();
-
-            if (Session["DemoUserId"] != null)
-                return Session["DemoUserId"].ToString();
-
-            string demoUserId = "DEMO_" + DateTime.Now.Ticks.ToString();
-            Session["DemoUserId"] = demoUserId;
-            return demoUserId;
+            // REMOVED DEMO USER - Only real authenticated users
+            return Session["UserId"]?.ToString();
         }
 
         private async System.Threading.Tasks.Task LoadAvailableLanguages()
         {
             try
             {
-                // Get languages that the user has progress in
+                // Get languages that the user has progress in from user progress structure
                 CollectionReference progressRef = db.Collection("users").Document(currentUserId).Collection("progress");
                 QuerySnapshot progressSnapshot = await progressRef.GetSnapshotAsync();
 
@@ -85,6 +85,11 @@ namespace INTFYP
                         var languageData = languageDoc.ToDictionary();
                         string languageName = languageData.ContainsKey("Name") ? languageData["Name"].ToString() : languageId;
                         ddlLanguages.Items.Add(new ListItem(languageName, languageId));
+                    }
+                    else
+                    {
+                        // Add with ID as name if language doc doesn't exist
+                        ddlLanguages.Items.Add(new ListItem(languageId, languageId));
                     }
                 }
 
@@ -119,7 +124,7 @@ namespace INTFYP
         {
             try
             {
-                // Get user's progress for this language
+                // Get user's progress for this language from user progress structure
                 DocumentReference languageProgressRef = db.Collection("users")
                     .Document(currentUserId)
                     .Collection("progress")
@@ -131,19 +136,19 @@ namespace INTFYP
                 {
                     var progressData = languageProgressSnap.ToDictionary();
 
-                    // Load overall statistics
+                    // Load overall statistics from user progress
                     lblTotalAttempts.Text = progressData.ContainsKey("totalAttempts") ? progressData["totalAttempts"].ToString() : "0";
                     lblCompletedLessons.Text = progressData.ContainsKey("completedLessons") ? progressData["completedLessons"].ToString() : "0";
                     lblAverageScore.Text = progressData.ContainsKey("averageScore") ? Math.Round(Convert.ToDouble(progressData["averageScore"]), 1).ToString() : "0";
                     lblCurrentStreak.Text = progressData.ContainsKey("currentStreak") ? progressData["currentStreak"].ToString() : "0";
 
-                    double totalHours = progressData.ContainsKey("totalTimeSpent") ? Convert.ToDouble(progressData["totalTimeSpent"]) / 60.0 : 0;
-                    lblTotalTime.Text = Math.Round(totalHours, 1).ToString();
+                    double totalMinutes = progressData.ContainsKey("totalTimeSpent") ? Convert.ToDouble(progressData["totalTimeSpent"]) : 0;
+                    lblTotalTime.Text = Math.Round(totalMinutes, 1).ToString();
 
-                    // Load topic progress
+                    // Load topic progress from user progress structure
                     await LoadTopicProgress(languageId);
 
-                    // Load recent activity and chart data
+                    // Load recent activity and chart data from user progress structure
                     await LoadRecentActivityAndChartData(languageId);
 
                     pnlStats.Visible = true;
@@ -208,59 +213,154 @@ namespace INTFYP
         {
             try
             {
-                // Get recent quiz attempts from languageResults collection
-                Query recentQuery = db.Collection("languageResults")
-                    .WhereEqualTo("userId", currentUserId)
-                    .WhereEqualTo("languageId", languageId)
-                    .OrderByDescending("completedAt")
-                    .Limit(10);
+                System.Diagnostics.Debug.WriteLine($"🔍 Loading recent activity from user progress structure for language: {languageId}");
 
-                QuerySnapshot recentSnapshot = await recentQuery.GetSnapshotAsync();
+                var allAttempts = new List<dynamic>();
 
-                var recentActivity = new List<object>();
+                // Get all topics for this language from user progress
+                CollectionReference topicsRef = db.Collection("users")
+                    .Document(currentUserId)
+                    .Collection("progress")
+                    .Document(languageId)
+                    .Collection("topics");
+
+                QuerySnapshot topicsSnapshot = await topicsRef.GetSnapshotAsync();
+
+                System.Diagnostics.Debug.WriteLine($"📚 Found {topicsSnapshot.Documents.Count} topics");
+
+                foreach (DocumentSnapshot topicDoc in topicsSnapshot.Documents)
+                {
+                    string topicName = topicDoc.Id;
+                    var topicData = topicDoc.ToDictionary();
+                    string topicDisplayName = topicData.ContainsKey("topicName") ? topicData["topicName"].ToString() : topicName;
+
+                    // Get all lessons for this topic
+                    CollectionReference lessonsRef = topicDoc.Reference.Collection("lessons");
+                    QuerySnapshot lessonsSnapshot = await lessonsRef.GetSnapshotAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"📖 Topic '{topicDisplayName}' has {lessonsSnapshot.Documents.Count} lessons");
+
+                    foreach (DocumentSnapshot lessonDoc in lessonsSnapshot.Documents)
+                    {
+                        string lessonId = lessonDoc.Id;
+                        var lessonData = lessonDoc.ToDictionary();
+                        string lessonName = lessonData.ContainsKey("lessonName") ? lessonData["lessonName"].ToString() : lessonId;
+
+                        // Get all attempts for this lesson
+                        CollectionReference attemptsRef = lessonDoc.Reference.Collection("attempts");
+                        QuerySnapshot attemptsSnapshot = await attemptsRef.GetSnapshotAsync();
+
+                        System.Diagnostics.Debug.WriteLine($"🎯 Lesson '{lessonName}' has {attemptsSnapshot.Documents.Count} attempts");
+
+                        foreach (DocumentSnapshot attemptDoc in attemptsSnapshot.Documents)
+                        {
+                            var attemptData = attemptDoc.ToDictionary();
+
+                            // Extract attempt information
+                            int score = attemptData.ContainsKey("score") ? Convert.ToInt32(attemptData["score"]) : 0;
+                            int attemptNumber = attemptData.ContainsKey("attemptNumber") ? Convert.ToInt32(attemptData["attemptNumber"]) : 1;
+
+                            DateTime completedAt = DateTime.Now;
+                            if (attemptData.ContainsKey("completedAt"))
+                            {
+                                if (attemptData["completedAt"] is Timestamp timestamp)
+                                    completedAt = timestamp.ToDateTime();
+                                else if (DateTime.TryParse(attemptData["completedAt"].ToString(), out DateTime parsedDate))
+                                    completedAt = parsedDate;
+                            }
+
+                            // Create attempt object
+                            allAttempts.Add(new
+                            {
+                                LessonName = lessonName,
+                                TopicName = topicDisplayName,
+                                Score = score,
+                                AttemptNumber = attemptNumber,
+                                CompletedAt = completedAt,
+                                CompletedAtFormatted = completedAt.ToString("MMM dd, yyyy HH:mm"),
+                                // Add sorting keys
+                                SortKey = completedAt.Ticks
+                            });
+
+                            System.Diagnostics.Debug.WriteLine($"✅ Added attempt: {lessonName} - {score}% on {completedAt:MMM dd HH:mm}");
+                        }
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine($"📊 Total attempts collected: {allAttempts.Count}");
+
+                if (allAttempts.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("⚠️ No attempts found in user progress structure");
+
+                    // Set empty data
+                    rptRecentActivity.DataSource = new List<object>();
+                    rptRecentActivity.DataBind();
+
+                    hfChartData.Value = JsonConvert.SerializeObject(new { labels = new string[0], scores = new int[0] });
+                    return;
+                }
+
+                // Sort all attempts by date (most recent first) for recent activity
+                var sortedAttempts = allAttempts
+                    .OrderByDescending(a => a.SortKey)
+                    .Take(20) // Limit to last 20 attempts for recent activity
+                    .ToList();
+
+                System.Diagnostics.Debug.WriteLine($"📋 Showing {sortedAttempts.Count} recent activities");
+
+                // Prepare recent activity data
+                var recentActivity = sortedAttempts.Select(a => new
+                {
+                    LessonName = a.LessonName,
+                    TopicName = a.TopicName,
+                    Score = a.Score,
+                    CompletedAt = a.CompletedAtFormatted
+                }).ToList();
+
+                // FIXED: Prepare chart data (chronological order for graph, ALL attempts)
+                var chartAttempts = allAttempts
+                    .OrderBy(a => a.SortKey) // Chronological order (oldest first)
+                    .ToList();
+
                 var chartLabels = new List<string>();
                 var chartScores = new List<int>();
 
-                int attemptNumber = recentSnapshot.Documents.Count;
+                System.Diagnostics.Debug.WriteLine($"📈 Preparing chart data for {chartAttempts.Count} attempts");
 
-                foreach (DocumentSnapshot doc in recentSnapshot.Documents)
+                // Add ALL attempts to chart (not just recent ones)
+                for (int i = 0; i < chartAttempts.Count; i++)
                 {
-                    var data = doc.ToDictionary();
+                    chartLabels.Add($"Quiz {i + 1}");
+                    chartScores.Add(chartAttempts[i].Score);
 
-                    string lessonName = data.ContainsKey("lessonName") ? data["lessonName"].ToString() : "Unknown Lesson";
-                    string topicName = data.ContainsKey("topicName") ? data["topicName"].ToString() : "Unknown Topic";
-                    int score = data.ContainsKey("score") ? Convert.ToInt32(data["score"]) : 0;
-                    DateTime completedAt = data.ContainsKey("completedAt") ? ((Timestamp)data["completedAt"]).ToDateTime() : DateTime.Now;
-
-                    recentActivity.Add(new
-                    {
-                        LessonName = lessonName,
-                        TopicName = topicName,
-                        Score = score,
-                        CompletedAt = completedAt.ToString("MMM dd, yyyy HH:mm")
-                    });
-
-                    // For chart (reverse order for chronological display)
-                    chartLabels.Insert(0, $"Attempt {attemptNumber}");
-                    chartScores.Insert(0, score);
-                    attemptNumber--;
+                    System.Diagnostics.Debug.WriteLine($"Chart point {i + 1}: {chartAttempts[i].LessonName} = {chartAttempts[i].Score}%");
                 }
 
+                // Bind to UI
                 rptRecentActivity.DataSource = recentActivity;
                 rptRecentActivity.DataBind();
+
+                System.Diagnostics.Debug.WriteLine($"✅ Bound {recentActivity.Count} recent activities to repeater");
 
                 // Prepare chart data
                 var chartData = new
                 {
-                    labels = chartLabels,
-                    scores = chartScores
+                    labels = chartLabels.ToArray(),
+                    scores = chartScores.ToArray()
                 };
 
                 hfChartData.Value = JsonConvert.SerializeObject(chartData);
+
+                System.Diagnostics.Debug.WriteLine($"📈 Chart data prepared with {chartLabels.Count} data points");
+                System.Diagnostics.Debug.WriteLine($"Chart labels: [{string.Join(", ", chartLabels)}]");
+                System.Diagnostics.Debug.WriteLine($"Chart scores: [{string.Join(", ", chartScores)}]");
+
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading recent activity: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"❌ Error loading recent activity from user progress: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
             }
         }
 

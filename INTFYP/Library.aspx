@@ -425,23 +425,31 @@
             flex-wrap: wrap;
         }
 
+        /* IMPORTANT: Override Bootstrap button styles to prevent conflicts */
         .book-action-btn {
-            padding: 7px 12px; /* Reduced from 8px 15px */
-            border-radius: 18px; /* Reduced from 20px */
-            border: none;
-            cursor: pointer;
-            font-size: 11px; /* Reduced from 12px */
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px; /* Reduced from 5px */
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            flex: 1;
-            justify-content: center;
-            min-width: 75px; /* Reduced from 80px */
+            padding: 7px 12px !important; 
+            border-radius: 18px !important; 
+            border: none !important;
+            cursor: pointer !important;
+            font-size: 11px !important; 
+            font-weight: 600 !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            flex: 1 !important;
+            justify-content: center !important;
+            min-width: 75px !important;
+            /* Override Bootstrap defaults */
+            font-family: inherit !important;
+            line-height: 1 !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            touch-action: manipulation !important;
+            user-select: none !important;
         }
 
         .book-action-btn::before {
@@ -463,19 +471,19 @@
         }
 
         .book-action-btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-2px) !important;
         }
 
         /* DEFAULT STATES for buttons */
         .btn-recommend {
-            background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%);
-            color: #2c3e50;
-            box-shadow: 0 4px 15px rgba(200, 200, 200, 0.3);
+            background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%) !important;
+            color: #2c3e50 !important;
+            box-shadow: 0 4px 15px rgba(200, 200, 200, 0.3) !important;
         }
 
         .btn-recommend:hover {
-            background: linear-gradient(135deg, #d8b5f0 0%, #c9a9e0 100%);
-            box-shadow: 0 8px 25px rgba(216, 181, 240, 0.4);
+            background: linear-gradient(135deg, #d8b5f0 0%, #c9a9e0 100%) !important;
+            box-shadow: 0 8px 25px rgba(216, 181, 240, 0.4) !important;
         }
 
         /* ACTIVE STATE - When user has recommended the book */
@@ -491,14 +499,14 @@
         }
 
         .btn-favorite {
-            background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%);
-            color: #2c3e50;
-            box-shadow: 0 4px 15px rgba(200, 200, 200, 0.3);
+            background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%) !important;
+            color: #2c3e50 !important;
+            box-shadow: 0 4px 15px rgba(200, 200, 200, 0.3) !important;
         }
 
         .btn-favorite:hover {
-            background: linear-gradient(135deg, #9caf88 0%, #8a9c78 100%);
-            box-shadow: 0 8px 25px rgba(156, 175, 136, 0.4);
+            background: linear-gradient(135deg, #9caf88 0%, #8a9c78 100%) !important;
+            box-shadow: 0 8px 25px rgba(156, 175, 136, 0.4) !important;
         }
 
         /* ACTIVE STATE - When user has favorited the book */
@@ -516,26 +524,13 @@
         /* Temporary click animation for both buttons */
         .btn-recommend.clicked,
         .btn-favorite.clicked {
-            animation: buttonPulse 0.6s ease-out;
+            animation: buttonPulse 0.6s ease-out !important;
         }
 
         @keyframes buttonPulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
             100% { transform: scale(1); }
-        }
-
-        .btn-outline {
-            background: rgba(255, 255, 255, 0.9);
-            color: #667eea;
-            border: 2px solid rgba(103, 126, 234, 0.3);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-outline:hover {
-            background: rgba(103, 126, 234, 0.1);
-            border-color: #667eea;
-            box-shadow: 0 8px 25px rgba(103, 126, 234, 0.2);
         }
 
         /* No Books Message */
@@ -613,7 +608,7 @@
             }
 
             .book-action-btn {
-                width: 100%;
+                width: 100% !important;
             }
         }
 
@@ -731,7 +726,22 @@
     </div>
 
     <script>
+        // Ensure this runs after page loads to avoid conflicts
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Library page loaded');
+
+            // Override any Bootstrap button event handlers
+            var buttons = document.querySelectorAll('.book-action-btn');
+            buttons.forEach(function (btn) {
+                // Remove any existing event listeners
+                var newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+            });
+        });
+
         function addClickEffect(button) {
+            console.log('Button clicked:', button.id);
+
             // Add clicked class for animation
             button.classList.add('clicked');
 
@@ -739,7 +749,15 @@
             setTimeout(function () {
                 button.classList.remove('clicked');
             }, 600);
+
+            // Return true to allow postback
+            return true;
         }
+
+        // Prevent Bootstrap from interfering with form submission
+        $(document).ready(function () {
+            $('.book-action-btn').off('click.bs.button');
+        });
     </script>
 
     <!-- Font Awesome for additional icons if needed -->

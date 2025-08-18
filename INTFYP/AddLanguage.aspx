@@ -2,141 +2,197 @@
 
 <asp:Content ID="AddLanguageContent" ContentPlaceHolderID="TeacherMainContent" runat="server">
     <style>
-        /* Design System Implementation */
-        :root {
-            /* Color Palette */
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --accent-primary: #ff6b6b;
-            --accent-secondary: #4ecdc4;
-            --text-primary: #2c3e50;
-            --text-secondary: #7f8c8d;
-            --text-muted: #95a5a6;
-            --light-text: rgba(255, 255, 255, 0.9);
-            
-            /* Glass Morphism */
-            --glass-bg: rgba(255, 255, 255, 0.95);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            
-            /* Spacing System (8px base) */
-            --space-xs: 8px;
-            --space-sm: 15px;
-            --space-md: 20px;
-            --space-lg: 25px;
-            --space-xl: 30px;
-            --space-2xl: 40px;
-            --space-3xl: 60px;
-        }
-
-        /* Typography */
-        * {
+        /* Modern Design System Implementation - Consistent with LanguageReports */
+        .add-language-page {
+            padding: 40px 20px;
             font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
         }
 
-        /* Glass Card Implementation */
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            box-shadow: var(--glass-shadow);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            animation: slideInFromTop 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        .languages-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
         }
 
-        .glass-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideInFromTop 1s ease-out;
         }
 
-        /* Form Sections */
-        .form-section {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: var(--space-2xl);
-            margin-bottom: var(--space-lg);
-            border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow);
-            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        .page-title {
+            font-size: clamp(32px, 5vw, 48px);
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         }
 
-        .form-header {
-            color: var(--text-primary);
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: var(--space-lg);
-            padding-bottom: var(--space-sm);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* Form Controls with Glass Effect */
-        .glass-input {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            padding: 15px 20px;
+        .page-subtitle {
+            color: rgba(255,255,255,0.8);
             font-size: 16px;
-            color: var(--text-primary);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 0;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+            overflow: hidden;
+            animation: slideInFromBottom 0.8s ease-out;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            font-weight: 700;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(103, 126, 234, 0.2);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 14px;
+            transition: all 0.3s ease;
             width: 100%;
         }
 
-        .glass-input:focus {
+        .form-control:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(103, 126, 234, 0.3);
             outline: none;
             transform: scale(1.02);
         }
 
-        .form-label {
-            font-weight: 500;
-            color: var(--text-primary);
-            font-size: 14px;
-            margin-bottom: var(--space-xs);
-            display: block;
-        }
-
-        /* Primary Button with Design System */
         .primary-button {
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 12px 24px;
             border-radius: 25px;
             font-weight: 600;
             box-shadow: 0 4px 15px rgba(103, 126, 234, 0.3);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
             border: none;
             cursor: pointer;
             font-size: 14px;
+            text-decoration: none;
         }
 
         .primary-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(103, 126, 234, 0.4);
+            color: white;
+            text-decoration: none;
         }
 
-        .primary-button:active {
-            transform: scale(0.98);
+        .secondary-button {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            border: 1px solid rgba(103, 126, 234, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            text-decoration: none;
         }
 
-        /* Language Cards with Glass Morphism */
+        .secondary-button:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+            text-decoration: none;
+        }
+
+        .success-button {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .success-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(86, 171, 47, 0.3);
+            color: white;
+        }
+
+        .info-button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .info-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.3);
+            color: white;
+        }
+
+        .danger-button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .danger-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+            color: white;
+        }
+
+        /* Language Card Styles */
         .language-card {
-            background: var(--glass-bg);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
             overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
             position: relative;
-            animation: slideInFromBottom 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            animation-delay: calc(var(--index) * 0.1s);
-            animation-fill-mode: both;
+            animation: slideInFromLeft 0.6s ease-out;
+            margin-bottom: 20px;
         }
 
         .language-card::before {
@@ -146,7 +202,7 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             animation: gradientSlide 3s ease-in-out infinite;
         }
 
@@ -156,11 +212,12 @@
         }
 
         .language-header {
-            padding: var(--space-lg);
+            padding: 25px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .language-info-wrapper {
@@ -171,65 +228,54 @@
 
         .language-flag {
             font-size: clamp(32px, 5vw, 48px);
-            margin-right: var(--space-sm);
+            margin-right: 15px;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
         }
 
         .language-info h5 {
-            color: var(--text-primary);
+            color: #2c3e50;
             font-size: 20px;
             font-weight: 600;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
         }
 
         .language-info small {
-            color: var(--text-secondary);
+            color: #7f8c8d;
             font-size: 14px;
-        }
-
-        .language-category {
-            background: linear-gradient(45deg, var(--accent-primary), var(--accent-secondary));
-            color: white;
-            font-size: 12px;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-weight: 500;
-            margin-left: var(--space-xs);
-            display: none; /* Hidden since no difficulty level */
         }
 
         /* Statistics Section */
         .language-stats {
-            padding: var(--space-md);
+            padding: 20px 25px;
         }
 
         .stat-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: var(--space-xs);
-            padding: var(--space-xs) 0;
+            margin-bottom: 10px;
+            padding: 10px 0;
         }
 
         .stat-label {
-            color: var(--text-secondary);
+            color: #7f8c8d;
             font-weight: 500;
             font-size: 14px;
         }
 
         .stat-value {
-            color: var(--text-primary);
+            color: #2c3e50;
             font-weight: 600;
             font-size: 16px;
         }
 
         /* Student Count Badge */
         .student-count-badge {
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: var(--space-sm) var(--space-md);
+            padding: 15px 20px;
             border-radius: 20px;
             text-align: center;
-            margin: var(--space-sm) 0;
+            margin: 15px 0;
             box-shadow: 0 4px 15px rgba(103, 126, 234, 0.3);
             position: relative;
             overflow: hidden;
@@ -246,92 +292,85 @@
             animation: shimmer 2s infinite;
         }
 
-        /* Manage Button */
-        .manage-button {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            padding: var(--space-xs) var(--space-sm);
-            color: var(--text-primary);
-            font-weight: 500;
-            font-size: 13px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .manage-button:hover {
-            background: var(--primary-gradient);
-            color: white;
-            transform: scale(1.05);
-        }
-
         /* Edit Section */
         .edit-section {
             background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
             backdrop-filter: blur(5px);
             border-radius: 15px;
-            padding: var(--space-md);
-            margin-top: var(--space-sm);
+            padding: 20px;
+            margin-top: 15px;
             border: 1px solid rgba(255,255,255,0.1);
         }
 
+        .edit-section h6 {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
         /* Action Buttons */
-        .action-buttons .btn {
-            margin-right: var(--space-xs);
-            border-radius: 15px;
-            padding: var(--space-xs) var(--space-sm);
-            font-weight: 500;
-            font-size: 13px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .action-buttons {
+            display: grid;
+            gap: 10px;
+            margin-top: 15px;
         }
 
-        .btn-success-glass {
-            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
-            border: none;
-            color: white;
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
         }
 
-        .btn-info-glass {
-            background: linear-gradient(45deg, #4ecdc4, #44a08d);
-            border: none;
-            color: white;
+        .form-group {
+            position: relative;
         }
 
-        .btn-danger-glass {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
-            border: none;
-            color: white;
-        }
-
-        .btn-success-glass:hover,
-        .btn-info-glass:hover,
-        .btn-danger-glass:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Alert System */
-        .alert-glass {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: var(--space-sm);
-            margin-bottom: var(--space-md);
-            border: 1px solid var(--glass-border);
-            animation: slideInFromTop 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .alert-success-glass {
-            border-left: 4px solid #56ab2f;
+        /* Alert Messages */
+        .alert-message {
+            background: rgba(86, 171, 47, 0.1);
+            border: 1px solid rgba(86, 171, 47, 0.3);
             color: #2d5016;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            animation: slideInFromTop 0.5s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .alert-danger-glass {
-            border-left: 4px solid #ff6b6b;
+        .alert-danger {
+            background: rgba(255, 107, 107, 0.1);
+            border-color: rgba(255, 107, 107, 0.3);
             color: #721c24;
         }
 
-        /* Animations from Design System */
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #7f8c8d;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Grid Layout for Language Cards */
+        .languages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 25px;
+        }
+
+        /* Animations */
         @keyframes slideInFromTop {
             from {
                 opacity: 0;
@@ -354,25 +393,14 @@
             }
         }
 
-        @keyframes fadeInUp {
+        @keyframes slideInFromLeft {
             from {
                 opacity: 0;
-                transform: translateY(40px);
+                transform: translateX(-50px);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes cardEntrance {
-            from {
-                opacity: 0;
-                transform: translateY(50px) rotate(2deg);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) rotate(0deg);
+                transform: translateX(0);
             }
         }
 
@@ -386,293 +414,271 @@
             50% { background-position: 100% 50%; }
         }
 
-        /* Grid System */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-            gap: var(--space-xl);
-        }
-
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .grid {
+            .languages-grid {
                 grid-template-columns: 1fr;
-                gap: var(--space-md);
+                gap: 20px;
             }
-        }
-
-        /* Form Layout */
-        .form-row {
-            display: flex;
-            gap: var(--space-sm);
-            margin-bottom: var(--space-md);
-        }
-
-        .form-group {
-            flex: 1;
-        }
-
-        @media (max-width: 768px) {
-            .form-row {
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .language-header {
                 flex-direction: column;
-                gap: var(--space-xs);
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
             }
         }
-
-        /* Staggered Animation for Cards */
-        .language-card:nth-child(1) { animation-delay: 0.1s; }
-        .language-card:nth-child(2) { animation-delay: 0.2s; }
-        .language-card:nth-child(3) { animation-delay: 0.3s; }
-        .language-card:nth-child(4) { animation-delay: 0.4s; }
-        .language-card:nth-child(5) { animation-delay: 0.5s; }
 
         /* Utility Classes */
-        .hover-lift {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .hover-lift:hover {
-            transform: translateY(-8px);
-        }
-
-        .gradient-text {
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        /* No Languages State */
-        .empty-state {
-            text-align: center;
-            padding: var(--space-3xl);
-            color: var(--text-muted);
-        }
-
-        .empty-state i {
-            font-size: 4rem;
-            margin-bottom: var(--space-md);
-            opacity: 0.5;
-        }
+        .mb-0 { margin-bottom: 0; }
+        .mb-1 { margin-bottom: 5px; }
+        .mb-2 { margin-bottom: 10px; }
+        .mb-3 { margin-bottom: 15px; }
+        .mb-4 { margin-bottom: 20px; }
+        .mt-3 { margin-top: 15px; }
+        .mt-4 { margin-top: 20px; }
+        .d-flex { display: flex; }
+        .justify-content-end { justify-content: flex-end; }
+        .justify-content-between { justify-content: space-between; }
+        .align-items-center { align-items: center; }
+        .text-center { text-align: center; }
+        .me-1 { margin-right: 5px; }
+        .me-2 { margin-right: 10px; }
     </style>
 
-    <!-- Alert Messages with Glass Effect -->
-    <asp:Panel ID="pnlAlert" runat="server" Visible="false">
-        <div class="alert-glass" id="alertDiv" runat="server">
-            <i class="fas fa-info-circle me-2"></i>
-            <asp:Label ID="lblMessage" runat="server"></asp:Label>
-        </div>
-    </asp:Panel>
-
-    <!-- Add Language Form with Glass Morphism -->
-    <div class="form-section">
-        <h3 class="form-header">
-            <i class="fas fa-plus-circle me-2"></i>
-            Add New Language Course
-        </h3>
-        
-        <div class="form-row">
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-language me-1"></i>
-                    Language Name
-                </label>
-                <asp:TextBox ID="txtLanguageName" runat="server" CssClass="glass-input" 
-                           placeholder="e.g., Korean, Japanese, Spanish" />
+    <div class="add-language-page">
+        <div class="languages-container">
+            <div class="page-header">
+                <h2 class="page-title">🌍 Language Course Manager</h2>
+                <p class="page-subtitle">Create and manage international language learning programs</p>
             </div>
-            
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-code me-1"></i>
-                    Language Code
-                </label>
-                <asp:TextBox ID="txtLanguageCode" runat="server" CssClass="glass-input" 
-                           placeholder="e.g., KR, JP, ES" />
-            </div>
-        </div>
 
-        <div class="form-row">
-            <div class="form-group">
-                <label class="form-label">
-                    <i class="fas fa-flag me-1"></i>
-                    Flag Emoji
-                </label>
-                <asp:TextBox ID="txtFlag" runat="server" CssClass="glass-input" 
-                           placeholder="e.g., 🇰🇷, 🇯🇵, 🇪🇸" />
-            </div>
-        </div>
+            <!-- Alert Messages -->
+            <asp:Panel ID="pnlAlert" runat="server" Visible="false">
+                <div class="alert-message" id="alertDiv" runat="server">
+                    <i class="fas fa-info-circle"></i>
+                    <asp:Label ID="lblMessage" runat="server"></asp:Label>
+                </div>
+            </asp:Panel>
 
-        <div class="form-group">
-            <label class="form-label">
-                <i class="fas fa-align-left me-1"></i>
-                Description
-            </label>
-            <asp:TextBox ID="txtDescription" runat="server" CssClass="glass-input" 
-                       TextMode="MultiLine" Rows="3" 
-                       placeholder="Brief description of the language course..." />
-        </div>
-
-        <div class="d-flex justify-content-end mt-4">
-            <asp:Button ID="btnAddLanguage" runat="server" Text="✨ Add Language Course" 
-                      CssClass="primary-button" OnClick="btnAddLanguage_Click" />
-        </div>
-    </div>
-
-    <!-- Language Courses Section -->
-    <div class="form-section">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="form-header mb-0">
-                <i class="fas fa-globe me-2"></i>
-                Language Courses
-            </h3>
-            <asp:Button ID="btnRefreshLanguages" runat="server" Text="🔄 Refresh" 
-                      CssClass="primary-button" OnClick="btnRefreshLanguages_Click" />
-        </div>
-        
-        <div class="grid">
-            <asp:Repeater ID="rptLanguages" runat="server" OnItemCommand="rptLanguages_ItemCommand">
-                <ItemTemplate>
-                    <div class="language-card glass-card">
-                        <div class="language-header">
-                            <div class="language-info-wrapper">
-                                <div class="language-flag"><%# Eval("Flag") %></div>
-                                <div class="language-info">
-                                    <h5><%# Eval("Name") %></h5>
-                                    <small><%# Eval("Description") %></small>
-                                </div>
-                            </div>
-                            <button class="manage-button" type="button" 
-                                    data-bs-toggle="collapse" 
-                                    data-bs-target="#language<%# Container.ItemIndex %>" 
-                                    aria-expanded="false">
-                                <i class="fas fa-cog"></i> Manage
-                            </button>
+            <!-- Add Language Form -->
+            <div class="glass-card">
+                <div class="card-header">
+                    <i class="fas fa-plus-circle"></i>
+                    Add New Language Course
+                </div>
+                <div class="card-body">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-language me-1"></i>
+                                Language Name
+                            </label>
+                            <asp:TextBox ID="txtLanguageName" runat="server" CssClass="form-control" 
+                                       placeholder="e.g., Korean, Japanese, Spanish" />
                         </div>
                         
-                        <div class="language-stats">
-                            <div class="stat-row">
-                                <span class="stat-label">
-                                    <i class="fas fa-code me-1"></i>Code:
-                                </span>
-                                <span class="stat-value"><%# Eval("Code") %></span>
-                            </div>
-                            <div class="stat-row">
-                                <span class="stat-label">
-                                    <i class="fas fa-calendar me-1"></i>Created:
-                                </span>
-                                <span class="stat-value"><%# Eval("CreatedDate", "{0:MMM dd, yyyy}") %></span>
-                            </div>
-                            
-                            <div class="student-count-badge">
-                                <i class="fas fa-users me-2"></i>
-                                <strong><%# Eval("StudentCount") %> Students Enrolled</strong>
-                            </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-code me-1"></i>
+                                Language Code
+                            </label>
+                            <asp:TextBox ID="txtLanguageCode" runat="server" CssClass="form-control" 
+                                       placeholder="e.g., KR, JP, ES" />
                         </div>
-                        
-                        <div class="collapse" id="language<%# Container.ItemIndex %>">
-                            <div class="p-3">
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        <div class="edit-section">
-                                            <h6 class="gradient-text mb-3">
-                                                <i class="fas fa-edit me-1"></i>
-                                                Edit Language Details
-                                            </h6>
-                                            <div class="form-row">
-                                                <div class="form-group">
-                                                    <label class="form-label">Language Name</label>
-                                                    <asp:TextBox ID="txtEditLanguageName" runat="server" CssClass="glass-input" 
-                                                               Text='<%# Eval("Name") %>' />
-                                                </div>
-                                                <div class="form-group">
-                                                    <label class="form-label">Language Code</label>
-                                                    <asp:TextBox ID="txtEditLanguageCode" runat="server" CssClass="glass-input" 
-                                                               Text='<%# Eval("Code") %>' />
-                                                </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-flag me-1"></i>
+                                Flag Emoji
+                            </label>
+                            <asp:TextBox ID="txtFlag" runat="server" CssClass="form-control" 
+                                       placeholder="e.g., 🇰🇷, 🇯🇵, 🇪🇸" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-align-left me-1"></i>
+                                Description
+                            </label>
+                            <asp:TextBox ID="txtDescription" runat="server" CssClass="form-control" 
+                                       TextMode="MultiLine" Rows="3" 
+                                       placeholder="Brief description of the language course..." />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <asp:Button ID="btnAddLanguage" runat="server" Text="✨ Add Language Course" 
+                                  CssClass="primary-button" OnClick="btnAddLanguage_Click" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Language Courses Section -->
+            <div class="glass-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-globe me-2"></i>
+                        Language Courses
+                    </div>
+                    <asp:Button ID="btnRefreshLanguages" runat="server" Text="🔄 Refresh" 
+                              CssClass="secondary-button" OnClick="btnRefreshLanguages_Click" />
+                </div>
+                <div class="card-body">
+                    <div class="languages-grid">
+                        <asp:Repeater ID="rptLanguages" runat="server" OnItemCommand="rptLanguages_ItemCommand">
+                            <ItemTemplate>
+                                <div class="language-card">
+                                    <div class="language-header">
+                                        <div class="language-info-wrapper">
+                                            <div class="language-flag"><%# Eval("Flag") %></div>
+                                            <div class="language-info">
+                                                <h5><%# Eval("Name") %></h5>
+                                                <small><%# Eval("Description") %></small>
                                             </div>
-                                            <div class="form-row">
-                                                <div class="form-group">
-                                                    <label class="form-label">Flag Emoji</label>
-                                                    <asp:TextBox ID="txtEditFlag" runat="server" CssClass="glass-input" 
-                                                               Text='<%# Eval("Flag") %>' />
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="form-label">Description</label>
-                                                <asp:TextBox ID="txtEditDescription" runat="server" CssClass="glass-input" 
-                                                           TextMode="MultiLine" Rows="3" 
-                                                           Text='<%# Eval("Description") %>' />
-                                            </div>
+                                        </div>
+                                        <button class="secondary-button" type="button" 
+                                                data-bs-toggle="collapse" 
+                                                data-bs-target="#language<%# Container.ItemIndex %>" 
+                                                aria-expanded="false">
+                                            <i class="fas fa-cog"></i> Manage
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="language-stats">
+                                        <div class="stat-row">
+                                            <span class="stat-label">
+                                                <i class="fas fa-code me-1"></i>Code:
+                                            </span>
+                                            <span class="stat-value"><%# Eval("Code") %></span>
+                                        </div>
+                                        <div class="stat-row">
+                                            <span class="stat-label">
+                                                <i class="fas fa-calendar me-1"></i>Created:
+                                            </span>
+                                            <span class="stat-value"><%# Eval("CreatedDate", "{0:MMM dd, yyyy}") %></span>
+                                        </div>
+                                        
+                                        <div class="student-count-badge">
+                                            <i class="fas fa-users me-2"></i>
+                                            <strong><%# Eval("StudentCount") %> Students Enrolled</strong>
                                         </div>
                                     </div>
                                     
-                                    <div class="col-md-4">
-                                        <div class="edit-section">
-                                            <h6 class="gradient-text mb-3">
-                                                <i class="fas fa-chart-bar me-1"></i>
-                                                Course Statistics
-                                            </h6>
-                                            <div class="mb-3">
-                                                <small class="text-muted d-block">Students Enrolled:</small>
-                                                <div class="fs-3 fw-bold gradient-text"><%# Eval("StudentCount") %></div>
-                                            </div>
-                                            <div class="mb-4">
-                                                <small class="text-muted d-block">Course Status:</small>
-                                                <span class="badge" style="background: linear-gradient(45deg, #56ab2f, #a8e6cf); color: white;">
-                                                    ✅ Active
-                                                </span>
-                                            </div>
-                                            
-                                            <div class="action-buttons d-grid gap-2">
-                                                <asp:LinkButton ID="btnUpdate" runat="server" 
-                                                              CssClass="btn btn-success-glass btn-sm" 
-                                                              CommandName="UpdateLanguage" 
-                                                              CommandArgument='<%# Eval("Id") %>'
-                                                              OnClientClick="return confirm('Update this language course?');">
-                                                    💾 Update Course
-                                                </asp:LinkButton>
+                                    <div class="collapse" id="language<%# Container.ItemIndex %>">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <div class="edit-section">
+                                                        <h6 class="mb-3">
+                                                            <i class="fas fa-edit me-1"></i>
+                                                            Edit Language Details
+                                                        </h6>
+                                                        <div class="form-grid">
+                                                            <div class="form-group">
+                                                                <label class="form-label">Language Name</label>
+                                                                <asp:TextBox ID="txtEditLanguageName" runat="server" CssClass="form-control" 
+                                                                           Text='<%# Eval("Name") %>' />
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="form-label">Language Code</label>
+                                                                <asp:TextBox ID="txtEditLanguageCode" runat="server" CssClass="form-control" 
+                                                                           Text='<%# Eval("Code") %>' />
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="form-label">Flag Emoji</label>
+                                                                <asp:TextBox ID="txtEditFlag" runat="server" CssClass="form-control" 
+                                                                           Text='<%# Eval("Flag") %>' />
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label class="form-label">Description</label>
+                                                                <asp:TextBox ID="txtEditDescription" runat="server" CssClass="form-control" 
+                                                                           TextMode="MultiLine" Rows="3" 
+                                                                           Text='<%# Eval("Description") %>' />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                 
-                                                <asp:LinkButton ID="btnViewStudents" runat="server" 
-                                                              CssClass="btn btn-info-glass btn-sm" 
-                                                              CommandName="ViewStudents" 
-                                                              CommandArgument='<%# Eval("Id") %>'>
-                                                    👥 View Students
-                                                </asp:LinkButton>
-                                                
-                                                <asp:LinkButton ID="btnDelete" runat="server" 
-                                                              CssClass="btn btn-danger-glass btn-sm" 
-                                                              CommandName="DeleteLanguage" 
-                                                              CommandArgument='<%# Eval("Id") %>'
-                                                              OnClientClick="return confirm('⚠️ Delete this language course permanently?');">
-                                                    🗑️ Delete Course
-                                                </asp:LinkButton>
+                                                <div class="col-md-4">
+                                                    <div class="edit-section">
+                                                        <h6 class="mb-3">
+                                                            <i class="fas fa-chart-bar me-1"></i>
+                                                            Course Statistics
+                                                        </h6>
+                                                        <div class="mb-3">
+                                                            <small style="color: #7f8c8d; display: block;">Students Enrolled:</small>
+                                                            <div style="font-size: 24px; font-weight: bold; color: #667eea;"><%# Eval("StudentCount") %></div>
+                                                        </div>
+                                                        <div class="mb-4">
+                                                            <small style="color: #7f8c8d; display: block;">Course Status:</small>
+                                                            <span style="background: linear-gradient(45deg, #56ab2f, #a8e6cf); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">
+                                                                ✅ Active
+                                                            </span>
+                                                        </div>
+                                                        
+                                                        <div class="action-buttons">
+                                                            <asp:LinkButton ID="btnUpdate" runat="server" 
+                                                                          CssClass="success-button" 
+                                                                          CommandName="UpdateLanguage" 
+                                                                          CommandArgument='<%# Eval("Id") %>'
+                                                                          OnClientClick="return confirm('Update this language course?');">
+                                                                <i class="fas fa-save"></i> Update Course
+                                                            </asp:LinkButton>
+                                                            
+                                                            <asp:LinkButton ID="btnViewStudents" runat="server" 
+                                                                          CssClass="info-button" 
+                                                                          CommandName="ViewStudents" 
+                                                                          CommandArgument='<%# Eval("Id") %>'>
+                                                                <i class="fas fa-users"></i> View Students
+                                                            </asp:LinkButton>
+                                                            
+                                                            <asp:LinkButton ID="btnDelete" runat="server" 
+                                                                          CssClass="danger-button" 
+                                                                          CommandName="DeleteLanguage" 
+                                                                          CommandArgument='<%# Eval("Id") %>'
+                                                                          OnClientClick="return confirm('⚠️ Delete this language course permanently?');">
+                                                                <i class="fas fa-trash"></i> Delete Course
+                                                            </asp:LinkButton>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+                            </ItemTemplate>
+                        </asp:Repeater>
                     </div>
-                </ItemTemplate>
-            </asp:Repeater>
+                    
+                    <asp:Panel ID="pnlNoLanguages" runat="server" Visible="false" CssClass="empty-state">
+                        <i class="fas fa-globe"></i>
+                        <h4>No Language Courses Found</h4>
+                        <p>Create your first language course using the form above</p>
+                    </asp:Panel>
+                </div>
+            </div>
         </div>
-        
-        <asp:Panel ID="pnlNoLanguages" runat="server" Visible="false" CssClass="empty-state">
-            <i class="fas fa-globe"></i>
-            <h4>No Language Courses Found</h4>
-            <p>Create your first language course using the form above</p>
-        </asp:Panel>
     </div>
 
     <script>
-        // Enhanced JavaScript with Design System Animations
+        // Modern JavaScript enhancements
         document.addEventListener('DOMContentLoaded', function () {
-            // Auto-hide alerts with glass effect
+            // Auto-hide alerts
             setTimeout(function () {
-                var alert = document.querySelector('.alert-glass');
+                var alert = document.querySelector('.alert-message');
                 if (alert) {
                     alert.style.opacity = '0';
                     alert.style.transform = 'translateY(-20px)';
-                    alert.style.transition = 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+                    alert.style.transition = 'all 0.5s ease';
                     setTimeout(function () {
                         alert.style.display = 'none';
                     }, 500);
@@ -682,12 +688,8 @@
             // Apply staggered animations to language cards
             const cards = document.querySelectorAll('.language-card');
             cards.forEach((card, index) => {
-                card.style.setProperty('--index', index);
                 card.style.animationDelay = `${index * 0.1}s`;
-            });
 
-            // Enhanced hover effects
-            cards.forEach(card => {
                 card.addEventListener('mouseenter', function () {
                     this.style.transform = 'translateY(-8px) scale(1.02)';
                     this.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.15)';
@@ -695,48 +697,26 @@
 
                 card.addEventListener('mouseleave', function () {
                     this.style.transform = 'translateY(0) scale(1)';
-                    this.style.boxShadow = 'var(--glass-shadow)';
+                    this.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.1)';
                 });
             });
 
             // Form input focus effects
-            const inputs = document.querySelectorAll('.glass-input');
+            const inputs = document.querySelectorAll('.form-control');
             inputs.forEach(input => {
                 input.addEventListener('focus', function () {
-                    this.parentElement.style.transform = 'scale(1.02)';
-                    this.parentElement.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                    this.style.transform = 'scale(1.02)';
+                    this.style.borderColor = '#667eea';
+                    this.style.boxShadow = '0 0 0 3px rgba(103, 126, 234, 0.3)';
                 });
 
                 input.addEventListener('blur', function () {
-                    this.parentElement.style.transform = 'scale(1)';
+                    this.style.transform = 'scale(1)';
                 });
             });
-
-            // Bootstrap tooltip initialization with glass effect
-            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
-                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                    return new bootstrap.Tooltip(tooltipTriggerEl);
-                });
-            }
 
             // Add smooth scroll behavior
             document.documentElement.style.scrollBehavior = 'smooth';
         });
-
-        // Page entrance animation
-        window.addEventListener('load', function () {
-            document.body.style.opacity = '1';
-            document.body.style.transform = 'translateY(0)';
-        });
     </script>
-
-    <style>
-        /* Page load animation */
-        body {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-    </style>
 </asp:Content>
