@@ -303,7 +303,6 @@
   <ItemGroup>
     <Content Include="AddBook.aspx" />
     <Content Include="AddLanguage.aspx" />
-    <Content Include="AddLanguageCard.aspx" />
     <Content Include="AddQuestion.aspx" />
     <Content Include="AddScholarship.aspx" />
     <Content Include="Admin.aspx" />
@@ -333,6 +332,7 @@
     <Content Include="CreateQuiz.aspx" />
     <Content Include="CreateStudyGroup.aspx" />
     <Content Include="Default.aspx" />
+    <Content Include="DisplayQuestion.aspx" />
     <Content Include="FavBooks.aspx" />
     <Content Include="favicon.ico" />
     <Content Include="GeminiAi.aspx" />
@@ -340,6 +340,7 @@
     <Content Include="Images\dprofile.jpg" />
     <Content Include="Images\logo.png" />
     <Content Include="Korean.aspx" />
+    <Content Include="Language.aspx" />
     <Content Include="LearningReport.aspx" />
     <Content Include="Library.aspx" />
     <Content Include="ManageClassroom.aspx" />
@@ -357,7 +358,6 @@
     <Content Include="libman.json" />
     <Content Include="PreviewBook.aspx" />
     <Content Include="Feedback.aspx" />
-    <Content Include="Learning.aspx" />
     <Content Include="StudyHub.aspx" />
     <Content Include="protos\google\type\timeofday.proto" />
     <Content Include="protos\google\type\quaternion.proto" />
@@ -445,6 +445,7 @@
     <Content Include="Login.aspx" />
     <Content Include="StudyHubGroup.aspx" />
     <Content Include="SubmitResult.aspx" />
+    <Content Include="TakeQuiz.aspx" />
     <Content Include="ViewSwitcher.ascx" />
     <Content Include="Web.config" />
     <Content Include="Bundle.config" />
@@ -463,13 +464,6 @@
     </Compile>
     <Compile Include="AddLanguage.aspx.designer.cs">
       <DependentUpon>AddLanguage.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="AddLanguageCard.aspx.cs">
-      <DependentUpon>AddLanguageCard.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="AddLanguageCard.aspx.designer.cs">
-      <DependentUpon>AddLanguageCard.aspx</DependentUpon>
     </Compile>
     <Compile Include="AddQuestion.aspx.cs">
       <DependentUpon>AddQuestion.aspx</DependentUpon>
@@ -508,6 +502,13 @@
     <Compile Include="Class.aspx.designer.cs">
       <DependentUpon>Class.aspx</DependentUpon>
     </Compile>
+    <Compile Include="DisplayQuestion.aspx.cs">
+      <DependentUpon>DisplayQuestion.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="DisplayQuestion.aspx.designer.cs">
+      <DependentUpon>DisplayQuestion.aspx</DependentUpon>
+    </Compile>
     <Compile Include="GeminiAi.aspx.cs">
       <DependentUpon>GeminiAi.aspx</DependentUpon>
     </Compile>
@@ -537,6 +538,13 @@
     </Compile>
     <Compile Include="Korean.aspx.designer.cs">
       <DependentUpon>Korean.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Language.aspx.cs">
+      <DependentUpon>Language.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Language.aspx.designer.cs">
+      <DependentUpon>Language.aspx</DependentUpon>
     </Compile>
     <Compile Include="LearningReport.aspx.cs">
       <DependentUpon>LearningReport.aspx</DependentUpon>
@@ -666,6 +674,13 @@
     <Compile Include="SubmitResult.aspx.designer.cs">
       <DependentUpon>SubmitResult.aspx</DependentUpon>
     </Compile>
+    <Compile Include="TakeQuiz.aspx.cs">
+      <DependentUpon>TakeQuiz.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TakeQuiz.aspx.designer.cs">
+      <DependentUpon>TakeQuiz.aspx</DependentUpon>
+    </Compile>
     <Compile Include="TeacherSite.Master.cs">
       <DependentUpon>TeacherSite.Master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -700,13 +715,6 @@
     </Compile>
     <Compile Include="Feedback.aspx.designer.cs">
       <DependentUpon>Feedback.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Learning.aspx.cs">
-      <DependentUpon>Learning.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Learning.aspx.designer.cs">
-      <DependentUpon>Learning.aspx</DependentUpon>
     </Compile>
     <Compile Include="StudyHub.aspx.cs">
       <DependentUpon>StudyHub.aspx</DependentUpon>

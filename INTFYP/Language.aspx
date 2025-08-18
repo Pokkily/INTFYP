@@ -1,14 +1,14 @@
-﻿<%@ Page Async="true" Title="FavBooks" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeBehind="FavBooks.aspx.cs" Inherits="INTFYP.FavBooks" %>
+﻿<%@ Page Async="true" Title="Languages" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeBehind="Language.aspx.cs" Inherits="INTFYP.Language" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
-    Favorite Books
+    Languages
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Enhanced FavBooks Page with Library Design Formula */
         
-        .library-page {
+        
+        .language-page {
             padding: 40px 20px;
             font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -18,7 +18,7 @@
         }
 
         /* Animated background elements */
-        .library-page::before {
+        .language-page::before {
             content: '';
             position: fixed;
             top: 0;
@@ -40,7 +40,7 @@
             75% { transform: translate(-10px, 10px) rotate(0.5deg); }
         }
 
-        .library-container {
+        .language-container {
             max-width: 1200px;
             margin: 0 auto;
             position: relative;
@@ -79,7 +79,7 @@
             bottom: -8px;
             left: 50%;
             transform: translateX(-50%);
-            width: 60px;
+            width: 80px;
             height: 4px;
             background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
             border-radius: 2px;
@@ -88,7 +88,7 @@
 
         @keyframes expandWidth {
             from { width: 0; }
-            to { width: 60px; }
+            to { width: 80px; }
         }
 
         .page-subtitle {
@@ -285,12 +285,12 @@
         }
 
         .content-title::before {
-            content: '⭐';
+            content: '🌍';
             font-size: 22px;
         }
 
-        /* Book Cards - Grid */
-        .books-grid {
+        /* Language Cards Grid */
+        .languages-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 15px;
@@ -308,7 +308,7 @@
             }
         }
 
-        .book-card {
+        .language-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -323,6 +323,9 @@
             height: 100%;
             display: flex;
             flex-direction: column;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
         }
 
         @keyframes cardEntrance {
@@ -336,7 +339,7 @@
             }
         }
 
-        .book-card::before {
+        .language-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -348,172 +351,62 @@
             animation: gradientShift 3s ease infinite;
         }
 
-        .book-card:hover {
+        .language-card:hover {
             transform: translateY(-6px) translateX(3px) scale(1.01);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
             background: rgba(255, 255, 255, 1);
+            text-decoration: none;
+            color: inherit;
         }
 
-        .book-icon {
-            width: 50px;
-            height: 50px;
+        .language-flag {
+            width: 80px;
+            height: 80px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 10px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 12px;
+            margin: 0 auto 15px auto;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 15px rgba(103, 126, 234, 0.2);
+            font-size: 35px;
         }
 
-        .book-icon::before {
-            content: '⭐';
-            font-size: 20px;
-            opacity: 0.9;
-        }
-
-        .book-card:hover .book-icon {
+        .language-card:hover .language-flag {
             transform: scale(1.05) rotate(3deg);
             box-shadow: 0 6px 20px rgba(103, 126, 234, 0.3);
         }
 
-        .book-title {
-            font-size: 16px;
+        .language-name {
+            font-size: 18px;
             font-weight: 700;
             color: #2c3e50;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            text-align: center;
             line-height: 1.3;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            min-height: 2.4em;
         }
 
-        .book-author {
+        .language-code {
             color: #7f8c8d;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 500;
-            margin-bottom: 10px;
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .category-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 5px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
             margin-bottom: 12px;
-            background: rgba(103, 126, 234, 0.1);
-            color: #667eea;
-            border: 1px solid rgba(103, 126, 234, 0.2);
+            text-align: center;
+            text-transform: uppercase;
         }
 
-        .book-actions {
-            display: flex;
-            gap: 6px;
-            margin-top: auto;
-            flex-wrap: wrap;
-        }
-
-        .book-action-btn {
-            padding: 7px 12px;
-            border-radius: 18px;
-            border: none;
-            cursor: pointer;
-            font-size: 11px;
-            font-weight: 600;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
+        .language-description {
+            color: #95a5a6;
+            font-size: 13px;
+            text-align: center;
+            line-height: 1.4;
             flex: 1;
-            justify-content: center;
-            min-width: 75px;
+            margin-bottom: 0;
         }
 
-        .book-action-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.6s ease;
-        }
-
-        .book-action-btn:hover::before {
-            width: 200px;
-            height: 200px;
-        }
-
-        .book-action-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        /* Button styles */
-        .btn-recommend {
-            background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%);
-            color: #2c3e50;
-            box-shadow: 0 4px 15px rgba(200, 200, 200, 0.3);
-        }
-
-        .btn-recommend:hover {
-            background: linear-gradient(135deg, #d8b5f0 0%, #c9a9e0 100%);
-            box-shadow: 0 8px 25px rgba(216, 181, 240, 0.4);
-        }
-
-        .btn-recommend.active {
-            background: linear-gradient(135deg, #d8b5f0 0%, #c9a9e0 100%) !important;
-            box-shadow: 0 8px 25px rgba(216, 181, 240, 0.5) !important;
-            color: #ffffff !important;
-        }
-
-        .btn-favorite {
-            background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%);
-            color: #2c3e50;
-            box-shadow: 0 4px 15px rgba(200, 200, 200, 0.3);
-        }
-
-        .btn-favorite:hover {
-            background: linear-gradient(135deg, #9caf88 0%, #8a9c78 100%);
-            box-shadow: 0 8px 25px rgba(156, 175, 136, 0.4);
-        }
-
-        .btn-favorite.active {
-            background: linear-gradient(135deg, #9caf88 0%, #8a9c78 100%) !important;
-            box-shadow: 0 8px 25px rgba(156, 175, 136, 0.5) !important;
-            color: #ffffff !important;
-        }
-
-        .btn-recommend.clicked,
-        .btn-favorite.clicked {
-            animation: buttonPulse 0.6s ease-out;
-        }
-
-        @keyframes buttonPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        /* No Books Message */
-        .no-books {
+        /* No Languages Message */
+        .no-languages {
             text-align: center;
             padding: 40px 30px;
             background: rgba(255, 255, 255, 0.1);
@@ -535,7 +428,7 @@
             }
         }
 
-        .no-books-icon {
+        .no-languages-icon {
             font-size: 48px;
             margin-bottom: 15px;
             opacity: 0.7;
@@ -547,45 +440,26 @@
             50% { transform: translateY(-10px); }
         }
 
-        .no-books h3 {
+        .no-languages h3 {
             font-size: 20px;
             font-weight: 600;
             margin-bottom: 8px;
             color: rgba(255, 255, 255, 0.9);
         }
 
-        .no-books p {
+        .no-languages p {
             font-size: 14px;
             color: rgba(255, 255, 255, 0.7);
             margin: 0;
         }
 
-        /* Top search bar styling */
-        .top-search-bar {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(103, 126, 234, 0.2);
-            border-radius: 25px;
-            padding: 10px 18px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            width: 250px;
-        }
-
-        .top-search-bar:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(103, 126, 234, 0.1);
-            background: rgba(255, 255, 255, 1);
-        }
-
         /* Responsive design */
         @media (max-width: 768px) {
-            .library-page {
+            .language-page {
                 padding: 20px 15px;
             }
 
-            .books-grid {
+            .languages-grid {
                 grid-template-columns: 1fr;
                 gap: 12px;
             }
@@ -596,17 +470,7 @@
                 gap: 12px;
             }
 
-            .search-input,
-            .top-search-bar {
-                width: 100%;
-            }
-
-            .book-actions {
-                flex-direction: column;
-                gap: 6px;
-            }
-
-            .book-action-btn {
+            .search-input {
                 width: 100%;
             }
         }
@@ -623,21 +487,20 @@
                 border-radius: 12px;
             }
 
-            .book-card {
+            .language-card {
                 padding: 12px;
                 border-radius: 12px;
             }
+
+            .language-flag {
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
+            }
         }
 
-        /* Content header with search */
-        .content-header-with-search {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .loading {
+        /* Loading states */
+        .language-card.loading {
             opacity: 0;
             animation: cardLoad 0.6s ease-out forwards;
         }
@@ -647,32 +510,23 @@
         }
     </style>
 
-    <div class="library-page">
-        <div class="library-container">
+    <div class="language-page">
+        <div class="language-container">
             <div class="page-header">
-                <h2 class="page-title">Your Favorite Books</h2>
-                <p class="page-subtitle">All Books You've Loved</p>
+                <h2 class="page-title">Choose Your Language</h2>
+                <p class="page-subtitle">Start Learning Today</p>
             </div>
 
             <div class="row">
                 <!-- Sidebar -->
                 <div class="col-md-3 mb-4">
                     <div class="sidebar-card">
-                        <h5 class="sidebar-title">Search Books</h5>
+                        <h5 class="sidebar-title">Search Languages</h5>
                         
-                        <asp:TextBox ID="txtBookSearch" runat="server" 
+                        <asp:TextBox ID="txtLanguageSearch" runat="server" 
                             CssClass="search-input"
-                            placeholder="Search by title, author, or category..." AutoPostBack="true"
-                            OnTextChanged="txtBookSearch_TextChanged" />
-
-                        <div class="d-grid gap-2">
-                            <button type="button" class="nav-button nav-button-primary" onclick="location.href='Library.aspx';">
-                                📚 Back to Library
-                            </button>
-                            <button type="button" class="nav-button nav-button-secondary" onclick="location.href='CitationGenerator.aspx';">
-                                📝 Citation Generator
-                            </button>
-                        </div>
+                            placeholder="Search by language name..." AutoPostBack="true"
+                            OnTextChanged="txtLanguageSearch_TextChanged" />
                     </div>
                 </div>
 
@@ -680,47 +534,32 @@
                 <div class="col-md-9">
                     <div class="main-content-card">
                         <div class="content-header">
-                            <h3 class="content-title">Your Favorites</h3>
+                            <h3 class="content-title">Available Languages</h3>
                         </div>
                     </div>
 
-                    <asp:Panel ID="pnlNoBooks" runat="server" Visible="false" CssClass="no-books">
-                        <div class="no-books-icon">⭐</div>
-                        <h3>No Favorite Books Found</h3>
-                        <p>Start exploring the library and mark your favorite books!</p>
+                    <asp:Panel ID="pnlNoLanguages" runat="server" Visible="false" CssClass="no-languages">
+                        <div class="no-languages-icon">🌍</div>
+                        <h3>No Languages Found</h3>
+                        <p>Try adjusting your search criteria or add a new language!</p>
                     </asp:Panel>
 
-                    <asp:Repeater ID="Repeater1" runat="server" OnItemCommand="Repeater1_ItemCommand">
+                    <asp:Repeater ID="rptLanguages" runat="server" OnItemCommand="rptLanguages_ItemCommand">
                         <HeaderTemplate>
-                            <div class="books-grid">
+                            <div class="languages-grid">
                         </HeaderTemplate>
                         <ItemTemplate>
-                            <div class="book-card" style="--card-index: <%# Container.ItemIndex %>;">
-                                <div class="book-icon"></div>
+                            <asp:LinkButton ID="lnkLanguageCard" runat="server" 
+                                CommandName="SelectLanguage" 
+                                CommandArgument='<%# Eval("Id") %>'
+                                CssClass="language-card" 
+                                style="--card-index: <%# Container.ItemIndex %>;">
                                 
-                                <a href='<%# "PreviewBook.aspx?pdfUrl=" + HttpUtility.UrlEncode(Eval("PdfUrl").ToString()) %>' 
-                                   style="text-decoration: none; color: inherit; flex: 1; display: flex; flex-direction: column;">
-                                    
-                                    <h5 class="book-title"><%# Eval("Title") %></h5>
-                                    <p class="book-author"><%# Eval("Author") %></p>
-                                    <span class="category-badge">#<%# Eval("Category") %></span>
-                                </a>
-                                
-                                <div class="book-actions">
-                                    <asp:Button ID="btnRecommend" runat="server"
-                                        Text='<%# String.Format("{0} ❤️", Eval("Recommendations")) %>'
-                                        CommandName="Recommend"
-                                        CommandArgument='<%# Eval("DocumentId") %>'
-                                        CssClass='<%# "book-action-btn btn-recommend" + (Convert.ToBoolean(Eval("IsRecommended")) ? " active" : "") %>'
-                                        OnClientClick="addClickEffect(this); return true;" />
-                                    <asp:Button ID="btnFavorite" runat="server"
-                                        Text="⭐"
-                                        CommandName="Favorite"
-                                        CommandArgument='<%# Eval("DocumentId") %>'
-                                        CssClass='<%# "book-action-btn btn-favorite" + (Convert.ToBoolean(Eval("IsFavorited")) ? " active" : "") %>'
-                                        OnClientClick="addClickEffect(this); return true;" />
-                                </div>
-                            </div>
+                                <div class="language-flag"><%# Eval("Flag") %></div>
+                                <h5 class="language-name"><%# Eval("Name") %></h5>
+                                <p class="language-code"><%# Eval("Code") %></p>
+                                <p class="language-description"><%# Eval("Description") %></p>
+                            </asp:LinkButton>
                         </ItemTemplate>
                         <FooterTemplate>
                             </div>
@@ -730,18 +569,6 @@
             </div>
         </div>
     </div>
-
-    <script>
-        function addClickEffect(button) {
-            // Add clicked class for animation
-            button.classList.add('clicked');
-
-            // Remove the class after animation completes
-            setTimeout(function () {
-                button.classList.remove('clicked');
-            }, 600);
-        }
-    </script>
 
     <!-- Font Awesome for additional icons if needed -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
