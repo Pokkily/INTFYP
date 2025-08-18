@@ -341,7 +341,6 @@
     <Content Include="Images\logo.png" />
     <Content Include="Korean.aspx" />
     <Content Include="Language.aspx" />
-    <Content Include="LearningReport.aspx" />
     <Content Include="Library.aspx" />
     <Content Include="ManageClassroom.aspx" />
     <Content Include="Quiz.aspx" />
@@ -545,13 +544,6 @@
     </Compile>
     <Compile Include="Language.aspx.designer.cs">
       <DependentUpon>Language.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="LearningReport.aspx.cs">
-      <DependentUpon>LearningReport.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="LearningReport.aspx.designer.cs">
-      <DependentUpon>LearningReport.aspx</DependentUpon>
     </Compile>
     <Compile Include="QuizModels.cs" />
     <Compile Include="ClassDetails.aspx.cs">
