@@ -1,6 +1,7 @@
 ﻿using Google.Cloud.Firestore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -50,7 +51,7 @@ namespace YourProjectNamespace
                 return;
             }
 
-            var entries = new List<ClassroomEntry>();
+            var allEntries = new List<ClassroomEntry>();
 
             try
             {
@@ -71,13 +72,17 @@ namespace YourProjectNamespace
                         string name = doc.GetValue<string>("name");
                         string creatorName = await GetUserFullName(userEmail);
 
-                        entries.Add(new ClassroomEntry
+                        // Check if class is archived (default to false if field doesn't exist)
+                        bool isArchived = doc.ContainsField("isArchived") ? doc.GetValue<bool>("isArchived") : false;
+
+                        allEntries.Add(new ClassroomEntry
                         {
                             classId = classId,
                             name = name,
                             createdByName = creatorName,
                             origin = "created",
-                            status = "created"
+                            status = "created",
+                            isArchived = isArchived
                         });
                     }
                 }
@@ -107,25 +112,42 @@ namespace YourProjectNamespace
                         string creatorEmail = classDoc.GetValue<string>("createdBy");
                         string creatorName = await GetUserFullName(creatorEmail);
 
-                        entries.Add(new ClassroomEntry
+                        // Check if class is archived (default to false if field doesn't exist)
+                        bool isArchived = classDoc.ContainsField("isArchived") ? classDoc.GetValue<bool>("isArchived") : false;
+
+                        allEntries.Add(new ClassroomEntry
                         {
                             classId = classId,
                             name = name,
                             createdByName = creatorName,
                             origin = "invited",
-                            status = status
+                            status = status,
+                            isArchived = isArchived
                         });
                     }
                 }
 
-                rptClasses.DataSource = entries;
-                rptClasses.DataBind();
-                pnlNoClasses.Visible = entries.Count == 0;
+                // Separate active and archived classes
+                var activeEntries = allEntries.Where(e => !e.isArchived).ToList();
+                var archivedEntries = allEntries.Where(e => e.isArchived).ToList();
+
+                // Bind active classes
+                rptActiveClasses.DataSource = activeEntries;
+                rptActiveClasses.DataBind();
+                pnlNoActiveClasses.Visible = activeEntries.Count == 0;
+
+                // Bind archived classes
+                rptArchivedClasses.DataSource = archivedEntries;
+                rptArchivedClasses.DataBind();
+                pnlNoArchivedClasses.Visible = archivedEntries.Count == 0;
+
+                System.Diagnostics.Debug.WriteLine($"Active classes: {activeEntries.Count}, Archived classes: {archivedEntries.Count}");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error in LoadClassesAsync: {ex.Message}");
-                pnlNoClasses.Visible = true;
+                pnlNoActiveClasses.Visible = true;
+                pnlNoArchivedClasses.Visible = true;
             }
         }
 
@@ -182,7 +204,6 @@ namespace YourProjectNamespace
                 {
                     Response.Redirect($"ClassDetails.aspx?classId={classId}", false);
                     Context.ApplicationInstance.CompleteRequest(); // Prevents ThreadAbortException
-
                 }
             }
             catch (Exception ex)
@@ -198,6 +219,7 @@ namespace YourProjectNamespace
             public string createdByName { get; set; }
             public string origin { get; set; }  // "created" or "invited"
             public string status { get; set; }  // "pending", "accepted", or "created"
+            public bool isArchived { get; set; } // Archive status
         }
     }
 }

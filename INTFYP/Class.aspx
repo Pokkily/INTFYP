@@ -97,6 +97,25 @@
             to { width: 60px; }
         }
 
+        .section-header {
+            margin-top: 40px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 10px;
+            display: inline-block;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
         .classes-list {
             animation: slideInFromBottom 1s ease-out 0.3s both;
         }
@@ -130,6 +149,27 @@
             animation-delay: calc(var(--card-index, 0) * 0.1s);
         }
 
+        /* Archived class styling */
+        .class-card.archived {
+            background: rgba(255, 255, 255, 0.7);
+            opacity: 0.8;
+            border-left: 4px solid #6c757d;
+        }
+
+        .class-card.archived .class-details h5 {
+            color: #6c757d;
+        }
+
+        .class-card.archived .class-image {
+            background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+        }
+
+        .class-card.archived .status-badge {
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+            border: 1px solid rgba(108, 117, 125, 0.2);
+        }
+
         @keyframes cardEntrance {
             from { 
                 opacity: 0; 
@@ -153,6 +193,10 @@
             animation: gradientShift 3s ease infinite;
         }
 
+        .class-card.archived::before {
+            background: linear-gradient(90deg, #6c757d, #495057);
+        }
+
         @keyframes gradientShift {
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -162,6 +206,10 @@
             transform: translateY(-8px) translateX(5px) scale(1.02);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
             background: rgba(255, 255, 255, 1);
+        }
+
+        .class-card.archived:hover {
+            background: rgba(255, 255, 255, 0.9);
         }
 
         .class-card:hover .class-image {
@@ -190,6 +238,11 @@
             animation: iconFloat 3s ease-in-out infinite;
         }
 
+        .class-card.archived .class-image::before {
+            content: '📦';
+            opacity: 0.7;
+        }
+
         @keyframes iconFloat {
             0%, 100% { transform: translateY(0) rotate(0deg); }
             50% { transform: translateY(-5px) rotate(5deg); }
@@ -211,6 +264,10 @@
 
         .class-card:hover .class-details h5 {
             color: #667eea;
+        }
+
+        .class-card.archived:hover .class-details h5 {
+            color: #6c757d;
         }
 
         .class-meta {
@@ -250,6 +307,12 @@
             background: rgba(78, 205, 196, 0.1);
             color: #4ecdc4;
             border: 1px solid rgba(78, 205, 196, 0.2);
+        }
+
+        .archive-badge {
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+            border: 1px solid rgba(108, 117, 125, 0.2);
         }
 
         .class-actions {
@@ -348,6 +411,17 @@
             box-shadow: 0 8px 25px rgba(103, 126, 234, 0.2);
         }
 
+        .btn-view.archived {
+            background: rgba(108, 117, 125, 0.1);
+            color: #6c757d;
+            border: 2px solid rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-view.archived:hover {
+            background: rgba(108, 117, 125, 0.2);
+            border-color: #6c757d;
+        }
+
         .no-classes {
             text-align: center;
             padding: 60px 40px;
@@ -357,6 +431,7 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: rgba(255, 255, 255, 0.9);
             animation: fadeInUp 1s ease-out 0.6s both;
+            margin-bottom: 20px;
         }
 
         @keyframes fadeInUp {
@@ -470,14 +545,19 @@
                 <h2 class="page-title">Your Classes</h2>
             </div>
 
-            <asp:Panel ID="pnlNoClasses" runat="server" Visible="false" CssClass="no-classes">
+            <!-- Active Classes Section -->
+            <div class="section-header">
+                <h3 class="section-title">Active Classes</h3>
+            </div>
+
+            <asp:Panel ID="pnlNoActiveClasses" runat="server" Visible="false" CssClass="no-classes">
                 <div class="no-classes-icon">🎓</div>
-                <h3>No Classes Yet</h3>
-                <p>You don't have any classes yet. Create one or wait for an invitation!</p>
+                <h3>No Active Classes</h3>
+                <p>You don't have any active classes yet. Create one or wait for an invitation!</p>
             </asp:Panel>
 
             <div class="classes-list">
-                <asp:Repeater ID="rptClasses" runat="server" OnItemCommand="rptClasses_ItemCommand">
+                <asp:Repeater ID="rptActiveClasses" runat="server" OnItemCommand="rptClasses_ItemCommand">
                     <ItemTemplate>
                         <div class="class-card" style="--card-index: <%# Container.ItemIndex %>;">
                             <div class="class-image"></div>
@@ -523,6 +603,48 @@
                                                 CommandArgument='<%# Eval("classId") %>'
                                                 CssClass="btn btn-view" />
                                 </asp:Panel>
+                            </div>
+                        </div>
+                    </ItemTemplate>
+                </asp:Repeater>
+            </div>
+
+            <!-- Archived Classes Section -->
+            <div class="section-header">
+                <h3 class="section-title">Archived Classes</h3>
+            </div>
+
+            <asp:Panel ID="pnlNoArchivedClasses" runat="server" Visible="false" CssClass="no-classes">
+                <div class="no-classes-icon">📦</div>
+                <h3>No Archived Classes</h3>
+                <p>You don't have any archived classes.</p>
+            </asp:Panel>
+
+            <div class="classes-list">
+                <asp:Repeater ID="rptArchivedClasses" runat="server" OnItemCommand="rptClasses_ItemCommand">
+                    <ItemTemplate>
+                        <div class="class-card archived" style="--card-index: <%# Container.ItemIndex %>;">
+                            <div class="class-image"></div>
+                            
+                            <div class="class-details">
+                                <h5><%# Eval("name") %></h5>
+                                
+                                <div class="class-meta">
+                                    <%# Eval("origin").ToString() == "created" 
+                                            ? "🧑‍🏫 Created By You" 
+                                            : $"📩 Invited by {Eval("createdByName")}" %>
+                                </div>
+                                
+                                <div class="status-badge archive-badge">
+                                    📦 Archived
+                                </div>
+                            </div>
+
+                            <div class="class-actions">
+                                <asp:Button ID="btnViewArchived" runat="server" Text="👁️ View"
+                                            CommandName="View"
+                                            CommandArgument='<%# Eval("classId") %>'
+                                            CssClass="btn btn-view archived" />
                             </div>
                         </div>
                     </ItemTemplate>

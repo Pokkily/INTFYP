@@ -1,9 +1,9 @@
-﻿<%@ Page Title="Classroom Details" 
-    Language="C#" 
-    MasterPageFile="~/Site.master" 
-    AutoEventWireup="true" 
-    CodeBehind="ClassDetails.aspx.cs" 
-    Inherits="YourProjectNamespace.ClassDetails" 
+﻿<%@ Page Title="Classroom Details"
+    Language="C#"
+    MasterPageFile="~/Site.master"
+    AutoEventWireup="true"
+    CodeBehind="ClassDetails.aspx.cs"
+    Inherits="YourProjectNamespace.ClassDetails"
     Async="true" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="TitleContent" runat="server">
@@ -12,489 +12,819 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Enhanced Classroom Details with Design Formula */
         
+
         .classroom-page {
-            padding: 40px 20px;
+            padding: 30px 20px;
             font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
             position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Animated background elements */
-        .classroom-page::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
-            animation: backgroundFloat 20s ease-in-out infinite;
-            z-index: -1;
-        }
-
-        @keyframes backgroundFloat {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            25% { transform: translate(-20px, -20px) rotate(1deg); }
-            50% { transform: translate(20px, -10px) rotate(-1deg); }
-            75% { transform: translate(-10px, 10px) rotate(0.5deg); }
         }
 
         .classroom-container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
             position: relative;
         }
 
         .classroom-header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 20px;
-            margin-bottom: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative;
-            overflow: hidden;
-            animation: slideInFromTop 1s ease-out;
-        }
-
-        .classroom-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2, #ff6b6b, #4ecdc4);
-            background-size: 400% 100%;
-            animation: gradientShift 3s ease infinite;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+            background: white;
+            padding: 25px 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            animation: slideInFromTop 0.6s ease-out;
         }
 
         @keyframes slideInFromTop {
-            from { 
-                opacity: 0; 
-                transform: translateY(-50px); 
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
             }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
         .classroom-title {
-            font-size: clamp(28px, 4vw, 36px);
+            font-size: 28px;
             font-weight: 700;
-            color: #2c3e50;
+            color: #1a202c;
             margin: 0;
-            position: relative;
-            display: inline-block;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        .classroom-title::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 0;
-            width: 60px;
-            height: 3px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            border-radius: 2px;
-            animation: expandWidth 1.5s ease-out 0.5s both;
+        /* Authentication Alert */
+        .auth-alert {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            color: #dc2626;
+            font-weight: 500;
         }
 
-        @keyframes expandWidth {
-            from { width: 0; }
-            to { width: 60px; }
-        }
+            .auth-alert.show {
+                display: flex;
+                animation: slideInFromTop 0.4s ease-out;
+            }
+
+            .auth-alert button {
+                background: #dc2626;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 6px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background 0.3s ease;
+            }
+
+                .auth-alert button:hover {
+                    background: #b91c1c;
+                }
 
         .posts-container {
-            animation: slideInFromBottom 1s ease-out 0.3s both;
+            animation: slideInFromBottom 0.6s ease-out 0.2s both;
         }
 
         @keyframes slideInFromBottom {
-            from { 
-                opacity: 0; 
-                transform: translateY(50px); 
+            from {
+                opacity: 0;
+                transform: translateY(30px);
             }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
+        /* Clean Post Card Design */
         .post-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 30px;
-            margin-bottom: 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            margin-bottom: 24px;
             overflow: hidden;
-            animation: cardEntrance 0.8s ease-out both;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: cardEntrance 0.5s ease-out both;
             animation-delay: calc(var(--card-index, 0) * 0.1s);
         }
 
         @keyframes cardEntrance {
-            from { 
-                opacity: 0; 
-                transform: translateY(30px) rotate(1deg); 
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
-            to { 
-                opacity: 1; 
-                transform: translateY(0) rotate(0deg); 
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
-        }
-
-        .post-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #667eea, #764ba2);
-            background-size: 200% 100%;
-            animation: gradientSlide 2s ease infinite;
-        }
-
-        @keyframes gradientSlide {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
         }
 
         .post-card:hover {
-            transform: translateY(-5px) scale(1.01);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1), 0 2px 10px rgba(0, 0, 0, 0.06);
+            transform: translateY(-2px);
         }
 
-        .post-card:hover .post-title {
-            color: #667eea;
-        }
-
+        /* Post Header */
         .post-header {
+            padding: 24px 24px 0 24px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 15px;
-            gap: 15px;
-            flex-wrap: wrap;
+            gap: 16px;
         }
 
         .post-title {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 700;
-            color: #2c3e50;
+            color: #1a202c;
             margin: 0;
-            line-height: 1.3;
-            transition: color 0.3s ease;
+            line-height: 1.4;
             flex: 1;
-            min-width: 0;
         }
 
         .post-type {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 8px 16px;
-            background: rgba(103, 126, 234, 0.1);
-            color: #667eea;
-            border: 1px solid rgba(103, 126, 234, 0.2);
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             white-space: nowrap;
-            transition: all 0.3s ease;
         }
 
-        .post-type::before {
-            content: '📝';
-            font-size: 12px;
-        }
+            .post-type.Assignment {
+                background: #fef2f2;
+                color: #dc2626;
+                border: 1px solid #fecaca;
+            }
 
-        .post-type.Assignment::before { content: '📋'; }
-        .post-type.Announcement::before { content: '📢'; }
-        .post-type.Material::before { content: '📚'; }
-        .post-type.Quiz::before { content: '❓'; }
+            .post-type.Announcement {
+                background: #ecfdf5;
+                color: #059669;
+                border: 1px solid #a7f3d0;
+            }
 
-        .post-card:hover .post-type {
-            background: rgba(103, 126, 234, 0.15);
-            border-color: rgba(103, 126, 234, 0.3);
-        }
+            .post-type.Material {
+                background: #eff6ff;
+                color: #2563eb;
+                border: 1px solid #bfdbfe;
+            }
 
+            .post-type.Quiz {
+                background: #fefce8;
+                color: #ca8a04;
+                border: 1px solid #fde68a;
+            }
+
+        /* Post Meta */
         .post-meta {
-            font-size: 15px;
-            color: #7f8c8d;
-            font-weight: 500;
+            padding: 8px 24px 16px 24px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .post-meta::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background: #667eea;
-            border-radius: 50%;
-            flex-shrink: 0;
+            gap: 12px;
+            font-size: 14px;
+            color: #64748b;
         }
 
         .post-author {
-            color: #667eea;
+            color: #3b82f6;
             font-weight: 600;
         }
 
-        .post-date {
-            color: #95a5a6;
-            font-size: 14px;
+        .meta-divider {
+            width: 4px;
+            height: 4px;
+            background: #cbd5e1;
+            border-radius: 50%;
         }
 
+        /* Post Content */
         .post-content {
-            margin: 20px 0;
-            white-space: pre-line;
-            color: #2c3e50;
-            font-size: 16px;
+            padding: 0 24px 20px 24px;
+            color: #374151;
+            font-size: 15px;
             line-height: 1.6;
-            padding: 20px;
-            background: rgba(248, 249, 250, 0.5);
-            border-radius: 12px;
-            border-left: 4px solid #667eea;
+            white-space: pre-line;
         }
 
+        /* Attachments Section */
         .attachments-section {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(236, 240, 241, 0.5);
+            padding: 20px 24px;
+            border-top: 1px solid #f1f5f9;
+            background: #fafbfc;
         }
 
         .attachments-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 15px;
+            color: #374151;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .attachments-title::before {
-            content: '📎';
-            font-size: 18px;
+        .attachments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
         }
 
-        .file-attachment {
-            display: inline-flex;
+        .attachment-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 10px;
-            padding: 12px 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: 600;
-            margin: 5px 10px 5px 0;
-            box-shadow: 0 4px 15px rgba(103, 126, 234, 0.3);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
             position: relative;
-            overflow: hidden;
         }
 
-        .file-attachment::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.6s ease;
-        }
+            .attachment-card:hover {
+                border-color: #3b82f6;
+                box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+                transform: translateY(-2px);
+            }
 
-        .file-attachment:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .file-attachment:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(103, 126, 234, 0.4);
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        .attachment-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 20px;
             color: white;
-            text-decoration: none;
         }
 
-        .file-attachment i {
+            .attachment-icon.pdf {
+                background: #dc2626;
+            }
+
+            .attachment-icon.image {
+                background: #059669;
+            }
+
+            .attachment-icon.doc {
+                background: #2563eb;
+            }
+
+            .attachment-icon.default {
+                background: #6b7280;
+            }
+
+        .attachment-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            text-align: center;
+            word-break: break-word;
+        }
+
+        .attachment-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn-preview, .btn-download {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-preview {
+            background: #3b82f6;
+            color: white;
+        }
+
+            .btn-preview:hover {
+                background: #2563eb;
+            }
+
+        .btn-download {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+            .btn-download:hover {
+                background: #e2e8f0;
+                color: #374151;
+            }
+
+        /* Comments Section */
+        .comments-section {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            margin-top: 16px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+            animation: slideInFromBottom 0.5s ease-out both;
+            animation-delay: 0.1s;
+        }
+
+        .comments-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            background: #fafbfc;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comments-title {
             font-size: 16px;
+            font-weight: 600;
+            color: #374151;
+            margin: 0;
         }
 
+        .comments-count {
+            background: #e2e8f0;
+            color: #64748b;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .comments-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .comment-item {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            gap: 12px;
+            transition: background 0.3s ease;
+        }
+
+            .comment-item:last-child {
+                border-bottom: none;
+            }
+
+            .comment-item:hover {
+                background: #fafbfc;
+            }
+
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .comment-content {
+            flex: 1;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .comment-date {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .comment-text {
+            color: #374151;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-line;
+        }
+
+        .no-comments {
+            padding: 40px 24px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .no-comments-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+            opacity: 0.6;
+        }
+
+        /* Comment Form */
+        .comment-form {
+            padding: 20px 24px;
+            border-top: 1px solid #f1f5f9;
+            background: #fafbfc;
+        }
+
+        .comment-form-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .form-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #059669, #047857);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-user-name {
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+
+        .comment-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+            .comment-textarea:focus {
+                outline: none;
+                border-color: #3b82f6;
+                box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            }
+
+            .comment-textarea::placeholder {
+                color: #9ca3af;
+            }
+
+        .comment-form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .btn-cancel, .btn-submit {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+            .btn-cancel:hover {
+                background: #e2e8f0;
+                color: #374151;
+            }
+
+        .btn-submit {
+            background: #3b82f6;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .btn-submit:hover {
+                background: #2563eb;
+            }
+
+            .btn-submit:disabled {
+                background: #9ca3af;
+                cursor: not-allowed;
+            }
+
+            .btn-submit .loading {
+                display: none;
+                width: 16px;
+                height: 16px;
+                border: 2px solid transparent;
+                border-top: 2px solid white;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+            }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Preview Modal */
+        .preview-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .preview-content {
+            background: white;
+            border-radius: 12px;
+            padding: 0;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: hidden;
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .preview-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-title {
+            font-weight: 600;
+            color: #374151;
+            margin: 0;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+            .btn-close:hover {
+                background: #f1f5f9;
+                color: #374151;
+            }
+
+        .preview-body {
+            padding: 20px;
+            max-height: 70vh;
+            overflow: auto;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .preview-iframe {
+            width: 100%;
+            height: 60vh;
+            border: none;
+            border-radius: 8px;
+        }
+
+        /* No Posts State */
         .no-posts {
             text-align: center;
-            padding: 80px 40px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 2px dashed rgba(255, 255, 255, 0.3);
-            border-radius: 20px;
-            color: rgba(255, 255, 255, 0.9);
-            animation: fadeInUp 1s ease-out 0.6s both;
+            padding: 60px 40px;
+            background: white;
+            border-radius: 16px;
+            border: 2px dashed #e2e8f0;
+            animation: fadeInUp 0.6s ease-out;
         }
 
         @keyframes fadeInUp {
-            from { 
-                opacity: 0; 
-                transform: translateY(40px); 
+            from {
+                opacity: 0;
+                transform: translateY(30px);
             }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
         .no-posts-icon {
-            font-size: 72px;
-            margin-bottom: 25px;
-            opacity: 0.7;
-            animation: iconFloat 3s ease-in-out infinite;
-        }
-
-        @keyframes iconFloat {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-15px) rotate(10deg); }
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.6;
         }
 
         .no-posts h3 {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #374151;
         }
 
         .no-posts p {
-            font-size: 18px;
-            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            color: #64748b;
             margin: 0;
-            line-height: 1.5;
         }
 
-        /* Responsive design */
+        /* Responsive Design */
         @media (max-width: 768px) {
             .classroom-page {
-                padding: 30px 15px;
+                padding: 20px 16px;
             }
 
-            .post-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-            .post-type {
-                align-self: flex-start;
-            }
-
-            .post-meta {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-            }
-
-            .file-attachment {
-                display: flex;
-                width: 100%;
-                justify-content: center;
-                margin: 10px 0 5px 0;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .classroom-header,
-            .post-card {
+            .classroom-header {
                 padding: 20px;
-                border-radius: 15px;
             }
 
             .classroom-title {
                 font-size: 24px;
             }
 
-            .post-title {
-                font-size: 20px;
+            .post-header {
+                padding: 20px 20px 0 20px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .post-meta {
+                padding: 8px 20px 16px 20px;
+                flex-wrap: wrap;
             }
 
             .post-content {
-                padding: 15px;
-                font-size: 15px;
+                padding: 0 20px 16px 20px;
+            }
+
+            .attachments-section {
+                padding: 16px 20px;
+            }
+
+            .attachments-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .comments-section {
+                margin-top: 12px;
+            }
+
+            .comment-item {
+                padding: 16px 20px;
+            }
+
+            .comment-form {
+                padding: 16px 20px;
+            }
+
+            .preview-content {
+                max-width: 95vw;
+                max-height: 95vh;
             }
         }
 
-        /* Loading animation for cards */
-        .post-card.loading {
-            opacity: 0;
-            animation: cardLoad 0.6s ease-out forwards;
+        /* Loading States */
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 4px;
         }
 
-        @keyframes cardLoad {
-            to { opacity: 1; }
+        @keyframes loading {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
         }
 
-        /* Hover effects for better interactivity */
-        .post-author:hover {
-            color: #764ba2;
-            transition: color 0.3s ease;
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
 
-        /* Focus states for accessibility */
-        .file-attachment:focus {
-            outline: 3px solid rgba(255, 255, 255, 0.5);
+        /* Focus states */
+        .attachment-card:focus,
+        .btn-preview:focus,
+        .btn-download:focus,
+        .btn-submit:focus,
+        .btn-cancel:focus,
+        .comment-textarea:focus {
+            outline: 2px solid #3b82f6;
             outline-offset: 2px;
-        }
-
-        /* Special animations for different post types */
-        .post-type.Assignment {
-            background: rgba(255, 107, 107, 0.1);
-            color: #ff6b6b;
-            border-color: rgba(255, 107, 107, 0.2);
-        }
-
-        .post-type.Announcement {
-            background: rgba(78, 205, 196, 0.1);
-            color: #4ecdc4;
-            border-color: rgba(78, 205, 196, 0.2);
-        }
-
-        .post-type.Material {
-            background: rgba(52, 152, 219, 0.1);
-            color: #3498db;
-            border-color: rgba(52, 152, 219, 0.2);
         }
     </style>
 
     <div class="classroom-page">
         <div class="classroom-container">
+            <!-- Authentication Alert -->
+            <div id="authAlert" class="auth-alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span id="authMessage">Session expired. Please log in again.</span>
+                <button onclick="redirectToLogin()">Login</button>
+            </div>
+
             <div class="classroom-header">
-                <h2 class="classroom-title" runat="server" id="classTitle">📚 Classroom Posts</h2>
+                <h2 class="classroom-title" runat="server" id="classTitle">
+                    <span>📚</span>
+                    <span>Classroom Posts</span>
+                </h2>
             </div>
 
             <div class="posts-container">
@@ -506,33 +836,110 @@
 
                 <asp:Repeater ID="rptPosts" runat="server">
                     <ItemTemplate>
-                        <div class="post-card" style="--card-index: <%# Container.ItemIndex %>;">
+                        <div class="post-card" style="--card-index: <%# Container.ItemIndex %>;" data-post-id="<%# Eval("Id") %>">
+                            <!-- Post Header -->
                             <div class="post-header">
                                 <h3 class="post-title"><%# Eval("Title") %></h3>
                                 <span class="post-type <%# Eval("Type") %>"><%# Eval("Type") %></span>
                             </div>
-                            
+
+                            <!-- Post Meta -->
                             <div class="post-meta">
                                 <span>Posted by <span class="post-author"><%# Eval("CreatedByName") %></span></span>
+                                <div class="meta-divider"></div>
                                 <span class="post-date"><%# Eval("CreatedAtFormatted") %></span>
                             </div>
-                            
-                            <div class="post-content">
-                                <%# Eval("Content") %>
-                            </div>
-                            
-                            <asp:Panel runat="server" CssClass="attachments-section" 
-                                       Visible='<%# ((System.Collections.IEnumerable)Eval("FileUrls")).Cast<object>().Any() %>'>
-                                <div class="attachments-title">Attachments</div>
-                                <asp:Repeater ID="rptFiles" runat="server" DataSource='<%# Eval("FileUrls") %>'>
-                                    <ItemTemplate>
-                                        <a href="<%# Container.DataItem %>" target="_blank" class="file-attachment">
-                                            <i class="fas fa-download"></i>
-                                            <span>Download File</span>
-                                        </a>
-                                    </ItemTemplate>
-                                </asp:Repeater>
+
+                            <!-- Post Content -->
+                            <div class="post-content"><%# Eval("Content") %></div>
+
+                            <!-- Attachments Section -->
+                            <asp:Panel runat="server" CssClass="attachments-section"
+                                Visible='<%# ((System.Collections.IEnumerable)Eval("FileUrls")).Cast<object>().Any() %>'>
+                                <div class="attachments-title">
+                                    <span>📎</span>
+                                    <span>Attachments</span>
+                                </div>
+                                <div class="attachments-grid">
+                                    <asp:Repeater ID="rptFiles" runat="server" DataSource='<%# Eval("FileUrls") %>'>
+                                        <ItemTemplate>
+                                            <div class="attachment-card" onclick="previewFile('<%# Container.DataItem %>')">
+                                                <div class="attachment-icon" data-file-type="">
+                                                    <i class="fas fa-file"></i>
+                                                </div>
+                                                <div class="attachment-name"><%# GetFileName(Container.DataItem.ToString()) %></div>
+                                                <div class="attachment-actions">
+                                                    <button type="button" class="btn-preview" onclick="event.stopPropagation(); previewFile('<%# Container.DataItem %>')">
+                                                        <i class="fas fa-eye"></i>Preview
+                                                    </button>
+                                                    <a href="<%# Container.DataItem %>" target="_blank" class="btn-download" onclick="event.stopPropagation()">
+                                                        <i class="fas fa-download"></i>Download
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </ItemTemplate>
+                                    </asp:Repeater>
+                                </div>
                             </asp:Panel>
+
+                            <!-- Comments Section -->
+                            <div class="comments-section">
+                                <div class="comments-header">
+                                    <h4 class="comments-title">💬 Comments</h4>
+                                    <span class="comments-count"><%# Eval("CommentsCount") %></span>
+                                </div>
+
+                                <!-- Comments List -->
+                                <div class="comments-list">
+                                    <asp:Panel runat="server" CssClass="no-comments"
+                                        Visible='<%# !((System.Collections.IEnumerable)Eval("Comments")).Cast<object>().Any() %>'>
+                                        <div class="no-comments-icon">💭</div>
+                                        <p>No comments yet. Be the first to comment!</p>
+                                    </asp:Panel>
+
+                                    <asp:Repeater ID="rptComments" runat="server" DataSource='<%# Eval("Comments") %>'>
+                                        <ItemTemplate>
+                                            <div class="comment-item">
+                                                <div class="comment-avatar"><%# GetInitials(Eval("AuthorName").ToString()) %></div>
+                                                <div class="comment-content">
+                                                    <div class="comment-header">
+                                                        <span class="comment-author"><%# Eval("AuthorName") %></span>
+                                                        <span class="comment-date"><%# Eval("CreatedAtFormatted") %></span>
+                                                    </div>
+                                                    <div class="comment-text"><%# Eval("Content") %></div>
+                                                </div>
+                                            </div>
+                                        </ItemTemplate>
+                                    </asp:Repeater>
+                                </div>
+
+                                <!-- Comment Form -->
+                                <div class="comment-form">
+                                    <div class="comment-form-header">
+                                        <div class="form-avatar"><%# GetUserInitials() %></div>
+                                        <span class="form-user-name"><%# GetCurrentUserName() %></span>
+                                    </div>
+                                    <textarea class="comment-textarea"
+                                        placeholder="Write a comment..."
+                                        data-post-id='<%# Eval("Id") %>'></textarea>
+                                    <div class="comment-form-actions">
+                                        <button type="button" class="btn-cancel" onclick="clearComment(this)">Cancel</button>
+                                        <button type="button" class="btn-submit" onclick="submitComment(this)" data-post-id='<%# Eval("Id") %>'>
+                                            <span class="btn-text">Post Comment</span>
+                                            <div class="loading"></div>
+                                        </button>
+                                    </div>
+
+                                    <!-- Hidden form for fallback -->
+                                    <asp:Panel ID="pnlCommentForm" runat="server" Style="display: none;">
+                                        <asp:TextBox ID="txtComment" runat="server" Style="display: none;"></asp:TextBox>
+                                        <asp:Button ID="btnSubmitComment" runat="server"
+                                            OnClick="SubmitComment_Click"
+                                            CommandArgument='<%# Eval("Id") %>'
+                                            Style="display: none;" />
+                                    </asp:Panel>
+                                </div>
+                            </div>
                         </div>
                     </ItemTemplate>
                 </asp:Repeater>
@@ -540,6 +947,390 @@
         </div>
     </div>
 
+    <!-- Preview Modal -->
+    <div id="previewModal" class="preview-modal" onclick="closePreview(event)">
+        <div class="preview-content" onclick="event.stopPropagation()">
+            <div class="preview-header">
+                <h3 id="previewTitle" class="preview-title">File Preview</h3>
+                <button type="button" class="btn-close" onclick="closePreview()">&times;</button>
+            </div>
+            <div id="previewBody" class="preview-body">
+                <!-- Preview content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
     <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Page loaded, initializing...');
+            initializeAttachmentIcons();
+            initializeCommentForms();
+
+            // Test if basic functionality works
+            console.log('Class ID from URL:', getClassIdFromUrl());
+        });
+
+        function redirectToLogin() {
+            window.location.href = 'Login.aspx';
+        }
+
+        // Initialize attachment icons based on file types
+        function initializeAttachmentIcons() {
+            document.querySelectorAll('.attachment-card').forEach(card => {
+                const fileName = card.querySelector('.attachment-name').textContent.toLowerCase();
+                const icon = card.querySelector('.attachment-icon');
+                const iconElement = icon.querySelector('i');
+
+                if (fileName.match(/\.(jpg|jpeg|png|gif|webp|svg)$/)) {
+                    icon.className = 'attachment-icon image';
+                    iconElement.className = 'fas fa-image';
+                } else if (fileName.match(/\.(pdf)$/)) {
+                    icon.className = 'attachment-icon pdf';
+                    iconElement.className = 'fas fa-file-pdf';
+                } else if (fileName.match(/\.(doc|docx)$/)) {
+                    icon.className = 'attachment-icon doc';
+                    iconElement.className = 'fas fa-file-word';
+                } else if (fileName.match(/\.(xls|xlsx)$/)) {
+                    icon.className = 'attachment-icon doc';
+                    iconElement.className = 'fas fa-file-excel';
+                } else if (fileName.match(/\.(ppt|pptx)$/)) {
+                    icon.className = 'attachment-icon doc';
+                    iconElement.className = 'fas fa-file-powerpoint';
+                } else if (fileName.match(/\.(mp4|avi|mov|wmv|webm)$/)) {
+                    icon.className = 'attachment-icon default';
+                    iconElement.className = 'fas fa-file-video';
+                } else {
+                    icon.className = 'attachment-icon default';
+                    iconElement.className = 'fas fa-file';
+                }
+            });
+        }
+
+        // Initialize comment forms
+        function initializeCommentForms() {
+            document.querySelectorAll('.comment-textarea').forEach(textarea => {
+                textarea.addEventListener('input', function () {
+                    const submitBtn = this.closest('.comment-form').querySelector('.btn-submit');
+                    submitBtn.disabled = this.value.trim() === '';
+                });
+
+                textarea.addEventListener('keydown', function (event) {
+                    if (event.ctrlKey && event.key === 'Enter') {
+                        const submitBtn = this.closest('.comment-form').querySelector('.btn-submit');
+                        if (!submitBtn.disabled) {
+                            submitComment(submitBtn);
+                        }
+                    }
+                });
+            });
+
+            // Set initial state for submit buttons
+            document.querySelectorAll('.btn-submit').forEach(btn => {
+                const textarea = btn.closest('.comment-form').querySelector('.comment-textarea');
+                btn.disabled = textarea.value.trim() === '';
+            });
+        }
+
+        // Submit comment via AJAX with fallback
+        async function submitComment(btn) {
+            const commentForm = btn.closest('.comment-form');
+            const textarea = commentForm.querySelector('.comment-textarea');
+            const postId = btn.getAttribute('data-post-id');
+            const commentText = textarea.value.trim();
+
+            console.log('Submit comment called:', { postId, commentText }); // Debug log
+
+            if (!commentText || btn.disabled) {
+                console.log('Comment text empty or button disabled');
+                return;
+            }
+
+            // Show loading state
+            btn.disabled = true;
+            const btnText = btn.querySelector('.btn-text');
+            const loading = btn.querySelector('.loading');
+
+            if (btnText) btnText.style.display = 'none';
+            if (loading) loading.style.display = 'block';
+            btn.style.cursor = 'not-allowed';
+
+            try {
+                const classId = getClassIdFromUrl();
+                console.log('Making AJAX call with:', { classId, postId, commentText });
+
+                // First try AJAX approach
+                const response = await fetch('ClassDetails.aspx/AddComment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    },
+                    body: JSON.stringify({
+                        classId: classId,
+                        postId: postId,
+                        commentText: commentText
+                    })
+                });
+
+                console.log('Response status:', response.status);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const responseText = await response.text();
+                console.log('Response text:', responseText);
+
+                const result = JSON.parse(responseText);
+                console.log('Parsed result:', result);
+
+                if (result.d && result.d.success) {
+                    // Clear the textarea
+                    textarea.value = '';
+
+                    // Add the new comment to the UI immediately
+                    addCommentToUI(btn.closest('.post-card'), result.d.comment);
+
+                    // Update comment count
+                    updateCommentCount(btn.closest('.post-card'), 1);
+
+                    // Show success feedback
+                    showToast('Comment posted successfully!', 'success');
+                } else {
+                    throw new Error(result.d ? result.d.error : 'Failed to post comment');
+                }
+            } catch (error) {
+                console.error('AJAX failed, trying fallback:', error);
+
+                // Fallback to traditional postback
+                try {
+                    await submitCommentFallback(btn, commentText);
+                } catch (fallbackError) {
+                    console.error('Fallback also failed:', fallbackError);
+                    showToast('Failed to post comment. Please try again.', 'error');
+                }
+            } finally {
+                // Reset button state
+                if (btnText) btnText.style.display = 'inline';
+                if (loading) loading.style.display = 'none';
+                btn.disabled = textarea.value.trim() === ''; // Enable only if there's text
+                btn.style.cursor = 'pointer';
+            }
+        }
+
+        // Fallback method using traditional postback
+        async function submitCommentFallback(btn, commentText) {
+            console.log('Using fallback postback method');
+
+            const postCard = btn.closest('.post-card');
+            const hiddenPanel = postCard.querySelector('[id*="pnlCommentForm"]');
+            const hiddenTextBox = postCard.querySelector('[id*="txtComment"]');
+            const hiddenButton = postCard.querySelector('[id*="btnSubmitComment"]');
+
+            if (hiddenTextBox && hiddenButton) {
+                // Set the comment text in hidden textbox
+                hiddenTextBox.value = commentText;
+
+                // Show a message that we're submitting
+                showToast('Submitting comment...', 'info');
+
+                // Trigger the postback
+                hiddenButton.click();
+            } else {
+                throw new Error('Fallback controls not found');
+            }
+        }
+
+        // Add comment to UI without page refresh
+        function addCommentToUI(postCard, commentData) {
+            const commentsList = postCard.querySelector('.comments-list');
+            const noComments = commentsList.querySelector('.no-comments');
+
+            // Remove "no comments" message if it exists
+            if (noComments) {
+                noComments.remove();
+            }
+
+            // Create new comment HTML
+            const commentHtml = `
+                <div class="comment-item" style="animation: slideInFromBottom 0.3s ease-out;">
+                    <div class="comment-avatar">${commentData.authorInitials}</div>
+                    <div class="comment-content">
+                        <div class="comment-header">
+                            <span class="comment-author">${commentData.authorName}</span>
+                            <span class="comment-date">Just now</span>
+                        </div>
+                        <div class="comment-text">${commentData.content}</div>
+                    </div>
+                </div>
+            `;
+
+            // Add the new comment to the end of the list
+            commentsList.insertAdjacentHTML('beforeend', commentHtml);
+
+            // Scroll the new comment into view smoothly
+            const newComment = commentsList.lastElementChild;
+            newComment.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Update comment count in the header
+        function updateCommentCount(postCard, increment) {
+            const commentCount = postCard.querySelector('.comments-count');
+            const currentCount = parseInt(commentCount.textContent) || 0;
+            const newCount = currentCount + increment;
+            commentCount.textContent = newCount;
+        }
+
+        // Get class ID from URL
+        function getClassIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('classId');
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'info') {
+            // Remove existing toasts
+            document.querySelectorAll('.toast').forEach(toast => toast.remove());
+
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <div class="toast-content">
+                    <span class="toast-icon">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                    <span class="toast-message">${message}</span>
+                </div>
+            `;
+
+            // Add toast styles
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                z-index: 10001;
+                animation: slideInFromRight 0.3s ease-out;
+                font-size: 14px;
+                font-weight: 500;
+                max-width: 350px;
+            `;
+
+            document.body.appendChild(toast);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOutToRight 0.3s ease-out';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Add CSS animations for toast
+        const toastStyles = document.createElement('style');
+        toastStyles.textContent = `
+            @keyframes slideInFromRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOutToRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+            
+            .toast-content {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+        `;
+        document.head.appendChild(toastStyles);
+
+        // Clear comment function
+        function clearComment(btn) {
+            const textarea = btn.closest('.comment-form').querySelector('.comment-textarea');
+            textarea.value = '';
+            const submitBtn = btn.closest('.comment-form').querySelector('.btn-submit');
+            submitBtn.disabled = true;
+            textarea.focus();
+        }
+        function previewFile(fileUrl) {
+            const fileName = fileUrl.split('/').pop().toLowerCase();
+            const modal = document.getElementById('previewModal');
+            const title = document.getElementById('previewTitle');
+            const body = document.getElementById('previewBody');
+
+            title.textContent = fileName;
+            body.innerHTML = '';
+
+            if (fileName.match(/\.(jpg|jpeg|png|gif|webp|svg)$/)) {
+                // Image preview
+                const img = document.createElement('img');
+                img.src = fileUrl;
+                img.className = 'preview-image';
+                img.alt = fileName;
+                body.appendChild(img);
+            } else if (fileName.match(/\.(pdf)$/)) {
+                // PDF preview
+                const iframe = document.createElement('iframe');
+                iframe.src = fileUrl + '#view=FitH';
+                iframe.className = 'preview-iframe';
+                body.appendChild(iframe);
+            } else if (fileName.match(/\.(mp4|webm)$/)) {
+                // Video preview
+                const video = document.createElement('video');
+                video.src = fileUrl;
+                video.controls = true;
+                video.className = 'preview-image';
+                video.style.maxHeight = '60vh';
+                body.appendChild(video);
+            } else {
+                // Generic preview with download option
+                const message = document.createElement('div');
+                message.innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <i class="fas fa-file fa-3x" style="color: #9ca3af; margin-bottom: 20px;"></i>
+                    <p style="margin-bottom: 20px; color: #64748b;">Preview not available for this file type.</p>
+                    <a href="${fileUrl}" target="_blank" class="btn-download" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; text-decoration: none;">
+                        <i class="fas fa-download"></i>
+                        Download File
+                    </a>
+                </div>
+            `;
+                body.appendChild(message);
+            }
+
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePreview(event) {
+            if (!event || event.target === document.getElementById('previewModal')) {
+                document.getElementById('previewModal').style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Keyboard navigation for accessibility
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                closePreview();
+            }
+        });
+
+        // Show loading state when submitting comment
+        function showCommentLoading(btn) {
+            const loadingSpinner = btn.querySelector('.loading');
+            if (loadingSpinner) {
+                loadingSpinner.style.display = 'block';
+            }
+            btn.disabled = true;
+            btn.innerHTML = '<div class="loading"></div>Posting...';
+        }
+    </script>
 </asp:Content>

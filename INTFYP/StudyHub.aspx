@@ -6,7 +6,7 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Enhanced Study Hub with Design Formula */
+        /* Enhanced Study Hub with Advanced Design */
         
         .study-hub-page {
             padding: 40px 20px;
@@ -94,7 +94,13 @@
             to { width: 60px; }
         }
 
-        .create-group-btn {
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .create-group-btn, .join-group-btn, .my-groups-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
@@ -115,7 +121,17 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .create-group-btn::before {
+        .join-group-btn {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            box-shadow: 0 6px 20px rgba(78, 205, 196, 0.3);
+        }
+
+        .my-groups-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .create-group-btn::before, .join-group-btn::before, .my-groups-btn::before {
             content: '';
             position: absolute;
             top: 50%;
@@ -128,7 +144,7 @@
             transition: all 0.6s ease;
         }
 
-        .create-group-btn:hover::before {
+        .create-group-btn:hover::before, .join-group-btn:hover::before, .my-groups-btn:hover::before {
             width: 300px;
             height: 300px;
         }
@@ -137,12 +153,78 @@
             transform: translateY(-3px);
             box-shadow: 0 10px 30px rgba(103, 126, 234, 0.4);
             background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-            color: white;
         }
 
-        .create-group-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 6px 20px rgba(103, 126, 234, 0.3);
+        .join-group-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(78, 205, 196, 0.4);
+            background: linear-gradient(135deg, #44a08d 0%, #4ecdc4 100%);
+        }
+
+        .my-groups-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+            background: linear-gradient(135deg, #ee5a52 0%, #ff6b6b 100%);
+        }
+
+        .filters-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideInFromLeft 1s ease-out 0.2s both;
+        }
+
+        @keyframes slideInFromLeft {
+            from { 
+                opacity: 0; 
+                transform: translateX(-50px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0); 
+            }
+        }
+
+        .filters-title {
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 12px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+            backdrop-filter: blur(5px);
+        }
+
+        .search-box::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .filter-dropdown {
+            padding: 12px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            backdrop-filter: blur(5px);
         }
 
         .groups-grid {
@@ -284,6 +366,16 @@
             flex-shrink: 0;
         }
 
+        .group-description {
+            font-size: 14px;
+            color: #95a5a6;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
         .group-stats {
             display: flex;
             gap: 20px;
@@ -304,15 +396,31 @@
             color: #667eea;
         }
 
+        .group-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
         .group-footer {
             padding: 20px 25px;
             border-top: 1px solid rgba(236, 240, 241, 0.5);
             background: rgba(248, 249, 250, 0.5);
+            display: flex;
+            gap: 10px;
         }
 
-        .view-group-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        .view-group-btn, .join-group-footer-btn {
             border: none;
             padding: 12px 24px;
             border-radius: 25px;
@@ -324,14 +432,25 @@
             gap: 8px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-size: 14px;
-            box-shadow: 0 4px 15px rgba(103, 126, 234, 0.3);
             position: relative;
             overflow: hidden;
-            width: 100%;
+            flex: 1;
             justify-content: center;
         }
 
-        .view-group-btn::before {
+        .view-group-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(103, 126, 234, 0.3);
+        }
+
+        .join-group-footer-btn {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+        }
+
+        .view-group-btn::before, .join-group-footer-btn::before {
             content: '';
             position: absolute;
             top: 50%;
@@ -344,7 +463,7 @@
             transition: all 0.6s ease;
         }
 
-        .view-group-btn:hover::before {
+        .view-group-btn:hover::before, .join-group-footer-btn:hover::before {
             width: 300px;
             height: 300px;
         }
@@ -357,9 +476,12 @@
             text-decoration: none;
         }
 
-        .view-group-btn:active {
-            transform: translateY(0);
-            box-shadow: 0 4px 15px rgba(103, 126, 234, 0.3);
+        .join-group-footer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+            background: linear-gradient(135deg, #44a08d 0%, #4ecdc4 100%);
+            color: white;
+            text-decoration: none;
         }
 
         .no-groups {
@@ -411,6 +533,28 @@
             line-height: 1.5;
         }
 
+        .floating-action-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(103, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .floating-action-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(103, 126, 234, 0.6);
+        }
+
         /* Responsive design */
         @media (max-width: 768px) {
             .study-hub-page {
@@ -423,9 +567,14 @@
                 text-align: center;
             }
 
-            .create-group-btn {
-                width: 100%;
+            .header-actions {
                 justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .create-group-btn, .join-group-btn, .my-groups-btn {
+                flex: 1;
+                min-width: 160px;
             }
 
             .groups-grid {
@@ -433,9 +582,17 @@
                 gap: 20px;
             }
 
-            .group-stats {
-                justify-content: center;
-                gap: 30px;
+            .filter-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                min-width: auto;
+            }
+
+            .group-footer {
+                flex-direction: column;
             }
         }
 
@@ -459,31 +616,31 @@
             .group-image-container {
                 height: 180px;
             }
+
+            .header-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
 
-        /* Loading animation for cards */
-        .group-card.loading {
-            opacity: 0;
-            animation: cardLoad 0.6s ease-out forwards;
+        /* Loading states */
+        .loading-skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
         }
 
-        @keyframes cardLoad {
-            to { opacity: 1; }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
 
-        /* Hover effects for interactive elements */
-        .group-meta:hover::before {
-            animation: pulse 1s ease infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.2); opacity: 0.7; }
-        }
-
-        /* Focus states for accessibility */
+        /* Accessibility improvements */
         .create-group-btn:focus,
-        .view-group-btn:focus {
+        .join-group-btn:focus,
+        .my-groups-btn:focus,
+        .view-group-btn:focus,
+        .join-group-footer-btn:focus {
             outline: 3px solid rgba(255, 255, 255, 0.5);
             outline-offset: 2px;
         }
@@ -492,16 +649,44 @@
     <div class="study-hub-page">
         <div class="hub-container">
             <div class="page-header">
-                <h3 class="page-title">🎓 Your Study Groups</h3>
-                <asp:Button ID="btnCreateGroup" runat="server" Text="➕ Create Group" CssClass="create-group-btn" OnClick="btnCreateGroup_Click" />
+                <h3 class="page-title">🎓 StudyHub Community</h3>
+                <div class="header-actions">
+                    <asp:Button ID="btnCreateGroup" runat="server" Text="➕ Create Group" CssClass="create-group-btn" OnClick="btnCreateGroup_Click" />
+                    <asp:Button ID="btnJoinGroup" runat="server" Text="🔍 Discover Groups" CssClass="join-group-btn" OnClick="btnJoinGroup_Click" />
+                    <asp:Button ID="btnMyGroups" runat="server" Text="📚 My Groups" CssClass="my-groups-btn" OnClick="btnMyGroups_Click" />
+                </div>
+            </div>
+
+            <!-- Enhanced Filters Section -->
+            <div class="filters-section">
+                <div class="filters-title">🔍 Find Your Perfect Study Group</div>
+                <div class="filter-controls">
+                    <asp:TextBox ID="txtSearch" runat="server" CssClass="search-box" placeholder="Search groups by name, subject, or topic..." AutoPostBack="true" OnTextChanged="txtSearch_TextChanged" />
+                    <asp:DropDownList ID="ddlSubject" runat="server" CssClass="filter-dropdown" AutoPostBack="true" OnSelectedIndexChanged="ddlSubject_SelectedIndexChanged">
+                        <asp:ListItem Value="">All Subjects</asp:ListItem>
+                        <asp:ListItem Value="Mathematics">Mathematics</asp:ListItem>
+                        <asp:ListItem Value="Science">Science</asp:ListItem>
+                        <asp:ListItem Value="Programming">Programming</asp:ListItem>
+                        <asp:ListItem Value="Languages">Languages</asp:ListItem>
+                        <asp:ListItem Value="History">History</asp:ListItem>
+                        <asp:ListItem Value="Business">Business</asp:ListItem>
+                        <asp:ListItem Value="Other">Other</asp:ListItem>
+                    </asp:DropDownList>
+                    <asp:DropDownList ID="ddlSortBy" runat="server" CssClass="filter-dropdown" AutoPostBack="true" OnSelectedIndexChanged="ddlSortBy_SelectedIndexChanged">
+                        <asp:ListItem Value="newest">Newest First</asp:ListItem>
+                        <asp:ListItem Value="oldest">Oldest First</asp:ListItem>
+                        <asp:ListItem Value="popular">Most Popular</asp:ListItem>
+                        <asp:ListItem Value="alphabetical">A-Z</asp:ListItem>
+                    </asp:DropDownList>
+                </div>
             </div>
 
             <div class="groups-grid">
-                <asp:Repeater ID="rptGroups" runat="server">
+                <asp:Repeater ID="rptGroups" runat="server" OnItemCommand="rptGroups_ItemCommand">
                     <ItemTemplate>
                         <div class="group-card" style="--card-index: <%# Container.ItemIndex %>;">
                             <div class="group-image-container">
-                                <img src='<%# Eval("groupImage") %>' class="group-image" alt="Group Image" />
+                                <img src='<%# Eval("groupImage") %>' class="group-image" alt="Group Image" onerror="this.src='Images/default-group.jpg'" />
                                 <div class="group-image-overlay"></div>
                             </div>
                             
@@ -511,23 +696,43 @@
                                 <small class="group-meta">
                                     🧑‍🏫 Hosted by <%# Eval("hosterName") %>
                                 </small>
+
+                                <div class="group-description">
+                                    <%# Eval("description") %>
+                                </div>
                                 
                                 <div class="group-stats">
                                     <div class="stat-item">
                                         <span class="stat-icon">👥</span>
-                                        <span><%# Eval("capacity") %> members</span>
+                                        <span><%# Eval("memberCount") %>/<%# Eval("capacity") %></span>
                                     </div>
                                     <div class="stat-item">
-                                        <span class="stat-icon">📚</span>
-                                        <span>Active</span>
+                                        <span class="stat-icon">📝</span>
+                                        <span><%# Eval("postCount") %> posts</span>
                                     </div>
+                                    <div class="stat-item">
+                                        <span class="stat-icon">⏰</span>
+                                        <span><%# Eval("lastActivity") %></span>
+                                    </div>
+                                </div>
+
+                                <div class="group-tags">
+                                    <%# !string.IsNullOrEmpty(Eval("subject").ToString()) ? "<span class='tag'>" + Eval("subject") + "</span>" : "" %>
+                                    <%# (bool)Eval("isActive") ? "<span class='tag'>🟢 Active</span>" : "<span class='tag'>⚪ Inactive</span>" %>
                                 </div>
                             </div>
                             
                             <div class="group-footer">
                                 <a href='StudyHubGroup.aspx?groupId=<%# Eval("groupId") %>' class="view-group-btn">
-                                    🚀 Join Study Session
+                                    🚀 View Group
                                 </a>
+                                <asp:LinkButton ID="btnJoinGroupFooter" runat="server" 
+                                    CommandName="JoinGroup" 
+                                    CommandArgument='<%# Eval("groupId") %>' 
+                                    CssClass="join-group-footer-btn"
+                                    Visible='<%# !(bool)Eval("isMember") %>'>
+                                    ➕ Join Group
+                                </asp:LinkButton>
                             </div>
                         </div>
                     </ItemTemplate>
@@ -535,14 +740,17 @@
                 
                 <!-- Show when no groups exist -->
                 <asp:Panel ID="pnlNoGroups" runat="server" Visible="false" CssClass="no-groups">
-                    <div class="no-groups-icon">📖</div>
-                    <h3>No Study Groups Yet</h3>
-                    <p>Create your first study group or join existing ones to start collaborating with peers!</p>
+                    <div class="no-groups-icon">📚</div>
+                    <h3>No Study Groups Found</h3>
+                    <p>Be the first to create a study group or adjust your search filters!</p>
                 </asp:Panel>
             </div>
         </div>
+
+        <!-- Floating Action Button -->
+        <asp:Button ID="btnFloatingCreate" runat="server" Text="➕" CssClass="floating-action-btn" OnClick="btnCreateGroup_Click" ToolTip="Create New Group" />
     </div>
 
-    <!-- Font Awesome for additional icons if needed -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <!-- Font Awesome for additional icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 </asp:Content>

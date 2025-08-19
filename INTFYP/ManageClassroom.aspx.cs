@@ -1,6 +1,7 @@
 ﻿using Google.Cloud.Firestore;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -35,7 +36,7 @@ namespace YourProjectNamespace
             Query query = db.Collection("classrooms").WhereEqualTo("createdBy", teacherEmail);
             QuerySnapshot snapshot = await query.GetSnapshotAsync();
 
-            List<Classroom> classrooms = new List<Classroom>();
+            List<Classroom> allClassrooms = new List<Classroom>();
 
             foreach (DocumentSnapshot doc in snapshot.Documents)
             {
@@ -47,8 +48,12 @@ namespace YourProjectNamespace
                 data.TryGetValue("startTime", out object startTime);
                 data.TryGetValue("endTime", out object endTime);
                 data.TryGetValue("status", out object status);
+                data.TryGetValue("isArchived", out object isArchived);
 
-                classrooms.Add(new Classroom
+                // Default to false if isArchived doesn't exist
+                bool archived = isArchived != null && Convert.ToBoolean(isArchived);
+
+                allClassrooms.Add(new Classroom
                 {
                     Id = doc.Id,
                     Name = name?.ToString(),
@@ -58,25 +63,41 @@ namespace YourProjectNamespace
                     StartTime = startTime?.ToString(),
                     EndTime = endTime?.ToString(),
                     Status = status?.ToString(),
+                    IsArchived = archived,
                     IsEditing = (doc.Id == editingClassId)
                 });
             }
 
-            rptClassrooms.DataSource = classrooms;
-            rptClassrooms.DataBind();
+            // Separate active and archived classes
+            var activeClassrooms = allClassrooms.Where(c => !c.IsArchived).ToList();
+            var archivedClassrooms = allClassrooms.Where(c => c.IsArchived).ToList();
+
+            // Bind active classes
+            rptActiveClassrooms.DataSource = activeClassrooms;
+            rptActiveClassrooms.DataBind();
+            pnlNoActiveClasses.Visible = activeClassrooms.Count == 0;
+
+            // Bind archived classes
+            rptArchivedClassrooms.DataSource = archivedClassrooms;
+            rptArchivedClassrooms.DataBind();
+            pnlNoArchivedClasses.Visible = archivedClassrooms.Count == 0;
         }
+
         protected void rptClassrooms_ItemDataBound(object sender, RepeaterItemEventArgs e)
         {
             if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem)
             {
                 DropDownList ddlDay = (DropDownList)e.Item.FindControl("ddlEditDay");
-                string weeklyDay = DataBinder.Eval(e.Item.DataItem, "WeeklyDay")?.ToString();
-                if (!string.IsNullOrEmpty(weeklyDay))
+                if (ddlDay != null)
                 {
-                    ListItem selected = ddlDay.Items.FindByText(weeklyDay);
-                    if (selected != null)
+                    string weeklyDay = DataBinder.Eval(e.Item.DataItem, "WeeklyDay")?.ToString();
+                    if (!string.IsNullOrEmpty(weeklyDay))
+                    {
                         ddlDay.ClearSelection();
-                    selected.Selected = true;
+                        ListItem selected = ddlDay.Items.FindByText(weeklyDay);
+                        if (selected != null)
+                            selected.Selected = true;
+                    }
                 }
             }
         }
@@ -85,47 +106,78 @@ namespace YourProjectNamespace
         {
             string classId = e.CommandArgument.ToString();
 
-            if (e.CommandName == "Delete")
+            try
             {
-                await db.Collection("classrooms").Document(classId).DeleteAsync();
-                editingClassId = null;
-                await LoadClassrooms();
-            }
-            else if (e.CommandName == "Edit")
-            {
-                editingClassId = classId;
-                await LoadClassrooms();
-            }
-            else if (e.CommandName == "Cancel")
-            {
-                editingClassId = null;
-                await LoadClassrooms();
-            }
-            else if (e.CommandName == "Update")
-            {
-                TextBox txtEditName = (TextBox)e.Item.FindControl("txtEditName");
-                TextBox txtEditDescription = (TextBox)e.Item.FindControl("txtEditDescription");
-                TextBox txtEditVenue = (TextBox)e.Item.FindControl("txtEditVenue");
-                TextBox txtEditStart = (TextBox)e.Item.FindControl("txtEditStart");
-                TextBox txtEditEnd = (TextBox)e.Item.FindControl("txtEditEnd");
-                DropDownList ddlEditDay = (DropDownList)e.Item.FindControl("ddlEditDay");
-
-                var update = new Dictionary<string, object>
+                if (e.CommandName == "Delete")
                 {
-                    { "name", txtEditName.Text.Trim() },
-                    { "description", txtEditDescription.Text.Trim() },
-                    { "venue", txtEditVenue.Text.Trim() },
-                    { "startTime", txtEditStart.Text.Trim() },
-                    { "endTime", txtEditEnd.Text.Trim() },
-                    { "weeklyDay", ddlEditDay.SelectedValue }
-                };
+                    await db.Collection("classrooms").Document(classId).DeleteAsync();
+                    editingClassId = null;
+                    await LoadClassrooms();
+                }
+                else if (e.CommandName == "Edit")
+                {
+                    editingClassId = classId;
+                    await LoadClassrooms();
+                }
+                else if (e.CommandName == "Cancel")
+                {
+                    editingClassId = null;
+                    await LoadClassrooms();
+                }
+                else if (e.CommandName == "Archive")
+                {
+                    var update = new Dictionary<string, object>
+                    {
+                        { "isArchived", true },
+                        { "archivedAt", FieldValue.ServerTimestamp }
+                    };
+                    await db.Collection("classrooms").Document(classId).UpdateAsync(update);
+                    editingClassId = null;
+                    await LoadClassrooms();
+                }
+                else if (e.CommandName == "Unarchive")
+                {
+                    var update = new Dictionary<string, object>
+                    {
+                        { "isArchived", false },
+                        { "restoredAt", FieldValue.ServerTimestamp }
+                    };
+                    await db.Collection("classrooms").Document(classId).UpdateAsync(update);
+                    await LoadClassrooms();
+                }
+                else if (e.CommandName == "Update")
+                {
+                    TextBox txtEditName = (TextBox)e.Item.FindControl("txtEditName");
+                    TextBox txtEditDescription = (TextBox)e.Item.FindControl("txtEditDescription");
+                    TextBox txtEditVenue = (TextBox)e.Item.FindControl("txtEditVenue");
+                    TextBox txtEditStart = (TextBox)e.Item.FindControl("txtEditStart");
+                    TextBox txtEditEnd = (TextBox)e.Item.FindControl("txtEditEnd");
+                    DropDownList ddlEditDay = (DropDownList)e.Item.FindControl("ddlEditDay");
 
-                await db.Collection("classrooms").Document(classId).UpdateAsync(update);
+                    var update = new Dictionary<string, object>
+                    {
+                        { "name", txtEditName.Text.Trim() },
+                        { "description", txtEditDescription.Text.Trim() },
+                        { "venue", txtEditVenue.Text.Trim() },
+                        { "startTime", txtEditStart.Text.Trim() },
+                        { "endTime", txtEditEnd.Text.Trim() },
+                        { "weeklyDay", ddlEditDay.SelectedValue },
+                        { "updatedAt", FieldValue.ServerTimestamp }
+                    };
 
-                editingClassId = null;
-                await LoadClassrooms();
+                    await db.Collection("classrooms").Document(classId).UpdateAsync(update);
+
+                    editingClassId = null;
+                    await LoadClassrooms();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in rptClassrooms_ItemCommand: {ex.Message}");
+                // You might want to show an error message to the user
             }
         }
+
         protected string FormatTime(object time)
         {
             if (time == null) return "";
@@ -144,6 +196,7 @@ namespace YourProjectNamespace
             public string StartTime { get; set; }
             public string EndTime { get; set; }
             public string Status { get; set; }
+            public bool IsArchived { get; set; }
             public bool IsEditing { get; set; }
         }
     }
