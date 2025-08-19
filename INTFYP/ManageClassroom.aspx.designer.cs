@@ -15,12 +15,39 @@ namespace YourProjectNamespace
     {
 
         /// <summary>
-        /// rptClassrooms control.
+        /// pnlNoActiveClasses control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptClassrooms;
+        protected global::System.Web.UI.WebControls.Panel pnlNoActiveClasses;
+
+        /// <summary>
+        /// rptActiveClassrooms control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptActiveClassrooms;
+
+        /// <summary>
+        /// pnlNoArchivedClasses control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlNoArchivedClasses;
+
+        /// <summary>
+        /// rptArchivedClassrooms control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptArchivedClassrooms;
     }
 }
