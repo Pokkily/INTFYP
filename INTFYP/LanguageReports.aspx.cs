@@ -13,6 +13,19 @@ namespace INTFYP
         private static FirestoreDb db;
         private static readonly object dbLock = new object();
 
+        // Cache for user lookups to avoid repeated database calls
+        private static Dictionary<string, UserInfo> userCache = new Dictionary<string, UserInfo>();
+
+        // User info class to store user details
+        public class UserInfo
+        {
+            public string UserId { get; set; }
+            public string Username { get; set; }
+            public string Email { get; set; }
+            public string DisplayName => !string.IsNullOrEmpty(Username) ? Username :
+                                       (!string.IsNullOrEmpty(Email) ? Email.Split('@')[0] : $"User {UserId?.Substring(0, Math.Min(8, UserId?.Length ?? 0))}");
+        }
+
         protected async void Page_Load(object sender, EventArgs e)
         {
             InitializeFirestore();
@@ -37,6 +50,142 @@ namespace INTFYP
                         db = FirestoreDb.Create("intorannetto");
                     }
                 }
+            }
+        }
+
+        // NEW: Method to fetch user details from users collection
+        private async System.Threading.Tasks.Task<UserInfo> GetUserDetailsAsync(string userId)
+        {
+            try
+            {
+                // Check cache first
+                if (userCache.ContainsKey(userId))
+                {
+                    System.Diagnostics.Debug.WriteLine($"📋 Using cached user data for: {userId}");
+                    return userCache[userId];
+                }
+
+                // Query users collection
+                DocumentReference userDoc = db.Collection("users").Document(userId);
+                DocumentSnapshot userSnapshot = await userDoc.GetSnapshotAsync();
+
+                UserInfo userInfo = new UserInfo { UserId = userId };
+
+                if (userSnapshot.Exists)
+                {
+                    var userData = userSnapshot.ToDictionary();
+
+                    // Extract username - adjust field names based on your Firestore structure
+                    if (userData.ContainsKey("username") && userData["username"] != null)
+                    {
+                        userInfo.Username = userData["username"].ToString().Trim();
+                    }
+
+                    // Extract email - adjust field names based on your Firestore structure
+                    if (userData.ContainsKey("email") && userData["email"] != null)
+                    {
+                        userInfo.Email = userData["email"].ToString().Trim();
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"✅ Found user in database: {userInfo.DisplayName}");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"⚠️ User not found in database: {userId}");
+                }
+
+                // Cache the result (even if user not found)
+                userCache[userId] = userInfo;
+
+                return userInfo;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error fetching user details for {userId}: {ex.Message}");
+
+                // Return basic user info on error
+                var fallbackUser = new UserInfo { UserId = userId };
+                userCache[userId] = fallbackUser;
+                return fallbackUser;
+            }
+        }
+
+        // NEW: Method to batch fetch multiple users efficiently
+        private async System.Threading.Tasks.Task<Dictionary<string, UserInfo>> GetMultipleUsersAsync(List<string> userIds)
+        {
+            var result = new Dictionary<string, UserInfo>();
+            var uncachedUserIds = new List<string>();
+
+            // Check cache first
+            foreach (string userId in userIds.Distinct())
+            {
+                if (userCache.ContainsKey(userId))
+                {
+                    result[userId] = userCache[userId];
+                }
+                else
+                {
+                    uncachedUserIds.Add(userId);
+                }
+            }
+
+            // Fetch uncached users in batches
+            if (uncachedUserIds.Count > 0)
+            {
+                System.Diagnostics.Debug.WriteLine($"🔍 Fetching {uncachedUserIds.Count} users from database");
+
+                // Firestore supports batch reads of up to 10 documents
+                for (int i = 0; i < uncachedUserIds.Count; i += 10)
+                {
+                    var batchIds = uncachedUserIds.Skip(i).Take(10).ToList();
+                    await FetchUserBatch(batchIds, result);
+                }
+            }
+
+            return result;
+        }
+
+        private async System.Threading.Tasks.Task FetchUserBatch(List<string> userIds, Dictionary<string, UserInfo> result)
+        {
+            try
+            {
+                var tasks = userIds.Select(async userId =>
+                {
+                    DocumentReference userDoc = db.Collection("users").Document(userId);
+                    DocumentSnapshot userSnapshot = await userDoc.GetSnapshotAsync();
+
+                    UserInfo userInfo = new UserInfo { UserId = userId };
+
+                    if (userSnapshot.Exists)
+                    {
+                        var userData = userSnapshot.ToDictionary();
+
+                        if (userData.ContainsKey("username") && userData["username"] != null)
+                        {
+                            userInfo.Username = userData["username"].ToString().Trim();
+                        }
+
+                        if (userData.ContainsKey("email") && userData["email"] != null)
+                        {
+                            userInfo.Email = userData["email"].ToString().Trim();
+                        }
+                    }
+
+                    // Cache and return
+                    userCache[userId] = userInfo;
+                    return new { UserId = userId, UserInfo = userInfo };
+                });
+
+                var batchResults = await System.Threading.Tasks.Task.WhenAll(tasks);
+
+                foreach (var item in batchResults)
+                {
+                    result[item.UserId] = item.UserInfo;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in batch user fetch: {ex.Message}");
             }
         }
 
@@ -166,8 +315,8 @@ namespace INTFYP
                 // Load language performance
                 await LoadLanguagePerformance(results);
 
-                // Load recent activity
-                LoadRecentActivity(results);
+                // Load recent activity with user lookup
+                await LoadRecentActivityAsync(results);
 
                 // Generate chart data
                 GenerateChartData(results);
@@ -245,135 +394,60 @@ namespace INTFYP
             }
         }
 
-        // UPDATED: LoadRecentActivity method to show student names
-        private void LoadRecentActivity(List<Dictionary<string, object>> results)
+        // UPDATED: LoadRecentActivity method with proper user lookup
+        private async System.Threading.Tasks.Task LoadRecentActivityAsync(List<Dictionary<string, object>> results)
         {
             try
             {
-                var recentActivity = results
+                var recentResults = results
                     .OrderByDescending(r => ((Timestamp)r["completedAt"]).ToDateTime())
                     .Take(20)
-                    .Select(r => new
+                    .ToList();
+
+                if (recentResults.Count == 0)
+                {
+                    rptRecentActivity.Visible = false;
+                    System.Diagnostics.Debug.WriteLine("⚠️ No recent activity records found");
+                    return;
+                }
+
+                // Get all unique user IDs
+                var userIds = recentResults.Select(r => r["userId"].ToString()).Distinct().ToList();
+                System.Diagnostics.Debug.WriteLine($"🔍 Looking up {userIds.Count} unique users for recent activity");
+
+                // Batch fetch user details
+                var userLookup = await GetMultipleUsersAsync(userIds);
+
+                // Build activity data with proper user names
+                var recentActivity = recentResults.Select(r =>
+                {
+                    string userId = r["userId"].ToString();
+                    UserInfo userInfo = userLookup.ContainsKey(userId) ? userLookup[userId] : new UserInfo { UserId = userId };
+
+                    return new
                     {
-                        // Use userName if available, fallback to userId for older records
-                        UserName = GetUserNameFromResult(r),
-                        UserId = r["userId"].ToString(), // Keep for reference if needed
+                        UserName = userInfo.DisplayName,
+                        UserId = userId,
                         LanguageName = r["languageName"].ToString(),
                         TopicName = r["topicName"].ToString(),
                         LessonName = r["lessonName"].ToString(),
                         Score = Convert.ToInt32(r["score"]),
                         TimeSpent = Math.Round(Convert.ToDouble(r["timeSpentSeconds"]) / 60.0, 1),
                         CompletedAt = ((Timestamp)r["completedAt"]).ToDateTime().ToString("MMM dd, HH:mm")
-                    })
-                    .ToList();
+                    };
+                }).ToList();
 
-                // Check if we have any recent activity
-                if (recentActivity.Count > 0)
-                {
-                    rptRecentActivity.DataSource = recentActivity;
-                    rptRecentActivity.DataBind();
-                    rptRecentActivity.Visible = true;
+                rptRecentActivity.DataSource = recentActivity;
+                rptRecentActivity.DataBind();
+                rptRecentActivity.Visible = true;
 
-                    System.Diagnostics.Debug.WriteLine($"✅ Loaded {recentActivity.Count} recent activity records with student names");
-                }
-                else
-                {
-                    // No recent activity found
-                    rptRecentActivity.Visible = false;
-                    System.Diagnostics.Debug.WriteLine("⚠️ No recent activity records found");
-                }
+                System.Diagnostics.Debug.WriteLine($"✅ Loaded {recentActivity.Count} recent activity records with proper user lookups");
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading recent activity: {ex.Message}");
-
-                // Hide repeater on error
                 rptRecentActivity.Visible = false;
             }
-        }
-
-        // NEW: Helper method to get user name with intelligent fallbacks
-        private string GetUserNameFromResult(Dictionary<string, object> result)
-        {
-            try
-            {
-                // First try to get userName (from newer records saved by TakeQuiz)
-                if (result.ContainsKey("userName") && result["userName"] != null)
-                {
-                    string userName = result["userName"].ToString().Trim();
-                    if (!string.IsNullOrEmpty(userName) && userName != "Guest User" && userName != "null")
-                    {
-                        System.Diagnostics.Debug.WriteLine($"📝 Found userName: {userName}");
-                        return userName;
-                    }
-                }
-
-                // Fallback: try to get userEmail (from newer records)
-                if (result.ContainsKey("userEmail") && result["userEmail"] != null)
-                {
-                    string userEmail = result["userEmail"].ToString().Trim();
-                    if (!string.IsNullOrEmpty(userEmail) && userEmail != "null")
-                    {
-                        // Extract name part from email (before @)
-                        string emailName = userEmail.Split('@')[0];
-                        string formattedName = emailName.Replace(".", " ").Replace("_", " ");
-                        System.Diagnostics.Debug.WriteLine($"📧 Using email-based name: {formattedName}");
-                        return CapitalizeWords(formattedName);
-                    }
-                }
-
-                // Final fallback: format userId for display
-                if (result.ContainsKey("userId") && result["userId"] != null)
-                {
-                    string userId = result["userId"].ToString();
-
-                    // If it's a demo user ID, make it more readable
-                    if (userId.StartsWith("DEMO_"))
-                    {
-                        System.Diagnostics.Debug.WriteLine("🎭 Using Demo User for demo ID");
-                        return "Demo User";
-                    }
-
-                    // If it's an email used as ID, extract the name part
-                    if (userId.Contains("@"))
-                    {
-                        string emailName = userId.Split('@')[0];
-                        string formattedName = emailName.Replace(".", " ").Replace("_", " ");
-                        System.Diagnostics.Debug.WriteLine($"🔗 Using userId as email name: {formattedName}");
-                        return CapitalizeWords(formattedName);
-                    }
-
-                    // Return shortened userId for display
-                    string shortId = userId.Length > 8 ? userId.Substring(0, 8) : userId;
-                    System.Diagnostics.Debug.WriteLine($"🆔 Using shortened userId: User {shortId}");
-                    return $"User {shortId}";
-                }
-
-                System.Diagnostics.Debug.WriteLine("❓ No valid user identifier found");
-                return "Unknown User";
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error getting user name: {ex.Message}");
-                return "Unknown User";
-            }
-        }
-
-        // NEW: Helper method to capitalize words properly
-        private string CapitalizeWords(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-                return input;
-
-            var words = input.Split(' ');
-            for (int i = 0; i < words.Length; i++)
-            {
-                if (!string.IsNullOrEmpty(words[i]))
-                {
-                    words[i] = char.ToUpper(words[i][0]) + words[i].Substring(1).ToLower();
-                }
-            }
-            return string.Join(" ", words);
         }
 
         private void GenerateChartData(List<Dictionary<string, object>> results)
@@ -446,6 +520,16 @@ namespace INTFYP
         {
             ScriptManager.RegisterStartupScript(this, GetType(), "alert",
                 $"alert('{message}');", true);
+        }
+
+        // NEW: Method to clear user cache if needed (call this periodically or when users are updated)
+        protected void ClearUserCache()
+        {
+            lock (dbLock)
+            {
+                userCache.Clear();
+                System.Diagnostics.Debug.WriteLine("🗑️ User cache cleared");
+            }
         }
     }
 }

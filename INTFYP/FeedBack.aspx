@@ -209,6 +209,13 @@
             color: white !important;
         }
 
+        /* Submit Button Container */
+        .submit-button-container {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         /* Enhanced Feedback Card Styles - PRESERVED */
         .feedback-card {
             height: 100%;
@@ -429,7 +436,7 @@
                 -webkit-line-clamp: 2;
             }
             
-            .row-cols-md-2 {
+            .row-cols-md-3 {
                 grid-template-columns: 1fr !important;
             }
         }
@@ -444,34 +451,19 @@
     </section>
 
     <div class="container mb-5">
+        <!-- Submit Button - Full Width Centered -->
+        <div class="submit-button-container">
+            <button type="button" class="btn btn-submit-teal px-5 py-2" data-bs-toggle="modal" data-bs-target="#feedbackModal" style="font-size: 1.1rem;">
+                Submit Feedback
+            </button>
+        </div>
+
+        <!-- Feedback Cards - Now Full Width -->
         <div class="row">
-            <!-- Student Info -->
-            <div class="col-md-4">
-                <div class="glass-card p-3 mb-3">
-                    <h5 class="fw-bold mb-3">Student Information</h5>
-                    <p><strong>Name:</strong> <asp:Label ID="lblName" runat="server" /></p>
-                    <p><strong>Username:</strong> <asp:Label ID="lblUsername" runat="server" /></p>
-                    <p><strong>Email:</strong> <asp:Label ID="lblEmail" runat="server" /></p>
-                    <p><strong>Phone:</strong> <asp:Label ID="lblPhone" runat="server" /></p>
-                    <p><strong>Gender:</strong> <asp:Label ID="lblGender" runat="server" /></p>
-                    <p><strong>Birthdate:</strong> <asp:Label ID="lblBirthdate" runat="server" /></p>
-                    <p><strong>Position:</strong> <asp:Label ID="lblPosition" runat="server" /></p>
-                    <p><strong>Address:</strong> <asp:Label ID="lblAddress" runat="server" /></p>
-                </div>
-
-                <!-- Submit Button Full Width - Now with Teal Color -->
-                <div class="mt-3">
-                    <button type="button" class="btn btn-submit-teal w-100" data-bs-toggle="modal" data-bs-target="#feedbackModal">
-                        Submit Feedback
-                    </button>
-                </div>
-            </div>
-
-            <!-- Feedback Cards -->
-            <div class="col-md-8">
+            <div class="col-12">
                 <asp:Repeater ID="rptFeedback" runat="server" OnItemCommand="rptFeedback_ItemCommand" OnItemDataBound="rptFeedback_ItemDataBound">
                     <HeaderTemplate>
-                        <div class="row row-cols-1 row-cols-md-2 g-4">
+                        <div class="row row-cols-1 row-cols-md-3 g-4">
                     </HeaderTemplate>
                     <ItemTemplate>
                         <div class="col">

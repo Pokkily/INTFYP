@@ -26,11 +26,14 @@ namespace YourProjectNamespace
 
                 if (string.IsNullOrEmpty(userId))
                 {
-                    lblName.Text = "Not logged in";
+                    // Redirect to login page or show message
+                    Response.Redirect("~/Login.aspx");
                     return;
                 }
 
-                await LoadUserDetails(userId);
+                // Set username for feedback form from session
+                txtFeedbackUsername.Text = Session["username"]?.ToString() ?? "";
+
                 await LoadAllFeedbacks();
             }
         }
@@ -42,26 +45,6 @@ namespace YourProjectNamespace
                 string path = Server.MapPath("~/serviceAccountKey.json");
                 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
                 db = FirestoreDb.Create("intorannetto");
-            }
-        }
-
-        private async Task LoadUserDetails(string userId)
-        {
-            DocumentReference userRef = db.Collection("users").Document(userId);
-            DocumentSnapshot snapshot = await userRef.GetSnapshotAsync();
-
-            if (snapshot.Exists)
-            {
-                var data = snapshot.ToDictionary();
-                lblName.Text = $"{data.GetValueOrDefault("firstName", "")} {data.GetValueOrDefault("lastName", "")}";
-                lblUsername.Text = data.GetValueOrDefault("username", "").ToString();
-                lblEmail.Text = data.GetValueOrDefault("email", "").ToString();
-                lblPhone.Text = data.GetValueOrDefault("phone", "").ToString();
-                lblGender.Text = data.GetValueOrDefault("gender", "").ToString();
-                lblBirthdate.Text = data.GetValueOrDefault("birthdate", "").ToString();
-                lblPosition.Text = data.GetValueOrDefault("position", "").ToString();
-                lblAddress.Text = data.GetValueOrDefault("address", "").ToString();
-                txtFeedbackUsername.Text = data.GetValueOrDefault("username", "").ToString();
             }
         }
 
