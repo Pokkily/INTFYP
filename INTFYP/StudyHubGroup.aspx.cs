@@ -37,14 +37,14 @@ namespace YourProjectNamespace
 
             if (string.IsNullOrEmpty(groupId))
             {
-                Response.Redirect("StudyHub.aspx");
+                Response.Redirect("StudyHubGroup.aspx");
                 return;
             }
 
             if (!IsPostBack)
                 await LoadGroup();
         }
-
+        
         protected override void OnPreRender(EventArgs e)
         {
             base.OnPreRender(e);

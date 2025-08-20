@@ -8,6 +8,7 @@ using System.Web.UI.WebControls;
 using System.Configuration;
 using SendGrid;
 using SendGrid.Helpers.Mail;
+using System.Threading;
 
 namespace YourProjectNamespace
 {
@@ -38,7 +39,9 @@ namespace YourProjectNamespace
                 // Check if user is admin (implement your admin authentication logic here)
                 if (!IsAdminAuthenticated())
                 {
-                    Response.Redirect("Login.aspx");
+                    // Use false parameter to prevent ThreadAbortException
+                    Response.Redirect("Login.aspx", false);
+                    Context.ApplicationInstance.CompleteRequest(); // Complete the request cleanly
                     return;
                 }
 
@@ -50,24 +53,65 @@ namespace YourProjectNamespace
                     await LoadStatistics();
                 }
             }
+            catch (ThreadAbortException)
+            {
+                // ThreadAbortException is normal for Response.Redirect
+                // Don't log or show error message for this
+                // Don't re-throw - just let it complete
+                return;
+            }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Page_Load error: {ex.Message}");
                 ShowErrorMessage("System error. Please try again later.");
             }
         }
-
         private bool IsAdminAuthenticated()
         {
-            // Implement your admin authentication logic here
-            // Check if user is logged in and has admin role
-            string userRole = Session["UserRole"]?.ToString();
-            bool isLoggedIn = Session["IsLoggedIn"] != null && (bool)Session["IsLoggedIn"];
+            try
+            {
+                System.Diagnostics.Debug.WriteLine("=== Admin Authentication Check ===");
 
-            return isLoggedIn && userRole == "Administrator";
+                // Debug: Log all session variables
+                foreach (string key in Session.Keys)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Session[{key}] = {Session[key]}");
+                }
 
-            // For testing purposes, you can temporarily return true
-            // return true;
+                // Check multiple possible session variable names for flexibility
+                string userRole = Session["UserRole"]?.ToString() ?? Session["position"]?.ToString();
+                bool isLoggedIn = false;
+
+                // Check both possible login status variables
+                if (Session["IsLoggedIn"] != null)
+                {
+                    isLoggedIn = (bool)Session["IsLoggedIn"];
+                }
+                else if (Session["isLoggedIn"] != null)
+                {
+                    isLoggedIn = (bool)Session["isLoggedIn"];
+                }
+
+                System.Diagnostics.Debug.WriteLine($"UserRole/Position: '{userRole}'");
+                System.Diagnostics.Debug.WriteLine($"IsLoggedIn: {isLoggedIn}");
+
+                // Check if user has admin role (case-insensitive)
+                bool isAdmin = !string.IsNullOrEmpty(userRole) &&
+                               userRole.Equals("Administrator", StringComparison.OrdinalIgnoreCase);
+
+                System.Diagnostics.Debug.WriteLine($"IsAdmin: {isAdmin}");
+                System.Diagnostics.Debug.WriteLine($"Final Authentication Result: {isLoggedIn && isAdmin}");
+
+                return isLoggedIn && isAdmin;
+
+                // For testing purposes, uncomment this line to bypass authentication
+                // return true;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"IsAdminAuthenticated error: {ex.Message}");
+                return false;
+            }
         }
 
         private void InitializeFirestore()
