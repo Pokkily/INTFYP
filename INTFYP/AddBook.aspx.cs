@@ -43,6 +43,15 @@ namespace INTFYP
         {
             try
             {
+                // Validate category selection
+                if (string.IsNullOrEmpty(ddlCategory.SelectedValue))
+                {
+                    lblStatus.Text = "❌ Please select a category.";
+                    lblStatus.ForeColor = System.Drawing.Color.Red;
+                    pnlStatus.Visible = true;
+                    return;
+                }
+
                 string pdfUrl = "";
 
                 // Check if PDF file is uploaded
@@ -56,18 +65,21 @@ namespace INTFYP
                 {
                     Title = txtTitle.Text.Trim(),
                     Author = txtAuthor.Text.Trim(),
-                    Category = txtCategory.Text.Trim(),
+                    Category = ddlCategory.SelectedValue,
+                    Tag = txtTag.Text.Trim(),
                     PdfUrl = pdfUrl,
                     CreatedAt = Timestamp.GetCurrentTimestamp()
                 });
 
                 lblStatus.Text = $"✅ Book added successfully! (ID: {addedDocRef.Id})";
                 lblStatus.ForeColor = System.Drawing.Color.Green;
+                pnlStatus.Visible = true;
 
                 // Clear input fields
                 txtTitle.Text = "";
                 txtAuthor.Text = "";
-                txtCategory.Text = "";
+                ddlCategory.SelectedIndex = 0; // Reset to first item (-- Select Category --)
+                txtTag.Text = "";
 
                 // Reload books
                 await LoadBooks();
@@ -76,6 +88,7 @@ namespace INTFYP
             {
                 lblStatus.ForeColor = System.Drawing.Color.Red;
                 lblStatus.Text = "❌ Error: " + ex.Message;
+                pnlStatus.Visible = true;
             }
         }
 
@@ -118,12 +131,31 @@ namespace INTFYP
                         Title = data.ContainsKey("Title") ? data["Title"].ToString() : "",
                         Author = data.ContainsKey("Author") ? data["Author"].ToString() : "",
                         Category = data.ContainsKey("Category") ? data["Category"].ToString() : "",
+                        Tag = data.ContainsKey("Tag") ? data["Tag"].ToString() : "",
                         PdfUrl = data.ContainsKey("PdfUrl") ? data["PdfUrl"].ToString() : ""
                     });
                 }
 
                 rptBooks.DataSource = books;
                 rptBooks.DataBind();
+
+                // Set the selected values for edit dropdowns after databinding
+                foreach (RepeaterItem item in rptBooks.Items)
+                {
+                    DropDownList ddlEditCategory = (DropDownList)item.FindControl("ddlEditCategory");
+                    if (ddlEditCategory != null)
+                    {
+                        var bookData = (dynamic)books[item.ItemIndex];
+                        string categoryValue = bookData.Category;
+
+                        // Set the selected value
+                        ListItem listItem = ddlEditCategory.Items.FindByValue(categoryValue);
+                        if (listItem != null)
+                        {
+                            ddlEditCategory.SelectedValue = categoryValue;
+                        }
+                    }
+                }
 
                 pnlNoBooks.Visible = books.Count == 0;
             }
@@ -161,15 +193,25 @@ namespace INTFYP
             // Find controls in the repeater item
             TextBox txtEditTitle = (TextBox)e.Item.FindControl("txtEditTitle");
             TextBox txtEditAuthor = (TextBox)e.Item.FindControl("txtEditAuthor");
-            TextBox txtEditCategory = (TextBox)e.Item.FindControl("txtEditCategory");
+            DropDownList ddlEditCategory = (DropDownList)e.Item.FindControl("ddlEditCategory");
+            TextBox txtEditTag = (TextBox)e.Item.FindControl("txtEditTag");
             FileUpload fileEditPdf = (FileUpload)e.Item.FindControl("fileEditPdf");
+
+            // Validate category selection
+            if (string.IsNullOrEmpty(ddlEditCategory.SelectedValue))
+            {
+                lblBookStatus.Text = "❌ Please select a category.";
+                lblBookStatus.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
 
             DocumentReference bookRef = db.Collection("books").Document(bookId);
             var updates = new Dictionary<string, object>
             {
                 { "Title", txtEditTitle.Text.Trim() },
                 { "Author", txtEditAuthor.Text.Trim() },
-                { "Category", txtEditCategory.Text.Trim() },
+                { "Category", ddlEditCategory.SelectedValue },
+                { "Tag", txtEditTag.Text.Trim() },
                 { "UpdatedAt", Timestamp.GetCurrentTimestamp() }
             };
 
