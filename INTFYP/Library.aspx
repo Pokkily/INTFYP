@@ -180,6 +180,41 @@
             background: rgba(255, 255, 255, 1);
         }
 
+        /* Category Filter Dropdown */
+        .category-filter {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(103, 126, 234, 0.2);
+            border-radius: 25px;
+            padding: 12px 20px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .category-filter:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(103, 126, 234, 0.1);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .filter-label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-label::before {
+            content: '🏷️';
+            font-size: 16px;
+        }
+
         /* Navigation Buttons */
         .nav-button {
             display: flex;
@@ -404,18 +439,36 @@
             text-overflow: ellipsis;
         }
 
+        /* Category and Tag badges */
+        .book-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 12px;
+        }
+
         .category-badge {
             display: inline-flex;
             align-items: center;
-            gap: 5px; /* Reduced from 6px */
-            padding: 5px 10px; /* Reduced from 6px 12px */
-            border-radius: 12px; /* Reduced from 15px */
-            font-size: 11px; /* Reduced from 12px */
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 11px;
             font-weight: 600;
-            margin-bottom: 12px; /* Reduced from 15px */
-            background: rgba(103, 126, 234, 0.1);
-            color: #667eea;
-            border: 1px solid rgba(103, 126, 234, 0.2);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+        }
+
+        .tag-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
         }
 
         .book-actions {
@@ -656,8 +709,36 @@
                         
                         <asp:TextBox ID="txtBookSearch" runat="server" 
                             CssClass="search-input"
-                            placeholder="Search by title, author, or category..." AutoPostBack="true"
+                            placeholder="Search by title, author, category, or tag..." AutoPostBack="true"
                             OnTextChanged="txtBookSearch_TextChanged" />
+
+                        <label class="filter-label">Filter by Category</label>
+                        <asp:DropDownList ID="ddlCategoryFilter" runat="server" CssClass="category-filter"
+                                          AutoPostBack="true" OnSelectedIndexChanged="ddlCategoryFilter_SelectedIndexChanged">
+                            <asp:ListItem Value="" Text="-- All Categories --" />
+                            <asp:ListItem Value="Comics" Text="Comics" />
+                            <asp:ListItem Value="Novels" Text="Novels" />
+                            <asp:ListItem Value="Short stories" Text="Short stories" />
+                            <asp:ListItem Value="Drama/plays" Text="Drama/plays" />
+                            <asp:ListItem Value="Poetry" Text="Poetry" />
+                            <asp:ListItem Value="Fantasy" Text="Fantasy" />
+                            <asp:ListItem Value="Science fiction" Text="Science fiction" />
+                            <asp:ListItem Value="Mystery/Thriller" Text="Mystery/Thriller" />
+                            <asp:ListItem Value="Romance" Text="Romance" />
+                            <asp:ListItem Value="Horror" Text="Horror" />
+                            <asp:ListItem Value="Historical fiction" Text="Historical fiction" />
+                            <asp:ListItem Value="Biography & Autobiography" Text="Biography & Autobiography" />
+                            <asp:ListItem Value="Memoir" Text="Memoir" />
+                            <asp:ListItem Value="Self-help" Text="Self-help" />
+                            <asp:ListItem Value="History" Text="History" />
+                            <asp:ListItem Value="Science & Technology" Text="Science & Technology" />
+                            <asp:ListItem Value="Philosophy" Text="Philosophy" />
+                            <asp:ListItem Value="Religion & Spirituality" Text="Religion & Spirituality" />
+                            <asp:ListItem Value="Travel" Text="Travel" />
+                            <asp:ListItem Value="Essays" Text="Essays" />
+                            <asp:ListItem Value="Business & Economics" Text="Business & Economics" />
+                            <asp:ListItem Value="Reference" Text="Reference" />
+                        </asp:DropDownList>
 
                         <div class="d-grid gap-2">
                             <button type="button" class="nav-button nav-button-primary" onclick="location.href='FavBooks.aspx';">
@@ -697,7 +778,11 @@
                                     
                                     <h5 class="book-title"><%# Eval("Title") %></h5>
                                     <p class="book-author"><%# Eval("Author") %></p>
-                                    <span class="category-badge">#<%# Eval("Category") %></span>
+                                    
+                                    <div class="book-badges">
+                                        <span class="category-badge"><%# Eval("Category") %></span>
+                                        <%# !string.IsNullOrEmpty(Eval("Tag")?.ToString()) ? "<span class='tag-badge'>#" + Eval("Tag") + "</span>" : "" %>
+                                    </div>
                                 </a>
                                 
                                 <div class="book-actions">

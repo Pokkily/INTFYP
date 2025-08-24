@@ -87,43 +87,85 @@
             filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.2));
         }
 
-        .profile-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            position: relative;
-        }
+        .profile-link {
+    text-decoration: none !important;
+    display: inline-block;
+    position: relative;
+}
 
-        .profile-img {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            border: 3px solid rgba(255, 255, 255, 0.8);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            cursor: pointer;
-        }
+.profile-link:hover {
+    text-decoration: none !important;
+}
 
-        .profile-img::before {
-            content: '';
-            position: absolute;
-            inset: -3px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
+/* Enhanced profile image hover effect for clickability */
+.profile-link .profile-img {
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-        .profile-img:hover {
-            transform: scale(1.15);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-        }
+.profile-link:hover .profile-img {
+    transform: scale(1.15);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    border-color: rgba(103, 126, 234, 0.6);
+}
 
-        .profile-img:hover::before {
-            opacity: 1;
-        }
+.profile-link:hover .profile-img::before {
+    opacity: 1;
+}
+
+/* Add a subtle glow effect on hover */
+.profile-link .profile-img::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(103, 126, 234, 0.3), rgba(118, 75, 162, 0.3));
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.profile-link:hover .profile-img::after {
+    opacity: 1;
+}
+
+/* Add a tooltip on hover */
+.profile-link::before {
+    content: 'View Profile';
+    position: absolute;
+    bottom: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.profile-link::after {
+    content: '';
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-bottom-color: rgba(0, 0, 0, 0.8);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.profile-link:hover::before,
+.profile-link:hover::after {
+    opacity: 1;
+}
 
         .title-group {
             display: flex;
@@ -1115,23 +1157,26 @@
                 <img src="Images/logo.png" alt="Logo" class="logo-img" onclick="window.location.href='Default.aspx'" />
                 
                 <div class="profile-section">
-                    <div style="position: relative;">
-                        <img src="Images/dprofile.jpg" alt="Profile" class="profile-img" />
-                        <div class="status-dot"></div>
-                    </div>
-                    
-                    <div class="title-group">
-                        <asp:PlaceHolder ID="phUser" runat="server" Visible="false">
-                            <span id="lblUsername" runat="server" class="title username"></span>
-                            <span class="subtitle">Welcome back!</span>
-                            <!-- Role badge will be added dynamically by code-behind -->
-                        </asp:PlaceHolder>
-                        <asp:PlaceHolder ID="phGuestLabel" runat="server" Visible="false">
-                            <span class="title">Guest User</span>
-                            <span class="subtitle">Please sign in to continue</span>
-                        </asp:PlaceHolder>
-                    </div>
-                </div>
+    <div style="position: relative;">
+        <!-- Make profile image clickable -->
+        <asp:HyperLink ID="lnkProfile" runat="server" NavigateUrl="Profile.aspx" CssClass="profile-link">
+            <img src="Images/dprofile.jpg" alt="Profile" class="profile-img" />
+        </asp:HyperLink>
+        <div class="status-dot"></div>
+    </div>
+    
+    <div class="title-group">
+        <asp:PlaceHolder ID="phUser" runat="server" Visible="false">
+            <span id="lblUsername" runat="server" class="title username"></span>
+            <span class="subtitle">Welcome back!</span>
+            <!-- Role badge will be added dynamically by code-behind -->
+        </asp:PlaceHolder>
+        <asp:PlaceHolder ID="phGuestLabel" runat="server" Visible="false">
+            <span class="title">Guest User</span>
+            <span class="subtitle">Please sign in to continue</span>
+        </asp:PlaceHolder>
+    </div>
+</div>
             </div>
 
             <!-- Navigation Menu -->

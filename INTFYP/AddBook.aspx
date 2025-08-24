@@ -206,6 +206,16 @@
             margin-left: 10px;
         }
 
+        .book-tag {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
         .edit-section {
             background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
             backdrop-filter: blur(5px);
@@ -369,8 +379,39 @@
                                 <i class="fas fa-tag me-1"></i>
                                 Category
                             </label>
-                            <asp:TextBox ID="txtCategory" runat="server" CssClass="form-control" 
-                                       placeholder="e.g., Science, Mathematics, Literature" />
+                            <asp:DropDownList ID="ddlCategory" runat="server" CssClass="form-control">
+                                <asp:ListItem Value="" Text="-- Select Category --" />
+                                <asp:ListItem Value="Comics" Text="Comics" />
+                                <asp:ListItem Value="Novels" Text="Novels" />
+                                <asp:ListItem Value="Short stories" Text="Short stories" />
+                                <asp:ListItem Value="Drama/plays" Text="Drama/plays" />
+                                <asp:ListItem Value="Poetry" Text="Poetry" />
+                                <asp:ListItem Value="Fantasy" Text="Fantasy" />
+                                <asp:ListItem Value="Science fiction" Text="Science fiction" />
+                                <asp:ListItem Value="Mystery/Thriller" Text="Mystery/Thriller" />
+                                <asp:ListItem Value="Romance" Text="Romance" />
+                                <asp:ListItem Value="Horror" Text="Horror" />
+                                <asp:ListItem Value="Historical fiction" Text="Historical fiction" />
+                                <asp:ListItem Value="Biography & Autobiography" Text="Biography & Autobiography" />
+                                <asp:ListItem Value="Memoir" Text="Memoir" />
+                                <asp:ListItem Value="Self-help" Text="Self-help" />
+                                <asp:ListItem Value="History" Text="History" />
+                                <asp:ListItem Value="Science & Technology" Text="Science & Technology" />
+                                <asp:ListItem Value="Philosophy" Text="Philosophy" />
+                                <asp:ListItem Value="Religion & Spirituality" Text="Religion & Spirituality" />
+                                <asp:ListItem Value="Travel" Text="Travel" />
+                                <asp:ListItem Value="Essays" Text="Essays" />
+                                <asp:ListItem Value="Business & Economics" Text="Business & Economics" />
+                                <asp:ListItem Value="Reference" Text="Reference (dictionaries, encyclopedias, textbooks)" />
+                            </asp:DropDownList>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-tags me-1"></i>
+                                Tag
+                            </label>
+                            <asp:TextBox ID="txtTag" runat="server" CssClass="form-control" 
+                                       placeholder="e.g., Advanced, Beginner, Recommended" />
                         </div>
                         <div class="form-group">
                             <label class="form-label">
@@ -404,6 +445,7 @@
                                         <h5><%# Eval("Title") %></h5>
                                         <small>by <%# Eval("Author") %></small>
                                         <span class="book-category"><%# Eval("Category") %></span>
+                                        <%# !string.IsNullOrEmpty(Eval("Tag")?.ToString()) ? "<span class='book-tag'>#" + Eval("Tag") + "</span>" : "" %>
                                     </div>
                                     <button class="secondary-button" type="button" 
                                             data-bs-toggle="collapse" 
@@ -436,8 +478,36 @@
                                                         </div>
                                                         <div class="form-group">
                                                             <label class="form-label">Category</label>
-                                                            <asp:TextBox ID="txtEditCategory" runat="server" CssClass="form-control" 
-                                                                       Text='<%# Eval("Category") %>' />
+                                                            <asp:DropDownList ID="ddlEditCategory" runat="server" CssClass="form-control">
+                                                                <asp:ListItem Value="" Text="-- Select Category --" />
+                                                                <asp:ListItem Value="Comics" Text="Comics" />
+                                                                <asp:ListItem Value="Novels" Text="Novels" />
+                                                                <asp:ListItem Value="Short stories" Text="Short stories" />
+                                                                <asp:ListItem Value="Drama" Text="Drama/plays" />
+                                                                <asp:ListItem Value="Poetry" Text="Poetry" />
+                                                                <asp:ListItem Value="Fantasy" Text="Fantasy" />
+                                                                <asp:ListItem Value="Science fiction" Text="Science fiction" />
+                                                                <asp:ListItem Value="Mystery" Text="Mystery/Thriller" />
+                                                                <asp:ListItem Value="Romance" Text="Romance" />
+                                                                <asp:ListItem Value="Horror" Text="Horror" />
+                                                                <asp:ListItem Value="Historical fiction" Text="Historical fiction" />
+                                                                <asp:ListItem Value="Biography & Autobiography" Text="Biography & Autobiography" />
+                                                                <asp:ListItem Value="Memoir" Text="Memoir" />
+                                                                <asp:ListItem Value="Self-help" Text="Self-help" />
+                                                                <asp:ListItem Value="History" Text="History" />
+                                                                <asp:ListItem Value="Science & Technology" Text="Science & Technology" />
+                                                                <asp:ListItem Value="Philosophy" Text="Philosophy" />
+                                                                <asp:ListItem Value="Religion & Spirituality" Text="Religion & Spirituality" />
+                                                                <asp:ListItem Value="Travel" Text="Travel" />
+                                                                <asp:ListItem Value="Essays" Text="Essays" />
+                                                                <asp:ListItem Value="Business & Economics" Text="Business & Economics" />
+                                                                <asp:ListItem Value="Reference" Text="Reference" />
+                                                            </asp:DropDownList>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label class="form-label">Tag</label>
+                                                            <asp:TextBox ID="txtEditTag" runat="server" CssClass="form-control" 
+                                                                       Text='<%# Eval("Tag") %>' />
                                                         </div>
                                                         <div class="form-group">
                                                             <label class="form-label">Replace PDF (Optional)</label>

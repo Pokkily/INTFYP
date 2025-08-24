@@ -70,20 +70,26 @@ namespace INTFYP
             Repeater1.DataBind();
         }
 
-        // COMBINED search functionality - searches by title, author, AND category in ONE search bar
+        // COMBINED search functionality - searches by title, author, category, AND tag in ONE search bar
         protected async void txtBookSearch_TextChanged(object sender, EventArgs e)
         {
+            await ApplyFilters();
+        }
+
+        // Category filter functionality
+        protected async void ddlCategoryFilter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            await ApplyFilters();
+        }
+
+        // Combined method to apply both search and category filter
+        private async System.Threading.Tasks.Task ApplyFilters()
+        {
             string keyword = txtBookSearch.Text.ToLower().Trim();
+            string selectedCategory = ddlCategoryFilter.SelectedValue;
 
             QuerySnapshot snapshot = await db.Collection("books").GetSnapshotAsync();
             List<LibraryBook> results = new List<LibraryBook>();
-
-            if (string.IsNullOrEmpty(keyword))
-            {
-                // If search is empty, load all books
-                await LoadBooks();
-                return;
-            }
 
             foreach (var doc in snapshot.Documents)
             {
@@ -98,13 +104,27 @@ namespace INTFYP
                 book.IsRecommended = book.RecommendedBy.Contains(CurrentUserId);
                 book.IsFavorited = book.FavoritedBy.Contains(CurrentUserId);
 
-                // COMBINED SEARCH: Search across title, author, AND category
-                bool matchesSearch =
-                    (book.Title?.ToLower().Contains(keyword) ?? false) ||
-                    (book.Author?.ToLower().Contains(keyword) ?? false) ||
-                    (book.Category?.ToLower().Contains(keyword) ?? false);
+                bool matchesSearch = true;
+                bool matchesCategory = true;
 
-                if (matchesSearch)
+                // Apply search filter (if search term exists)
+                if (!string.IsNullOrEmpty(keyword))
+                {
+                    matchesSearch =
+                        (book.Title?.ToLower().Contains(keyword) ?? false) ||
+                        (book.Author?.ToLower().Contains(keyword) ?? false) ||
+                        (book.Category?.ToLower().Contains(keyword) ?? false) ||
+                        (book.Tag?.ToLower().Contains(keyword) ?? false);
+                }
+
+                // Apply category filter (if category is selected)
+                if (!string.IsNullOrEmpty(selectedCategory))
+                {
+                    matchesCategory = string.Equals(book.Category, selectedCategory, StringComparison.OrdinalIgnoreCase);
+                }
+
+                // Book must match both search and category filters
+                if (matchesSearch && matchesCategory)
                 {
                     results.Add(book);
                 }
@@ -194,15 +214,15 @@ namespace INTFYP
                 await bookRef.UpdateAsync(bookUpdates);
             }
 
-            // Reload based on current search state
-            if (!string.IsNullOrEmpty(txtBookSearch.Text.Trim()))
+            // Reload based on current filter state
+            if (!string.IsNullOrEmpty(txtBookSearch.Text.Trim()) || !string.IsNullOrEmpty(ddlCategoryFilter.SelectedValue))
             {
-                // If there's a search term, rerun the search
-                txtBookSearch_TextChanged(txtBookSearch, EventArgs.Empty);
+                // If there are active filters, reapply them
+                await ApplyFilters();
             }
             else
             {
-                // If no search term, load all books
+                // If no filters active, load all books
                 await LoadBooks();
             }
         }
@@ -213,6 +233,7 @@ namespace INTFYP
             [FirestoreProperty] public string Title { get; set; }
             [FirestoreProperty] public string Author { get; set; }
             [FirestoreProperty] public string Category { get; set; }
+            [FirestoreProperty] public string Tag { get; set; }
             [FirestoreProperty] public int? Recommendations { get; set; }
             [FirestoreProperty] public List<string> RecommendedBy { get; set; }
             [FirestoreProperty] public List<string> FavoritedBy { get; set; }

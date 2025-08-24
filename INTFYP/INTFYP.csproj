@@ -338,6 +338,7 @@
     <Content Include="LanguageReports.aspx" />
     <Content Include="Library.aspx" />
     <Content Include="ManageClassroom.aspx" />
+    <Content Include="Profile.aspx" />
     <Content Include="Quiz.aspx" />
     <Content Include="QuizDetail.aspx" />
     <Content Include="Register.aspx" />
@@ -547,6 +548,13 @@
     </Compile>
     <Compile Include="LanguageReports.aspx.designer.cs">
       <DependentUpon>LanguageReports.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Profile.aspx.cs">
+      <DependentUpon>Profile.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Profile.aspx.designer.cs">
+      <DependentUpon>Profile.aspx</DependentUpon>
     </Compile>
     <Compile Include="QuizModels.cs" />
     <Compile Include="ClassDetails.aspx.cs">
