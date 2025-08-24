@@ -126,6 +126,7 @@
                     <asp:ListItem Text="All" Value="all" />
                     <asp:ListItem Text="Announcement" Value="announcement" />
                     <asp:ListItem Text="Assignment" Value="assignment" />
+                    <asp:ListItem Text="Note" Value="Note" />
                     <asp:ListItem Text="Reminder" Value="reminder" />
                 </asp:DropDownList>
             </div>

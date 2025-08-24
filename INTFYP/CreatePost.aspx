@@ -91,6 +91,7 @@
             <asp:DropDownList ID="ddlPostType" runat="server">
                 <asp:ListItem Text="Announcement" Value="announcement" />
                 <asp:ListItem Text="Assignment" Value="assignment" />
+                <asp:ListItem Text="Note" Value="note" />
                 <asp:ListItem Text="Reminder" Value="reminder" />
             </asp:DropDownList>
         </div>

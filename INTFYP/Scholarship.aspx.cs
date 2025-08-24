@@ -72,13 +72,6 @@ namespace YourNamespace
             }
         }
 
-
-        public class SubjectGrade
-        {
-            public string Subject { get; set; }
-            public string Grade { get; set; }
-        }
-
         public class ScholarshipItem
         {
             public string Title { get; set; }

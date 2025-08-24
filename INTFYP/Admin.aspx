@@ -16,17 +16,66 @@
             --danger-color: #e74a3b;
             --warning-color: #f6c23e;
             --info-color: #36b9cc;
+            --dark-color: #2c3e50;
         }
         
         body {
             background-color: var(--secondary-color);
             font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
-        
+
+        /* Navigation Bar Styles */
+        .admin-navbar {
+            background-color: var(--dark-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .admin-navbar .navbar-brand {
+            font-weight: bold;
+            color: white !important;
+        }
+
+        .admin-navbar .nav-link {
+            color: #ecf0f1 !important;
+            padding: 0.75rem 1rem !important;
+            transition: all 0.3s ease;
+        }
+
+        .admin-navbar .nav-link:hover {
+            color: var(--primary-color) !important;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 6px;
+        }
+
+        .admin-navbar .nav-link.active {
+            color: var(--primary-color) !important;
+            background-color: rgba(78, 115, 223, 0.2);
+            border-radius: 6px;
+        }
+
+        .navbar-toggler {
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        /* Badge styles for navigation */
+        .nav-badge {
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.75rem;
+            margin-left: 0.5rem;
+        }
+
+        /* Admin header with reduced padding since navbar is above it */
         .admin-header {
             background: linear-gradient(135deg, var(--primary-color) 0%, #3a5bc7 100%);
             color: white;
-            padding: 2rem 0;
+            padding: 1.5rem 0; /* Reduced from 2rem */
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
@@ -180,16 +229,55 @@
 </head>
 <body>
     <form id="form1" runat="server">
+        
+        <!-- Navigation Bar -->
+        <nav class="navbar navbar-expand-lg admin-navbar">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <i class="bi bi-shield-check"></i> Admin Panel
+                </a>
+                
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNavbar" aria-controls="adminNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="adminNavbar">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="Admin.aspx">
+                                <i class="bi bi-people"></i> User Management
+                                <span class="nav-badge" id="pendingBadge">
+                                    <asp:Label ID="lblNavPending" runat="server" Text="0"></asp:Label>
+                                </span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="AdminScholarship.aspx">
+                                <i class="bi bi-award"></i> Scholarship Management
+                                <span class="nav-badge" id="scholarshipBadge" style="display:none;">
+                                    <asp:Label ID="lblNavScholarship" runat="server" Text="0"></asp:Label>
+                                </span>
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <asp:Button ID="btnNavLogout" runat="server" Text="Logout" OnClick="btnLogout_Click" 
+                                       CssClass="nav-link btn btn-link text-white" style="border:none; background:none;" />
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- End Navigation Bar -->
+
         <div class="admin-header">
             <div class="container">
                 <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <h1><i class="bi bi-shield-check"></i> Admin Dashboard</h1>
-                        <p class="mb-0">User Registration Management System</p>
-                    </div>
-                    <div class="col-md-6 text-md-end">
-                        <asp:Button ID="btnLogout" runat="server" Text="Logout" OnClick="btnLogout_Click" 
-                                   CssClass="btn btn-outline-light" />
+                    <div class="col-12">
+                        <h1><i class="bi bi-people"></i> User Management</h1>
+                        <p class="mb-0">Manage user registrations and approvals</p>
                     </div>
                 </div>
             </div>
@@ -392,6 +480,23 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Update the navigation badge with pending count
+        function updateNavBadge() {
+            const pendingCount = document.querySelector('#lblPendingCount').innerText;
+            document.querySelector('#lblNavPending').innerText = pendingCount;
+            
+            // Hide badge if no pending users
+            const badge = document.querySelector('#pendingBadge');
+            if (pendingCount === '0') {
+                badge.style.display = 'none';
+            } else {
+                badge.style.display = 'inline-block';
+            }
+        }
+
+        // Call on page load
+        window.addEventListener('load', updateNavBadge);
+
         function showRejectModal(userId, userName) {
             document.getElementById('<%= hiddenUserIdToReject.ClientID %>').value = userId;
             document.getElementById('rejectUserName').innerText = userName;
