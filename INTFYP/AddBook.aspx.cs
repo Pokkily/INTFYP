@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Collections.Generic;
+using System.IO;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using CloudinaryDotNet;
@@ -41,20 +42,26 @@ namespace INTFYP
 
         protected async void btnSubmit_Click(object sender, EventArgs e)
         {
+            // Hide previous messages
+            pnlStatus.Visible = false;
+
             try
             {
-                // Validate category selection
-                if (string.IsNullOrEmpty(ddlCategory.SelectedValue))
+                // Validate form inputs
+                if (!ValidateForm())
                 {
-                    lblStatus.Text = "❌ Please select a category.";
-                    lblStatus.ForeColor = System.Drawing.Color.Red;
-                    pnlStatus.Visible = true;
+                    return;
+                }
+
+                // Validate PDF file
+                if (!ValidatePdfFile(filePdf))
+                {
                     return;
                 }
 
                 string pdfUrl = "";
 
-                // Check if PDF file is uploaded
+                // Upload PDF file to Cloudinary
                 if (filePdf.HasFile)
                 {
                     pdfUrl = await UploadPdfToCloudinary(filePdf);
@@ -71,25 +78,115 @@ namespace INTFYP
                     CreatedAt = Timestamp.GetCurrentTimestamp()
                 });
 
-                lblStatus.Text = $"✅ Book added successfully! (ID: {addedDocRef.Id})";
-                lblStatus.ForeColor = System.Drawing.Color.Green;
-                pnlStatus.Visible = true;
+                ShowSuccessMessage($"✅ Learning material added successfully! (ID: {addedDocRef.Id})");
 
                 // Clear input fields
-                txtTitle.Text = "";
-                txtAuthor.Text = "";
-                ddlCategory.SelectedIndex = 0; // Reset to first item (-- Select Category --)
-                txtTag.Text = "";
+                ClearForm();
 
                 // Reload books
                 await LoadBooks();
             }
             catch (Exception ex)
             {
-                lblStatus.ForeColor = System.Drawing.Color.Red;
-                lblStatus.Text = "❌ Error: " + ex.Message;
-                pnlStatus.Visible = true;
+                ShowErrorMessage("❌ Error adding material: " + ex.Message);
             }
+        }
+
+        private bool ValidateForm()
+        {
+            // Check if title is empty
+            if (string.IsNullOrWhiteSpace(txtTitle.Text))
+            {
+                ShowErrorMessage("❌ Please enter a title.");
+                return false;
+            }
+
+            // Check if author is empty
+            if (string.IsNullOrWhiteSpace(txtAuthor.Text))
+            {
+                ShowErrorMessage("❌ Please enter an author.");
+                return false;
+            }
+
+            // Validate category selection
+            if (string.IsNullOrEmpty(ddlCategory.SelectedValue))
+            {
+                ShowErrorMessage("❌ Please select a category.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidatePdfFile(FileUpload fileUpload)
+        {
+            if (!fileUpload.HasFile)
+            {
+                ShowErrorMessage("❌ Please select a PDF file.");
+                return false;
+            }
+
+            // Check file extension
+            string fileExtension = Path.GetExtension(fileUpload.FileName).ToLower();
+            if (fileExtension != ".pdf")
+            {
+                ShowErrorMessage("❌ Only PDF files are allowed.");
+                return false;
+            }
+
+            // Check file size (10 MB limit)
+            const int maxFileSize = 10 * 1024 * 1024; // 10 MB in bytes
+            if (fileUpload.PostedFile.ContentLength > maxFileSize)
+            {
+                ShowErrorMessage("❌ File size exceeds 10 MB limit. Please select a smaller file.");
+                return false;
+            }
+
+            // Check MIME type for additional security
+            if (fileUpload.PostedFile.ContentType != "application/pdf")
+            {
+                ShowErrorMessage("❌ Invalid file type. Please select a valid PDF file.");
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidateEditPdfFile(FileUpload fileUpload)
+        {
+            // For edit, PDF file is optional
+            if (!fileUpload.HasFile)
+            {
+                return true; // No file selected is OK for edit
+            }
+
+            // Check file extension
+            string fileExtension = Path.GetExtension(fileUpload.FileName).ToLower();
+            if (fileExtension != ".pdf")
+            {
+                lblBookStatus.Text = "❌ Only PDF files are allowed.";
+                lblBookStatus.ForeColor = System.Drawing.Color.Red;
+                return false;
+            }
+
+            // Check file size (10 MB limit)
+            const int maxFileSize = 10 * 1024 * 1024; // 10 MB in bytes
+            if (fileUpload.PostedFile.ContentLength > maxFileSize)
+            {
+                lblBookStatus.Text = "❌ File size exceeds 10 MB limit. Please select a smaller file.";
+                lblBookStatus.ForeColor = System.Drawing.Color.Red;
+                return false;
+            }
+
+            // Check MIME type for additional security
+            if (fileUpload.PostedFile.ContentType != "application/pdf")
+            {
+                lblBookStatus.Text = "❌ Invalid file type. Please select a valid PDF file.";
+                lblBookStatus.ForeColor = System.Drawing.Color.Red;
+                return false;
+            }
+
+            return true;
         }
 
         private async System.Threading.Tasks.Task<string> UploadPdfToCloudinary(FileUpload fileUpload)
@@ -109,6 +206,11 @@ namespace INTFYP
                     Folder = "book_pdfs"
                 };
                 var uploadResult = await cloudinary.UploadAsync(uploadParams);
+
+                if (uploadResult.Error != null)
+                {
+                    throw new Exception($"Cloudinary upload error: {uploadResult.Error.Message}");
+                }
 
                 return uploadResult.SecureUrl?.ToString() ?? "";
             }
@@ -143,7 +245,7 @@ namespace INTFYP
                 foreach (RepeaterItem item in rptBooks.Items)
                 {
                     DropDownList ddlEditCategory = (DropDownList)item.FindControl("ddlEditCategory");
-                    if (ddlEditCategory != null)
+                    if (ddlEditCategory != null && item.ItemIndex < books.Count)
                     {
                         var bookData = (dynamic)books[item.ItemIndex];
                         string categoryValue = bookData.Category;
@@ -158,6 +260,9 @@ namespace INTFYP
                 }
 
                 pnlNoBooks.Visible = books.Count == 0;
+
+                // Clear any previous book status messages
+                lblBookStatus.Text = "";
             }
             catch (Exception ex)
             {
@@ -197,11 +302,32 @@ namespace INTFYP
             TextBox txtEditTag = (TextBox)e.Item.FindControl("txtEditTag");
             FileUpload fileEditPdf = (FileUpload)e.Item.FindControl("fileEditPdf");
 
+            // Validate required fields
+            if (string.IsNullOrWhiteSpace(txtEditTitle.Text))
+            {
+                lblBookStatus.Text = "❌ Please enter a title.";
+                lblBookStatus.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(txtEditAuthor.Text))
+            {
+                lblBookStatus.Text = "❌ Please enter an author.";
+                lblBookStatus.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
             // Validate category selection
             if (string.IsNullOrEmpty(ddlEditCategory.SelectedValue))
             {
                 lblBookStatus.Text = "❌ Please select a category.";
                 lblBookStatus.ForeColor = System.Drawing.Color.Red;
+                return;
+            }
+
+            // Validate PDF file if uploaded
+            if (!ValidateEditPdfFile(fileEditPdf))
+            {
                 return;
             }
 
@@ -241,6 +367,29 @@ namespace INTFYP
 
             // Reload books
             await LoadBooks();
+        }
+
+        private void ShowSuccessMessage(string message)
+        {
+            lblStatus.Text = message;
+            lblStatus.ForeColor = System.Drawing.Color.Green;
+            pnlStatus.Visible = true;
+        }
+
+        private void ShowErrorMessage(string message)
+        {
+            lblStatus.Text = message;
+            lblStatus.ForeColor = System.Drawing.Color.Red;
+            pnlStatus.Visible = true;
+        }
+
+        private void ClearForm()
+        {
+            txtTitle.Text = "";
+            txtAuthor.Text = "";
+            ddlCategory.SelectedIndex = 0; // Reset to first item (-- Select Category --)
+            txtTag.Text = "";
+            // Note: We don't clear the file upload control as it's automatically cleared after postback
         }
     }
 }

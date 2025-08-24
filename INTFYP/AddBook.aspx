@@ -237,8 +237,20 @@
             color: #2d5016;
             padding: 12px 16px;
             border-radius: 10px;
-            margin-bottom: 20px;
-            animation: slideInFromTop 0.5s ease-out;
+            margin-left: 15px;
+            animation: slideInFromRight 0.5s ease-out;
+            display: inline-block;
+        }
+
+        .error-message {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: #8b2635;
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-left: 15px;
+            animation: slideInFromRight 0.5s ease-out;
+            display: inline-block;
         }
 
         .no-data-panel {
@@ -254,6 +266,24 @@
             font-size: 4rem;
             margin-bottom: 20px;
             opacity: 0.5;
+        }
+
+        .file-hint {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .file-hint i {
+            color: #3498db;
+            margin-right: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         /* Grid System */
@@ -302,6 +332,17 @@
             }
         }
 
+        @keyframes slideInFromRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .form-grid {
@@ -317,6 +358,18 @@
             
             .action-buttons {
                 flex-direction: column;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .status-message, .error-message {
+                margin-left: 0;
+                margin-top: 10px;
+                display: block;
             }
         }
 
@@ -342,14 +395,6 @@
                 <p class="page-subtitle">Upload and manage educational resources for students</p>
             </div>
 
-            <!-- Status Message -->
-            <asp:Panel ID="pnlStatus" runat="server" Visible="false">
-                <div class="status-message">
-                    <i class="fas fa-check-circle me-2"></i>
-                    <asp:Label ID="lblStatus" runat="server" Text="" />
-                </div>
-            </asp:Panel>
-
             <!-- Add Book Form -->
             <div class="glass-card">
                 <div class="card-header">
@@ -365,6 +410,11 @@
                             </label>
                             <asp:TextBox ID="txtTitle" runat="server" CssClass="form-control" 
                                        placeholder="e.g., Advanced Physics Textbook" />
+                            <asp:RequiredFieldValidator ID="rfvTitle" runat="server" 
+                                ControlToValidate="txtTitle" 
+                                ErrorMessage="Title is required" 
+                                CssClass="text-danger" 
+                                Display="Dynamic" />
                         </div>
                         <div class="form-group">
                             <label class="form-label">
@@ -373,6 +423,11 @@
                             </label>
                             <asp:TextBox ID="txtAuthor" runat="server" CssClass="form-control" 
                                        placeholder="e.g., Dr. John Smith" />
+                            <asp:RequiredFieldValidator ID="rfvAuthor" runat="server" 
+                                ControlToValidate="txtAuthor" 
+                                ErrorMessage="Author is required" 
+                                CssClass="text-danger" 
+                                Display="Dynamic" />
                         </div>
                         <div class="form-group">
                             <label class="form-label">
@@ -381,7 +436,6 @@
                             </label>
                             <asp:DropDownList ID="ddlCategory" runat="server" CssClass="form-control">
                                 <asp:ListItem Value="" Text="-- Select Category --" />
-                                <asp:ListItem Value="Comics" Text="Comics" />
                                 <asp:ListItem Value="Novels" Text="Novels" />
                                 <asp:ListItem Value="Short stories" Text="Short stories" />
                                 <asp:ListItem Value="Drama/plays" Text="Drama/plays" />
@@ -404,6 +458,11 @@
                                 <asp:ListItem Value="Business & Economics" Text="Business & Economics" />
                                 <asp:ListItem Value="Reference" Text="Reference (dictionaries, encyclopedias, textbooks)" />
                             </asp:DropDownList>
+                            <asp:RequiredFieldValidator ID="rfvCategory" runat="server" 
+                                ControlToValidate="ddlCategory" 
+                                ErrorMessage="Please select a category" 
+                                CssClass="text-danger" 
+                                Display="Dynamic" />
                         </div>
                         <div class="form-group">
                             <label class="form-label">
@@ -419,11 +478,39 @@
                                 PDF File
                             </label>
                             <asp:FileUpload ID="filePdf" runat="server" CssClass="form-control" />
+                            <div class="file-hint">
+                                <i class="fas fa-info-circle"></i>
+                                Maximum file size: 10 MB. Only PDF files are allowed.
+                            </div>
+                            <asp:RequiredFieldValidator ID="rfvPdf" runat="server" 
+                                ControlToValidate="filePdf" 
+                                ErrorMessage="PDF file is required" 
+                                CssClass="text-danger" 
+                                Display="Dynamic" />
                         </div>
                     </div>
+                    
                     <div class="d-flex justify-content-end mt-4">
-                        <asp:Button ID="btnSubmit" runat="server" Text="✨ Add Material" 
-                                  CssClass="primary-button" OnClick="btnSubmit_Click" />
+                        <div class="button-group">
+                            <asp:Button ID="btnSubmit" runat="server" Text="✨ Add Material" 
+                                      CssClass="primary-button" OnClick="btnSubmit_Click" />
+                            
+                            <!-- Status Message Panel (beside button) -->
+                            <asp:Panel ID="pnlStatus" runat="server" Visible="false">
+                                <div class="status-message">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <asp:Label ID="lblStatus" runat="server" Text="" />
+                                </div>
+                            </asp:Panel>
+                            
+                            <!-- Error Message Panel (beside button) -->
+                            <asp:Panel ID="pnlError" runat="server" Visible="false">
+                                <div class="error-message">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    <asp:Label ID="lblError" runat="server" Text="" />
+                                </div>
+                            </asp:Panel>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -480,7 +567,6 @@
                                                             <label class="form-label">Category</label>
                                                             <asp:DropDownList ID="ddlEditCategory" runat="server" CssClass="form-control">
                                                                 <asp:ListItem Value="" Text="-- Select Category --" />
-                                                                <asp:ListItem Value="Comics" Text="Comics" />
                                                                 <asp:ListItem Value="Novels" Text="Novels" />
                                                                 <asp:ListItem Value="Short stories" Text="Short stories" />
                                                                 <asp:ListItem Value="Drama" Text="Drama/plays" />
@@ -512,6 +598,10 @@
                                                         <div class="form-group">
                                                             <label class="form-label">Replace PDF (Optional)</label>
                                                             <asp:FileUpload ID="fileEditPdf" runat="server" CssClass="form-control" />
+                                                            <div class="file-hint">
+                                                                <i class="fas fa-info-circle"></i>
+                                                                Maximum file size: 10 MB. Only PDF files are allowed.
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -571,22 +661,22 @@
         document.addEventListener('DOMContentLoaded', function () {
             // Auto-hide status messages
             setTimeout(function () {
-                var statusPanel = document.querySelector('.status-message');
-                if (statusPanel) {
-                    statusPanel.style.opacity = '0';
-                    statusPanel.style.transform = 'translateY(-20px)';
-                    statusPanel.style.transition = 'all 0.5s ease';
+                var statusMessages = document.querySelectorAll('.status-message, .error-message');
+                statusMessages.forEach(function (message) {
+                    message.style.opacity = '0';
+                    message.style.transform = 'translateX(20px)';
+                    message.style.transition = 'all 0.5s ease';
                     setTimeout(function () {
-                        statusPanel.style.display = 'none';
+                        message.style.display = 'none';
                     }, 500);
-                }
+                });
             }, 5000);
 
             // Enhanced hover effects for cards
             const cards = document.querySelectorAll('.book-card');
             cards.forEach((card, index) => {
                 card.style.animationDelay = `${index * 0.1}s`;
-                
+
                 card.addEventListener('mouseenter', function () {
                     this.style.transform = 'translateY(-5px)';
                     this.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.15)';
@@ -609,6 +699,30 @@
 
                 input.addEventListener('blur', function () {
                     this.style.transform = 'scale(1)';
+                });
+            });
+
+            // PDF file validation
+            const pdfInputs = document.querySelectorAll('input[type="file"]');
+            pdfInputs.forEach(input => {
+                input.addEventListener('change', function () {
+                    const file = this.files[0];
+                    if (file) {
+                        // Check file type
+                        if (file.type !== 'application/pdf') {
+                            alert('Please select a PDF file only.');
+                            this.value = '';
+                            return;
+                        }
+
+                        // Check file size (10 MB = 10 * 1024 * 1024 bytes)
+                        const maxSize = 10 * 1024 * 1024;
+                        if (file.size > maxSize) {
+                            alert('File size exceeds 10 MB limit. Please select a smaller file.');
+                            this.value = '';
+                            return;
+                        }
+                    }
                 });
             });
         });
