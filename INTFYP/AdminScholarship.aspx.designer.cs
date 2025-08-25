@@ -11,7 +11,7 @@ namespace YourProjectNamespace
 {
 
 
-    public partial class Admin
+    public partial class AdminScholarship
     {
 
         /// <summary>
@@ -24,13 +24,13 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.HtmlControls.HtmlForm form1;
 
         /// <summary>
-        /// lblNavPending control.
+        /// lblNavUsers control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblNavPending;
+        protected global::System.Web.UI.WebControls.Label lblNavUsers;
 
         /// <summary>
         /// lblNavScholarship control.
@@ -114,13 +114,13 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.DropDownList ddlStatusFilter;
 
         /// <summary>
-        /// ddlPositionFilter control.
+        /// ddlLevelFilter control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddlPositionFilter;
+        protected global::System.Web.UI.WebControls.DropDownList ddlLevelFilter;
 
         /// <summary>
         /// btnRefresh control.
@@ -132,22 +132,31 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.Button btnRefresh;
 
         /// <summary>
-        /// rptUsers control.
+        /// rptApplications control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptUsers;
+        protected global::System.Web.UI.WebControls.Repeater rptApplications;
 
         /// <summary>
-        /// pnlNoUsers control.
+        /// pnlNoApplications control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlNoUsers;
+        protected global::System.Web.UI.WebControls.Panel pnlNoApplications;
+
+        /// <summary>
+        /// ddlRejectionReason control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddlRejectionReason;
 
         /// <summary>
         /// txtRejectionReason control.
@@ -168,12 +177,12 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.Button btnConfirmReject;
 
         /// <summary>
-        /// hiddenUserIdToReject control.
+        /// hiddenApplicationIdToReject control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hiddenUserIdToReject;
+        protected global::System.Web.UI.WebControls.HiddenField hiddenApplicationIdToReject;
     }
 }

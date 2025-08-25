@@ -300,6 +300,7 @@
     <Content Include="AddQuestion.aspx" />
     <Content Include="AddScholarship.aspx" />
     <Content Include="Admin.aspx" />
+    <Content Include="AdminScholarship.aspx" />
     <Content Include="CitationGenerator.aspx" />
     <Content Include="Class.aspx" />
     <Content Include="ClassDetails.aspx" />
@@ -343,6 +344,7 @@
     <Content Include="QuizDetail.aspx" />
     <Content Include="Register.aspx" />
     <Content Include="Scholarship.aspx" />
+    <Content Include="ScholarshipApp.aspx" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
     <Content Include="Scripts\bootstrap.esm.js" />
@@ -481,6 +483,13 @@
     </Compile>
     <Compile Include="Admin.aspx.designer.cs">
       <DependentUpon>Admin.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="AdminScholarship.aspx.cs">
+      <DependentUpon>AdminScholarship.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="AdminScholarship.aspx.designer.cs">
+      <DependentUpon>AdminScholarship.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -648,6 +657,13 @@
     </Compile>
     <Compile Include="Scholarship.aspx.designer.cs">
       <DependentUpon>Scholarship.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ScholarshipApp.aspx.cs">
+      <DependentUpon>ScholarshipApp.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ScholarshipApp.aspx.designer.cs">
+      <DependentUpon>ScholarshipApp.aspx</DependentUpon>
     </Compile>
     <Compile Include="Site.Master.cs">
       <DependentUpon>Site.Master</DependentUpon>

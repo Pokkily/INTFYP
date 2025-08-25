@@ -190,6 +190,12 @@
                 border: 1px solid #bfdbfe;
             }
 
+            .post-type.Note {
+                background: #faf5ff;
+                color: #7c3aed;
+                border: 1px solid #c4b5fd;
+            }
+
             .post-type.Quiz {
                 background: #fefce8;
                 color: #ca8a04;
