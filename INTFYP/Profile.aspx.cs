@@ -130,9 +130,6 @@ namespace YourProjectNamespace
                 {
                     txtBirthdate.Text = birthdate;
                 }
-
-                // Load notification settings
-                await LoadNotificationSettings();
             }
             catch (Exception ex)
             {
@@ -704,63 +701,7 @@ namespace YourProjectNamespace
             }
         }
 
-        private async Task LoadNotificationSettings()
-        {
-            try
-            {
-                var settingsRef = db.Collection("users").Document(currentUserId).Collection("settings").Document("notifications");
-                var settingsSnap = await settingsRef.GetSnapshotAsync();
-
-                if (settingsSnap.Exists)
-                {
-                    var settings = settingsSnap.ToDictionary();
-                    if (settings != null)
-                    {
-                        chkEmailNotifications.Checked = Convert.ToBoolean(GetSafeValue(settings, "emailNotifications", "true"));
-                        chkStudyHubNotifications.Checked = Convert.ToBoolean(GetSafeValue(settings, "studyHubNotifications", "true"));
-                        chkClassNotifications.Checked = Convert.ToBoolean(GetSafeValue(settings, "classNotifications", "true"));
-                    }
-                }
-                else
-                {
-                    // Default settings
-                    chkEmailNotifications.Checked = true;
-                    chkStudyHubNotifications.Checked = true;
-                    chkClassNotifications.Checked = true;
-                }
-
-                // Load privacy settings
-                var privacyRef = db.Collection("users").Document(currentUserId).Collection("settings").Document("privacy");
-                var privacySnap = await privacyRef.GetSnapshotAsync();
-
-                if (privacySnap.Exists)
-                {
-                    var privacy = privacySnap.ToDictionary();
-                    if (privacy != null)
-                    {
-                        chkPublicProfile.Checked = Convert.ToBoolean(GetSafeValue(privacy, "publicProfile", "true"));
-                        chkShowActivity.Checked = Convert.ToBoolean(GetSafeValue(privacy, "showActivity", "true"));
-                    }
-                }
-                else
-                {
-                    // Default privacy settings
-                    chkPublicProfile.Checked = true;
-                    chkShowActivity.Checked = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"LoadNotificationSettings error: {ex}");
-                // Set default values on error
-                chkEmailNotifications.Checked = true;
-                chkStudyHubNotifications.Checked = true;
-                chkClassNotifications.Checked = true;
-                chkPublicProfile.Checked = true;
-                chkShowActivity.Checked = true;
-            }
-        }
-
+        // Updated btnUpdateProfile_Click method with comprehensive validation
         protected async void btnUpdateProfile_Click(object sender, EventArgs e)
         {
             try
@@ -781,31 +722,131 @@ namespace YourProjectNamespace
                     return;
                 }
 
-                // Validate phone number if provided
+                // Validate and check phone number uniqueness
                 string phone = txtPhone.Text.Trim();
-                if (!string.IsNullOrEmpty(phone) && (phone.Length < 6 || !phone.All(char.IsDigit)))
+                if (!string.IsNullOrEmpty(phone))
                 {
-                    ShowMessage("Please enter a valid phone number (digits only, at least 6 characters).", "warning");
-                    return;
+                    // Basic phone format validation
+                    if (phone.Length < 6 || !phone.All(char.IsDigit))
+                    {
+                        ShowMessage("Please enter a valid phone number (digits only, at least 6 characters).", "warning");
+                        return;
+                    }
+
+                    // Check if phone number is already taken by another user
+                    bool isPhoneValid = await ValidateFieldUniqueness("phone", phone);
+                    if (!isPhoneValid)
+                    {
+                        ShowMessage("This phone number is already registered by another user. Please use a different phone number.", "danger");
+                        return;
+                    }
+                }
+
+                // Validate email uniqueness (if email field becomes editable in the future)
+                string email = txtEmail.Text.Trim().ToLower();
+                if (!string.IsNullOrEmpty(email))
+                {
+                    // Basic email format validation
+                    if (!IsValidEmail(email))
+                    {
+                        ShowMessage("Please enter a valid email address.", "warning");
+                        return;
+                    }
+
+                    // Check email uniqueness
+                    bool isEmailValid = await ValidateFieldUniqueness("email_lower", email);
+                    if (!isEmailValid)
+                    {
+                        ShowMessage("This email address is already registered by another user.", "danger");
+                        return;
+                    }
+                }
+
+                // Validate username uniqueness (if username field becomes editable in the future)
+                string username = txtUsername.Text.Trim();
+                if (!string.IsNullOrEmpty(username))
+                {
+                    // Basic username format validation
+                    if (username.Length < 3 || username.Length > 20)
+                    {
+                        ShowMessage("Username must be between 3 and 20 characters long.", "warning");
+                        return;
+                    }
+
+                    if (!System.Text.RegularExpressions.Regex.IsMatch(username, @"^[a-zA-Z0-9_]+$"))
+                    {
+                        ShowMessage("Username can only contain letters, numbers, and underscores.", "warning");
+                        return;
+                    }
+
+                    // Check username uniqueness
+                    bool isUsernameValid = await ValidateFieldUniqueness("username", username);
+                    if (!isUsernameValid)
+                    {
+                        ShowMessage("This username is already taken. Please choose a different username.", "danger");
+                        return;
+                    }
+                }
+
+                // Validate birthdate if provided
+                if (!string.IsNullOrEmpty(txtBirthdate.Text))
+                {
+                    if (DateTime.TryParse(txtBirthdate.Text, out DateTime birthDate))
+                    {
+                        if (birthDate > DateTime.Now)
+                        {
+                            ShowMessage("Birthdate cannot be in the future.", "warning");
+                            return;
+                        }
+
+                        if (birthDate < DateTime.Now.AddYears(-120))
+                        {
+                            ShowMessage("Please enter a valid birthdate.", "warning");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        ShowMessage("Please enter a valid birthdate.", "warning");
+                        return;
+                    }
                 }
 
                 // Update user profile
                 var updateData = new Dictionary<string, object>
+        {
+            { "firstName", txtFirstName.Text.Trim() },
+            { "lastName", txtLastName.Text.Trim() },
+            { "phone", phone },
+            { "gender", ddlGender.SelectedValue },
+            { "birthdate", txtBirthdate.Text.Trim() },
+            { "address", txtAddress.Text.Trim() },
+            { "lastUpdated", Timestamp.GetCurrentTimestamp() }
+        };
+
+                // Add email and username to update if they were modified and are not read-only
+                if (!txtEmail.ReadOnly && !string.IsNullOrEmpty(email))
                 {
-                    { "firstName", txtFirstName.Text.Trim() },
-                    { "lastName", txtLastName.Text.Trim() },
-                    { "phone", phone },
-                    { "gender", ddlGender.SelectedValue },
-                    { "birthdate", txtBirthdate.Text.Trim() },
-                    { "address", txtAddress.Text.Trim() },
-                    { "lastUpdated", Timestamp.GetCurrentTimestamp() }
-                };
+                    updateData["email"] = txtEmail.Text.Trim();
+                    updateData["email_lower"] = email;
+                }
+
+                if (!txtUsername.ReadOnly && !string.IsNullOrEmpty(username))
+                {
+                    updateData["username"] = username;
+                }
 
                 var userRef = db.Collection("users").Document(currentUserId);
                 await userRef.UpdateAsync(updateData);
 
                 // Update profile header display
                 ltProfileName.Text = $"{txtFirstName.Text.Trim()} {txtLastName.Text.Trim()}";
+
+                // Update username display if it was changed
+                if (!txtUsername.ReadOnly)
+                {
+                    ltUsername.Text = username;
+                }
 
                 ShowMessage("Profile updated successfully!", "success");
             }
@@ -815,7 +856,218 @@ namespace YourProjectNamespace
                 System.Diagnostics.Debug.WriteLine($"Profile update error: {ex}");
             }
         }
+        private async Task<bool> ValidateFieldUniqueness(string fieldName, string fieldValue)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(fieldValue))
+                    return true; // Empty values are allowed (not checking uniqueness for empty values)
 
+                // Get the current user's data to compare
+                var currentUserRef = db.Collection("users").Document(currentUserId);
+                var currentUserSnap = await currentUserRef.GetSnapshotAsync();
+
+                if (currentUserSnap.Exists)
+                {
+                    var currentUserData = currentUserSnap.ToDictionary();
+                    string currentValue = GetSafeValue(currentUserData, fieldName);
+
+                    // If the value hasn't changed, it's valid
+                    if (string.Equals(currentValue, fieldValue, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+
+                // Check if any other user has this field value
+                var query = db.Collection("users").WhereEqualTo(fieldName, fieldValue);
+                var snapshot = await query.GetSnapshotAsync();
+
+                if (snapshot != null && snapshot.Count > 0)
+                {
+                    // Check if any of the found documents is not the current user
+                    foreach (var doc in snapshot.Documents)
+                    {
+                        if (doc.Id != currentUserId)
+                        {
+                            return false; // Found another user with the same field value
+                        }
+                    }
+                }
+
+                return true; // No other user has this field value
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error validating field uniqueness for {fieldName}: {ex}");
+                return false; // Return false on error to be safe
+            }
+        }
+
+        // Helper method to validate email format
+        private bool IsValidEmail(string email)
+        {
+            try
+            {
+                var emailRegex = new System.Text.RegularExpressions.Regex(
+                    @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+                return emailRegex.IsMatch(email);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        // Enhanced validation method for comprehensive field validation
+        private async Task<Dictionary<string, string>> ValidateAllFields()
+        {
+            var errors = new Dictionary<string, string>();
+
+            try
+            {
+                // Required field validation
+                if (string.IsNullOrWhiteSpace(txtFirstName.Text))
+                    errors.Add("firstName", "First name is required.");
+
+                if (string.IsNullOrWhiteSpace(txtLastName.Text))
+                    errors.Add("lastName", "Last name is required.");
+
+                // Phone validation
+                string phone = txtPhone.Text.Trim();
+                if (!string.IsNullOrEmpty(phone))
+                {
+                    if (phone.Length < 6 || !phone.All(char.IsDigit))
+                        errors.Add("phone", "Phone number must be at least 6 digits and contain only numbers.");
+                    else if (!await ValidateFieldUniqueness("phone", phone))
+                        errors.Add("phone", "This phone number is already registered by another user.");
+                }
+
+                // Email validation (if editable)
+                if (!txtEmail.ReadOnly)
+                {
+                    string email = txtEmail.Text.Trim().ToLower();
+                    if (!string.IsNullOrEmpty(email))
+                    {
+                        if (!IsValidEmail(email))
+                            errors.Add("email", "Please enter a valid email address.");
+                        else if (!await ValidateFieldUniqueness("email_lower", email))
+                            errors.Add("email", "This email address is already registered by another user.");
+                    }
+                }
+
+                // Username validation (if editable)
+                if (!txtUsername.ReadOnly)
+                {
+                    string username = txtUsername.Text.Trim();
+                    if (!string.IsNullOrEmpty(username))
+                    {
+                        if (username.Length < 3 || username.Length > 20)
+                            errors.Add("username", "Username must be between 3 and 20 characters long.");
+                        else if (!System.Text.RegularExpressions.Regex.IsMatch(username, @"^[a-zA-Z0-9_]+$"))
+                            errors.Add("username", "Username can only contain letters, numbers, and underscores.");
+                        else if (!await ValidateFieldUniqueness("username", username))
+                            errors.Add("username", "This username is already taken. Please choose a different username.");
+                    }
+                }
+
+                // Birthdate validation
+                if (!string.IsNullOrEmpty(txtBirthdate.Text))
+                {
+                    if (DateTime.TryParse(txtBirthdate.Text, out DateTime birthDate))
+                    {
+                        if (birthDate > DateTime.Now)
+                            errors.Add("birthdate", "Birthdate cannot be in the future.");
+                        else if (birthDate < DateTime.Now.AddYears(-120))
+                            errors.Add("birthdate", "Please enter a valid birthdate.");
+                    }
+                    else
+                    {
+                        errors.Add("birthdate", "Please enter a valid birthdate.");
+                    }
+                }
+
+                return errors;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in ValidateAllFields: {ex}");
+                errors.Add("general", "An error occurred during validation. Please try again.");
+                return errors;
+            }
+        }
+
+        // Alternative update method using comprehensive validation
+        protected async void btnUpdateProfileWithValidation_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Check if this is a reset request
+                string eventArgument = Request["__EVENTARGUMENT"];
+                if (eventArgument == "reset")
+                {
+                    await LoadUserProfile();
+                    ShowMessage("Form has been reset to original values.", "info");
+                    return;
+                }
+
+                // Perform comprehensive validation
+                var validationErrors = await ValidateAllFields();
+
+                if (validationErrors.Count > 0)
+                {
+                    // Display all validation errors
+                    string errorMessage = "Please correct the following errors:\n" +
+                        string.Join("\n", validationErrors.Values);
+                    ShowMessage(errorMessage, "danger");
+                    return;
+                }
+
+                // If all validations pass, proceed with update
+                var updateData = new Dictionary<string, object>
+        {
+            { "firstName", txtFirstName.Text.Trim() },
+            { "lastName", txtLastName.Text.Trim() },
+            { "phone", txtPhone.Text.Trim() },
+            { "gender", ddlGender.SelectedValue },
+            { "birthdate", txtBirthdate.Text.Trim() },
+            { "address", txtAddress.Text.Trim() },
+            { "lastUpdated", Timestamp.GetCurrentTimestamp() }
+        };
+
+                // Add email and username if they're editable
+                if (!txtEmail.ReadOnly)
+                {
+                    string email = txtEmail.Text.Trim();
+                    updateData["email"] = email;
+                    updateData["email_lower"] = email.ToLower();
+                }
+
+                if (!txtUsername.ReadOnly)
+                {
+                    updateData["username"] = txtUsername.Text.Trim();
+                }
+
+                var userRef = db.Collection("users").Document(currentUserId);
+                await userRef.UpdateAsync(updateData);
+
+                // Update UI displays
+                ltProfileName.Text = $"{txtFirstName.Text.Trim()} {txtLastName.Text.Trim()}";
+                if (!txtUsername.ReadOnly)
+                {
+                    ltUsername.Text = txtUsername.Text.Trim();
+                }
+
+                ShowMessage("Profile updated successfully!", "success");
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("Error updating profile: " + ex.Message, "danger");
+                System.Diagnostics.Debug.WriteLine($"Profile update error: {ex}");
+            }
+        }
         protected async void btnUploadPhoto_Click(object sender, EventArgs e)
         {
             try
@@ -910,184 +1162,6 @@ namespace YourProjectNamespace
             {
                 System.Diagnostics.Debug.WriteLine($"Cloudinary upload error: {ex}");
                 return "";
-            }
-        }
-
-        protected async void btnChangePassword_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                string currentPassword = txtCurrentPassword.Text.Trim();
-                string newPassword = txtNewPassword.Text.Trim();
-                string confirmPassword = txtConfirmPassword.Text.Trim();
-
-                // Validate inputs
-                if (string.IsNullOrEmpty(currentPassword) || string.IsNullOrEmpty(newPassword) || string.IsNullOrEmpty(confirmPassword))
-                {
-                    ShowMessage("All password fields are required.", "warning");
-                    return;
-                }
-
-                if (newPassword != confirmPassword)
-                {
-                    ShowMessage("New passwords do not match.", "warning");
-                    return;
-                }
-
-                // Validate new password strength
-                if (newPassword.Length < 8 ||
-                    !newPassword.Any(char.IsUpper) ||
-                    !newPassword.Any(char.IsLower) ||
-                    !newPassword.Any(char.IsDigit) ||
-                    !newPassword.Any(ch => !char.IsLetterOrDigit(ch)))
-                {
-                    ShowMessage("New password must be at least 8 characters and contain uppercase, lowercase, number, and special character.", "warning");
-                    return;
-                }
-
-                // Get current user data
-                var userRef = db.Collection("users").Document(currentUserId);
-                var userSnap = await userRef.GetSnapshotAsync();
-
-                if (!userSnap.Exists)
-                {
-                    ShowMessage("User not found.", "danger");
-                    return;
-                }
-
-                var userData = userSnap.ToDictionary();
-                if (userData == null)
-                {
-                    ShowMessage("Error accessing user data.", "danger");
-                    return;
-                }
-
-                string storedPassword = GetSafeValue(userData, "password");
-
-                // Verify current password (In production, use proper password hashing)
-                if (currentPassword != storedPassword)
-                {
-                    ShowMessage("Current password is incorrect.", "warning");
-                    return;
-                }
-
-                // Update password (In production, hash the password before storing)
-                await userRef.UpdateAsync(new Dictionary<string, object>
-                {
-                    { "password", newPassword },
-                    { "passwordLastChanged", Timestamp.GetCurrentTimestamp() }
-                });
-
-                // Clear password fields
-                txtCurrentPassword.Text = "";
-                txtNewPassword.Text = "";
-                txtConfirmPassword.Text = "";
-
-                ShowMessage("Password changed successfully!", "success");
-            }
-            catch (Exception ex)
-            {
-                ShowMessage("Error changing password: " + ex.Message, "danger");
-                System.Diagnostics.Debug.WriteLine($"Password change error: {ex}");
-            }
-        }
-
-        protected async void btnSaveNotifications_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var settingsRef = db.Collection("users").Document(currentUserId)
-                    .Collection("settings").Document("notifications");
-
-                var notificationSettings = new Dictionary<string, object>
-                {
-                    { "emailNotifications", chkEmailNotifications.Checked },
-                    { "studyHubNotifications", chkStudyHubNotifications.Checked },
-                    { "classNotifications", chkClassNotifications.Checked },
-                    { "lastUpdated", Timestamp.GetCurrentTimestamp() }
-                };
-
-                await settingsRef.SetAsync(notificationSettings);
-
-                ShowMessage("Notification preferences saved successfully!", "success");
-            }
-            catch (Exception ex)
-            {
-                ShowMessage("Error saving notification preferences: " + ex.Message, "danger");
-                System.Diagnostics.Debug.WriteLine($"Save notifications error: {ex}");
-            }
-        }
-
-        protected async void btnSavePrivacy_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var privacyRef = db.Collection("users").Document(currentUserId)
-                    .Collection("settings").Document("privacy");
-
-                var privacySettings = new Dictionary<string, object>
-                {
-                    { "publicProfile", chkPublicProfile.Checked },
-                    { "showActivity", chkShowActivity.Checked },
-                    { "lastUpdated", Timestamp.GetCurrentTimestamp() }
-                };
-
-                await privacyRef.SetAsync(privacySettings);
-
-                ShowMessage("Privacy settings saved successfully!", "success");
-            }
-            catch (Exception ex)
-            {
-                ShowMessage("Error saving privacy settings: " + ex.Message, "danger");
-                System.Diagnostics.Debug.WriteLine($"Save privacy error: {ex}");
-            }
-        }
-
-        protected async void btnDeactivateAccount_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                var userRef = db.Collection("users").Document(currentUserId);
-
-                // Mark account as deactivated instead of deleting
-                await userRef.UpdateAsync(new Dictionary<string, object>
-                {
-                    { "isActive", false },
-                    { "deactivatedAt", Timestamp.GetCurrentTimestamp() },
-                    { "deactivatedBy", currentUserId },
-                    { "status", "deactivated" }
-                });
-
-                // Log the deactivation
-                var activityRef = db.Collection("users").Document(currentUserId)
-                    .Collection("activities").Document();
-
-                await activityRef.SetAsync(new Dictionary<string, object>
-                {
-                    { "type", "account_deactivated" },
-                    { "description", "Account deactivated by user" },
-                    { "timestamp", Timestamp.GetCurrentTimestamp() },
-                    { "userId", currentUserId }
-                });
-
-                // Clear session and redirect
-                Session.Clear();
-                Session.Abandon();
-
-                ShowMessage("Account deactivated successfully. You will be redirected to the login page.", "info");
-
-                // Redirect after a short delay
-                string script = @"
-                    setTimeout(function() {
-                        window.location.href = 'Login.aspx?deactivated=true';
-                    }, 3000);
-                ";
-                ScriptManager.RegisterStartupScript(this, GetType(), "redirectAfterDeactivation", script, true);
-            }
-            catch (Exception ex)
-            {
-                ShowMessage("Error deactivating account: " + ex.Message, "danger");
-                System.Diagnostics.Debug.WriteLine($"Account deactivation error: {ex}");
             }
         }
 

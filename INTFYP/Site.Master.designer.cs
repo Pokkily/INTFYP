@@ -42,6 +42,24 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.HyperLink lnkProfile;
 
         /// <summary>
+        /// imgProfileHeader control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Image imgProfileHeader;
+
+        /// <summary>
+        /// divProfileIcon control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl divProfileIcon;
+
+        /// <summary>
         /// phUser control.
         /// </summary>
         /// <remarks>
@@ -58,6 +76,15 @@ namespace YourProjectNamespace
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl lblUsername;
+
+        /// <summary>
+        /// divRoleBadge control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl divRoleBadge;
 
         /// <summary>
         /// phGuestLabel control.
@@ -85,6 +112,15 @@ namespace YourProjectNamespace
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.HyperLink lnkStudyHub;
+
+        /// <summary>
+        /// lnkChatRoom control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HyperLink lnkChatRoom;
 
         /// <summary>
         /// lnkLibrary control.
@@ -202,15 +238,6 @@ namespace YourProjectNamespace
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.PlaceHolder phGuest;
-
-        /// <summary>
-        /// phTeacherStats control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder phTeacherStats;
 
         /// <summary>
         /// MainContent control.
