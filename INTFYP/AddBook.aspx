@@ -456,7 +456,7 @@
                                 <asp:ListItem Value="Travel" Text="Travel" />
                                 <asp:ListItem Value="Essays" Text="Essays" />
                                 <asp:ListItem Value="Business & Economics" Text="Business & Economics" />
-                                <asp:ListItem Value="Reference" Text="Reference (dictionaries, encyclopedias, textbooks)" />
+                                <asp:ListItem Value="Reference" Text="Reference" />
                             </asp:DropDownList>
                             <asp:RequiredFieldValidator ID="rfvCategory" runat="server" 
                                 ControlToValidate="ddlCategory" 
