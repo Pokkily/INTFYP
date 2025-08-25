@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.IO;
+using System.Collections;
 
 namespace YourProjectNamespace
 {
@@ -17,12 +18,14 @@ namespace YourProjectNamespace
         private FirestoreDb db;
         protected string currentUserId;
         protected string currentUsername;
-        private Dictionary<string, object> userData;
+        private Dictionary<string, object> userData = new Dictionary<string, object>();
 
         protected async void Page_Load(object sender, EventArgs e)
         {
-            // Check authentication
-            if (Session["userId"] == null || Session["username"] == null)
+            // Enhanced session validation
+            if (Session["userId"] == null || Session["username"] == null ||
+                string.IsNullOrEmpty(Session["userId"].ToString()) ||
+                string.IsNullOrEmpty(Session["username"].ToString()))
             {
                 Response.Redirect("Login.aspx");
                 return;
@@ -32,21 +35,35 @@ namespace YourProjectNamespace
             {
                 // Initialize Firestore
                 db = FirestoreDb.Create("intorannetto");
+                if (db == null)
+                {
+                    throw new InvalidOperationException("Failed to initialize Firestore database");
+                }
+
                 currentUserId = Session["userId"].ToString();
                 currentUsername = Session["username"].ToString();
 
                 if (!IsPostBack)
                 {
+                    // Show loading initially
+                    pnlClassesLoading.Visible = true;
+
                     await LoadUserProfile();
                     await LoadUserStats();
                     await LoadUserClasses();
                     await LoadUserActivity();
+
+                    // Hide loading after everything is loaded
+                    pnlClassesLoading.Visible = false;
                 }
             }
             catch (Exception ex)
             {
                 ShowMessage("Error loading profile: " + ex.Message, "danger");
                 System.Diagnostics.Debug.WriteLine($"Profile load error: {ex}");
+
+                // Hide loading on error
+                pnlClassesLoading.Visible = false;
             }
         }
 
@@ -66,42 +83,52 @@ namespace YourProjectNamespace
 
                 userData = userSnap.ToDictionary();
 
-                // Populate profile header
-                string firstName = userData.GetValueOrDefault("firstName", "").ToString();
-                string lastName = userData.GetValueOrDefault("lastName", "").ToString();
-                string username = userData.GetValueOrDefault("username", "").ToString();
-                string position = userData.GetValueOrDefault("position", "Student").ToString();
+                // Check if userData is null (this should not happen if document exists, but let's be safe)
+                if (userData == null)
+                {
+                    userData = new Dictionary<string, object>();
+                    ShowMessage("Error loading user data.", "danger");
+                    return;
+                }
+
+                // Safely get values with null checks
+                string firstName = GetSafeValue(userData, "firstName");
+                string lastName = GetSafeValue(userData, "lastName");
+                string username = GetSafeValue(userData, "username");
+                string position = GetSafeValue(userData, "position", "Student");
 
                 ltProfileName.Text = $"{firstName} {lastName}";
                 ltUsername.Text = username;
                 ltPosition.Text = position;
 
                 // Load profile image if exists
-                if (userData.ContainsKey("profileImageUrl") && !string.IsNullOrEmpty(userData["profileImageUrl"].ToString()))
+                string profileImageUrl = GetSafeValue(userData, "profileImageUrl");
+                if (!string.IsNullOrEmpty(profileImageUrl))
                 {
-                    imgProfile.ImageUrl = userData["profileImageUrl"].ToString();
+                    imgProfile.ImageUrl = profileImageUrl;
                 }
 
                 // Populate form fields
                 txtFirstName.Text = firstName;
                 txtLastName.Text = lastName;
-                txtEmail.Text = userData.GetValueOrDefault("email", "").ToString();
+                txtEmail.Text = GetSafeValue(userData, "email");
                 txtUsername.Text = username;
-                txtPhone.Text = userData.GetValueOrDefault("phone", "").ToString();
+                txtPhone.Text = GetSafeValue(userData, "phone");
                 txtPosition.Text = position;
-                txtAddress.Text = userData.GetValueOrDefault("address", "").ToString();
+                txtAddress.Text = GetSafeValue(userData, "address");
 
                 // Set gender dropdown
-                string gender = userData.GetValueOrDefault("gender", "").ToString();
-                if (ddlGender.Items.FindByValue(gender) != null)
+                string gender = GetSafeValue(userData, "gender");
+                if (!string.IsNullOrEmpty(gender) && ddlGender.Items.FindByValue(gender) != null)
                 {
                     ddlGender.SelectedValue = gender;
                 }
 
                 // Set birthdate
-                if (userData.ContainsKey("birthdate") && !string.IsNullOrEmpty(userData["birthdate"].ToString()))
+                string birthdate = GetSafeValue(userData, "birthdate");
+                if (!string.IsNullOrEmpty(birthdate))
                 {
-                    txtBirthdate.Text = userData["birthdate"].ToString();
+                    txtBirthdate.Text = birthdate;
                 }
 
                 // Load notification settings
@@ -118,51 +145,165 @@ namespace YourProjectNamespace
         {
             try
             {
-                // Get classes count
-                var classesSnapshot = await db.Collection("users").Document(currentUserId)
-                    .Collection("enrolledClasses").GetSnapshotAsync();
-                ltClassesCount.Text = classesSnapshot.Count.ToString();
+                string userEmail = Session["email"]?.ToString()?.ToLower();
+                string userPosition = Session["position"]?.ToString()?.ToLower();
+
+                int classesCount = 0;
+
+                if (!string.IsNullOrEmpty(userEmail))
+                {
+                    if (userPosition == "teacher")
+                    {
+                        // For teachers: count classes they created
+                        var teacherClassesSnapshot = await db.Collection("classrooms")
+                            .WhereEqualTo("createdBy", userEmail)
+                            .WhereEqualTo("isArchived", false) // Only active classes
+                            .GetSnapshotAsync();
+                        classesCount = teacherClassesSnapshot?.Count ?? 0;
+                    }
+                    else
+                    {
+                        // For students: count accepted invitations
+                        var invitedSnapshot = await db.CollectionGroup("invitedStudents")
+                            .WhereEqualTo("email", userEmail)
+                            .WhereEqualTo("status", "accepted")
+                            .GetSnapshotAsync();
+
+                        if (invitedSnapshot != null)
+                        {
+                            // Count only non-archived classes
+                            foreach (var inviteDoc in invitedSnapshot.Documents)
+                            {
+                                try
+                                {
+                                    var classroomRef = inviteDoc.Reference.Parent.Parent;
+                                    var classroomDoc = await classroomRef.GetSnapshotAsync();
+
+                                    if (classroomDoc.Exists)
+                                    {
+                                        var classroomData = classroomDoc.ToDictionary();
+                                        if (classroomData != null)
+                                        {
+                                            // Only count if not archived
+                                            bool isArchived = classroomData.ContainsKey("isArchived") &&
+                                                            Convert.ToBoolean(classroomData["isArchived"]);
+                                            if (!isArchived)
+                                            {
+                                                classesCount++;
+                                            }
+                                        }
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"Error checking class archive status: {ex.Message}");
+                                }
+                            }
+                        }
+                    }
+                }
+
+                ltClassesCount.Text = classesCount.ToString();
+                System.Diagnostics.Debug.WriteLine($"Classes count updated: {classesCount}");
 
                 // Get posts count (posts created by user)
                 var allGroupsSnapshot = await db.Collection("studyHubs").GetSnapshotAsync();
                 int postsCount = 0;
 
-                foreach (var groupDoc in allGroupsSnapshot.Documents)
+                if (allGroupsSnapshot != null)
                 {
-                    var postsSnapshot = await groupDoc.Reference.Collection("posts")
-                        .WhereEqualTo("postedBy", currentUserId).GetSnapshotAsync();
-                    postsCount += postsSnapshot.Count;
+                    foreach (var groupDoc in allGroupsSnapshot.Documents)
+                    {
+                        try
+                        {
+                            var postsSnapshot = await groupDoc.Reference.Collection("posts")
+                                .WhereEqualTo("postedBy", currentUserId).GetSnapshotAsync();
+                            if (postsSnapshot != null)
+                            {
+                                postsCount += postsSnapshot.Count;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error getting posts for group {groupDoc.Id}: {ex.Message}");
+                        }
+                    }
                 }
                 ltPostsCount.Text = postsCount.ToString();
 
                 // Get total likes received
                 int totalLikes = 0;
-                foreach (var groupDoc in allGroupsSnapshot.Documents)
+                if (allGroupsSnapshot != null)
                 {
-                    var userPostsSnapshot = await groupDoc.Reference.Collection("posts")
-                        .WhereEqualTo("postedBy", currentUserId).GetSnapshotAsync();
-
-                    foreach (var postDoc in userPostsSnapshot.Documents)
+                    foreach (var groupDoc in allGroupsSnapshot.Documents)
                     {
-                        var postData = postDoc.ToDictionary();
-                        if (postData.ContainsKey("likes"))
+                        try
                         {
-                            var likes = (List<object>)postData["likes"];
-                            totalLikes += likes.Count;
+                            var userPostsSnapshot = await groupDoc.Reference.Collection("posts")
+                                .WhereEqualTo("postedBy", currentUserId).GetSnapshotAsync();
+
+                            if (userPostsSnapshot != null)
+                            {
+                                foreach (var postDoc in userPostsSnapshot.Documents)
+                                {
+                                    var postData = postDoc.ToDictionary();
+                                    if (postData != null && postData.ContainsKey("likes") && postData["likes"] != null)
+                                    {
+                                        try
+                                        {
+                                            var likes = postData["likes"] as List<object>;
+                                            if (likes != null)
+                                            {
+                                                totalLikes += likes.Count;
+                                            }
+                                        }
+                                        catch
+                                        {
+                                            // Skip if likes format is unexpected
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error getting likes for group {groupDoc.Id}: {ex.Message}");
                         }
                     }
                 }
                 ltLikesCount.Text = totalLikes.ToString();
 
-                // Get saved posts count
-                var savedPostsSnapshot = await db.Collection("users").Document(currentUserId)
-                    .Collection("savedPosts").GetSnapshotAsync();
-                ltSavedCount.Text = savedPostsSnapshot.Count.ToString();
+                // Get saved posts count by counting posts where user is in saves array
+                int savedCount = 0;
+                if (allGroupsSnapshot != null)
+                {
+                    foreach (var groupDoc in allGroupsSnapshot.Documents)
+                    {
+                        try
+                        {
+                            var savedPostsSnapshot = await groupDoc.Reference.Collection("posts")
+                                .WhereArrayContains("saves", currentUserId).GetSnapshotAsync();
+                            if (savedPostsSnapshot != null)
+                            {
+                                savedCount += savedPostsSnapshot.Count;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error getting saved posts for group {groupDoc.Id}: {ex.Message}");
+                        }
+                    }
+                }
+                ltSavedCount.Text = savedCount.ToString();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"LoadUserStats error: {ex}");
-                // Don't show error to user, just log it
+                // Set default values
+                ltClassesCount.Text = "0";
+                ltPostsCount.Text = "0";
+                ltLikesCount.Text = "0";
+                ltSavedCount.Text = "0";
             }
         }
 
@@ -171,43 +312,185 @@ namespace YourProjectNamespace
             try
             {
                 var classes = new List<dynamic>();
-                var enrolledClassesSnapshot = await db.Collection("users").Document(currentUserId)
-                    .Collection("enrolledClasses").GetSnapshotAsync();
+                string userEmail = Session["email"]?.ToString()?.ToLower();
+                string userPosition = Session["position"]?.ToString()?.ToLower();
 
-                foreach (var enrollmentDoc in enrolledClassesSnapshot.Documents)
+                if (string.IsNullOrEmpty(userEmail))
                 {
-                    var enrollment = enrollmentDoc.ToDictionary();
-                    string classId = enrollment.GetValueOrDefault("classId", "").ToString();
+                    System.Diagnostics.Debug.WriteLine("User email is empty in LoadUserClasses");
+                    pnlNoClasses.Visible = true;
+                    return;
+                }
 
-                    if (!string.IsNullOrEmpty(classId))
+                System.Diagnostics.Debug.WriteLine($"Loading classes for user: {userEmail}, position: {userPosition}");
+
+                if (userPosition == "teacher")
+                {
+                    System.Diagnostics.Debug.WriteLine("Loading classes created by teacher...");
+
+                    // For teachers: get classes they created
+                    var teacherClassesSnapshot = await db.Collection("classrooms")
+                        .WhereEqualTo("createdBy", userEmail)
+                        .WhereEqualTo("isArchived", false) // Only get active classes
+                        .GetSnapshotAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"Found {teacherClassesSnapshot?.Count ?? 0} classes created by teacher");
+
+                    if (teacherClassesSnapshot != null)
                     {
-                        var classDoc = await db.Collection("classes").Document(classId).GetSnapshotAsync();
-                        if (classDoc.Exists)
+                        foreach (var classDoc in teacherClassesSnapshot.Documents)
                         {
-                            var classData = classDoc.ToDictionary();
-
-                            // Get student count for this class
-                            var studentsSnapshot = await db.Collection("classes").Document(classId)
-                                .Collection("students").GetSnapshotAsync();
-
-                            classes.Add(new
+                            try
                             {
-                                classId,
-                                className = classData.GetValueOrDefault("className", "Unknown Class").ToString(),
-                                teacherName = classData.GetValueOrDefault("teacherName", "Unknown Teacher").ToString(),
-                                schedule = classData.GetValueOrDefault("schedule", "Not specified").ToString(),
-                                studentCount = studentsSnapshot.Count,
-                                enrolledAt = enrollment.ContainsKey("enrolledAt") ?
-                                    ((Timestamp)enrollment["enrolledAt"]).ToDateTime().ToString("MMM dd, yyyy") : "Unknown"
-                            });
+                                var classData = classDoc.ToDictionary();
+                                if (classData == null) continue;
+
+                                // Get student count for this class
+                                var invitedStudentsSnapshot = await classDoc.Reference.Collection("invitedStudents")
+                                    .WhereEqualTo("status", "accepted")
+                                    .GetSnapshotAsync();
+
+                                string createdAtDate = "Unknown";
+                                if (classData.ContainsKey("createdAt") && classData["createdAt"] != null)
+                                {
+                                    try
+                                    {
+                                        if (classData["createdAt"] is Timestamp timestamp)
+                                        {
+                                            createdAtDate = timestamp.ToDateTime().ToString("MMM dd, yyyy");
+                                        }
+                                    }
+                                    catch
+                                    {
+                                        createdAtDate = "Unknown";
+                                    }
+                                }
+
+                                classes.Add(new
+                                {
+                                    classId = classDoc.Id,
+                                    className = GetSafeValue(classData, "name", "Unknown Class"),
+                                    teacherName = "You", // Since this is a class created by the user
+                                    schedule = GetSafeValue(classData, "schedule", "Not specified"),
+                                    studentCount = invitedStudentsSnapshot?.Count ?? 0,
+                                    enrolledAt = createdAtDate
+                                });
+
+                                System.Diagnostics.Debug.WriteLine($"Added teacher class: {GetSafeValue(classData, "name")}");
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Error processing teacher class {classDoc.Id}: {ex.Message}");
+                            }
                         }
                     }
                 }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("Loading classes for student...");
+
+                    // For students: get classes they're invited to and accepted
+                    var invitedSnapshot = await db.CollectionGroup("invitedStudents")
+                        .WhereEqualTo("email", userEmail)
+                        .WhereEqualTo("status", "accepted") // Only get accepted invitations
+                        .GetSnapshotAsync();
+
+                    System.Diagnostics.Debug.WriteLine($"Found {invitedSnapshot?.Count ?? 0} accepted invitations for student");
+
+                    if (invitedSnapshot != null)
+                    {
+                        foreach (var inviteDoc in invitedSnapshot.Documents)
+                        {
+                            try
+                            {
+                                var inviteData = inviteDoc.ToDictionary();
+                                if (inviteData == null) continue;
+
+                                // Get the parent classroom document
+                                var classroomRef = inviteDoc.Reference.Parent.Parent;
+                                var classroomDoc = await classroomRef.GetSnapshotAsync();
+
+                                if (!classroomDoc.Exists) continue;
+
+                                var classroomData = classroomDoc.ToDictionary();
+                                if (classroomData == null) continue;
+
+                                // Skip archived classes
+                                if (classroomData.ContainsKey("isArchived") && Convert.ToBoolean(classroomData["isArchived"]))
+                                {
+                                    continue;
+                                }
+
+                                // Get teacher name
+                                string creatorEmail = GetSafeValue(classroomData, "createdBy");
+                                string teacherName = await GetUserFullName(creatorEmail);
+
+                                // Get student count for this class
+                                var studentsSnapshot = await classroomRef.Collection("invitedStudents")
+                                    .WhereEqualTo("status", "accepted")
+                                    .GetSnapshotAsync();
+
+                                string joinedAtDate = "Unknown";
+                                if (inviteData.ContainsKey("acceptedAt") && inviteData["acceptedAt"] != null)
+                                {
+                                    try
+                                    {
+                                        if (inviteData["acceptedAt"] is Timestamp timestamp)
+                                        {
+                                            joinedAtDate = timestamp.ToDateTime().ToString("MMM dd, yyyy");
+                                        }
+                                    }
+                                    catch
+                                    {
+                                        joinedAtDate = "Unknown";
+                                    }
+                                }
+                                else if (inviteData.ContainsKey("invitedAt") && inviteData["invitedAt"] != null)
+                                {
+                                    try
+                                    {
+                                        if (inviteData["invitedAt"] is Timestamp timestamp)
+                                        {
+                                            joinedAtDate = timestamp.ToDateTime().ToString("MMM dd, yyyy");
+                                        }
+                                    }
+                                    catch
+                                    {
+                                        joinedAtDate = "Unknown";
+                                    }
+                                }
+
+                                classes.Add(new
+                                {
+                                    classId = classroomRef.Id,
+                                    className = GetSafeValue(classroomData, "name", "Unknown Class"),
+                                    teacherName = teacherName,
+                                    schedule = GetSafeValue(classroomData, "schedule", "Not specified"),
+                                    studentCount = studentsSnapshot?.Count ?? 0,
+                                    enrolledAt = joinedAtDate
+                                });
+
+                                System.Diagnostics.Debug.WriteLine($"Added student class: {GetSafeValue(classroomData, "name")}");
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Error processing student invitation {inviteDoc.Id}: {ex.Message}");
+                            }
+                        }
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine($"Total classes found: {classes.Count}");
 
                 rptClasses.DataSource = classes;
                 rptClasses.DataBind();
 
                 pnlNoClasses.Visible = classes.Count == 0;
+
+                if (classes.Count == 0)
+                {
+                    System.Diagnostics.Debug.WriteLine("No classes found for user");
+                }
             }
             catch (Exception ex)
             {
@@ -216,13 +499,165 @@ namespace YourProjectNamespace
             }
         }
 
+        // Helper method to get user's full name from email
+        private async Task<string> GetUserFullName(string email)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(email)) return "Unknown Teacher";
+
+                var userSnapshot = await db.Collection("users")
+                    .WhereEqualTo("email_lower", email.ToLower())
+                    .GetSnapshotAsync();
+
+                if (userSnapshot != null && userSnapshot.Count > 0)
+                {
+                    var userDoc = userSnapshot.Documents[0];
+                    var userData = userDoc.ToDictionary();
+                    if (userData != null)
+                    {
+                        string firstName = GetSafeValue(userData, "firstName", "");
+                        string lastName = GetSafeValue(userData, "lastName", "");
+
+                        if (!string.IsNullOrEmpty(firstName) || !string.IsNullOrEmpty(lastName))
+                        {
+                            return $"{firstName} {lastName}".Trim();
+                        }
+                    }
+                }
+                return email;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in GetUserFullName: {ex.Message}");
+                return email;
+            }
+        }
+
+        // Simplified single method to load all user activity from post documents
         private async Task LoadUserActivity()
         {
             try
             {
-                await LoadLikedPosts();
-                await LoadSavedPosts();
-                await LoadSharedPosts();
+                var likedPosts = new List<dynamic>();
+                var savedPosts = new List<dynamic>();
+                var sharedPosts = new List<dynamic>();
+
+                // Get all study hub groups
+                var allGroupsSnapshot = await db.Collection("studyHubs").GetSnapshotAsync();
+
+                if (allGroupsSnapshot != null)
+                {
+                    foreach (var groupDoc in allGroupsSnapshot.Documents)
+                    {
+                        try
+                        {
+                            var groupData = groupDoc.ToDictionary();
+                            string groupName = GetSafeValue(groupData, "groupName", "Unknown Group");
+
+                            // Get all posts in this group and check engagement arrays
+                            var postsSnapshot = await groupDoc.Reference.Collection("posts")
+                                .OrderByDescending("timestamp")
+                                .GetSnapshotAsync();
+
+                            if (postsSnapshot != null)
+                            {
+                                foreach (var postDoc in postsSnapshot.Documents)
+                                {
+                                    var postData = postDoc.ToDictionary();
+                                    if (postData == null) continue;
+
+                                    // Check if current user has any engagement with this post
+                                    bool isLiked = IsUserInArray(postData, "likes", currentUserId);
+                                    bool isSaved = IsUserInArray(postData, "saves", currentUserId);
+                                    bool isShared = IsUserInArray(postData, "shares", currentUserId);
+
+                                    // Skip if user has no engagement with this post
+                                    if (!isLiked && !isSaved && !isShared) continue;
+
+                                    // Get comment count
+                                    var commentsSnapshot = await postDoc.Reference.Collection("comments").GetSnapshotAsync();
+
+                                    // Get engagement counts directly from the arrays
+                                    int likeCount = GetArrayCount(postData, "likes");
+                                    int shareCount = GetArrayCount(postData, "shares");
+
+                                    // Format timestamp
+                                    string timestamp = "";
+                                    DateTime postDateTime = DateTime.MinValue;
+                                    if (postData.ContainsKey("timestamp") && postData["timestamp"] != null)
+                                    {
+                                        try
+                                        {
+                                            if (postData["timestamp"] is Timestamp ts)
+                                            {
+                                                postDateTime = ts.ToDateTime();
+                                                timestamp = postDateTime.ToString("MMM dd, yyyy 'at' h:mm tt");
+                                            }
+                                        }
+                                        catch { timestamp = "Unknown date"; }
+                                    }
+
+                                    var postItem = new
+                                    {
+                                        postId = postDoc.Id,
+                                        groupId = groupDoc.Id,
+                                        groupName = groupName,
+                                        content = TruncateText(GetSafeValue(postData, "content"), 150),
+                                        authorName = GetSafeValue(postData, "postedByName", "Unknown"),
+                                        timestamp = timestamp,
+                                        sortTimestamp = postDateTime,
+                                        likeCount = likeCount,
+                                        commentCount = commentsSnapshot?.Count ?? 0,
+                                        shareCount = shareCount,
+                                        isLiked = isLiked,
+                                        isSaved = isSaved,
+                                        isShared = isShared
+                                    };
+
+                                    // Add to appropriate lists based on user engagement
+                                    if (isLiked)
+                                    {
+                                        likedPosts.Add(postItem);
+                                    }
+                                    if (isSaved)
+                                    {
+                                        savedPosts.Add(postItem);
+                                    }
+                                    if (isShared)
+                                    {
+                                        sharedPosts.Add(postItem);
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error loading posts for group {groupDoc.Id}: {ex.Message}");
+                        }
+                    }
+                }
+
+                // Sort all lists by timestamp (most recent first) and limit
+                likedPosts = likedPosts.OrderByDescending(p => ((DateTime)p.sortTimestamp)).Take(50).ToList();
+                savedPosts = savedPosts.OrderByDescending(p => ((DateTime)p.sortTimestamp)).Take(50).ToList();
+                sharedPosts = sharedPosts.OrderByDescending(p => ((DateTime)p.sortTimestamp)).Take(50).ToList();
+
+                // Bind to repeaters
+                rptLikedPosts.DataSource = likedPosts;
+                rptLikedPosts.DataBind();
+
+                rptSavedPosts.DataSource = savedPosts;
+                rptSavedPosts.DataBind();
+
+                rptSharedPosts.DataSource = sharedPosts;
+                rptSharedPosts.DataBind();
+
+                // Check if we have any activity data
+                bool hasActivity = likedPosts.Count > 0 || savedPosts.Count > 0 || sharedPosts.Count > 0;
+                pnlNoActivity.Visible = !hasActivity;
+
+                System.Diagnostics.Debug.WriteLine($"Activity loaded - Liked: {likedPosts.Count}, Saved: {savedPosts.Count}, Shared: {sharedPosts.Count}");
             }
             catch (Exception ex)
             {
@@ -231,152 +666,41 @@ namespace YourProjectNamespace
             }
         }
 
-        private async Task LoadLikedPosts()
+        // Helper method to check if user ID is in an array field
+        private bool IsUserInArray(Dictionary<string, object> postData, string arrayFieldName, string userId)
         {
             try
             {
-                var likedPosts = new List<dynamic>();
-                var allGroupsSnapshot = await db.Collection("studyHubs").GetSnapshotAsync();
+                if (!postData.ContainsKey(arrayFieldName) || postData[arrayFieldName] == null)
+                    return false;
 
-                foreach (var groupDoc in allGroupsSnapshot.Documents)
-                {
-                    var postsSnapshot = await groupDoc.Reference.Collection("posts")
-                        .WhereArrayContains("likes", currentUserId)
-                        .OrderByDescending("timestamp")
-                        .Limit(10)
-                        .GetSnapshotAsync();
+                var array = postData[arrayFieldName] as List<object>;
+                if (array == null) return false;
 
-                    foreach (var postDoc in postsSnapshot.Documents)
-                    {
-                        var postData = postDoc.ToDictionary();
-
-                        // Get comment count
-                        var commentsSnapshot = await postDoc.Reference.Collection("comments").GetSnapshotAsync();
-
-                        likedPosts.Add(new
-                        {
-                            postId = postDoc.Id,
-                            content = TruncateText(postData.GetValueOrDefault("content", "").ToString(), 150),
-                            authorName = postData.GetValueOrDefault("postedByName", "Unknown").ToString(),
-                            timestamp = postData.ContainsKey("timestamp") ?
-                                ((Timestamp)postData["timestamp"]).ToDateTime().ToString("MMM dd, yyyy") : "",
-                            likeCount = postData.ContainsKey("likes") ? ((List<object>)postData["likes"]).Count : 0,
-                            commentCount = commentsSnapshot.Count,
-                            shareCount = postData.ContainsKey("shares") ? ((List<object>)postData["shares"]).Count : 0
-                        });
-                    }
-                }
-
-                // Sort by timestamp and take top 20
-                likedPosts = likedPosts.OrderByDescending(p => p.timestamp).Take(20).ToList();
-
-                rptLikedPosts.DataSource = likedPosts;
-                rptLikedPosts.DataBind();
+                return array.Cast<string>().Contains(userId);
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"LoadLikedPosts error: {ex}");
+                System.Diagnostics.Debug.WriteLine($"Error checking user in array {arrayFieldName}: {ex.Message}");
+                return false;
             }
         }
 
-        private async Task LoadSavedPosts()
+        // Helper method to get count of items in an array field
+        private int GetArrayCount(Dictionary<string, object> postData, string arrayFieldName)
         {
             try
             {
-                var savedPosts = new List<dynamic>();
-                var savedPostsSnapshot = await db.Collection("users").Document(currentUserId)
-                    .Collection("savedPosts").OrderByDescending("savedAt").Limit(20).GetSnapshotAsync();
+                if (!postData.ContainsKey(arrayFieldName) || postData[arrayFieldName] == null)
+                    return 0;
 
-                foreach (var savedDoc in savedPostsSnapshot.Documents)
-                {
-                    var savedData = savedDoc.ToDictionary();
-                    string postId = savedData.GetValueOrDefault("postId", "").ToString();
-                    string groupId = savedData.GetValueOrDefault("groupId", "").ToString();
-
-                    if (!string.IsNullOrEmpty(postId) && !string.IsNullOrEmpty(groupId))
-                    {
-                        var postDoc = await db.Collection("studyHubs").Document(groupId)
-                            .Collection("posts").Document(postId).GetSnapshotAsync();
-
-                        if (postDoc.Exists)
-                        {
-                            var postData = postDoc.ToDictionary();
-
-                            // Get comment count
-                            var commentsSnapshot = await postDoc.Reference.Collection("comments").GetSnapshotAsync();
-
-                            savedPosts.Add(new
-                            {
-                                postId,
-                                content = TruncateText(postData.GetValueOrDefault("content", "").ToString(), 150),
-                                authorName = postData.GetValueOrDefault("postedByName", "Unknown").ToString(),
-                                timestamp = postData.ContainsKey("timestamp") ?
-                                    ((Timestamp)postData["timestamp"]).ToDateTime().ToString("MMM dd, yyyy") : "",
-                                likeCount = postData.ContainsKey("likes") ? ((List<object>)postData["likes"]).Count : 0,
-                                commentCount = commentsSnapshot.Count,
-                                shareCount = postData.ContainsKey("shares") ? ((List<object>)postData["shares"]).Count : 0
-                            });
-                        }
-                    }
-                }
-
-                rptSavedPosts.DataSource = savedPosts;
-                rptSavedPosts.DataBind();
+                var array = postData[arrayFieldName] as List<object>;
+                return array?.Count ?? 0;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"LoadSavedPosts error: {ex}");
-            }
-        }
-
-        private async Task LoadSharedPosts()
-        {
-            try
-            {
-                var sharedPosts = new List<dynamic>();
-                var timelineSnapshot = await db.Collection("users").Document(currentUserId)
-                    .Collection("timeline").WhereEqualTo("type", "share")
-                    .OrderByDescending("sharedAt").Limit(20).GetSnapshotAsync();
-
-                foreach (var timelineDoc in timelineSnapshot.Documents)
-                {
-                    var timelineData = timelineDoc.ToDictionary();
-                    string originalPostId = timelineData.GetValueOrDefault("originalPostId", "").ToString();
-                    string originalGroupId = timelineData.GetValueOrDefault("originalGroupId", "").ToString();
-
-                    if (!string.IsNullOrEmpty(originalPostId) && !string.IsNullOrEmpty(originalGroupId))
-                    {
-                        var postDoc = await db.Collection("studyHubs").Document(originalGroupId)
-                            .Collection("posts").Document(originalPostId).GetSnapshotAsync();
-
-                        if (postDoc.Exists)
-                        {
-                            var postData = postDoc.ToDictionary();
-
-                            // Get comment count
-                            var commentsSnapshot = await postDoc.Reference.Collection("comments").GetSnapshotAsync();
-
-                            sharedPosts.Add(new
-                            {
-                                postId = originalPostId,
-                                content = TruncateText(postData.GetValueOrDefault("content", "").ToString(), 150),
-                                authorName = postData.GetValueOrDefault("postedByName", "Unknown").ToString(),
-                                timestamp = timelineData.ContainsKey("sharedAt") ?
-                                    ((Timestamp)timelineData["sharedAt"]).ToDateTime().ToString("MMM dd, yyyy") : "",
-                                likeCount = postData.ContainsKey("likes") ? ((List<object>)postData["likes"]).Count : 0,
-                                commentCount = commentsSnapshot.Count,
-                                shareCount = postData.ContainsKey("shares") ? ((List<object>)postData["shares"]).Count : 0
-                            });
-                        }
-                    }
-                }
-
-                rptSharedPosts.DataSource = sharedPosts;
-                rptSharedPosts.DataBind();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"LoadSharedPosts error: {ex}");
+                System.Diagnostics.Debug.WriteLine($"Error getting array count for {arrayFieldName}: {ex.Message}");
+                return 0;
             }
         }
 
@@ -390,9 +714,12 @@ namespace YourProjectNamespace
                 if (settingsSnap.Exists)
                 {
                     var settings = settingsSnap.ToDictionary();
-                    chkEmailNotifications.Checked = Convert.ToBoolean(settings.GetValueOrDefault("emailNotifications", true));
-                    chkStudyHubNotifications.Checked = Convert.ToBoolean(settings.GetValueOrDefault("studyHubNotifications", true));
-                    chkClassNotifications.Checked = Convert.ToBoolean(settings.GetValueOrDefault("classNotifications", true));
+                    if (settings != null)
+                    {
+                        chkEmailNotifications.Checked = Convert.ToBoolean(GetSafeValue(settings, "emailNotifications", "true"));
+                        chkStudyHubNotifications.Checked = Convert.ToBoolean(GetSafeValue(settings, "studyHubNotifications", "true"));
+                        chkClassNotifications.Checked = Convert.ToBoolean(GetSafeValue(settings, "classNotifications", "true"));
+                    }
                 }
                 else
                 {
@@ -409,8 +736,11 @@ namespace YourProjectNamespace
                 if (privacySnap.Exists)
                 {
                     var privacy = privacySnap.ToDictionary();
-                    chkPublicProfile.Checked = Convert.ToBoolean(privacy.GetValueOrDefault("publicProfile", true));
-                    chkShowActivity.Checked = Convert.ToBoolean(privacy.GetValueOrDefault("showActivity", true));
+                    if (privacy != null)
+                    {
+                        chkPublicProfile.Checked = Convert.ToBoolean(GetSafeValue(privacy, "publicProfile", "true"));
+                        chkShowActivity.Checked = Convert.ToBoolean(GetSafeValue(privacy, "showActivity", "true"));
+                    }
                 }
                 else
                 {
@@ -422,6 +752,12 @@ namespace YourProjectNamespace
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"LoadNotificationSettings error: {ex}");
+                // Set default values on error
+                chkEmailNotifications.Checked = true;
+                chkStudyHubNotifications.Checked = true;
+                chkClassNotifications.Checked = true;
+                chkPublicProfile.Checked = true;
+                chkShowActivity.Checked = true;
             }
         }
 
@@ -620,7 +956,13 @@ namespace YourProjectNamespace
                 }
 
                 var userData = userSnap.ToDictionary();
-                string storedPassword = userData.GetValueOrDefault("password", "").ToString();
+                if (userData == null)
+                {
+                    ShowMessage("Error accessing user data.", "danger");
+                    return;
+                }
+
+                string storedPassword = GetSafeValue(userData, "password");
 
                 // Verify current password (In production, use proper password hashing)
                 if (currentPassword != storedPassword)
@@ -749,10 +1091,88 @@ namespace YourProjectNamespace
             }
         }
 
+        // Handle unsaving posts by updating the post's saves array
+        protected async void btnUnsavePost_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                var button = sender as LinkButton;
+                if (button == null) return;
+
+                string commandArg = button.CommandArgument;
+                var args = commandArg.Split('|');
+
+                if (args.Length != 2) return;
+
+                string postId = args[0];
+                string groupId = args[1];
+
+                await UnsavePost(postId, groupId);
+                await LoadUserActivity(); // Refresh the activity display
+
+                ShowMessage("Post removed from saved items.", "success");
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("Error removing post from saved items: " + ex.Message, "danger");
+                System.Diagnostics.Debug.WriteLine($"Unsave post error: {ex}");
+            }
+        }
+
+        // Simplified unsave method that directly modifies the post's saves array
+        private async Task UnsavePost(string postId, string groupId)
+        {
+            try
+            {
+                var postRef = db.Collection("studyHubs").Document(groupId)
+                    .Collection("posts").Document(postId);
+
+                var postSnap = await postRef.GetSnapshotAsync();
+                if (!postSnap.Exists) return;
+
+                var postData = postSnap.ToDictionary();
+                if (postData == null) return;
+
+                // Get current saves array
+                var saves = new List<string>();
+                if (postData.ContainsKey("saves") && postData["saves"] != null)
+                {
+                    var savesObj = postData["saves"] as List<object>;
+                    if (savesObj != null)
+                    {
+                        saves = savesObj.Cast<string>().ToList();
+                    }
+                }
+
+                // Remove current user from saves array if present
+                if (saves.Contains(currentUserId))
+                {
+                    saves.Remove(currentUserId);
+                    await postRef.UpdateAsync("saves", saves);
+                    System.Diagnostics.Debug.WriteLine($"User {currentUserId} removed from saves of post {postId}");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error unsaving post: {ex}");
+                throw;
+            }
+        }
+
+        // Helper method for dictionary access
+        private string GetSafeValue(Dictionary<string, object> dictionary, string key, string defaultValue = "")
+        {
+            if (dictionary == null || !dictionary.ContainsKey(key) || dictionary[key] == null)
+            {
+                return defaultValue;
+            }
+            return dictionary[key].ToString();
+        }
+
         private string TruncateText(string text, int maxLength)
         {
             if (string.IsNullOrEmpty(text) || text.Length <= maxLength)
-                return text;
+                return text ?? "";
 
             return text.Substring(0, maxLength) + "...";
         }
@@ -766,10 +1186,30 @@ namespace YourProjectNamespace
             ScriptManager.RegisterStartupScript(this, GetType(), "showMessage", script, true);
         }
 
-        // Helper method for checking if activity has data
+        // Method to check if we have activity data
         protected bool HasActivityData()
         {
-            return rptLikedPosts.Items.Count > 0 || rptSavedPosts.Items.Count > 0 || rptSharedPosts.Items.Count > 0;
+            try
+            {
+                int likedCount = 0;
+                int savedCount = 0;
+                int sharedCount = 0;
+
+                if (rptLikedPosts.DataSource is IList likedData)
+                    likedCount = likedData.Count;
+
+                if (rptSavedPosts.DataSource is IList savedData)
+                    savedCount = savedData.Count;
+
+                if (rptSharedPosts.DataSource is IList sharedData)
+                    sharedCount = sharedData.Count;
+
+                return likedCount > 0 || savedCount > 0 || sharedCount > 0;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         protected override void OnPreRender(EventArgs e)
@@ -781,7 +1221,6 @@ namespace YourProjectNamespace
 
             // Add any additional client-side scripts needed
             string script = @"
-                // Additional client-side functionality can be added here
                 console.log('Profile page loaded successfully');
             ";
 

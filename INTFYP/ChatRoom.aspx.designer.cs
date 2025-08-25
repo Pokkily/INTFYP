@@ -11,223 +11,241 @@ namespace YourProjectNamespace
 {
 
 
-    public partial class Site
+    public partial class ChatRoom
     {
 
         /// <summary>
-        /// TitleContent control.
+        /// lblMyRoomCount control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.ContentPlaceHolder TitleContent;
+        protected global::System.Web.UI.WebControls.Label lblMyRoomCount;
 
         /// <summary>
-        /// ScriptManager1 control.
+        /// lblAvailableRoomCount control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.ScriptManager ScriptManager1;
+        protected global::System.Web.UI.WebControls.Label lblAvailableRoomCount;
 
         /// <summary>
-        /// lnkProfile control.
+        /// txtSearchMyRooms control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkProfile;
+        protected global::System.Web.UI.WebControls.TextBox txtSearchMyRooms;
 
         /// <summary>
-        /// phUser control.
+        /// rptMyRooms control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder phUser;
+        protected global::System.Web.UI.WebControls.Repeater rptMyRooms;
 
         /// <summary>
-        /// lblUsername control.
+        /// pnlNoMyRooms control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl lblUsername;
+        protected global::System.Web.UI.WebControls.Panel pnlNoMyRooms;
 
         /// <summary>
-        /// phGuestLabel control.
+        /// txtSearchAvailable control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder phGuestLabel;
+        protected global::System.Web.UI.WebControls.TextBox txtSearchAvailable;
 
         /// <summary>
-        /// lnkClass control.
+        /// rptAvailableRooms control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkClass;
+        protected global::System.Web.UI.WebControls.Repeater rptAvailableRooms;
 
         /// <summary>
-        /// lnkStudyHub control.
+        /// pnlNoAvailableRooms control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkStudyHub;
+        protected global::System.Web.UI.WebControls.Panel pnlNoAvailableRooms;
 
         /// <summary>
-        /// lnkChatRoom control.
+        /// txtRoomName control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkChatRoom;
+        protected global::System.Web.UI.WebControls.TextBox txtRoomName;
 
         /// <summary>
-        /// lnkLibrary control.
+        /// txtDescription control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkLibrary;
+        protected global::System.Web.UI.WebControls.TextBox txtDescription;
 
         /// <summary>
-        /// lnkQuiz control.
+        /// chkPublicRoom control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkQuiz;
+        protected global::System.Web.UI.WebControls.CheckBox chkPublicRoom;
 
         /// <summary>
-        /// lnkLearning control.
+        /// btnCreateRoom control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkLearning;
+        protected global::System.Web.UI.WebControls.Button btnCreateRoom;
 
         /// <summary>
-        /// lnkScholarship control.
+        /// lblCreateStatus control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkScholarship;
+        protected global::System.Web.UI.WebControls.Label lblCreateStatus;
 
         /// <summary>
-        /// lnkFeedback control.
+        /// pnlNoRoom control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkFeedback;
+        protected global::System.Web.UI.WebControls.Panel pnlNoRoom;
 
         /// <summary>
-        /// lnkChatbot control.
+        /// pnlChatInterface control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkChatbot;
+        protected global::System.Web.UI.WebControls.Panel pnlChatInterface;
 
         /// <summary>
-        /// phTeacherMenu control.
+        /// lblCurrentRoom control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder phTeacherMenu;
+        protected global::System.Web.UI.WebControls.Label lblCurrentRoom;
 
         /// <summary>
-        /// lnkManage control.
+        /// lblMemberCount control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkManage;
+        protected global::System.Web.UI.WebControls.Label lblMemberCount;
 
         /// <summary>
-        /// phAdminMenu control.
+        /// pnlInviteSection control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder phAdminMenu;
+        protected global::System.Web.UI.WebControls.Panel pnlInviteSection;
 
         /// <summary>
-        /// lnkAdmin control.
+        /// txtInviteEmail control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.HyperLink lnkAdmin;
+        protected global::System.Web.UI.WebControls.TextBox txtInviteEmail;
 
         /// <summary>
-        /// phLoggedIn control.
+        /// btnInvite control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder phLoggedIn;
+        protected global::System.Web.UI.WebControls.Button btnInvite;
 
         /// <summary>
-        /// btnLogout control.
+        /// lblInviteStatus control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnLogout;
+        protected global::System.Web.UI.WebControls.Label lblInviteStatus;
 
         /// <summary>
-        /// phGuest control.
+        /// btnLeaveRoom control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder phGuest;
+        protected global::System.Web.UI.WebControls.Button btnLeaveRoom;
 
         /// <summary>
-        /// phTeacherStats control.
+        /// rptMessages control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder phTeacherStats;
+        protected global::System.Web.UI.WebControls.Repeater rptMessages;
 
         /// <summary>
-        /// MainContent control.
+        /// txtMessage control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.ContentPlaceHolder MainContent;
+        protected global::System.Web.UI.WebControls.TextBox txtMessage;
+
+        /// <summary>
+        /// btnSend control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnSend;
+
+        /// <summary>
+        /// hfCurrentRoomId control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfCurrentRoomId;
     }
 }

@@ -242,17 +242,6 @@
             display: inline-block;
         }
 
-        .error-message {
-            background: rgba(255, 107, 107, 0.1);
-            border: 1px solid rgba(255, 107, 107, 0.3);
-            color: #8b2635;
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin-left: 15px;
-            animation: slideInFromRight 0.5s ease-out;
-            display: inline-block;
-        }
-
         .no-data-panel {
             text-align: center;
             padding: 60px 20px;
@@ -386,6 +375,82 @@
         .justify-content-between { justify-content: space-between; }
         .align-items-center { align-items: center; }
         .text-center { text-align: center; }
+
+        /* Search Bar Styles */
+        .search-container {
+            position: relative;
+            max-width: 600px;
+        }
+
+        .search-input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(103, 126, 234, 0.2);
+            border-radius: 25px;
+            padding: 12px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .search-input-group:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(103, 126, 234, 0.3);
+            transform: scale(1.02);
+        }
+
+        .search-icon {
+            color: #667eea;
+            font-size: 16px;
+            margin-right: 12px;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: #2c3e50;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .clear-search-btn {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .clear-search-btn:hover {
+            background: #ff6b6b;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .text-primary {
+            color: #667eea !important;
+            text-decoration: underline;
+        }
+
+        .text-primary:hover {
+            color: #5a6fd8 !important;
+        }
     </style>
 
     <div class="add-book-page">
@@ -414,7 +479,8 @@
                                 ControlToValidate="txtTitle" 
                                 ErrorMessage="Title is required" 
                                 CssClass="text-danger" 
-                                Display="Dynamic" />
+                                Display="Dynamic" 
+                                ValidationGroup="AddBookGroup" />
                         </div>
                         <div class="form-group">
                             <label class="form-label">
@@ -427,7 +493,8 @@
                                 ControlToValidate="txtAuthor" 
                                 ErrorMessage="Author is required" 
                                 CssClass="text-danger" 
-                                Display="Dynamic" />
+                                Display="Dynamic" 
+                                ValidationGroup="AddBookGroup" />
                         </div>
                         <div class="form-group">
                             <label class="form-label">
@@ -462,7 +529,8 @@
                                 ControlToValidate="ddlCategory" 
                                 ErrorMessage="Please select a category" 
                                 CssClass="text-danger" 
-                                Display="Dynamic" />
+                                Display="Dynamic" 
+                                ValidationGroup="AddBookGroup" />
                         </div>
                         <div class="form-group">
                             <label class="form-label">
@@ -480,37 +548,31 @@
                             <asp:FileUpload ID="filePdf" runat="server" CssClass="form-control" />
                             <div class="file-hint">
                                 <i class="fas fa-info-circle"></i>
-                                Maximum file size: 10 MB. Only PDF files are allowed.
+                                Maximum file size: 4 MB. Only PDF files are allowed.
                             </div>
                             <asp:RequiredFieldValidator ID="rfvPdf" runat="server" 
                                 ControlToValidate="filePdf" 
                                 ErrorMessage="PDF file is required" 
                                 CssClass="text-danger" 
-                                Display="Dynamic" />
+                                Display="Dynamic" 
+                                ValidationGroup="AddBookGroup" />
                         </div>
                     </div>
                     
-                    <div class="d-flex justify-content-end mt-4">
+                    <div class="d-flex justify-content-between align-items-center mt-4">
                         <div class="button-group">
-                            <asp:Button ID="btnSubmit" runat="server" Text="✨ Add Material" 
-                                      CssClass="primary-button" OnClick="btnSubmit_Click" />
-                            
-                            <!-- Status Message Panel (beside button) -->
+                            <!-- Status Message Panel (left side of button) -->
                             <asp:Panel ID="pnlStatus" runat="server" Visible="false">
                                 <div class="status-message">
                                     <i class="fas fa-check-circle me-2"></i>
                                     <asp:Label ID="lblStatus" runat="server" Text="" />
                                 </div>
                             </asp:Panel>
-                            
-                            <!-- Error Message Panel (beside button) -->
-                            <asp:Panel ID="pnlError" runat="server" Visible="false">
-                                <div class="error-message">
-                                    <i class="fas fa-exclamation-circle me-2"></i>
-                                    <asp:Label ID="lblError" runat="server" Text="" />
-                                </div>
-                            </asp:Panel>
                         </div>
+                        
+                        <asp:Button ID="btnSubmit" runat="server" Text="✨ Add Material" 
+                                  CssClass="primary-button" OnClick="btnSubmit_Click" 
+                                  ValidationGroup="AddBookGroup" />
                     </div>
                 </div>
             </div>
@@ -522,6 +584,18 @@
                     Your Learning Materials
                 </div>
                 <div class="card-body">
+                    <!-- Search Bar -->
+                    <div class="search-container mb-4">
+                        <div class="search-input-group">
+                            <i class="fas fa-search search-icon"></i>
+                            <asp:TextBox ID="txtSearch" runat="server" CssClass="search-input" 
+                                       placeholder="Search books by title, author, or category..." 
+                                       AutoPostBack="true" OnTextChanged="txtSearch_TextChanged" />
+                            <asp:Button ID="btnClearSearch" runat="server" Text="×" CssClass="clear-search-btn" 
+                                      OnClick="btnClearSearch_Click" ToolTip="Clear search" />
+                        </div>
+                    </div>
+                    
                     <asp:Label ID="lblBookStatus" runat="server" Text="" />
                     
                     <asp:Repeater ID="rptBooks" runat="server" OnItemCommand="rptBooks_ItemCommand">
@@ -600,7 +674,7 @@
                                                             <asp:FileUpload ID="fileEditPdf" runat="server" CssClass="form-control" />
                                                             <div class="file-hint">
                                                                 <i class="fas fa-info-circle"></i>
-                                                                Maximum file size: 10 MB. Only PDF files are allowed.
+                                                                Maximum file size: 4 MB. Only PDF files are allowed.
                                                             </div>
                                                         </div>
                                                     </div>
@@ -625,6 +699,7 @@
                                                                       CssClass="success-button" 
                                                                       CommandName="Update" 
                                                                       CommandArgument='<%# Eval("Id") %>'
+                                                                      CausesValidation="false"
                                                                       OnClientClick="return confirm('Update this book?');">
                                                             <i class="fas fa-save"></i> Update
                                                         </asp:LinkButton>
@@ -633,6 +708,7 @@
                                                                       CssClass="danger-button" 
                                                                       CommandName="Delete" 
                                                                       CommandArgument='<%# Eval("Id") %>'
+                                                                      CausesValidation="false"
                                                                       OnClientClick="return confirm('Are you sure you want to delete this book? This action cannot be undone.');">
                                                             <i class="fas fa-trash"></i> Delete
                                                         </asp:LinkButton>
@@ -648,8 +724,14 @@
                     
                     <asp:Panel ID="pnlNoBooks" runat="server" Visible="false" CssClass="no-data-panel">
                         <i class="fas fa-book-open"></i>
-                        <h4>No Learning Materials Found</h4>
-                        <p>Upload your first educational resource using the form above!</p>
+                        <asp:Panel ID="pnlNoSearchResults" runat="server" Visible="false">
+                            <h4>No Books Found</h4>
+                            <p>No books match your search criteria. Try different keywords or <asp:LinkButton ID="lnkClearSearch" runat="server" Text="clear the search" OnClick="btnClearSearch_Click" CausesValidation="false" CssClass="text-primary" />.</p>
+                        </asp:Panel>
+                        <asp:Panel ID="pnlNoBooksAtAll" runat="server" Visible="true">
+                            <h4>No Learning Materials Found</h4>
+                            <p>Upload your first educational resource using the form above!</p>
+                        </asp:Panel>
                     </asp:Panel>
                 </div>
             </div>
@@ -661,7 +743,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             // Auto-hide status messages
             setTimeout(function () {
-                var statusMessages = document.querySelectorAll('.status-message, .error-message');
+                var statusMessages = document.querySelectorAll('.status-message');
                 statusMessages.forEach(function (message) {
                     message.style.opacity = '0';
                     message.style.transform = 'translateX(20px)';
@@ -702,7 +784,7 @@
                 });
             });
 
-            // PDF file validation
+            // PDF file validation - UPDATED FOR 4MB
             const pdfInputs = document.querySelectorAll('input[type="file"]');
             pdfInputs.forEach(input => {
                 input.addEventListener('change', function () {
@@ -715,10 +797,10 @@
                             return;
                         }
 
-                        // Check file size (10 MB = 10 * 1024 * 1024 bytes)
-                        const maxSize = 10 * 1024 * 1024;
+                        // Check file size (4 MB = 4 * 1024 * 1024 bytes)
+                        const maxSize = 4 * 1024 * 1024;
                         if (file.size > maxSize) {
-                            alert('File size exceeds 10 MB limit. Please select a smaller file.');
+                            alert('File size exceeds 4 MB limit. Please select a smaller file.');
                             this.value = '';
                             return;
                         }

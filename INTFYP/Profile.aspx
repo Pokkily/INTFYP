@@ -283,6 +283,7 @@
             font-size: 16px;
             transition: all 0.3s ease;
             background: #f8f9fa;
+            box-sizing: border-box;
         }
 
         .form-control:focus {
@@ -716,6 +717,49 @@
             outline: 3px solid rgba(103, 126, 234, 0.5);
             outline-offset: 2px;
         }
+
+        /* Alert styles for notifications */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+
+        .btn-close {
+            position: absolute;
+            top: 8px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
     </style>
 
     <asp:UpdatePanel ID="UpdatePanel1" runat="server">
@@ -783,21 +827,21 @@
                     </div>
                 </div>
 
-                <!-- Navigation Tabs -->
+                <!-- Navigation Tabs - FIXED: Added type="button" to prevent form submission -->
                 <div class="profile-tabs">
-                    <button class="tab-button active" onclick="showTab('overview')">
+                    <button type="button" class="tab-button active" onclick="showTab('overview')">
                         <span class="tab-icon">👤</span>
                         <span>Overview</span>
                     </button>
-                    <button class="tab-button" onclick="showTab('classes')">
+                    <button type="button" class="tab-button" onclick="showTab('classes')">
                         <span class="tab-icon">📚</span>
                         <span>My Classes</span>
                     </button>
-                    <button class="tab-button" onclick="showTab('activity')">
+                    <button type="button" class="tab-button" onclick="showTab('activity')">
                         <span class="tab-icon">📱</span>
                         <span>Activity</span>
                     </button>
-                    <button class="tab-button" onclick="showTab('settings')">
+                    <button type="button" class="tab-button" onclick="showTab('settings')">
                         <span class="tab-icon">⚙️</span>
                         <span>Settings</span>
                     </button>
@@ -918,134 +962,187 @@
                         </asp:Panel>
                     </div>
 
-                    <!-- Activity Tab -->
-                    <div id="activity" class="tab-panel">
-                        <div class="section-header">
-                            <span class="section-icon">📱</span>
-                            Study Hub Activity
-                        </div>
+                   <!-- Activity Tab - Replace the existing activity tab with this updated version -->
+<div id="activity" class="tab-panel">
+    <div class="section-header">
+        <span class="section-icon">📱</span>
+        Study Hub Activity
+    </div>
 
-                        <!-- Activity Filter -->
-                        <div class="activity-filter">
-                            <button class="filter-btn active" onclick="filterActivity('all')">All Activity</button>
-                            <button class="filter-btn" onclick="filterActivity('liked')">❤️ Liked Posts</button>
-                            <button class="filter-btn" onclick="filterActivity('saved')">⭐ Saved Posts</button>
-                            <button class="filter-btn" onclick="filterActivity('shared')">📤 Shared Posts</button>
-                        </div>
+    <!-- Activity Filter -->
+    <div class="activity-filter">
+        <button type="button" class="filter-btn active" onclick="filterActivity('all')">All Activity</button>
+        <button type="button" class="filter-btn" onclick="filterActivity('liked')">❤️ Liked Posts</button>
+        <button type="button" class="filter-btn" onclick="filterActivity('saved')">⭐ Saved Posts</button>
+        <button type="button" class="filter-btn" onclick="filterActivity('shared')">📤 Shared Posts</button>
+    </div>
 
-                        <!-- Activity Content -->
-                        <asp:Panel ID="pnlActivity" runat="server">
-                            <div class="post-grid">
-                                <!-- Liked Posts -->
-                                <asp:Repeater ID="rptLikedPosts" runat="server">
-                                    <ItemTemplate>
-                                        <div class="post-card activity-item liked-post">
-                                            <div class="post-header">
-                                                <div class="post-avatar">
-                                                    <%# Eval("authorName").ToString().Substring(0, 1).ToUpper() %>
-                                                </div>
-                                                <div class="post-meta">
-                                                    <div class="post-author"><%# Eval("authorName") %></div>
-                                                    <div class="post-time"><%# Eval("timestamp") %></div>
-                                                </div>
-                                                <div style="color: #e74c3c; font-size: 20px;">❤️</div>
-                                            </div>
-                                            <div class="post-content">
-                                                <%# Eval("content") %>
-                                            </div>
-                                            <div class="post-actions">
-                                                <span class="post-action liked">
-                                                    ❤️ <%# Eval("likeCount") %>
-                                                </span>
-                                                <span class="post-action">
-                                                    💬 <%# Eval("commentCount") %>
-                                                </span>
-                                                <span class="post-action">
-                                                    📤 <%# Eval("shareCount") %>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </ItemTemplate>
-                                </asp:Repeater>
-
-                                <!-- Saved Posts -->
-                                <asp:Repeater ID="rptSavedPosts" runat="server">
-                                    <ItemTemplate>
-                                        <div class="post-card activity-item saved-post">
-                                            <div class="post-header">
-                                                <div class="post-avatar">
-                                                    <%# Eval("authorName").ToString().Substring(0, 1).ToUpper() %>
-                                                </div>
-                                                <div class="post-meta">
-                                                    <div class="post-author"><%# Eval("authorName") %></div>
-                                                    <div class="post-time"><%# Eval("timestamp") %></div>
-                                                </div>
-                                                <div style="color: #f39c12; font-size: 20px;">⭐</div>
-                                            </div>
-                                            <div class="post-content">
-                                                <%# Eval("content") %>
-                                            </div>
-                                            <div class="post-actions">
-                                                <span class="post-action">
-                                                    ❤️ <%# Eval("likeCount") %>
-                                                </span>
-                                                <span class="post-action">
-                                                    💬 <%# Eval("commentCount") %>
-                                                </span>
-                                                <span class="post-action saved">
-                                                    ⭐ Saved
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </ItemTemplate>
-                                </asp:Repeater>
-
-                                <!-- Shared Posts -->
-                                <asp:Repeater ID="rptSharedPosts" runat="server">
-                                    <ItemTemplate>
-                                        <div class="post-card activity-item shared-post">
-                                            <div class="post-header">
-                                                <div class="post-avatar">
-                                                    <%# Eval("authorName").ToString().Substring(0, 1).ToUpper() %>
-                                                </div>
-                                                <div class="post-meta">
-                                                    <div class="post-author"><%# Eval("authorName") %></div>
-                                                    <div class="post-time"><%# Eval("timestamp") %></div>
-                                                </div>
-                                                <div style="color: #3498db; font-size: 20px;">📤</div>
-                                            </div>
-                                            <div class="post-content">
-                                                <%# Eval("content") %>
-                                            </div>
-                                            <div class="post-actions">
-                                                <span class="post-action">
-                                                    ❤️ <%# Eval("likeCount") %>
-                                                </span>
-                                                <span class="post-action">
-                                                    💬 <%# Eval("commentCount") %>
-                                                </span>
-                                                <span class="post-action">
-                                                    📤 <%# Eval("shareCount") %>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </ItemTemplate>
-                                </asp:Repeater>
-                            </div>
-
-                            <!-- No Activity -->
-                            <asp:Panel ID="pnlNoActivity" runat="server" Visible="false">
-                                <div class="empty-state">
-                                    <div class="empty-state-icon">📱</div>
-                                    <h3 class="empty-state-title">No Activity Yet</h3>
-                                    <p class="empty-state-text">Start engaging with StudyHub posts to see your activity here!</p>
-                                    <a href="StudyHub.aspx" class="btn btn-primary" style="margin-top: 20px;">
-                                        🚀 Explore StudyHub
-                                    </a>
+    <!-- Activity Content -->
+    <asp:Panel ID="pnlActivity" runat="server">
+        <div class="activity-grid">
+            <!-- Liked Posts -->
+            <asp:Repeater ID="rptLikedPosts" runat="server">
+                <ItemTemplate>
+                    <div class="post-card activity-item liked-post" data-activity-type="liked">
+                        <div class="post-header">
+                            <div class="post-author">
+                                <div class="post-avatar">
+                                    <%# Eval("authorName").ToString().Substring(0, 1).ToUpper() %>
                                 </div>
-                            </asp:Panel>
-                        </asp:Panel>
+                                <div class="post-meta">
+                                    <div class="post-author-name"><%# Eval("authorName") %></div>
+                                    <div class="post-time"><%# Eval("timestamp") %></div>
+                                    <div class="post-group">in <%# Eval("groupName") %></div>
+                                </div>
+                            </div>
+                            <div class="activity-badge liked">
+                                <span class="badge-icon">❤️</span>
+                                <span class="badge-text">Liked</span>
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            <div class="post-text"><%# Eval("content") %></div>
+                        </div>
+                        <div class="post-stats">
+                            <div class="stat-item">
+                                <span class="stat-icon">❤️</span>
+                                <span class="stat-count"><%# Eval("likeCount") %></span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-icon">💬</span>
+                                <span class="stat-count"><%# Eval("commentCount") %></span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-icon">📤</span>
+                                <span class="stat-count"><%# Eval("shareCount") %></span>
+                            </div>
+                        </div>
+                        <div class="post-actions">
+                            <a href="StudyHubGroup.aspx?groupId=<%# Eval("groupId") %>&postId=<%# Eval("postId") %>" class="action-btn view-post">
+                                <span class="action-icon">👁️</span>
+                                View Post
+                            </a>
+                        </div>
                     </div>
+                </ItemTemplate>
+            </asp:Repeater>
+
+            <!-- Saved Posts -->
+            <asp:Repeater ID="rptSavedPosts" runat="server">
+                <ItemTemplate>
+                    <div class="post-card activity-item saved-post" data-activity-type="saved">
+                        <div class="post-header">
+                            <div class="post-author">
+                                <div class="post-avatar">
+                                    <%# Eval("authorName").ToString().Substring(0, 1).ToUpper() %>
+                                </div>
+                                <div class="post-meta">
+                                    <div class="post-author-name"><%# Eval("authorName") %></div>
+                                    <div class="post-time"><%# Eval("timestamp") %></div>
+                                    <div class="post-group">in <%# Eval("groupName") %></div>
+                                </div>
+                            </div>
+                            <div class="activity-badge saved">
+                                <span class="badge-icon">⭐</span>
+                                <span class="badge-text">Saved</span>
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            <div class="post-text"><%# Eval("content") %></div>
+                        </div>
+                        <div class="post-stats">
+                            <div class="stat-item">
+                                <span class="stat-icon">❤️</span>
+                                <span class="stat-count"><%# Eval("likeCount") %></span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-icon">💬</span>
+                                <span class="stat-count"><%# Eval("commentCount") %></span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-icon">📤</span>
+                                <span class="stat-count"><%# Eval("shareCount") %></span>
+                            </div>
+                        </div>
+                        <div class="post-actions">
+                            <a href="StudyHubGroup.aspx?groupId=<%# Eval("groupId") %>&postId=<%# Eval("postId") %>" class="action-btn view-post">
+                                <span class="action-icon">👁️</span>
+                                View Post
+                            </a>
+                            <asp:LinkButton ID="btnUnsave" runat="server" 
+                                CommandArgument='<%# Eval("postId") + "|" + Eval("groupId") %>'
+                                OnClick="btnUnsavePost_Click" 
+                                CssClass="action-btn unsave-btn"
+                                OnClientClick="return confirm('Remove this post from your saved items?');">
+                                <span class="action-icon">🗑️</span>
+                                Unsave
+                            </asp:LinkButton>
+                        </div>
+                    </div>
+                </ItemTemplate>
+            </asp:Repeater>
+
+            <!-- Shared Posts -->
+            <asp:Repeater ID="rptSharedPosts" runat="server">
+                <ItemTemplate>
+                    <div class="post-card activity-item shared-post" data-activity-type="shared">
+                        <div class="post-header">
+                            <div class="post-author">
+                                <div class="post-avatar">
+                                    <%# Eval("authorName").ToString().Substring(0, 1).ToUpper() %>
+                                </div>
+                                <div class="post-meta">
+                                    <div class="post-author-name"><%# Eval("authorName") %></div>
+                                    <div class="post-time"><%# Eval("timestamp") %></div>
+                                    <div class="post-group">in <%# Eval("groupName") %></div>
+                                </div>
+                            </div>
+                            <div class="activity-badge shared">
+                                <span class="badge-icon">📤</span>
+                                <span class="badge-text">Shared</span>
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            <div class="post-text"><%# Eval("content") %></div>
+                        </div>
+                        <div class="post-stats">
+                            <div class="stat-item">
+                                <span class="stat-icon">❤️</span>
+                                <span class="stat-count"><%# Eval("likeCount") %></span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-icon">💬</span>
+                                <span class="stat-count"><%# Eval("commentCount") %></span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-icon">📤</span>
+                                <span class="stat-count"><%# Eval("shareCount") %></span>
+                            </div>
+                        </div>
+                        <div class="post-actions">
+                            <a href="StudyHubGroup.aspx?groupId=<%# Eval("groupId") %>&postId=<%# Eval("postId") %>" class="action-btn view-post">
+                                <span class="action-icon">👁️</span>
+                                View Post
+                            </a>
+                        </div>
+                    </div>
+                </ItemTemplate>
+            </asp:Repeater>
+        </div>
+
+        <!-- No Activity -->
+        <asp:Panel ID="pnlNoActivity" runat="server" Visible="false">
+            <div class="empty-state">
+                <div class="empty-state-icon">📱</div>
+                <h3 class="empty-state-title">No Activity Yet</h3>
+                <p class="empty-state-text">Start engaging with StudyHub posts to see your activity here!</p>
+                <a href="StudyHub.aspx" class="btn btn-primary" style="margin-top: 20px;">
+                    🚀 Explore StudyHub
+                </a>
+            </div>
+        </asp:Panel>
+    </asp:Panel>
+</div>
 
                     <!-- Settings Tab -->
                     <div id="settings" class="tab-panel">
@@ -1171,29 +1268,40 @@
     </asp:UpdatePanel>
 
     <script>
-        // Tab switching functionality
+        // FIXED: Improved Tab switching functionality
         function showTab(tabName) {
-            // Hide all tab panels
-            document.querySelectorAll('.tab-panel').forEach(panel => {
-                panel.classList.remove('active');
-            });
-            
-            // Remove active class from all tab buttons
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('active');
-            });
-            
-            // Show selected tab panel
-            document.getElementById(tabName).classList.add('active');
-            
-            // Add active class to clicked button
-            event.target.closest('.tab-button').classList.add('active');
+            try {
+                // Hide all tab panels
+                document.querySelectorAll('.tab-panel').forEach(panel => {
+                    panel.classList.remove('active');
+                });
 
-            // Load tab content if needed
-            if (tabName === 'classes') {
-                loadClasses();
-            } else if (tabName === 'activity') {
-                loadActivity();
+                // Remove active class from all tab buttons
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.classList.remove('active');
+                });
+
+                // Show selected tab panel
+                const targetPanel = document.getElementById(tabName);
+                if (targetPanel) {
+                    targetPanel.classList.add('active');
+                }
+
+                // Add active class to clicked button
+                event.target.closest('.tab-button').classList.add('active');
+
+                // Load tab content if needed
+                if (tabName === 'classes') {
+                    loadClasses();
+                } else if (tabName === 'activity') {
+                    loadActivity();
+                }
+
+                // Prevent any form submission
+                event.preventDefault();
+                return false;
+            } catch (error) {
+                console.error('Error switching tabs:', error);
             }
         }
 
@@ -1201,7 +1309,7 @@
         function previewProfileImage(input) {
             if (input.files && input.files[0]) {
                 var reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     document.querySelector('.profile-image').src = e.target.result;
                     document.getElementById('<%= btnUploadPhoto.ClientID %>').style.display = 'inline-block';
                 };
@@ -1209,24 +1317,48 @@
             }
         }
 
-        // Activity filtering
         function filterActivity(type) {
-            // Update filter buttons
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
+            try {
+                // Update filter buttons
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                event.target.classList.add('active');
 
-            // Show/hide activity items
-            document.querySelectorAll('.activity-item').forEach(item => {
-                if (type === 'all') {
-                    item.style.display = 'block';
-                } else {
-                    const shouldShow = item.classList.contains(type + '-post');
-                    item.style.display = shouldShow ? 'block' : 'none';
-                }
-            });
+                // Show/hide activity items with animation
+                document.querySelectorAll('.activity-item').forEach(item => {
+                    const itemType = item.getAttribute('data-activity-type');
+
+                    if (type === 'all') {
+                        item.classList.remove('hidden');
+                        item.style.display = 'block';
+                    } else {
+                        if (itemType === type) {
+                            item.classList.remove('hidden');
+                            item.style.display = 'block';
+                        } else {
+                            item.classList.add('hidden');
+                            setTimeout(() => {
+                                if (item.classList.contains('hidden')) {
+                                    item.style.display = 'none';
+                                }
+                            }, 300);
+                        }
+                    }
+                });
+
+                event.preventDefault();
+                return false;
+            } catch (error) {
+                console.error('Error filtering activity:', error);
+            }
         }
+
+        // Initialize activity display
+        document.addEventListener('DOMContentLoaded', function () {
+            // Set up any initialization needed for activity display
+            console.log('Activity section initialized');
+        });
 
         // Form reset functionality
         function resetForm() {
@@ -1234,6 +1366,7 @@
                 // This will be handled by server-side code
                 __doPostBack('<%= btnUpdateProfile.UniqueID %>', 'reset');
             }
+            return false;
         }
 
         // Load classes (placeholder for async loading)
@@ -1273,19 +1406,26 @@
         }
 
         // Auto-save functionality for settings
-        document.querySelectorAll('.toggle-switch input').forEach(toggle => {
-            toggle.addEventListener('change', function() {
-                // Auto-save setting changes
-                console.log('Setting changed:', this.id, this.checked);
-                // You can implement auto-save here
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toggle-switch input').forEach(toggle => {
+                toggle.addEventListener('change', function () {
+                    // Auto-save setting changes
+                    console.log('Setting changed:', this.id, this.checked);
+                    // You can implement auto-save here
+                });
             });
         });
 
         // Password strength indicator
-        document.getElementById('<%= txtNewPassword.ClientID %>').addEventListener('input', function() {
-            const password = this.value;
-            const strength = calculatePasswordStrength(password);
-            // Add visual feedback for password strength
+        document.addEventListener('DOMContentLoaded', function () {
+            const newPasswordField = document.getElementById('<%= txtNewPassword.ClientID %>');
+            if (newPasswordField) {
+                newPasswordField.addEventListener('input', function () {
+                    const password = this.value;
+                    const strength = calculatePasswordStrength(password);
+                    // Add visual feedback for password strength
+                });
+            }
         });
 
         function calculatePasswordStrength(password) {
@@ -1299,11 +1439,12 @@
         }
 
         // Initialize tooltips and other UI enhancements
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Add smooth scrolling to tab switching
             document.querySelectorAll('.tab-button').forEach(button => {
-                button.addEventListener('click', function() {
-                    document.querySelector('.tab-content').scrollIntoView({ 
+                button.addEventListener('click', function (e) {
+                    e.preventDefault(); // Prevent any default behavior
+                    document.querySelector('.tab-content').scrollIntoView({
                         behavior: 'smooth',
                         block: 'start'
                     });
@@ -1313,31 +1454,31 @@
             // Add form validation
             const forms = document.querySelectorAll('form');
             forms.forEach(form => {
-                form.addEventListener('submit', function(e) {
+                form.addEventListener('submit', function (e) {
                     // Add form validation logic here
                 });
             });
         });
 
         // Keyboard navigation support
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.ctrlKey || e.metaKey) {
-                switch(e.key) {
+                switch (e.key) {
                     case '1':
                         e.preventDefault();
-                        document.querySelector('[onclick="showTab(\'overview\')"]').click();
+                        showTab('overview');
                         break;
                     case '2':
                         e.preventDefault();
-                        document.querySelector('[onclick="showTab(\'classes\')"]').click();
+                        showTab('classes');
                         break;
                     case '3':
                         e.preventDefault();
-                        document.querySelector('[onclick="showTab(\'activity\')"]').click();
+                        showTab('activity');
                         break;
                     case '4':
                         e.preventDefault();
-                        document.querySelector('[onclick="showTab(\'settings\')"]').click();
+                        showTab('settings');
                         break;
                 }
             }

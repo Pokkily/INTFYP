@@ -18,6 +18,9 @@
             --spacing-md: 20px;
             --spacing-lg: 25px;
             --spacing-xl: 30px;
+            --border-radius-lg: 20px;
+            --border-radius-md: 12px;
+            --border-radius-sm: 8px;
         }
 
         /* Page Background with Library Style */
@@ -56,11 +59,12 @@
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
+            border-radius: var(--border-radius-lg);
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
             position: relative;
+            cursor: pointer;
         }
 
         .glass-card::before {
@@ -89,7 +93,7 @@
         .page-header {
             background: var(--primary-gradient);
             color: rgba(255, 255, 255, 0.9);
-            border-radius: 20px;
+            border-radius: var(--border-radius-lg);
             padding: var(--spacing-lg);
             margin-bottom: var(--spacing-lg);
             animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -133,6 +137,26 @@
             to { opacity: 1; transform: translateY(0) rotate(0deg); }
         }
 
+        /* Floating background animation for modal */
+        @keyframes modalBackgroundFloat {
+            0%, 100% { 
+                background-position: 0% 50%;
+                transform: rotate(0deg);
+            }
+            25% { 
+                background-position: 100% 25%;
+                transform: rotate(0.5deg);
+            }
+            50% { 
+                background-position: 100% 50%;
+                transform: rotate(-0.5deg);
+            }
+            75% { 
+                background-position: 0% 75%;
+                transform: rotate(0.2deg);
+            }
+        }
+
         .btn-primary {
             background: var(--primary-gradient);
             color: white;
@@ -170,7 +194,7 @@
             box-shadow: 0 8px 20px rgba(103, 126, 234, 0.4);
         }
 
-        /* Teal Submit Button - Matching Language Page Student Report Button */
+        /* Teal Submit Button */
         .btn-submit-teal {
             background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%) !important;
             color: white !important;
@@ -216,7 +240,7 @@
             animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Enhanced Feedback Card Styles - PRESERVED */
+        /* Enhanced Feedback Card Styles */
         .feedback-card {
             height: 100%;
             display: flex;
@@ -285,7 +309,7 @@
             margin-top: auto;
         }
 
-        /* Library-Style Like Button - Dark Green (Same as Favorite Button) */
+        /* Library-Style Like Button - Card Version */
         .btn-like {
             padding: 0.35rem 0.75rem !important;
             border-radius: 18px !important;
@@ -304,15 +328,12 @@
             justify-content: center !important;
             min-width: 75px !important;
             white-space: nowrap !important;
-            /* Override Bootstrap defaults */
             font-family: inherit !important;
             line-height: 1 !important;
             text-align: center !important;
             vertical-align: middle !important;
             touch-action: manipulation !important;
             user-select: none !important;
-
-            /* Default state - gray (same as Library buttons) */
             background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%) !important;
             color: #2c3e50 !important;
             box-shadow: 0 4px 15px rgba(200, 200, 200, 0.3) !important;
@@ -336,7 +357,6 @@
             height: 200px;
         }
 
-        /* Hover state - Dark Green (same as favorite button) */
         .btn-like:hover {
             transform: translateY(-2px) !important;
             background: linear-gradient(135deg, #9caf88 0%, #8a9c78 100%) !important;
@@ -344,7 +364,6 @@
             color: white !important;
         }
 
-        /* ACTIVE STATE - When user has liked (Dark Green) */
         .btn-like.active {
             background: linear-gradient(135deg, #9caf88 0%, #8a9c78 100%) !important;
             box-shadow: 0 8px 25px rgba(156, 175, 136, 0.5) !important;
@@ -356,7 +375,6 @@
             box-shadow: 0 10px 30px rgba(156, 175, 136, 0.6) !important;
         }
 
-        /* Temporary click animation */
         .btn-like.clicked {
             animation: buttonPulse 0.6s ease-out !important;
         }
@@ -367,67 +385,456 @@
             100% { transform: scale(1); }
         }
 
+        /* Detail Modal Like Button - Same size as post comment button */
+        .btn-like-detail {
+            padding: 10px 20px !important;
+            border-radius: 25px !important;
+            border: none !important;
+            cursor: pointer !important;
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            justify-content: center !important;
+            min-width: 120px !important;
+            white-space: nowrap !important;
+            font-family: inherit !important;
+            line-height: 1 !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            touch-action: manipulation !important;
+            user-select: none !important;
+            background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%) !important;
+            color: #2c3e50 !important;
+            box-shadow: 0 4px 15px rgba(200, 200, 200, 0.3) !important;
+        }
+
+        .btn-like-detail::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.6s ease;
+        }
+
+        .btn-like-detail:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .btn-like-detail:hover {
+            transform: translateY(-2px) !important;
+            background: linear-gradient(135deg, #9caf88 0%, #8a9c78 100%) !important;
+            box-shadow: 0 8px 25px rgba(156, 175, 136, 0.4) !important;
+            color: white !important;
+        }
+
+        .btn-like-detail.active {
+            background: linear-gradient(135deg, #9caf88 0%, #8a9c78 100%) !important;
+            box-shadow: 0 8px 25px rgba(156, 175, 136, 0.5) !important;
+            color: #ffffff !important;
+        }
+
+        .btn-like-detail.active:hover {
+            background: linear-gradient(135deg, #8a9c78 0%, #7a8c68 100%) !important;
+            box-shadow: 0 10px 30px rgba(156, 175, 136, 0.6) !important;
+        }
+
+        .btn-like-detail.clicked {
+            animation: buttonPulse 0.6s ease-out !important;
+        }
+
         .btn-sm {
             padding: 0.35rem 0.75rem;
             font-size: 0.85rem;
             white-space: nowrap;
         }
 
-        /* Comment Modal Styles */
-        .modal-header {
+        /* Enhanced Card Detail Modal Styles */
+        .card-detail-modal .modal-dialog {
+            max-width: 95vw;
+            width: 95vw;
+            margin: 1rem auto;
+        }
+
+        .card-detail-modal .modal-content {
+            border-radius: var(--border-radius-lg);
+            border: none;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        /* Dark backdrop for better focus */
+        .card-detail-modal .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.9) !important;
+        }
+
+        .card-detail-modal .modal-header {
             background: var(--primary-gradient);
             color: white;
+            border-bottom: none;
+            padding: 1.5rem 2rem;
+            position: relative;
         }
-        
-        .modal-header .btn-close {
-            filter: invert(1);
+
+        .card-detail-modal .modal-header::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
         }
-        
+
+        .card-detail-modal .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-detail-modal .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .card-detail-modal .btn-close:hover {
+            opacity: 1;
+        }
+
+        .card-detail-content {
+            display: flex;
+            min-height: 75vh;
+        }
+
+        .card-detail-image {
+            flex: 0 0 33.333%;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            padding: 2rem;
+        }
+
+        /* Removed the colorful line */
+        .card-detail-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: var(--border-radius-sm);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card-detail-image img:hover {
+            transform: scale(1.05);
+        }
+
+        .card-detail-info {
+            flex: 0 0 33.333%;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid #e9ecef;
+        }
+
+        .card-detail-comments {
+            flex: 1;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        /* Comment input section styles */
+        .comment-input {
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 1rem;
+            border-radius: var(--border-radius-md);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
         .comment-input textarea {
             resize: none;
             border: 2px solid #e9ecef;
-            transition: border-color 0.3s ease;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            border-radius: var(--border-radius-md);
+            background: rgba(255, 255, 255, 0.9);
         }
-        
+
         .comment-input textarea:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            background: white;
         }
-        
-        .comment {
-            transition: all 0.2s ease;
-            margin-bottom: 0.75rem;
-            padding: 0.75rem;
-            border-radius: 12px;
+
+        .detail-header {
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .detail-header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 80px;
+            height: 2px;
+            background: var(--primary-gradient);
+            border-radius: 1px;
+        }
+
+        .detail-header h4 {
+            margin: 0;
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-date {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .detail-date::before {
+            content: '🕒';
+            font-size: 0.9rem;
+        }
+
+        .detail-description {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+            color: var(--text-primary);
             background: rgba(248, 249, 250, 0.8);
+            padding: 1.5rem;
+            border-radius: var(--border-radius-md);
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
-        
-        .comment:hover {
-            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+
+        /* Simplified Detail Actions Section - Remove box styling */
+        .detail-actions {
+            display: flex !important;
+            align-items: center !important;
+            gap: 1rem !important;
+            margin-bottom: 1rem !important;
         }
-        
+
+        .like-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .comments-header {
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .comments-header::before {
+            content: '💬';
+            font-size: 1rem;
+        }
+
+        .comment-input {
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 1rem;
+            border-radius: var(--border-radius-md);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .comment-input textarea {
+            resize: none;
+            border: 2px solid #e9ecef;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            border-radius: var(--border-radius-md);
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .comment-input textarea:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            background: white;
+        }
+
         .comments-list {
-            max-height: 400px;
+            flex: 1;
+            max-height: 350px;
             overflow-y: auto;
             padding-right: 0.5rem;
         }
-        
-        .comments-list::-webkit-scrollbar {
+
+        .comment {
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+            padding: 1.25rem;
+            border-radius: var(--border-radius-md);
+            background: rgba(248, 249, 250, 0.9);
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .comment:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transform: translateX(8px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .comment::before {
+            content: '';
+            position: absolute;
+            left: -4px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary-gradient);
+            transition: width 0.3s ease;
+        }
+
+        .comment:hover::before {
             width: 6px;
         }
-        
+
+        .comments-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
         .comments-list::-webkit-scrollbar-track {
             background: #f8f9fa;
             border-radius: 10px;
         }
-        
+
         .comments-list::-webkit-scrollbar-thumb {
-            background: #dee2e6;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             border-radius: 10px;
         }
 
-        /* Responsive adjustments */
+        .comments-list::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+
+        /* Image Zoom Modal */
+        .image-zoom-modal .modal-dialog {
+            max-width: 90vw;
+            width: 90vw;
+            height: 90vh;
+            margin: 5vh auto;
+        }
+
+        .image-zoom-modal .modal-content {
+            height: 100%;
+            border: none;
+            border-radius: var(--border-radius-lg);
+            background: rgba(0, 0, 0, 0.9);
+            overflow: hidden;
+        }
+
+        .image-zoom-modal .modal-body {
+            padding: 0;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-zoom-modal img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: var(--border-radius-sm);
+        }
+
+        .image-zoom-modal .btn-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            filter: brightness(0) invert(1);
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .image-zoom-modal .btn-close:hover {
+            opacity: 1;
+        }
+
+        /* Fix for modal backdrop issues */
+        .modal-backdrop {
+            z-index: 1040 !important;
+        }
+
+        .modal {
+            z-index: 1050 !important;
+        }
+
+        body.modal-open {
+            overflow: hidden !important;
+            padding-right: 0 !important;
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
+            .card-detail-modal .modal-dialog {
+                max-width: 95vw;
+                width: 95vw;
+                margin: 0.5rem auto;
+            }
+            
+            .card-detail-content {
+                flex-direction: column;
+                min-height: auto;
+            }
+            
+            .card-detail-image {
+                flex: none;
+                height: 300px;
+            }
+            
+            .card-detail-info, .card-detail-comments {
+                flex: none;
+                padding: 1.5rem;
+                border-right: none;
+            }
+            
+            .card-detail-info {
+                border-bottom: 1px solid #e9ecef;
+            }
+            
             .feedback-image-container {
                 height: 150px;
             }
@@ -438,6 +845,12 @@
             
             .row-cols-md-3 {
                 grid-template-columns: 1fr !important;
+            }
+
+            .detail-actions {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 1rem !important;
             }
         }
     </style>
@@ -467,13 +880,13 @@
                     </HeaderTemplate>
                     <ItemTemplate>
                         <div class="col">
-                            <div class="glass-card feedback-card h-100" style='animation-delay: calc(<%# Container.ItemIndex %> * 0.1s)'>
+                            <div class="glass-card feedback-card h-100" 
+                                 style='animation-delay: calc(<%# Container.ItemIndex %> * 0.1s)'
+                                 data-post-id='<%# Eval("PostId") %>'
+                                 onclick="openCardDetail('<%# Eval("PostId") %>')">
                                 <!-- Image Section -->
                                 <div class="feedback-image-container">
-                                    <img src='<%# Eval("MediaUrl") %>' alt="Feedback media"
-                                         class="feedback-image"
-                                         data-bs-toggle="modal"
-                                         data-bs-target='<%# "#imgModal" + Eval("PostId") %>' />
+                                    <img src='<%# Eval("MediaUrl") %>' alt="Feedback media" class="feedback-image" />
                                 </div>
                                 
                                 <!-- Content Section -->
@@ -485,8 +898,8 @@
                                     
                                     <p class="feedback-description"><%# Eval("Description") %></p>
                                     
-                                    <div class="feedback-actions">
-                                        <!-- Like Button with Library Style - Now Dark Green with Active State -->
+                                    <div class="feedback-actions" onclick="event.stopPropagation();">
+                                        <!-- Like Button with Library Style -->
                                         <asp:Button ID="btnLike" runat="server"
                                             Text='<%# "❤️ " + Eval("Likes") %>'
                                             CommandName="Like"
@@ -497,103 +910,110 @@
                                         <!-- Comment Button -->
                                         <button type="button"
                                             class="btn btn-sm btn-outline-secondary"
-                                            data-bs-toggle="modal"
-                                            data-bs-target='<%# "#commentModal" + Eval("PostId") %>'
-                                            onclick="loadCommentsInModal('<%# Eval("PostId") %>')">
+                                            onclick="openCardDetail('<%# Eval("PostId") %>')">
                                             💬 <%# ((System.Collections.ICollection)Eval("Comments")).Count %>
                                         </button>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Comment Modal for each post -->
-                            <div class="modal fade" id='<%# "commentModal" + Eval("PostId") %>' tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <!-- Enhanced Card Detail Modal -->
+                            <div class="modal fade card-detail-modal" id='<%# "cardDetailModal" + Eval("PostId") %>' tabindex="-1" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+                                <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h5 class="modal-title fw-bold">
-                                                <i class="fas fa-comments me-2"></i>Comments - <%# Eval("Username") %>
+                                                <i class="fas fa-expand-alt me-2"></i>Feedback Details
                                             </h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
-                                        <div class="modal-body">
-                                            <!-- Original Post Info -->
-                                            <div class="border-bottom pb-3 mb-4">
-                                                <div class="d-flex align-items-center mb-2">
-                                                    <h6 class="fw-bold mb-0 me-3"><%# Eval("Username") %></h6>
-                                                    <small class="text-muted"><%# Eval("CreatedAt", "{0:dd MMM yyyy hh:mm tt}") %></small>
+                                        <div class="modal-body p-0">
+                                            <div class="card-detail-content">
+                                                <!-- Image Section - Left Column (Now clickable) -->
+                                                <div class="card-detail-image" onclick="openImageZoom('<%# Eval("MediaUrl") %>')">
+                                                    <img src='<%# Eval("MediaUrl") %>' alt="Feedback media" />
                                                 </div>
-                                                <p class="mb-0"><%# Eval("Description") %></p>
-                                            </div>
-
-                                            <!-- Comment Input Section -->
-                                            <div class="comment-input mb-4">
-                                                <label class="form-label fw-bold">Add a Comment</label>
-                                                <asp:TextBox ID="txtCommentInput" runat="server" 
-                                                    TextMode="MultiLine" 
-                                                    Rows="3" 
-                                                    CssClass="form-control mb-2" 
-                                                    placeholder="Write your comment..." />
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <asp:Label ID="lblCommentError" runat="server" CssClass="text-danger small" Visible="false" />
-                                                    <asp:Button ID="btnSubmitComment" runat="server"
-                                                        Text="Post Comment"
-                                                        CommandName="SubmitComment"
-                                                        CommandArgument='<%# Eval("PostId") %>'
-                                                        CssClass="btn btn-primary" />
-                                                </div>
-                                            </div>
-
-                                            <!-- Comments List -->
-                                            <div class="comments-section">
-                                                <h6 class="fw-bold mb-3 border-bottom pb-2">
-                                                    All Comments (<%# ((System.Collections.ICollection)Eval("Comments")).Count %>)
-                                                </h6>
                                                 
-                                                <div class="comments-list">
-                                                    <asp:Repeater ID="rptComments" runat="server">
-                                                        <ItemTemplate>
-                                                            <div class="comment">
-                                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                                    <div class="d-flex align-items-center">
-                                                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" 
-                                                                             style="width: 32px; height: 32px; font-size: 14px;">
-                                                                            <%# Eval("username").ToString().Substring(0, 1).ToUpper() %>
+                                                <!-- Info Section - Middle Column -->
+                                                <div class="card-detail-info">
+                                                    <!-- Header -->
+                                                    <div class="detail-header">
+                                                        <h4><%# Eval("Username") %></h4>
+                                                        <div class="detail-date"><%# Eval("CreatedAt", "{0:dd MMM yyyy hh:mm tt}") %></div>
+                                                    </div>
+                                                    
+                                                    <!-- Description -->
+                                                    <div class="detail-description">
+                                                        <%# Eval("Description") %>
+                                                    </div>
+                                                    
+                                                    <!-- Actions Section - Simplified without box -->
+                                                    <div class="detail-actions">
+                                                        <asp:Button ID="btnLikeDetail" runat="server"
+                                                            Text='<%# "❤️ " + Eval("Likes") %>'
+                                                            CommandName="Like"
+                                                            CommandArgument='<%# Eval("PostId") %>'
+                                                            CssClass='<%# "btn-like-detail" + (Convert.ToBoolean(Eval("IsLiked")) ? " active" : "") %>'
+                                                            OnClientClick="addClickEffect(this); return true;" />
+                                                    </div>
+                                                    
+                                                    <!-- Comment Input Section - In Middle Column -->
+                                                    <div class="comment-input">
+                                                        <label class="form-label fw-bold mb-2">Add Comment</label>
+                                                        <asp:TextBox ID="txtCommentInputDetail" runat="server" 
+                                                            TextMode="MultiLine" 
+                                                            Rows="3" 
+                                                            CssClass="form-control mb-2" 
+                                                            placeholder="Write your comment..." />
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <asp:Label ID="lblCommentErrorDetail" runat="server" CssClass="text-danger small" Visible="false" />
+                                                            <asp:Button ID="btnSubmitCommentDetail" runat="server"
+                                                                Text="Post Comment"
+                                                                CommandName="SubmitComment"
+                                                                CommandArgument='<%# Eval("PostId") %>'
+                                                                CssClass="btn btn-primary" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Comments List Section - Right Column -->
+                                                <div class="card-detail-comments">
+                                                    <h6 class="comments-header">
+                                                        Comments (<%# ((System.Collections.ICollection)Eval("Comments")).Count %>)
+                                                    </h6>
+                                                    
+                                                    <!-- Comments List Only -->
+                                                    <div class="comments-list">
+                                                        <asp:Repeater ID="rptCommentsDetail" runat="server">
+                                                            <ItemTemplate>
+                                                                <div class="comment">
+                                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                        <div class="d-flex align-items-center">
+                                                                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" 
+                                                                                 style="width: 32px; height: 32px; font-size: 14px;">
+                                                                                <%# Eval("username").ToString().Substring(0, 1).ToUpper() %>
+                                                                            </div>
+                                                                            <small class="fw-bold"><%# Eval("username") %></small>
                                                                         </div>
-                                                                        <small class="fw-bold"><%# Eval("username") %></small>
+                                                                        <small class="text-muted"><%# Eval("createdAt", "{0:dd MMM yyyy hh:mm tt}") %></small>
                                                                     </div>
-                                                                    <small class="text-muted"><%# Eval("createdAt", "{0:dd MMM yyyy hh:mm tt}") %></small>
+                                                                    <p class="mb-0 ps-5"><%# Eval("text") %></p>
                                                                 </div>
-                                                                <p class="mb-0 ps-5"><%# Eval("text") %></p>
-                                                            </div>
-                                                        </ItemTemplate>
-                                                    </asp:Repeater>
+                                                            </ItemTemplate>
+                                                        </asp:Repeater>
 
-                                                    <!-- No Comments Message -->
-                                                    <div id="noCommentsDiv" runat="server" style="display:none;" class="text-center text-muted py-5">
-                                                        <i class="fas fa-comment-slash fa-3x mb-3 opacity-50"></i>
-                                                        <p class="mb-0">No comments yet. Be the first to comment!</p>
+                                                        <!-- No Comments Message -->
+                                                        <div id="noCommentsDetailDiv" runat="server" style="display:none;" class="text-center text-muted py-4">
+                                                            <i class="fas fa-comment-slash fa-2x mb-3 opacity-50"></i>
+                                                            <p class="mb-0">No comments yet. Be the first to comment!</p>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Image Modal -->
-                            <div class="modal fade" id='<%# "imgModal" + Eval("PostId") %>' tabindex="-1" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-xl">
-                                    <div class="modal-content">
-                                        <div class="modal-body text-center p-0">
-                                            <img src='<%# Eval("MediaUrl") %>' class="img-fluid w-100" style="max-height:90vh; object-fit: contain;" />
-                                        </div>
-                                    </div>
-                                </div>
-            </div>
                         </div>
                     </ItemTemplate>
                     <FooterTemplate>
@@ -604,8 +1024,20 @@
         </div>
     </div>
 
+    <!-- Image Zoom Modal -->
+    <div class="modal fade image-zoom-modal" id="imageZoomModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-body">
+                    <img id="zoomedImage" src="" alt="Zoomed image" />
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Feedback Modal -->
-    <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+    <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -633,7 +1065,6 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <!-- Submit Button in Modal - Also with Teal Color -->
                     <asp:Button ID="btnSubmit" runat="server" CssClass="btn btn-submit-teal" Text="Submit Feedback" OnClick="btnSubmit_Click" />
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
@@ -646,64 +1077,250 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 
-    <!-- JavaScript -->
+    <!-- COMPLETELY REWRITTEN - NON-AGGRESSIVE MODAL MANAGEMENT -->
     <script type="text/javascript">
+        // Simplified modal tracking
+        let modalInstances = new Map();
+
         $(document).ready(function () {
-            console.log('Feedback page loaded with teal submit buttons (matching Language page)');
+            console.log('Enhanced Feedback page loaded with non-aggressive modal management');
 
             // Add hover effects to all glass cards
             const cards = document.querySelectorAll('.glass-card');
             cards.forEach(card => {
                 card.addEventListener('mouseenter', () => {
-                    card.style.transform = 'translateY(-8px)';
-                    card.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.15)';
+                    if (!card.classList.contains('hover-disabled')) {
+                        card.style.transform = 'translateY(-8px)';
+                        card.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.15)';
+                    }
                 });
                 card.addEventListener('mouseleave', () => {
-                    card.style.transform = '';
-                    card.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.1)';
+                    if (!card.classList.contains('hover-disabled')) {
+                        card.style.transform = '';
+                        card.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.1)';
+                    }
                 });
             });
 
-            // Animation when modals open
-            $('.modal').on('shown.bs.modal', function () {
-                $(this).find('.modal-dialog').addClass('animate__animated animate__fadeInUp');
-            });
+            // Setup minimal event listeners
+            setupMinimalEventListeners();
         });
 
-        // Library-style click effect for like button - Updated for proper active state
+        // COMPLETELY REWRITTEN: Simple image zoom function
+        function openImageZoom(imageSrc) {
+            // Stop event propagation
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            
+            console.log('Opening image zoom for:', imageSrc);
+            
+            const zoomedImage = document.getElementById('zoomedImage');
+            zoomedImage.src = imageSrc;
+
+            const modalElement = document.getElementById('imageZoomModal');
+            
+            // Get or create modal instance
+            let imageZoomModal = bootstrap.Modal.getInstance(modalElement);
+            if (!imageZoomModal) {
+                imageZoomModal = new bootstrap.Modal(modalElement, {
+                    backdrop: true,
+                    keyboard: true,
+                    focus: true
+                });
+            }
+            
+            imageZoomModal.show();
+        }
+
+        // MINIMAL event listener setup - let Bootstrap handle its own lifecycle
+        function setupMinimalEventListeners() {
+            // Only track modal instances for reference, don't interfere with Bootstrap lifecycle
+            $(document).on('show.bs.modal', '.modal', function (e) {
+                console.log('Modal showing:', this.id);
+                const modalId = this.id;
+                const modalInstance = bootstrap.Modal.getInstance(this);
+                if (modalInstance) {
+                    modalInstances.set(modalId, modalInstance);
+                }
+            });
+
+            $(document).on('shown.bs.modal', '.modal', function (e) {
+                console.log('Modal shown:', this.id);
+                
+                // Auto-focus on comment input if available (but not for image zoom)
+                if (this.id !== 'imageZoomModal') {
+                    $(this).find('textarea[id*="txtCommentInputDetail"]').focus();
+                }
+            });
+
+            $(document).on('hide.bs.modal', '.modal', function (e) {
+                console.log('Modal hiding:', this.id);
+                const modalId = this.id;
+
+                // Clear comment inputs and errors (but not for image zoom)
+                if (modalId !== 'imageZoomModal') {
+                    $(this).find('textarea[id*="txtCommentInputDetail"]').val('');
+                    $(this).find('[id*="lblCommentErrorDetail"]').hide();
+                }
+            });
+
+            $(document).on('hidden.bs.modal', '.modal', function (e) {
+                console.log('Modal hidden:', this.id);
+                const modalId = this.id;
+                
+                // Remove from our tracking
+                if (modalInstances.has(modalId)) {
+                    modalInstances.delete(modalId);
+                }
+                
+                // NO AUTOMATIC CLEANUP - let Bootstrap handle its own lifecycle
+            });
+
+            // Handle ESC key naturally - let Bootstrap handle it
+            $(document).on('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    // Let Bootstrap handle ESC naturally
+                    console.log('ESC pressed - letting Bootstrap handle modal closure');
+                }
+            });
+        }
+
+        // SIMPLIFIED: Only close card detail modals, never interfere with image zoom
+        function openCardDetail(postId) {
+            const modalId = 'cardDetailModal' + postId;
+            console.log('Opening card detail modal:', modalId);
+
+            try {
+                // Close other CARD DETAIL modals only - never touch image zoom
+                $('.card-detail-modal.show').each(function() {
+                    const existingModal = bootstrap.Modal.getInstance(this);
+                    if (existingModal && this.id !== modalId) {
+                        existingModal.hide();
+                    }
+                });
+
+                // Open the requested modal
+                const modalElement = document.getElementById(modalId);
+                if (modalElement) {
+                    let modal = bootstrap.Modal.getInstance(modalElement);
+                    if (!modal) {
+                        modal = new bootstrap.Modal(modalElement, {
+                            backdrop: true,
+                            keyboard: true,
+                            focus: true
+                        });
+                    }
+                    modal.show();
+                } else {
+                    console.error('Modal element not found:', modalId);
+                }
+
+            } catch (error) {
+                console.error('Error opening card detail modal:', error);
+            }
+        }
+
+        // Enhanced click effect for like buttons
         function addClickEffect(button) {
             // Add clicked class for animation
             button.classList.add('clicked');
 
-            // Remove only the clicked animation class after animation completes
-            // Don't manually add "active" class - let the server-side code handle it
+            // Create a temporary ripple effect
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple-effect';
+            ripple.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 20px;
+                height: 20px;
+                background: rgba(255, 255, 255, 0.6);
+                border-radius: 50%;
+                transform: translate(-50%, -50%) scale(0);
+                animation: ripple 0.6s ease-out;
+                pointer-events: none;
+                z-index: 10;
+            `;
+
+            button.appendChild(ripple);
+
+            // Remove effects after animation
             setTimeout(function () {
                 button.classList.remove('clicked');
+                if (ripple.parentNode) {
+                    ripple.parentNode.removeChild(ripple);
+                }
             }, 600);
         }
 
-        // Function to load comments
-        function loadCommentsInModal(postId) {
-            console.log('Opening comment modal for post:', postId);
-            // You can add AJAX loading logic here if needed
-        }
+        // Add ripple effect keyframes dynamically
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: translate(-50%, -50%) scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
 
-        // Page load function for postbacks
+        // Simplified page load function
         function pageLoad() {
-            console.log('PageLoad fired');
-            // Re-initialize any JavaScript if needed after postback
+            console.log('PageLoad fired - re-initializing minimal event listeners');
+            
+            // Re-setup minimal event listeners
+            setupMinimalEventListeners();
+
+            // Re-initialize hover effects
+            const cards = document.querySelectorAll('.glass-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    if (!card.classList.contains('hover-disabled')) {
+                        card.style.transform = 'translateY(-8px)';
+                        card.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.15)';
+                    }
+                });
+                card.addEventListener('mouseleave', () => {
+                    if (!card.classList.contains('hover-disabled')) {
+                        card.style.transform = '';
+                        card.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.1)';
+                    }
+                });
+            });
         }
 
-        // Auto-focus on comment input when modal opens
-        $(document).on('shown.bs.modal', '[id^="commentModal"]', function () {
-            $(this).find('textarea[id*="txtCommentInput"]').focus();
+        // Prevent modal from closing when clicking on action buttons
+        $(document).on('click', '.feedback-actions', function (e) {
+            e.stopPropagation();
         });
 
-        // Clear comment input and errors when modal closes
-        $(document).on('hidden.bs.modal', '[id^="commentModal"]', function () {
-            var modal = $(this);
-            modal.find('textarea[id*="txtCommentInput"]').val('');
-            modal.find('[id*="lblCommentError"]').hide();
+        // Handle card click vs button click
+        $(document).on('click', '.feedback-card', function (e) {
+            if (!$(e.target).closest('.feedback-actions, button, input, textarea').length) {
+                const postId = $(this).data('post-id');
+                if (postId) {
+                    openCardDetail(postId);
+                }
+            }
         });
+
+        // Only emergency cleanup for genuinely orphaned backdrops
+        setInterval(function () {
+            const visibleModals = $('.modal.show').length;
+            const backdrops = $('.modal-backdrop').length;
+            
+            // Only cleanup if there are backdrops but no visible modals
+            if (backdrops > 0 && visibleModals === 0) {
+                console.log('Emergency cleanup: found orphaned backdrops with no visible modals');
+                $('.modal-backdrop').remove();
+                $('body').removeClass('modal-open').css({
+                    'overflow': '',
+                    'padding-right': ''
+                });
+            }
+        }, 10000); // Check every 10 seconds instead of 5
     </script>
 </asp:Content>
