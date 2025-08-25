@@ -15,8 +15,18 @@ namespace INTFYP
         private static FirestoreDb db;
         private static readonly object dbLock = new object();
 
+        // Store all books for search functionality
+        private static List<object> allBooks = new List<object>();
+
         protected async void Page_Load(object sender, EventArgs e)
         {
+            // Check if request was too large - UPDATED FOR 4MB
+            if (Request.ContentLength > (4 * 1024 * 1024))
+            {
+                ShowErrorMessage("❌ File size exceeds 4 MB limit. Please select a smaller file.");
+                return;
+            }
+
             InitializeFirestore();
             if (!IsPostBack)
             {
@@ -42,6 +52,13 @@ namespace INTFYP
 
         protected async void btnSubmit_Click(object sender, EventArgs e)
         {
+            // Only validate if the validation group passes
+            Page.Validate("AddBookGroup");
+            if (!Page.IsValid)
+            {
+                return;
+            }
+
             // Hide previous messages
             pnlStatus.Visible = false;
 
@@ -134,11 +151,11 @@ namespace INTFYP
                 return false;
             }
 
-            // Check file size (10 MB limit)
-            const int maxFileSize = 10 * 1024 * 1024; // 10 MB in bytes
+            // Check file size (4 MB limit) - UPDATED FOR 4MB
+            const int maxFileSize = 4 * 1024 * 1024; // 4 MB in bytes
             if (fileUpload.PostedFile.ContentLength > maxFileSize)
             {
-                ShowErrorMessage("❌ File size exceeds 10 MB limit. Please select a smaller file.");
+                ShowErrorMessage("❌ File size exceeds 4 MB limit. Please select a smaller file.");
                 return false;
             }
 
@@ -169,11 +186,11 @@ namespace INTFYP
                 return false;
             }
 
-            // Check file size (10 MB limit)
-            const int maxFileSize = 10 * 1024 * 1024; // 10 MB in bytes
+            // Check file size (4 MB limit) - UPDATED FOR 4MB
+            const int maxFileSize = 4 * 1024 * 1024; // 4 MB in bytes
             if (fileUpload.PostedFile.ContentLength > maxFileSize)
             {
-                lblBookStatus.Text = "❌ File size exceeds 10 MB limit. Please select a smaller file.";
+                lblBookStatus.Text = "❌ File size exceeds 4 MB limit. Please select a smaller file.";
                 lblBookStatus.ForeColor = System.Drawing.Color.Red;
                 return false;
             }
@@ -238,16 +255,22 @@ namespace INTFYP
                     });
                 }
 
-                rptBooks.DataSource = books;
+                // Store all books for search functionality
+                allBooks = books;
+
+                // Apply search filter if there's a search term
+                var filteredBooks = FilterBooks(books, txtSearch.Text);
+
+                rptBooks.DataSource = filteredBooks;
                 rptBooks.DataBind();
 
                 // Set the selected values for edit dropdowns after databinding
                 foreach (RepeaterItem item in rptBooks.Items)
                 {
                     DropDownList ddlEditCategory = (DropDownList)item.FindControl("ddlEditCategory");
-                    if (ddlEditCategory != null && item.ItemIndex < books.Count)
+                    if (ddlEditCategory != null && item.ItemIndex < filteredBooks.Count)
                     {
-                        var bookData = (dynamic)books[item.ItemIndex];
+                        var bookData = (dynamic)filteredBooks[item.ItemIndex];
                         string categoryValue = bookData.Category;
 
                         // Set the selected value
@@ -259,7 +282,18 @@ namespace INTFYP
                     }
                 }
 
-                pnlNoBooks.Visible = books.Count == 0;
+                pnlNoBooks.Visible = filteredBooks.Count == 0;
+
+                // Show appropriate message based on whether we're searching or not
+                if (pnlNoBooks.Visible)
+                {
+                    Panel pnlNoSearchResults = (Panel)pnlNoBooks.FindControl("pnlNoSearchResults");
+                    Panel pnlNoBooksAtAll = (Panel)pnlNoBooks.FindControl("pnlNoBooksAtAll");
+
+                    bool hasSearchTerm = !string.IsNullOrWhiteSpace(txtSearch.Text);
+                    pnlNoSearchResults.Visible = hasSearchTerm;
+                    pnlNoBooksAtAll.Visible = !hasSearchTerm;
+                }
 
                 // Clear any previous book status messages
                 lblBookStatus.Text = "";
@@ -268,6 +302,115 @@ namespace INTFYP
             {
                 lblBookStatus.ForeColor = System.Drawing.Color.Red;
                 lblBookStatus.Text = "❌ Error loading books: " + ex.Message;
+            }
+        }
+
+        private List<object> FilterBooks(List<object> books, string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return books;
+            }
+
+            searchTerm = searchTerm.ToLower();
+            var filteredBooks = new List<object>();
+
+            foreach (var book in books)
+            {
+                var bookData = (dynamic)book;
+                string title = bookData.Title?.ToString()?.ToLower() ?? "";
+                string author = bookData.Author?.ToString()?.ToLower() ?? "";
+                string category = bookData.Category?.ToString()?.ToLower() ?? "";
+                string tag = bookData.Tag?.ToString()?.ToLower() ?? "";
+
+                if (title.Contains(searchTerm) ||
+                    author.Contains(searchTerm) ||
+                    category.Contains(searchTerm) ||
+                    tag.Contains(searchTerm))
+                {
+                    filteredBooks.Add(book);
+                }
+            }
+
+            return filteredBooks;
+        }
+
+        protected async void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            // Filter and display books based on search term
+            var filteredBooks = FilterBooks(allBooks, txtSearch.Text);
+
+            rptBooks.DataSource = filteredBooks;
+            rptBooks.DataBind();
+
+            // Set the selected values for edit dropdowns after databinding
+            foreach (RepeaterItem item in rptBooks.Items)
+            {
+                DropDownList ddlEditCategory = (DropDownList)item.FindControl("ddlEditCategory");
+                if (ddlEditCategory != null && item.ItemIndex < filteredBooks.Count)
+                {
+                    var bookData = (dynamic)filteredBooks[item.ItemIndex];
+                    string categoryValue = bookData.Category;
+
+                    // Set the selected value
+                    ListItem listItem = ddlEditCategory.Items.FindByValue(categoryValue);
+                    if (listItem != null)
+                    {
+                        ddlEditCategory.SelectedValue = categoryValue;
+                    }
+                }
+            }
+
+            pnlNoBooks.Visible = filteredBooks.Count == 0;
+
+            // Show appropriate message based on whether we're searching or not
+            if (pnlNoBooks.Visible)
+            {
+                Panel pnlNoSearchResults = (Panel)pnlNoBooks.FindControl("pnlNoSearchResults");
+                Panel pnlNoBooksAtAll = (Panel)pnlNoBooks.FindControl("pnlNoBooksAtAll");
+
+                bool hasSearchTerm = !string.IsNullOrWhiteSpace(txtSearch.Text);
+                pnlNoSearchResults.Visible = hasSearchTerm;
+                pnlNoBooksAtAll.Visible = !hasSearchTerm;
+            }
+        }
+
+        protected void btnClearSearch_Click(object sender, EventArgs e)
+        {
+            txtSearch.Text = "";
+
+            // Display all books
+            rptBooks.DataSource = allBooks;
+            rptBooks.DataBind();
+
+            // Set the selected values for edit dropdowns after databinding
+            foreach (RepeaterItem item in rptBooks.Items)
+            {
+                DropDownList ddlEditCategory = (DropDownList)item.FindControl("ddlEditCategory");
+                if (ddlEditCategory != null && item.ItemIndex < allBooks.Count)
+                {
+                    var bookData = (dynamic)allBooks[item.ItemIndex];
+                    string categoryValue = bookData.Category;
+
+                    // Set the selected value
+                    ListItem listItem = ddlEditCategory.Items.FindByValue(categoryValue);
+                    if (listItem != null)
+                    {
+                        ddlEditCategory.SelectedValue = categoryValue;
+                    }
+                }
+            }
+
+            pnlNoBooks.Visible = allBooks.Count == 0;
+
+            // Show appropriate message 
+            if (pnlNoBooks.Visible)
+            {
+                Panel pnlNoSearchResults = (Panel)pnlNoBooks.FindControl("pnlNoSearchResults");
+                Panel pnlNoBooksAtAll = (Panel)pnlNoBooks.FindControl("pnlNoBooksAtAll");
+
+                pnlNoSearchResults.Visible = false; // No search term now
+                pnlNoBooksAtAll.Visible = true; // Show general message
             }
         }
 
