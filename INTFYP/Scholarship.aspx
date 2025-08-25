@@ -97,7 +97,72 @@
         .page-subtitle {
             font-size: 18px;
             color: rgba(255, 255, 255, 0.8);
-            margin: 0;
+            margin: 0 0 25px 0;
+        }
+
+        /* UPDATED: Scholarship App Button - Matching Submit Feedback Button Design */
+        .scholarship-app-button {
+            background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%) !important;
+            color: white !important;
+            padding: 15px 30px !important;
+            border-radius: 25px !important;
+            font-weight: 600 !important;
+            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3) !important;
+            border: none !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative !important;
+            overflow: hidden !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            font-size: 16px !important;
+            text-decoration: none !important;
+            animation: slideInFromTop 1s ease-out 0.3s both;
+        }
+
+        .scholarship-app-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.6s ease;
+        }
+
+        .scholarship-app-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .scholarship-app-button:hover {
+            background: linear-gradient(135deg, #44a08d 0%, #4ecdc4 100%) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4) !important;
+            color: white !important;
+            text-decoration: none !important;
+        }
+
+        .scholarship-app-button:active {
+            transform: translateY(0) !important;
+        }
+
+        .scholarship-app-button .icon {
+            font-size: 18px;
+        }
+
+        /* Clicked animation for visual feedback */
+        .scholarship-app-button.clicked {
+            animation: buttonPulse 0.6s ease-out !important;
+        }
+
+        @keyframes buttonPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         /* Scholarship Cards */
@@ -409,6 +474,12 @@
                 padding: 20px 15px;
             }
 
+            .scholarship-app-button {
+                padding: 12px 24px;
+                font-size: 14px;
+                margin-bottom: 10px;
+            }
+
             .card-header {
                 flex-direction: column;
                 align-items: stretch;
@@ -443,6 +514,12 @@
         @media (max-width: 480px) {
             .page-title {
                 font-size: 28px;
+            }
+
+            .scholarship-app-button {
+                padding: 10px 20px;
+                font-size: 13px;
+                gap: 8px;
             }
 
             .scholarship-card {
@@ -489,14 +566,9 @@
             animation: buttonPulse 0.2s ease-out;
         }
 
-        @keyframes buttonPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(0.95); }
-            100% { transform: scale(1); }
-        }
-
         .toggle-button:focus,
-        .apply-button:focus {
+        .apply-button:focus,
+        .scholarship-app-button:focus {
             outline: 2px solid #667eea;
             outline-offset: 2px;
         }
@@ -507,6 +579,12 @@
             <div class="page-header">
                 <h2 class="page-title">Scholarship Application</h2>
                 <p class="page-subtitle">Review your submitted results and apply for available scholarships</p>
+                
+                <!-- UPDATED: Scholarship Application Button with Teal Design -->
+                <a href="scholarshipApp.aspx" class="scholarship-app-button" onclick="handleScholarshipAppClick(event)">
+                    <span class="icon">📝</span>
+                    <span>Start New Application</span>
+                </a>
             </div>
 
             <div class="row">
@@ -574,7 +652,7 @@
     <!-- WORKING JAVASCRIPT - NO BOOTSTRAP CONFLICTS -->
     <script type="text/javascript">
         $(document).ready(function () {
-            console.log('Enhanced Scholarship page loaded - WORKING TOGGLE VERSION');
+            console.log('Enhanced Scholarship page loaded - WORKING TOGGLE VERSION with teal button');
 
             // Hover effects for cards
             $('.scholarship-card').hover(
@@ -646,6 +724,20 @@
             setTimeout(() => {
                 $(event.target).removeClass('clicked');
             }, 200);
+        }
+
+        // UPDATED: Enhanced Scholarship App Button Click with Animation
+        function handleScholarshipAppClick(event) {
+            console.log('Scholarship App button clicked successfully!');
+
+            // Add clicked class for animation (matching feedback button behavior)
+            const button = event.target.closest('.scholarship-app-button');
+            button.classList.add('clicked');
+
+            // Remove clicked animation class after animation completes
+            setTimeout(() => {
+                button.classList.remove('clicked');
+            }, 600);
         }
 
         // Function for smooth animations on page load
