@@ -2,7 +2,7 @@
 
 <asp:Content ID="AddLanguageContent" ContentPlaceHolderID="TeacherMainContent" runat="server">
     <style>
-        /* Modern Design System Implementation - Consistent with LanguageReports */
+        /* Modern Design System Implementation */
         .add-language-page {
             padding: 40px 20px;
             font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -146,24 +146,6 @@
             color: white;
         }
 
-        .info-button {
-            background: linear-gradient(45deg, #4ecdc4, #44a08d);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 500;
-            font-size: 12px;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-
-        .info-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(78, 205, 196, 0.3);
-            color: white;
-        }
-
         .danger-button {
             background: linear-gradient(45deg, #ff6b6b, #ee5a52);
             color: white;
@@ -244,53 +226,31 @@
             font-size: 14px;
         }
 
-        /* Statistics Section */
-        .language-stats {
+        /* Language Details Section */
+        .language-details {
             padding: 20px 25px;
         }
 
-        .stat-row {
+        .detail-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
             padding: 10px 0;
         }
 
-        .stat-label {
+        .detail-label {
             color: #7f8c8d;
             font-weight: 500;
             font-size: 14px;
         }
 
-        .stat-value {
+        .detail-value {
             color: #2c3e50;
             font-weight: 600;
             font-size: 16px;
         }
 
-        /* Student Count Badge */
-        .student-count-badge {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 20px;
-            text-align: center;
-            margin: 15px 0;
-            box-shadow: 0 4px 15px rgba(103, 126, 234, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
 
-        .student-count-badge::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            animation: shimmer 2s infinite;
-        }
 
         /* Edit Section */
         .edit-section {
@@ -529,8 +489,6 @@
                         <i class="fas fa-globe me-2"></i>
                         Language Courses
                     </div>
-                    <asp:Button ID="btnRefreshLanguages" runat="server" Text="🔄 Refresh" 
-                              CssClass="secondary-button" OnClick="btnRefreshLanguages_Click" />
                 </div>
                 <div class="card-body">
                     <div class="languages-grid">
@@ -553,103 +511,72 @@
                                         </button>
                                     </div>
                                     
-                                    <div class="language-stats">
-                                        <div class="stat-row">
-                                            <span class="stat-label">
+                                    <div class="language-details">
+                                        <div class="detail-row">
+                                            <span class="detail-label">
                                                 <i class="fas fa-code me-1"></i>Code:
                                             </span>
-                                            <span class="stat-value"><%# Eval("Code") %></span>
+                                            <span class="detail-value"><%# Eval("Code") %></span>
                                         </div>
-                                        <div class="stat-row">
-                                            <span class="stat-label">
+                                        <div class="detail-row">
+                                            <span class="detail-label">
                                                 <i class="fas fa-calendar me-1"></i>Created:
                                             </span>
-                                            <span class="stat-value"><%# Eval("CreatedDate", "{0:MMM dd, yyyy}") %></span>
+                                            <span class="detail-value"><%# Eval("CreatedDate", "{0:MMM dd, yyyy}") %></span>
                                         </div>
                                         
-                                        <div class="student-count-badge">
-                                            <i class="fas fa-users me-2"></i>
-                                            <strong><%# Eval("StudentCount") %> Students Enrolled</strong>
+                                        <div class="status-badge">
+                                            <i class="fas fa-check-circle me-2"></i>
                                         </div>
                                     </div>
                                     
                                     <div class="collapse" id="language<%# Container.ItemIndex %>">
                                         <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-8">
-                                                    <div class="edit-section">
-                                                        <h6 class="mb-3">
-                                                            <i class="fas fa-edit me-1"></i>
-                                                            Edit Language Details
-                                                        </h6>
-                                                        <div class="form-grid">
-                                                            <div class="form-group">
-                                                                <label class="form-label">Language Name</label>
-                                                                <asp:TextBox ID="txtEditLanguageName" runat="server" CssClass="form-control" 
-                                                                           Text='<%# Eval("Name") %>' />
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label class="form-label">Language Code</label>
-                                                                <asp:TextBox ID="txtEditLanguageCode" runat="server" CssClass="form-control" 
-                                                                           Text='<%# Eval("Code") %>' />
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label class="form-label">Flag Emoji</label>
-                                                                <asp:TextBox ID="txtEditFlag" runat="server" CssClass="form-control" 
-                                                                           Text='<%# Eval("Flag") %>' />
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label class="form-label">Description</label>
-                                                                <asp:TextBox ID="txtEditDescription" runat="server" CssClass="form-control" 
-                                                                           TextMode="MultiLine" Rows="3" 
-                                                                           Text='<%# Eval("Description") %>' />
-                                                            </div>
-                                                        </div>
+                                            <div class="edit-section">
+                                                <h6 class="mb-3">
+                                                    <i class="fas fa-edit me-1"></i>
+                                                    Edit Language Details
+                                                </h6>
+                                                <div class="form-grid">
+                                                    <div class="form-group">
+                                                        <label class="form-label">Language Name</label>
+                                                        <asp:TextBox ID="txtEditLanguageName" runat="server" CssClass="form-control" 
+                                                                   Text='<%# Eval("Name") %>' />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="form-label">Language Code</label>
+                                                        <asp:TextBox ID="txtEditLanguageCode" runat="server" CssClass="form-control" 
+                                                                   Text='<%# Eval("Code") %>' />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="form-label">Flag Emoji</label>
+                                                        <asp:TextBox ID="txtEditFlag" runat="server" CssClass="form-control" 
+                                                                   Text='<%# Eval("Flag") %>' />
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="form-label">Description</label>
+                                                        <asp:TextBox ID="txtEditDescription" runat="server" CssClass="form-control" 
+                                                                   TextMode="MultiLine" Rows="3" 
+                                                                   Text='<%# Eval("Description") %>' />
                                                     </div>
                                                 </div>
                                                 
-                                                <div class="col-md-4">
-                                                    <div class="edit-section">
-                                                        <h6 class="mb-3">
-                                                            <i class="fas fa-chart-bar me-1"></i>
-                                                            Course Statistics
-                                                        </h6>
-                                                        <div class="mb-3">
-                                                            <small style="color: #7f8c8d; display: block;">Students Enrolled:</small>
-                                                            <div style="font-size: 24px; font-weight: bold; color: #667eea;"><%# Eval("StudentCount") %></div>
-                                                        </div>
-                                                        <div class="mb-4">
-                                                            <small style="color: #7f8c8d; display: block;">Course Status:</small>
-                                                            <span style="background: linear-gradient(45deg, #56ab2f, #a8e6cf); color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px;">
-                                                                ✅ Active
-                                                            </span>
-                                                        </div>
-                                                        
-                                                        <div class="action-buttons">
-                                                            <asp:LinkButton ID="btnUpdate" runat="server" 
-                                                                          CssClass="success-button" 
-                                                                          CommandName="UpdateLanguage" 
-                                                                          CommandArgument='<%# Eval("Id") %>'
-                                                                          OnClientClick="return confirm('Update this language course?');">
-                                                                <i class="fas fa-save"></i> Update Course
-                                                            </asp:LinkButton>
-                                                            
-                                                            <asp:LinkButton ID="btnViewStudents" runat="server" 
-                                                                          CssClass="info-button" 
-                                                                          CommandName="ViewStudents" 
-                                                                          CommandArgument='<%# Eval("Id") %>'>
-                                                                <i class="fas fa-users"></i> View Students
-                                                            </asp:LinkButton>
-                                                            
-                                                            <asp:LinkButton ID="btnDelete" runat="server" 
-                                                                          CssClass="danger-button" 
-                                                                          CommandName="DeleteLanguage" 
-                                                                          CommandArgument='<%# Eval("Id") %>'
-                                                                          OnClientClick="return confirm('⚠️ Delete this language course permanently?');">
-                                                                <i class="fas fa-trash"></i> Delete Course
-                                                            </asp:LinkButton>
-                                                        </div>
-                                                    </div>
+                                                <div class="action-buttons">
+                                                    <asp:LinkButton ID="btnUpdate" runat="server" 
+                                                                  CssClass="success-button" 
+                                                                  CommandName="UpdateLanguage" 
+                                                                  CommandArgument='<%# Eval("Id") %>'
+                                                                  OnClientClick="return confirm('Update this language course?');">
+                                                        <i class="fas fa-save"></i> Update Course
+                                                    </asp:LinkButton>
+                                                    
+                                                    <asp:LinkButton ID="btnDelete" runat="server" 
+                                                                  CssClass="danger-button" 
+                                                                  CommandName="DeleteLanguage" 
+                                                                  CommandArgument='<%# Eval("Id") %>'
+                                                                  OnClientClick="return confirm('⚠️ Delete this language course permanently?');">
+                                                        <i class="fas fa-trash"></i> Delete Course
+                                                    </asp:LinkButton>
                                                 </div>
                                             </div>
                                         </div>

@@ -50,6 +50,46 @@ namespace INTFYP
             }
         }
 
+        // Helper method to update the book count display
+        private void UpdateBookCountDisplay(List<object> books, string searchTerm = "")
+        {
+            int count = books.Count;
+            string countText;
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                if (count == 0)
+                {
+                    countText = "No books found";
+                }
+                else if (count == 1)
+                {
+                    countText = "1 book found";
+                }
+                else
+                {
+                    countText = $"{count} books found";
+                }
+            }
+            else
+            {
+                if (count == 0)
+                {
+                    countText = "No books";
+                }
+                else if (count == 1)
+                {
+                    countText = "1 book";
+                }
+                else
+                {
+                    countText = $"{count} books";
+                }
+            }
+
+            lblBookCount.Text = countText;
+        }
+
         protected async void btnSubmit_Click(object sender, EventArgs e)
         {
             // Only validate if the validation group passes
@@ -264,6 +304,9 @@ namespace INTFYP
                 rptBooks.DataSource = filteredBooks;
                 rptBooks.DataBind();
 
+                // Update book count display
+                UpdateBookCountDisplay(filteredBooks, txtSearch.Text);
+
                 // Set the selected values for edit dropdowns after databinding
                 foreach (RepeaterItem item in rptBooks.Items)
                 {
@@ -302,6 +345,9 @@ namespace INTFYP
             {
                 lblBookStatus.ForeColor = System.Drawing.Color.Red;
                 lblBookStatus.Text = "❌ Error loading books: " + ex.Message;
+
+                // Show 0 books if there's an error
+                UpdateBookCountDisplay(new List<object>());
             }
         }
 
@@ -343,6 +389,9 @@ namespace INTFYP
             rptBooks.DataSource = filteredBooks;
             rptBooks.DataBind();
 
+            // Update book count display with search term
+            UpdateBookCountDisplay(filteredBooks, txtSearch.Text);
+
             // Set the selected values for edit dropdowns after databinding
             foreach (RepeaterItem item in rptBooks.Items)
             {
@@ -382,6 +431,9 @@ namespace INTFYP
             // Display all books
             rptBooks.DataSource = allBooks;
             rptBooks.DataBind();
+
+            // Update book count display (no search term)
+            UpdateBookCountDisplay(allBooks);
 
             // Set the selected values for edit dropdowns after databinding
             foreach (RepeaterItem item in rptBooks.Items)

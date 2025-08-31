@@ -9,8 +9,11 @@
 
 namespace YourProjectNamespace
 {
+
+
     public partial class ChatRoom
     {
+
         /// <summary>
         /// lblMyRoomCount control.
         /// </summary>
@@ -21,13 +24,13 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.Label lblMyRoomCount;
 
         /// <summary>
-        /// lblDirectChatCount control.
+        /// lblPrivateChatCount control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblDirectChatCount;
+        protected global::System.Web.UI.WebControls.Label lblPrivateChatCount;
 
         /// <summary>
         /// txtSearchMyRooms control.
@@ -102,22 +105,22 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.Label lblSearchStatus;
 
         /// <summary>
-        /// rptDirectChats control.
+        /// rptPrivateChats control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rptDirectChats;
+        protected global::System.Web.UI.WebControls.Repeater rptPrivateChats;
 
         /// <summary>
-        /// pnlNoDirectChats control.
+        /// pnlNoPrivateChats control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel pnlNoDirectChats;
+        protected global::System.Web.UI.WebControls.Panel pnlNoPrivateChats;
 
         /// <summary>
         /// txtRoomName control.
@@ -127,15 +130,6 @@ namespace YourProjectNamespace
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtRoomName;
-
-        /// <summary>
-        /// txtDescription control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtDescription;
 
         /// <summary>
         /// btnCreateRoom control.
@@ -192,6 +186,15 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.Label lblMemberCount;
 
         /// <summary>
+        /// pnlManageButton control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlManageButton;
+
+        /// <summary>
         /// btnLeaveRoom control.
         /// </summary>
         /// <remarks>
@@ -219,6 +222,15 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.TextBox txtMessage;
 
         /// <summary>
+        /// fileUpload control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.FileUpload fileUpload;
+
+        /// <summary>
         /// btnSend control.
         /// </summary>
         /// <remarks>
@@ -228,6 +240,42 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.Button btnSend;
 
         /// <summary>
+        /// txtInviteEmail control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtInviteEmail;
+
+        /// <summary>
+        /// btnInviteUser control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnInviteUser;
+
+        /// <summary>
+        /// lblInviteStatus control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblInviteStatus;
+
+        /// <summary>
+        /// rptMembers control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptMembers;
+
+        /// <summary>
         /// hfCurrentRoomId control.
         /// </summary>
         /// <remarks>
@@ -235,5 +283,32 @@ namespace YourProjectNamespace
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.HiddenField hfCurrentRoomId;
+
+        /// <summary>
+        /// hfActiveTab control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfActiveTab;
+
+        /// <summary>
+        /// hfCurrentRoomType control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfCurrentRoomType;
+
+        /// <summary>
+        /// hfIsOwner control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfIsOwner;
     }
 }

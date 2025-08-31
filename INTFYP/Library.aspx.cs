@@ -18,7 +18,7 @@ namespace INTFYP
 
             if (!IsPostBack)
             {
-                await LoadBooks();
+                await LoadBookSections();
             }
         }
 
@@ -29,12 +29,12 @@ namespace INTFYP
             db = FirestoreDb.Create("intorannetto");
         }
 
-        private async System.Threading.Tasks.Task LoadBooks()
+        private async System.Threading.Tasks.Task LoadBookSections()
         {
             System.Diagnostics.Debug.WriteLine("Session userId: " + Session["userId"]);
 
             QuerySnapshot snapshot = await db.Collection("books").GetSnapshotAsync();
-            List<LibraryBook> bookList = new List<LibraryBook>();
+            List<LibraryBook> allBooks = new List<LibraryBook>();
 
             foreach (var doc in snapshot.Documents)
             {
@@ -50,27 +50,38 @@ namespace INTFYP
                 book.IsRecommended = book.RecommendedBy.Contains(CurrentUserId);
                 book.IsFavorited = book.FavoritedBy.Contains(CurrentUserId);
 
-                bookList.Add(book);
+                allBooks.Add(book);
             }
 
-            bookList = bookList.OrderByDescending(b => b.Recommendations).ToList();
-
-            // Show "No Books" panel if no books found
-            if (bookList.Count == 0)
+            // Check if we have any books
+            if (allBooks.Count == 0)
             {
                 pnlNoBooks.Visible = true;
-                Repeater1.DataSource = null;
-            }
-            else
-            {
-                pnlNoBooks.Visible = false;
-                Repeater1.DataSource = bookList;
+                pnlBookSections.Visible = false;
+                return;
             }
 
-            Repeater1.DataBind();
+            pnlNoBooks.Visible = false;
+            pnlBookSections.Visible = true;
+
+            // Load Newest Books (15 items) - If you don't have DateAdded, this will be random 15
+            var newestBooks = allBooks.OrderByDescending(b => b.DateAdded ?? DateTime.MinValue).Take(15).ToList();
+            if (newestBooks.Count == 0) newestBooks = allBooks.Take(15).ToList(); // Fallback if no dates
+            RepNewest.DataSource = newestBooks;
+            RepNewest.DataBind();
+
+            // Load Most Recommended Books (15 items)
+            var mostRecommended = allBooks.OrderByDescending(b => b.Recommendations ?? 0).Take(15).ToList();
+            RepMostRecommended.DataSource = mostRecommended;
+            RepMostRecommended.DataBind();
+
+            // Load All Books Alphabetically
+            var alphabetical = allBooks.OrderBy(b => b.Title ?? "").ToList();
+            RepAlphabetical.DataSource = alphabetical;
+            RepAlphabetical.DataBind();
         }
 
-        // COMBINED search functionality - searches by title, author, category, AND tag in ONE search bar
+        // COMBINED search functionality - now searches across all sections
         protected async void txtBookSearch_TextChanged(object sender, EventArgs e)
         {
             await ApplyFilters();
@@ -87,6 +98,13 @@ namespace INTFYP
         {
             string keyword = txtBookSearch.Text.ToLower().Trim();
             string selectedCategory = ddlCategoryFilter.SelectedValue;
+
+            // If no filters applied, show all sections
+            if (string.IsNullOrEmpty(keyword) && string.IsNullOrEmpty(selectedCategory))
+            {
+                await LoadBookSections();
+                return;
+            }
 
             QuerySnapshot snapshot = await db.Collection("books").GetSnapshotAsync();
             List<LibraryBook> results = new List<LibraryBook>();
@@ -130,25 +148,32 @@ namespace INTFYP
                 }
             }
 
-            // Order by recommendations (most recommended first)
-            results = results.OrderByDescending(b => b.Recommendations ?? 0).ToList();
-
-            // Show appropriate content based on results
+            // When filtering, show results in a single section, hide others
             if (results.Count == 0)
             {
                 pnlNoBooks.Visible = true;
-                Repeater1.DataSource = null;
+                pnlBookSections.Visible = false;
             }
             else
             {
                 pnlNoBooks.Visible = false;
-                Repeater1.DataSource = results;
-            }
+                pnlBookSections.Visible = true;
 
-            Repeater1.DataBind();
+                // Show filtered results in the "search results" section
+                results = results.OrderByDescending(b => b.Recommendations ?? 0).ToList();
+
+                // Hide all sections and show only filtered results
+                pnlNewest.Visible = false;
+                pnlMostRecommended.Visible = false;
+                pnlAlphabetical.Visible = false;
+                pnlSearchResults.Visible = true;
+
+                RepSearchResults.DataSource = results;
+                RepSearchResults.DataBind();
+            }
         }
 
-        protected async void Repeater1_ItemCommand(object source, RepeaterCommandEventArgs e)
+        protected async void Repeater_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("Session userId: " + Session["userId"]);
 
@@ -222,8 +247,8 @@ namespace INTFYP
             }
             else
             {
-                // If no filters active, load all books
-                await LoadBooks();
+                // If no filters active, load all sections
+                await LoadBookSections();
             }
         }
 
@@ -238,6 +263,7 @@ namespace INTFYP
             [FirestoreProperty] public List<string> RecommendedBy { get; set; }
             [FirestoreProperty] public List<string> FavoritedBy { get; set; }
             [FirestoreProperty] public string PdfUrl { get; set; }
+            [FirestoreProperty] public DateTime? DateAdded { get; set; } // Add this field to your Firestore documents
 
             public string DocumentId { get; set; }
             public bool IsRecommended { get; set; }

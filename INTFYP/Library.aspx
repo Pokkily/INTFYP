@@ -279,17 +279,46 @@
             background: linear-gradient(135deg, #44a08d 0%, #4ecdc4 100%);
         }
 
-        /* Main Content Card - MADE SMALLER */
-        .main-content-card {
+        /* Section Headers */
+        .section-header {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 15px; /* Reduced from 25px */
-            margin-bottom: 15px; /* Reduced from 20px */
-            border-radius: 15px; /* Reduced from 20px */
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Reduced shadow */
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            animation: slideInFromRight 0.8s ease-out 0.3s both;
+            padding: 20px 25px;
+            margin-bottom: 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            animation: slideInFromRight 0.8s ease-out both;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-newest .section-title::before {
+            content: '🆕';
+            font-size: 28px;
+        }
+
+        .section-recommended .section-title::before {
+            content: '🔥';
+            font-size: 28px;
+        }
+
+        .section-alphabetical .section-title::before {
+            content: '📖';
+            font-size: 28px;
+        }
+
+        .section-search .section-title::before {
+            content: '🔍';
+            font-size: 28px;
         }
 
         @keyframes slideInFromRight {
@@ -303,32 +332,16 @@
             }
         }
 
-        .content-header {
-            text-align: center;
-            margin-bottom: 15px; /* Reduced from 25px */
+        /* Book Sections */
+        .book-section {
+            margin-bottom: 40px;
         }
 
-        .content-title {
-            font-size: 20px; /* Reduced from 24px */
-            font-weight: 700;
-            color: #2c3e50;
-            margin: 0 0 10px 0; /* Reduced bottom margin */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px; /* Reduced from 10px */
-        }
-
-        .content-title::before {
-            content: '📚';
-            font-size: 22px; /* Reduced from 28px */
-        }
-
-        /* Book Cards - Grid made more compact */
+        /* Books Grid */
         .books-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); /* Reduced from 280px */
-            gap: 15px; /* Reduced from 20px */
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 15px;
             animation: slideInFromBottom 1s ease-out 0.4s both;
         }
 
@@ -347,9 +360,9 @@
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 18px; /* Reduced from 20px */
-            border-radius: 18px; /* Reduced from 20px */
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1); /* Reduced shadow */
+            padding: 18px;
+            border-radius: 18px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
@@ -384,54 +397,54 @@
         }
 
         .book-card:hover {
-            transform: translateY(-6px) translateX(3px) scale(1.01); /* Reduced from -8px and scale(1.02) */
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15); /* Reduced shadow */
+            transform: translateY(-6px) translateX(3px) scale(1.01);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
             background: rgba(255, 255, 255, 1);
         }
 
         .book-icon {
-            width: 50px; /* Reduced from 60px */
-            height: 50px; /* Reduced from 60px */
+            width: 50px;
+            height: 50px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 10px; /* Reduced from 12px */
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 12px; /* Reduced from 15px */
+            margin-bottom: 12px;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 15px rgba(103, 126, 234, 0.2);
         }
 
         .book-icon::before {
             content: '📖';
-            font-size: 20px; /* Reduced from 24px */
+            font-size: 20px;
             opacity: 0.9;
         }
 
         .book-card:hover .book-icon {
-            transform: scale(1.05) rotate(3deg); /* Reduced from scale(1.1) and rotate(5deg) */
-            box-shadow: 0 6px 20px rgba(103, 126, 234, 0.3); /* Reduced shadow */
+            transform: scale(1.05) rotate(3deg);
+            box-shadow: 0 6px 20px rgba(103, 126, 234, 0.3);
         }
 
         .book-title {
-            font-size: 16px; /* Reduced from 18px */
+            font-size: 16px;
             font-weight: 700;
             color: #2c3e50;
-            margin-bottom: 6px; /* Reduced from 8px */
+            margin-bottom: 6px;
             line-height: 1.3;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
-            min-height: 2.4em; /* Slightly reduced */
+            min-height: 2.4em;
         }
 
         .book-author {
             color: #7f8c8d;
-            font-size: 13px; /* Reduced from 14px */
+            font-size: 13px;
             font-weight: 500;
-            margin-bottom: 10px; /* Reduced from 12px */
+            margin-bottom: 10px;
             display: -webkit-box;
             -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
@@ -473,7 +486,7 @@
 
         .book-actions {
             display: flex;
-            gap: 6px; /* Reduced from 8px */
+            gap: 6px;
             margin-top: auto;
             flex-wrap: wrap;
         }
@@ -589,10 +602,10 @@
         /* No Books Message */
         .no-books {
             text-align: center;
-            padding: 40px 30px; /* Reduced from 60px 40px */
+            padding: 40px 30px;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            border-radius: 15px; /* Reduced from 20px */
+            border-radius: 15px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: rgba(255, 255, 255, 0.9);
             animation: fadeInUp 1s ease-out 0.6s both;
@@ -610,8 +623,8 @@
         }
 
         .no-books-icon {
-            font-size: 48px; /* Reduced from 64px */
-            margin-bottom: 15px; /* Reduced from 20px */
+            font-size: 48px;
+            margin-bottom: 15px;
             opacity: 0.7;
             animation: iconBounce 2s ease-in-out infinite;
         }
@@ -622,14 +635,14 @@
         }
 
         .no-books h3 {
-            font-size: 20px; /* Reduced from 24px */
+            font-size: 20px;
             font-weight: 600;
-            margin-bottom: 8px; /* Reduced from 10px */
+            margin-bottom: 8px;
             color: rgba(255, 255, 255, 0.9);
         }
 
         .no-books p {
-            font-size: 14px; /* Reduced from 16px */
+            font-size: 14px;
             color: rgba(255, 255, 255, 0.7);
             margin: 0;
         }
@@ -642,13 +655,7 @@
 
             .books-grid {
                 grid-template-columns: 1fr;
-                gap: 12px; /* Reduced from 15px */
-            }
-
-            .content-header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 12px; /* Reduced from 15px */
+                gap: 12px;
             }
 
             .search-input {
@@ -657,7 +664,7 @@
 
             .book-actions {
                 flex-direction: column;
-                gap: 6px; /* Reduced from 8px */
+                gap: 6px;
             }
 
             .book-action-btn {
@@ -671,15 +678,15 @@
             }
 
             .sidebar-card,
-            .main-content-card {
-                padding: 15px; /* Reduced from 20px */
-                margin-bottom: 12px; /* Reduced from 15px */
-                border-radius: 12px; /* Reduced from 15px */
+            .section-header {
+                padding: 15px;
+                margin-bottom: 12px;
+                border-radius: 12px;
             }
 
             .book-card {
-                padding: 12px; /* Reduced from 15px */
-                border-radius: 12px; /* Reduced from 15px */
+                padding: 12px;
+                border-radius: 12px;
             }
         }
 
@@ -716,7 +723,6 @@
                         <asp:DropDownList ID="ddlCategoryFilter" runat="server" CssClass="category-filter"
                                           AutoPostBack="true" OnSelectedIndexChanged="ddlCategoryFilter_SelectedIndexChanged">
                             <asp:ListItem Value="" Text="-- All Categories --" />
-                            <asp:ListItem Value="Comics" Text="Comics" />
                             <asp:ListItem Value="Novels" Text="Novels" />
                             <asp:ListItem Value="Short stories" Text="Short stories" />
                             <asp:ListItem Value="Drama/plays" Text="Drama/plays" />
@@ -753,58 +759,205 @@
 
                 <!-- Main Content -->
                 <div class="col-md-9">
-                    <div class="main-content-card">
-                        <div class="content-header">
-                            <h3 class="content-title">Books Collection</h3>
-                        </div>
-                    </div>
-
+                    <!-- No Books Panel -->
                     <asp:Panel ID="pnlNoBooks" runat="server" Visible="false" CssClass="no-books">
                         <div class="no-books-icon">📚</div>
                         <h3>No Books Found</h3>
                         <p>Try adjusting your search criteria or browse all books!</p>
                     </asp:Panel>
 
-                    <asp:Repeater ID="Repeater1" runat="server" OnItemCommand="Repeater1_ItemCommand">
-                        <HeaderTemplate>
-                            <div class="books-grid">
-                        </HeaderTemplate>
-                        <ItemTemplate>
-                            <div class="book-card" style="--card-index: <%# Container.ItemIndex %>;">
-                                <div class="book-icon"></div>
-                                
-                                <a href='<%# "PreviewBook.aspx?pdfUrl=" + HttpUtility.UrlEncode(Eval("PdfUrl").ToString()) %>' 
-                                   style="text-decoration: none; color: inherit; flex: 1; display: flex; flex-direction: column;">
-                                    
-                                    <h5 class="book-title"><%# Eval("Title") %></h5>
-                                    <p class="book-author"><%# Eval("Author") %></p>
-                                    
-                                    <div class="book-badges">
-                                        <span class="category-badge"><%# Eval("Category") %></span>
-                                        <%# !string.IsNullOrEmpty(Eval("Tag")?.ToString()) ? "<span class='tag-badge'>#" + Eval("Tag") + "</span>" : "" %>
+                    <!-- Book Sections Panel -->
+                    <asp:Panel ID="pnlBookSections" runat="server">
+                        
+                        <!-- Search Results Section (Only visible during search/filter) -->
+                        <asp:Panel ID="pnlSearchResults" runat="server" Visible="false" CssClass="book-section">
+                            <div class="section-header section-search">
+                                <h3 class="section-title">Search Results</h3>
+                            </div>
+                            <asp:Repeater ID="RepSearchResults" runat="server" OnItemCommand="Repeater_ItemCommand">
+                                <HeaderTemplate>
+                                    <div class="books-grid">
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <div class="book-card" style="--card-index: <%# Container.ItemIndex %>;">
+                                        <div class="book-icon"></div>
+                                        
+                                        <a href='<%# "PreviewBook.aspx?pdfUrl=" + HttpUtility.UrlEncode(Eval("PdfUrl").ToString()) %>' 
+                                           style="text-decoration: none; color: inherit; flex: 1; display: flex; flex-direction: column;">
+                                            
+                                            <h5 class="book-title"><%# Eval("Title") %></h5>
+                                            <p class="book-author"><%# Eval("Author") %></p>
+                                            
+                                            <div class="book-badges">
+                                                <span class="category-badge"><%# Eval("Category") %></span>
+                                                <%# !string.IsNullOrEmpty(Eval("Tag")?.ToString()) ? "<span class='tag-badge'>#" + Eval("Tag") + "</span>" : "" %>
+                                            </div>
+                                        </a>
+                                        
+                                        <div class="book-actions">
+                                            <asp:Button ID="btnRecommend" runat="server"
+                                                Text='<%# String.Format("{0} ❤️", Eval("Recommendations")) %>'
+                                                CommandName="Recommend"
+                                                CommandArgument='<%# Eval("DocumentId") %>'
+                                                CssClass='<%# "book-action-btn btn-recommend" + (Convert.ToBoolean(Eval("IsRecommended")) ? " active" : "") %>'
+                                                OnClientClick="addClickEffect(this); return true;" />
+                                            <asp:Button ID="btnFavorite" runat="server"
+                                                Text="⭐"
+                                                CommandName="Favorite"
+                                                CommandArgument='<%# Eval("DocumentId") %>'
+                                                CssClass='<%# "book-action-btn btn-favorite" + (Convert.ToBoolean(Eval("IsFavorited")) ? " active" : "") %>'
+                                                OnClientClick="addClickEffect(this); return true;" />
+                                        </div>
                                     </div>
-                                </a>
-                                
-                                <div class="book-actions">
-                                    <asp:Button ID="btnRecommend" runat="server"
-                                        Text='<%# String.Format("{0} ❤️", Eval("Recommendations")) %>'
-                                        CommandName="Recommend"
-                                        CommandArgument='<%# Eval("DocumentId") %>'
-                                        CssClass='<%# "book-action-btn btn-recommend" + (Convert.ToBoolean(Eval("IsRecommended")) ? " active" : "") %>'
-                                        OnClientClick="addClickEffect(this); return true;" />
-                                    <asp:Button ID="btnFavorite" runat="server"
-                                        Text="⭐"
-                                        CommandName="Favorite"
-                                        CommandArgument='<%# Eval("DocumentId") %>'
-                                        CssClass='<%# "book-action-btn btn-favorite" + (Convert.ToBoolean(Eval("IsFavorited")) ? " active" : "") %>'
-                                        OnClientClick="addClickEffect(this); return true;" />
-                                </div>
+                                </ItemTemplate>
+                                <FooterTemplate>
+                                    </div>
+                                </FooterTemplate>
+                            </asp:Repeater>
+                        </asp:Panel>
+
+                        <!-- Newest Books Section -->
+                        <asp:Panel ID="pnlNewest" runat="server" CssClass="book-section">
+                            <div class="section-header section-newest">
+                                <h3 class="section-title">Newest Books</h3>
                             </div>
-                        </ItemTemplate>
-                        <FooterTemplate>
+                            <asp:Repeater ID="RepNewest" runat="server" OnItemCommand="Repeater_ItemCommand">
+                                <HeaderTemplate>
+                                    <div class="books-grid">
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <div class="book-card" style="--card-index: <%# Container.ItemIndex %>;">
+                                        <div class="book-icon"></div>
+                                        
+                                        <a href='<%# "PreviewBook.aspx?pdfUrl=" + HttpUtility.UrlEncode(Eval("PdfUrl").ToString()) %>' 
+                                           style="text-decoration: none; color: inherit; flex: 1; display: flex; flex-direction: column;">
+                                            
+                                            <h5 class="book-title"><%# Eval("Title") %></h5>
+                                            <p class="book-author"><%# Eval("Author") %></p>
+                                            
+                                            <div class="book-badges">
+                                                <span class="category-badge"><%# Eval("Category") %></span>
+                                                <%# !string.IsNullOrEmpty(Eval("Tag")?.ToString()) ? "<span class='tag-badge'>#" + Eval("Tag") + "</span>" : "" %>
+                                            </div>
+                                        </a>
+                                        
+                                        <div class="book-actions">
+                                            <asp:Button ID="btnRecommend" runat="server"
+                                                Text='<%# String.Format("{0} ❤️", Eval("Recommendations")) %>'
+                                                CommandName="Recommend"
+                                                CommandArgument='<%# Eval("DocumentId") %>'
+                                                CssClass='<%# "book-action-btn btn-recommend" + (Convert.ToBoolean(Eval("IsRecommended")) ? " active" : "") %>'
+                                                OnClientClick="addClickEffect(this); return true;" />
+                                            <asp:Button ID="btnFavorite" runat="server"
+                                                Text="⭐"
+                                                CommandName="Favorite"
+                                                CommandArgument='<%# Eval("DocumentId") %>'
+                                                CssClass='<%# "book-action-btn btn-favorite" + (Convert.ToBoolean(Eval("IsFavorited")) ? " active" : "") %>'
+                                                OnClientClick="addClickEffect(this); return true;" />
+                                        </div>
+                                    </div>
+                                </ItemTemplate>
+                                <FooterTemplate>
+                                    </div>
+                                </FooterTemplate>
+                            </asp:Repeater>
+                        </asp:Panel>
+
+                        <!-- Most Recommended Books Section -->
+                        <asp:Panel ID="pnlMostRecommended" runat="server" CssClass="book-section">
+                            <div class="section-header section-recommended">
+                                <h3 class="section-title">Most Recommended</h3>
                             </div>
-                        </FooterTemplate>
-                    </asp:Repeater>
+                            <asp:Repeater ID="RepMostRecommended" runat="server" OnItemCommand="Repeater_ItemCommand">
+                                <HeaderTemplate>
+                                    <div class="books-grid">
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <div class="book-card" style="--card-index: <%# Container.ItemIndex %>;">
+                                        <div class="book-icon"></div>
+                                        
+                                        <a href='<%# "PreviewBook.aspx?pdfUrl=" + HttpUtility.UrlEncode(Eval("PdfUrl").ToString()) %>' 
+                                           style="text-decoration: none; color: inherit; flex: 1; display: flex; flex-direction: column;">
+                                            
+                                            <h5 class="book-title"><%# Eval("Title") %></h5>
+                                            <p class="book-author"><%# Eval("Author") %></p>
+                                            
+                                            <div class="book-badges">
+                                                <span class="category-badge"><%# Eval("Category") %></span>
+                                                <%# !string.IsNullOrEmpty(Eval("Tag")?.ToString()) ? "<span class='tag-badge'>#" + Eval("Tag") + "</span>" : "" %>
+                                            </div>
+                                        </a>
+                                        
+                                        <div class="book-actions">
+                                            <asp:Button ID="btnRecommend" runat="server"
+                                                Text='<%# String.Format("{0} ❤️", Eval("Recommendations")) %>'
+                                                CommandName="Recommend"
+                                                CommandArgument='<%# Eval("DocumentId") %>'
+                                                CssClass='<%# "book-action-btn btn-recommend" + (Convert.ToBoolean(Eval("IsRecommended")) ? " active" : "") %>'
+                                                OnClientClick="addClickEffect(this); return true;" />
+                                            <asp:Button ID="btnFavorite" runat="server"
+                                                Text="⭐"
+                                                CommandName="Favorite"
+                                                CommandArgument='<%# Eval("DocumentId") %>'
+                                                CssClass='<%# "book-action-btn btn-favorite" + (Convert.ToBoolean(Eval("IsFavorited")) ? " active" : "") %>'
+                                                OnClientClick="addClickEffect(this); return true;" />
+                                        </div>
+                                    </div>
+                                </ItemTemplate>
+                                <FooterTemplate>
+                                    </div>
+                                </FooterTemplate>
+                            </asp:Repeater>
+                        </asp:Panel>
+
+                        <!-- Alphabetical Books Section -->
+                        <asp:Panel ID="pnlAlphabetical" runat="server" CssClass="book-section">
+                            <div class="section-header section-alphabetical">
+                                <h3 class="section-title">All Books (A-Z)</h3>
+                            </div>
+                            <asp:Repeater ID="RepAlphabetical" runat="server" OnItemCommand="Repeater_ItemCommand">
+                                <HeaderTemplate>
+                                    <div class="books-grid">
+                                </HeaderTemplate>
+                                <ItemTemplate>
+                                    <div class="book-card" style="--card-index: <%# Container.ItemIndex %>;">
+                                        <div class="book-icon"></div>
+                                        
+                                        <a href='<%# "PreviewBook.aspx?pdfUrl=" + HttpUtility.UrlEncode(Eval("PdfUrl").ToString()) %>' 
+                                           style="text-decoration: none; color: inherit; flex: 1; display: flex; flex-direction: column;">
+                                            
+                                            <h5 class="book-title"><%# Eval("Title") %></h5>
+                                            <p class="book-author"><%# Eval("Author") %></p>
+                                            
+                                            <div class="book-badges">
+                                                <span class="category-badge"><%# Eval("Category") %></span>
+                                                <%# !string.IsNullOrEmpty(Eval("Tag")?.ToString()) ? "<span class='tag-badge'>#" + Eval("Tag") + "</span>" : "" %>
+                                            </div>
+                                        </a>
+                                        
+                                        <div class="book-actions">
+                                            <asp:Button ID="btnRecommend" runat="server"
+                                                Text='<%# String.Format("{0} ❤️", Eval("Recommendations")) %>'
+                                                CommandName="Recommend"
+                                                CommandArgument='<%# Eval("DocumentId") %>'
+                                                CssClass='<%# "book-action-btn btn-recommend" + (Convert.ToBoolean(Eval("IsRecommended")) ? " active" : "") %>'
+                                                OnClientClick="addClickEffect(this); return true;" />
+                                            <asp:Button ID="btnFavorite" runat="server"
+                                                Text="⭐"
+                                                CommandName="Favorite"
+                                                CommandArgument='<%# Eval("DocumentId") %>'
+                                                CssClass='<%# "book-action-btn btn-favorite" + (Convert.ToBoolean(Eval("IsFavorited")) ? " active" : "") %>'
+                                                OnClientClick="addClickEffect(this); return true;" />
+                                        </div>
+                                    </div>
+                                </ItemTemplate>
+                                <FooterTemplate>
+                                    </div>
+                                </FooterTemplate>
+                            </asp:Repeater>
+                        </asp:Panel>
+
+                    </asp:Panel>
                 </div>
             </div>
         </div>
