@@ -216,7 +216,7 @@
             color: #155724;
         }
 
-        .room-status.public {
+        .room-status.direct {
             background: #cce5ff;
             color: #004085;
         }
@@ -297,62 +297,6 @@
 
         .leave-btn:hover {
             background: rgba(255, 255, 255, 0.3);
-        }
-
-        .invite-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .invite-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .invite-dropdown {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background: white;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            padding: 15px;
-            width: 280px;
-            z-index: 1000;
-            display: none;
-            margin-top: 8px;
-        }
-
-        .invite-dropdown.show {
-            display: block;
-        }
-
-        .invite-dropdown h5 {
-            margin: 0 0 10px 0;
-            color: #495057;
-            font-size: 14px;
-        }
-
-        .invite-form {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .invite-input {
-            flex: 1;
-            padding: 8px 12px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            font-size: 13px;
-            box-sizing: border-box;
         }
 
         .messages-container {
@@ -527,6 +471,40 @@
             border: 1px solid #ffeaa7; 
         }
 
+        .start-chat-section {
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .user-search-result {
+            padding: 12px 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
         @media (max-width: 768px) {
             .chat-container {
                 flex-direction: column;
@@ -540,11 +518,6 @@
             
             .main-chat {
                 height: 500px;
-            }
-
-            .invite-dropdown {
-                right: -20px;
-                width: 260px;
             }
         }
 
@@ -567,17 +540,17 @@
         <div class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h3>Chat Rooms</h3>
-                <p>Create, join, and manage conversations</p>
+                <p>Create rooms and chat with others</p>
                 <div style="margin-top: 10px;">
                     <span class="room-count">My Rooms: <asp:Label ID="lblMyRoomCount" runat="server" Text="0" /></span>
-                    <span class="room-count" style="margin-left: 8px; background: #28a745;">Available: <asp:Label ID="lblAvailableRoomCount" runat="server" Text="0" /></span>
+                    <span class="room-count" style="margin-left: 8px; background: #28a745;">Direct Chats: <asp:Label ID="lblDirectChatCount" runat="server" Text="0" /></span>
                 </div>
             </div>
 
             <!-- Sidebar Tabs -->
             <div class="sidebar-tabs">
                 <button type="button" class="tab-btn active" onclick="switchTab('my-rooms')">My Rooms</button>
-                <button type="button" class="tab-btn" onclick="switchTab('browse-rooms')">Browse</button>
+                <button type="button" class="tab-btn" onclick="switchTab('direct-chat')">Direct Chat</button>
                 <button type="button" class="tab-btn" onclick="switchTab('create-room')">Create</button>
             </div>
 
@@ -602,8 +575,7 @@
                                     <p><%# Eval("MemberCount") %> members • <%# Eval("LastActivity") %></p>
                                 </div>
                                 <div class="room-actions">
-                                    <span class="room-status joined">Joined</span>
-                                    <%# Convert.ToBoolean(Eval("IsPublic")) ? "<span class='room-status public'>Public</span>" : "<span class='room-status'>Private</span>" %>
+                                    <span class="room-status joined">Group</span>
                                 </div>
                             </div>
                         </ItemTemplate>
@@ -611,45 +583,71 @@
                     
                     <asp:Panel ID="pnlNoMyRooms" runat="server" style="padding: 40px 20px; text-align: center; color: #6c757d;">
                         <h4>No Rooms Yet</h4>
-                        <p>Create a room or join existing ones to get started!</p>
+                        <p>Create a room or start direct chats to get started!</p>
                     </asp:Panel>
                 </div>
             </div>
 
-            <!-- Browse Rooms Tab -->
-            <div class="tab-content" id="browse-rooms-tab">
-                <!-- Search Available Rooms -->
-                <div class="search-section">
-                    <div class="search-box">
-                        <asp:TextBox ID="txtSearchAvailable" runat="server" CssClass="search-input" 
-                                   placeholder="Search public rooms..." onkeyup="filterRooms('available')" />
-                        <span class="search-icon">🔍</span>
+            <!-- Direct Chat Tab -->
+            <div class="tab-content" id="direct-chat-tab">
+                <!-- Start New Chat Section -->
+                <div class="start-chat-section">
+                    <h4 style="margin: 0 0 15px 0; color: #495057; font-size: 16px;">Start New Chat</h4>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Search by Email</label>
+                        <div style="display: flex; gap: 8px;">
+                            <asp:TextBox ID="txtUserSearch" runat="server" CssClass="form-control" 
+                                       placeholder="Enter email address" style="flex: 1;" />
+                            <asp:Button ID="btnSearchUser" runat="server" Text="Search" 
+                                      CssClass="btn btn-primary btn-small" OnClick="btnSearchUser_Click" />
+                        </div>
                     </div>
+
+                    <!-- User Search Results -->
+                    <asp:Panel ID="pnlUserSearchResults" runat="server" Visible="false">
+                        <asp:Repeater ID="rptUserSearchResults" runat="server" OnItemCommand="rptUserSearchResults_ItemCommand">
+                            <ItemTemplate>
+                                <div class="user-search-result">
+                                    <div class="user-info">
+                                        <div class="user-avatar">
+                                            <%# GetInitials(Eval("Name").ToString()) %>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 500;"><%# Eval("Name") %></div>
+                                            <div style="font-size: 12px; color: #6c757d;"><%# Eval("Email") %></div>
+                                        </div>
+                                    </div>
+                                    <asp:Button runat="server" Text="Chat" CommandName="StartChat" 
+                                              CommandArgument='<%# Eval("Email") %>' 
+                                              CssClass="btn btn-success btn-mini" />
+                                </div>
+                            </ItemTemplate>
+                        </asp:Repeater>
+                    </asp:Panel>
+                    
+                    <asp:Label ID="lblSearchStatus" runat="server" CssClass="status-message" />
                 </div>
 
-                <!-- Available Rooms List -->
-                <div class="rooms-list" id="availableRoomsList">
-                    <asp:Repeater ID="rptAvailableRooms" runat="server" OnItemCommand="rptAvailableRooms_ItemCommand">
+                <!-- Direct Chats List -->
+                <div class="rooms-list" id="directChatsList">
+                    <asp:Repeater ID="rptDirectChats" runat="server">
                         <ItemTemplate>
-                            <div class="room-item">
+                            <div class="room-item" onclick="selectRoom('<%# Eval("Id") %>', '<%# Eval("Name") %>', 'direct')">
                                 <div class="room-info">
                                     <h4><%# Eval("Name") %></h4>
-                                    <p><%# Eval("MemberCount") %> members • Created by <%# Eval("CreatedBy") %></p>
-                                    <p style="font-size: 11px; margin-top: 3px;"><%# Eval("Description") %></p>
+                                    <p><%# Eval("LastActivity") %></p>
                                 </div>
                                 <div class="room-actions">
-                                    <span class="room-status public">Public</span>
-                                    <asp:Button runat="server" Text="Join" CommandName="JoinRoom" 
-                                              CommandArgument='<%# Eval("Id") %>' 
-                                              CssClass="btn btn-success btn-mini" />
+                                    <span class="room-status direct">Direct</span>
                                 </div>
                             </div>
                         </ItemTemplate>
                     </asp:Repeater>
-
-                    <asp:Panel ID="pnlNoAvailableRooms" runat="server" style="padding: 40px 20px; text-align: center; color: #6c757d;">
-                        <h4>No Public Rooms</h4>
-                        <p>Be the first to create a public room!</p>
+                    
+                    <asp:Panel ID="pnlNoDirectChats" runat="server" style="padding: 40px 20px; text-align: center; color: #6c757d;">
+                        <h4>No Direct Chats</h4>
+                        <p>Search for users and start chatting!</p>
                     </asp:Panel>
                 </div>
             </div>
@@ -670,11 +668,6 @@
                                    TextMode="MultiLine" Rows="2" placeholder="Brief description" />
                     </div>
 
-                    <div class="form-group">
-                        <asp:CheckBox ID="chkPublicRoom" runat="server" />
-                        <label style="margin-left: 8px; font-size: 13px;">Make this room public (anyone can join)</label>
-                    </div>
-
                     <asp:Button ID="btnCreateRoom" runat="server" Text="Create Room" 
                               CssClass="btn btn-primary" OnClick="btnCreateRoom_Click" style="width: 100%;" />
                     
@@ -688,18 +681,18 @@
             <!-- No Room Selected State -->
             <asp:Panel ID="pnlNoRoom" runat="server" CssClass="empty-state no-room-selected" Visible="true">
                 <h3>Welcome to Chat Rooms</h3>
-                <p>Select a room from the sidebar to start chatting, or create/join new rooms</p>
+                <p>Select a room from the sidebar to start chatting, or create/start new chats</p>
                 <div style="margin-top: 20px; color: #495057;">
                     <p><strong>Getting Started:</strong></p>
-                    <p>• Browse public rooms to join conversations</p>
-                    <p>• Create your own room and invite others</p>
-                    <p>• Join multiple rooms and switch between them</p>
+                    <p>• Start direct chats with other users by searching their email</p>
+                    <p>• Create group rooms and invite others</p>
+                    <p>• Switch between multiple conversations</p>
                 </div>
             </asp:Panel>
 
             <!-- Chat Interface -->
             <asp:Panel ID="pnlChatInterface" runat="server" Visible="false">
-                <!-- Chat Header with Invite Functionality -->
+                <!-- Chat Header -->
                 <div class="chat-header">
                     <div>
                         <h2 class="chat-title">
@@ -710,26 +703,9 @@
                         </div>
                     </div>
                     <div class="room-controls">
-                        <!-- Invite Dropdown Button -->
-                        <div style="position: relative;">
-                            <button type="button" class="invite-btn" onclick="toggleInviteDropdown()">
-                                + Invite Member
-                            </button>
-                            <div class="invite-dropdown" id="inviteDropdown">
-                                <h5>Invite New Member</h5>
-                                <div class="invite-form">
-                                    <asp:TextBox ID="txtInviteEmail" runat="server" CssClass="invite-input" 
-                                               placeholder="Enter email address" />
-                                    <asp:Button ID="btnInvite" runat="server" Text="Invite" CssClass="btn btn-primary btn-small" 
-                                              OnClick="btnInvite_Click" />
-                                </div>
-                                <asp:Label ID="lblInviteStatus" runat="server" CssClass="status-message" />
-                            </div>
-                        </div>
-
-                        <asp:Button ID="btnLeaveRoom" runat="server" Text="Leave Room" 
+                        <asp:Button ID="btnLeaveRoom" runat="server" Text="Leave Chat" 
                                   CssClass="leave-btn" OnClick="btnLeaveRoom_Click" 
-                                  OnClientClick="return confirm('Are you sure you want to leave this room?');" />
+                                  OnClientClick="return confirm('Are you sure you want to leave this chat?');" />
                     </div>
                 </div>
 
@@ -787,10 +763,10 @@
             const targetTab = document.getElementById(tabName + '-tab');
             if (targetTab) targetTab.classList.add('active');
 
-            // Load available rooms when browsing tab is opened
-            if (tabName === 'browse-rooms') {
+            // Load direct chats when direct chat tab is opened
+            if (tabName === 'direct-chat') {
                 setTimeout(() => {
-                    __doPostBack('LoadAvailableRooms', '');
+                    __doPostBack('LoadDirectChats', '');
                 }, 100);
             }
             
@@ -801,22 +777,17 @@
             document.getElementById('<%= hfCurrentRoomId.ClientID %>').value = roomId;
             
             // Update active room styling in the current tab
-            const currentList = source === 'my' ? '#myRoomsList' : '#availableRoomsList';
+            const currentList = source === 'my' ? '#myRoomsList' : '#directChatsList';
             document.querySelectorAll(`${currentList} .room-item`).forEach(item => item.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            
-            // Close invite dropdown if open
-            document.getElementById('inviteDropdown').classList.remove('show');
             
             // Trigger postback to load room
             __doPostBack('LoadRoom', roomId);
         }
 
         function filterRooms(type) {
-            const searchInput = type === 'my' ? 
-                document.getElementById('<%= txtSearchMyRooms.ClientID %>') :
-                document.getElementById('<%= txtSearchAvailable.ClientID %>');
-            const roomsList = type === 'my' ? '#myRoomsList' : '#availableRoomsList';
+            const searchInput = document.getElementById('<%= txtSearchMyRooms.ClientID %>');
+            const roomsList = '#myRoomsList';
 
             const filter = searchInput.value.toLowerCase();
             const rooms = document.querySelectorAll(`${roomsList} .room-item`);
@@ -831,11 +802,6 @@
                     room.style.display = 'none';
                 }
             });
-        }
-
-        function toggleInviteDropdown() {
-            const dropdown = document.getElementById('inviteDropdown');
-            dropdown.classList.toggle('show');
         }
 
         function scrollToBottom() {
@@ -854,16 +820,6 @@
                     e.stopPropagation();
                     return false;
                 });
-            });
-
-            // Close invite dropdown when clicking outside
-            document.addEventListener('click', function(e) {
-                const dropdown = document.getElementById('inviteDropdown');
-                const inviteBtn = document.querySelector('.invite-btn');
-                
-                if (dropdown && inviteBtn && !dropdown.contains(e.target) && !inviteBtn.contains(e.target)) {
-                    dropdown.classList.remove('show');
-                }
             });
 
             const messageInput = document.getElementById('<%= txtMessage.ClientID %>');

@@ -43,9 +43,9 @@ namespace YourProjectNamespace
                     LoadCurrentRoomAsync();
                 }
             }
-            else if (Request["__EVENTTARGET"] == "LoadAvailableRooms")
+            else if (Request["__EVENTTARGET"] == "LoadDirectChats")
             {
-                LoadAvailableRoomsAsync();
+                LoadDirectChatsAsync();
             }
             else if (!string.IsNullOrEmpty(hfCurrentRoomId.Value))
             {
@@ -73,10 +73,10 @@ namespace YourProjectNamespace
             {
                 var rooms = new List<ChatRoomInfo>();
 
-                // Alternative approach: Get all rooms and check membership individually
-                // This avoids collection group queries entirely
+                // Get all rooms and check membership individually
                 var allRoomsQuery = db.Collection("chatRooms")
                     .WhereEqualTo("status", "active")
+                    .WhereEqualTo("type", "group") // Only get group rooms, not direct chats
                     .Limit(100);
 
                 var allRoomsSnapshot = await allRoomsQuery.GetSnapshotAsync();
@@ -118,7 +118,7 @@ namespace YourProjectNamespace
                                 MemberCount = membersSnapshot.Count,
                                 LastActivity = lastActivity,
                                 CreatedBy = GetCreatorName(GetSafeValue(roomData, "createdBy", "")),
-                                IsPublic = GetSafeBoolValue(roomData, "settings.isPrivate", true) == false
+                                IsPublic = false // All rooms are private now
                             });
                         }
                     }
@@ -138,73 +138,277 @@ namespace YourProjectNamespace
             }
         }
 
-        private async void LoadAvailableRoomsAsync()
+        private async void LoadDirectChatsAsync()
         {
             try
             {
-                var availableRooms = new List<ChatRoomInfo>();
+                var directChats = new List<ChatRoomInfo>();
 
-                // Get all active public rooms - use the direct isPublic field for better querying
-                var publicRoomsQuery = db.Collection("chatRooms")
+                // Get all direct chat rooms where current user is a member
+                var directChatsQuery = db.Collection("chatRooms")
                     .WhereEqualTo("status", "active")
-                    .WhereEqualTo("isPublic", true)
+                    .WhereEqualTo("type", "direct")
                     .Limit(100);
-                var publicSnapshot = await publicRoomsQuery.GetSnapshotAsync();
 
-                foreach (var roomDoc in publicSnapshot.Documents)
+                var directChatsSnapshot = await directChatsQuery.GetSnapshotAsync();
+
+                foreach (var roomDoc in directChatsSnapshot.Documents)
                 {
-                    var roomData = roomDoc.ToDictionary();
-
-                    // Double-check if room is public (fallback to settings if needed)
-                    bool isPublic = GetSafeBoolValue(roomData, "isPublic", false);
-                    if (!isPublic)
-                    {
-                        // Fallback to check settings.isPrivate
-                        bool isPrivate = GetSafeBoolValue(roomData, "settings.isPrivate", true);
-                        if (isPrivate) continue; // Skip private rooms
-                    }
-
-                    // Check if user is already a member
+                    // Check if current user is a member of this direct chat
                     var memberDoc = await roomDoc.Reference.Collection("members")
                         .Document(currentUserEmail).GetSnapshotAsync();
 
-                    bool isAlreadyMember = false;
                     if (memberDoc.Exists)
                     {
                         var memberData = memberDoc.ToDictionary();
                         string status = GetSafeValue(memberData, "status", "");
-                        isAlreadyMember = (status == "active");
+
+                        if (status == "active")
+                        {
+                            var roomData = roomDoc.ToDictionary();
+
+                            // Get the other participant's name for display
+                            var allMembers = await roomDoc.Reference.Collection("members")
+                                .WhereEqualTo("status", "active")
+                                .GetSnapshotAsync();
+
+                            string chatName = "Direct Chat";
+                            foreach (var member in allMembers.Documents)
+                            {
+                                var memberInfo = member.ToDictionary();
+                                string memberEmail = GetSafeValue(memberInfo, "email", "");
+                                if (memberEmail != currentUserEmail)
+                                {
+                                    chatName = GetSafeValue(memberInfo, "name", memberEmail);
+                                    break;
+                                }
+                            }
+
+                            // Get last activity
+                            string lastActivity = "No recent activity";
+                            if (roomData.ContainsKey("lastActivity"))
+                            {
+                                var timestamp = ((Timestamp)roomData["lastActivity"]).ToDateTime();
+                                lastActivity = FormatRelativeTime(timestamp);
+                            }
+
+                            directChats.Add(new ChatRoomInfo
+                            {
+                                Id = roomDoc.Id,
+                                Name = chatName,
+                                Description = "",
+                                MemberCount = 2,
+                                LastActivity = lastActivity,
+                                CreatedBy = "",
+                                IsPublic = false
+                            });
+                        }
                     }
-
-                    if (isAlreadyMember) continue; // Skip rooms user is already in
-
-                    // Get member count
-                    var membersSnapshot = await roomDoc.Reference.Collection("members")
-                        .WhereEqualTo("status", "active")
-                        .GetSnapshotAsync();
-
-                    availableRooms.Add(new ChatRoomInfo
-                    {
-                        Id = roomDoc.Id,
-                        Name = GetSafeValue(roomData, "name", "Unnamed Room"),
-                        Description = GetSafeValue(roomData, "description", "No description"),
-                        MemberCount = membersSnapshot.Count,
-                        CreatedBy = GetCreatorName(GetSafeValue(roomData, "createdBy", "")),
-                        IsPublic = true
-                    });
                 }
 
-                rptAvailableRooms.DataSource = availableRooms.OrderByDescending(r => r.MemberCount).ToList();
-                rptAvailableRooms.DataBind();
+                rptDirectChats.DataSource = directChats.OrderByDescending(r => r.LastActivity).ToList();
+                rptDirectChats.DataBind();
 
-                lblAvailableRoomCount.Text = availableRooms.Count.ToString();
+                lblDirectChatCount.Text = directChats.Count.ToString();
 
                 // Show/hide empty state
-                pnlNoAvailableRooms.Visible = availableRooms.Count == 0;
+                pnlNoDirectChats.Visible = directChats.Count == 0;
             }
             catch (Exception ex)
             {
-                ShowMessage("Error loading available rooms: " + ex.Message, "text-danger");
+                ShowSearchMessage("Error loading direct chats: " + ex.Message, "text-danger");
+            }
+        }
+
+        protected async void btnSearchUser_Click(object sender, EventArgs e)
+        {
+            string searchEmail = txtUserSearch.Text.Trim().ToLower();
+
+            if (string.IsNullOrEmpty(searchEmail))
+            {
+                ShowSearchMessage("Please enter an email address", "text-danger");
+                return;
+            }
+
+            if (searchEmail == currentUserEmail.ToLower())
+            {
+                ShowSearchMessage("You cannot start a chat with yourself", "text-warning");
+                return;
+            }
+
+            try
+            {
+                var userResults = new List<UserSearchResult>();
+
+                // Search for user by email
+                var userSnapshot = await db.Collection("users")
+                    .WhereEqualTo("email", searchEmail)
+                    .GetSnapshotAsync();
+
+                if (userSnapshot.Count > 0)
+                {
+                    var userDoc = userSnapshot.Documents[0];
+                    var userData = userDoc.ToDictionary();
+
+                    string firstName = GetSafeValue(userData, "firstName", "");
+                    string lastName = GetSafeValue(userData, "lastName", "");
+                    string fullName = $"{firstName} {lastName}".Trim();
+
+                    if (string.IsNullOrEmpty(fullName))
+                    {
+                        fullName = searchEmail.Split('@')[0];
+                    }
+
+                    userResults.Add(new UserSearchResult
+                    {
+                        Email = searchEmail,
+                        Name = fullName
+                    });
+
+                    rptUserSearchResults.DataSource = userResults;
+                    rptUserSearchResults.DataBind();
+                    pnlUserSearchResults.Visible = true;
+
+                    ShowSearchMessage("User found!", "text-success");
+                }
+                else
+                {
+                    pnlUserSearchResults.Visible = false;
+                    ShowSearchMessage("User not found", "text-danger");
+                }
+            }
+            catch (Exception ex)
+            {
+                pnlUserSearchResults.Visible = false;
+                ShowSearchMessage("Error searching for user: " + ex.Message, "text-danger");
+            }
+        }
+
+        protected async void rptUserSearchResults_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            if (e.CommandName == "StartChat")
+            {
+                string targetUserEmail = e.CommandArgument.ToString();
+                await StartDirectChatAsync(targetUserEmail);
+            }
+        }
+
+        private async Task StartDirectChatAsync(string targetUserEmail)
+        {
+            try
+            {
+                // Check if direct chat already exists between these users
+                var existingChatsQuery = db.Collection("chatRooms")
+                    .WhereEqualTo("type", "direct")
+                    .WhereEqualTo("status", "active");
+
+                var existingChatsSnapshot = await existingChatsQuery.GetSnapshotAsync();
+
+                foreach (var chatDoc in existingChatsSnapshot.Documents)
+                {
+                    var membersSnapshot = await chatDoc.Reference.Collection("members")
+                        .WhereEqualTo("status", "active")
+                        .GetSnapshotAsync();
+
+                    var memberEmails = new List<string>();
+                    foreach (var member in membersSnapshot.Documents)
+                    {
+                        var memberData = member.ToDictionary();
+                        memberEmails.Add(GetSafeValue(memberData, "email", ""));
+                    }
+
+                    // Check if this chat has exactly these two users
+                    if (memberEmails.Count == 2 &&
+                        memberEmails.Contains(currentUserEmail) &&
+                        memberEmails.Contains(targetUserEmail))
+                    {
+                        // Direct chat already exists, just select it
+                        hfCurrentRoomId.Value = chatDoc.Id;
+                        LoadCurrentRoomAsync();
+                        ShowSearchMessage("Opened existing chat", "text-success");
+                        return;
+                    }
+                }
+
+                // Get target user info
+                var userSnapshot = await db.Collection("users")
+                    .WhereEqualTo("email", targetUserEmail)
+                    .GetSnapshotAsync();
+
+                if (userSnapshot.Count == 0)
+                {
+                    ShowSearchMessage("User not found", "text-danger");
+                    return;
+                }
+
+                var targetUser = userSnapshot.Documents[0].ToDictionary();
+                string targetUserName = GetSafeValue(targetUser, "firstName", "") + " " + GetSafeValue(targetUser, "lastName", "");
+                if (string.IsNullOrEmpty(targetUserName.Trim()))
+                {
+                    targetUserName = targetUserEmail.Split('@')[0];
+                }
+
+                // Create new direct chat
+                var chatRef = db.Collection("chatRooms").Document();
+                var chatData = new Dictionary<string, object>
+                {
+                    { "name", $"Direct Chat" },
+                    { "type", "direct" },
+                    { "createdBy", currentUserEmail },
+                    { "createdAt", FieldValue.ServerTimestamp },
+                    { "lastActivity", FieldValue.ServerTimestamp },
+                    { "status", "active" }
+                };
+
+                await chatRef.SetAsync(chatData);
+
+                // Add both users as members
+                await chatRef.Collection("members").Document(currentUserEmail).SetAsync(new
+                {
+                    email = currentUserEmail,
+                    name = currentUserName,
+                    role = "member",
+                    joinedAt = FieldValue.ServerTimestamp,
+                    status = "active",
+                    lastSeen = FieldValue.ServerTimestamp
+                });
+
+                await chatRef.Collection("members").Document(targetUserEmail).SetAsync(new
+                {
+                    email = targetUserEmail,
+                    name = targetUserName,
+                    role = "member",
+                    joinedAt = FieldValue.ServerTimestamp,
+                    status = "active",
+                    lastSeen = FieldValue.ServerTimestamp
+                });
+
+                // Add welcome message
+                await chatRef.Collection("messages").AddAsync(new
+                {
+                    senderId = "system",
+                    senderName = "System",
+                    content = $"{currentUserName} started a chat with {targetUserName}",
+                    type = "system",
+                    timestamp = FieldValue.ServerTimestamp
+                });
+
+                // Clear search and select new chat
+                txtUserSearch.Text = "";
+                pnlUserSearchResults.Visible = false;
+                hfCurrentRoomId.Value = chatRef.Id;
+                LoadCurrentRoomAsync();
+                LoadDirectChatsAsync();
+
+                ShowSearchMessage($"Started chat with {targetUserName}!", "text-success");
+
+                // Switch to direct chat tab
+                ClientScript.RegisterStartupScript(this.GetType(), "switchToDirectChat",
+                    "setTimeout(() => switchTab('direct-chat'), 500);", true);
+            }
+            catch (Exception ex)
+            {
+                ShowSearchMessage("Error starting chat: " + ex.Message, "text-danger");
             }
         }
 
@@ -212,7 +416,6 @@ namespace YourProjectNamespace
         {
             string roomName = txtRoomName.Text.Trim();
             string description = txtDescription.Text.Trim();
-            bool isPublic = chkPublicRoom.Checked;
 
             if (string.IsNullOrEmpty(roomName))
             {
@@ -222,7 +425,7 @@ namespace YourProjectNamespace
 
             try
             {
-                // Create new room
+                // Create new group room (always private now)
                 var roomRef = db.Collection("chatRooms").Document();
                 var roomData = new Dictionary<string, object>
                 {
@@ -232,15 +435,7 @@ namespace YourProjectNamespace
                     { "createdBy", currentUserEmail },
                     { "createdAt", FieldValue.ServerTimestamp },
                     { "lastActivity", FieldValue.ServerTimestamp },
-                    { "status", "active" },
-                    { "isPublic", isPublic }, // Add direct isPublic field for easier querying
-                    { "settings", new Dictionary<string, object>
-                        {
-                            { "isPrivate", !isPublic },
-                            { "allowInvites", true },
-                            { "maxMembers", 100 }
-                        }
-                    }
+                    { "status", "active" }
                 };
 
                 await roomRef.SetAsync(roomData);
@@ -269,7 +464,6 @@ namespace YourProjectNamespace
                 // Clear form and refresh
                 txtRoomName.Text = "";
                 txtDescription.Text = "";
-                chkPublicRoom.Checked = false;
                 ShowMessage($"Room '{roomName}' created successfully!", "text-success");
 
                 LoadMyRoomsAsync();
@@ -286,80 +480,6 @@ namespace YourProjectNamespace
             catch (Exception ex)
             {
                 ShowMessage("Error creating room: " + ex.Message, "text-danger");
-            }
-        }
-
-        protected async void rptAvailableRooms_ItemCommand(object source, RepeaterCommandEventArgs e)
-        {
-            if (e.CommandName == "JoinRoom")
-            {
-                string roomId = e.CommandArgument.ToString();
-                await JoinRoomAsync(roomId);
-            }
-        }
-
-        private async Task JoinRoomAsync(string roomId)
-        {
-            try
-            {
-                var roomRef = db.Collection("chatRooms").Document(roomId);
-                var roomSnapshot = await roomRef.GetSnapshotAsync();
-
-                if (!roomSnapshot.Exists)
-                {
-                    ShowMessage("Room not found", "text-danger");
-                    return;
-                }
-
-                var roomData = roomSnapshot.ToDictionary();
-                string roomName = GetSafeValue(roomData, "name", "Unknown Room");
-
-                // Check if already a member
-                var memberDoc = await roomRef.Collection("members").Document(currentUserEmail).GetSnapshotAsync();
-                if (memberDoc.Exists && GetSafeValue(memberDoc.ToDictionary(), "status", "") == "active")
-                {
-                    ShowMessage("You are already a member of this room", "text-warning");
-                    return;
-                }
-
-                // Add user as member
-                await roomRef.Collection("members").Document(currentUserEmail).SetAsync(new
-                {
-                    email = currentUserEmail,
-                    name = currentUserName,
-                    role = "member",
-                    joinedAt = FieldValue.ServerTimestamp,
-                    status = "active",
-                    lastSeen = FieldValue.ServerTimestamp
-                });
-
-                // Add system message
-                await roomRef.Collection("messages").AddAsync(new
-                {
-                    senderId = "system",
-                    senderName = "System",
-                    content = $"{currentUserName} joined the room",
-                    type = "system",
-                    timestamp = FieldValue.ServerTimestamp
-                });
-
-                // Update room last activity
-                await roomRef.UpdateAsync("lastActivity", FieldValue.ServerTimestamp);
-
-                ShowMessage($"Successfully joined '{roomName}'!", "text-success");
-
-                // Refresh both lists
-                LoadMyRoomsAsync();
-                LoadAvailableRoomsAsync();
-                UpdateRoomCounts();
-
-                // Auto-select the joined room
-                hfCurrentRoomId.Value = roomId;
-                LoadCurrentRoomAsync();
-            }
-            catch (Exception ex)
-            {
-                ShowMessage("Error joining room: " + ex.Message, "text-danger");
             }
         }
 
@@ -387,7 +507,7 @@ namespace YourProjectNamespace
                 {
                     senderId = "system",
                     senderName = "System",
-                    content = $"{currentUserName} left the room",
+                    content = $"{currentUserName} left the chat",
                     type = "system",
                     timestamp = FieldValue.ServerTimestamp
                 });
@@ -401,83 +521,14 @@ namespace YourProjectNamespace
                 hfCurrentRoomId.Value = "";
                 pnlNoRoom.Visible = true;
                 pnlChatInterface.Visible = false;
-                pnlInviteSection.Visible = false;
 
                 LoadMyRoomsAsync();
-                LoadAvailableRoomsAsync();
+                LoadDirectChatsAsync();
                 UpdateRoomCounts();
             }
             catch (Exception ex)
             {
                 ShowMessage("Error leaving room: " + ex.Message, "text-danger");
-            }
-        }
-
-        protected async void btnInvite_Click(object sender, EventArgs e)
-        {
-            string email = txtInviteEmail.Text.Trim().ToLower();
-            string roomId = hfCurrentRoomId.Value;
-
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(roomId))
-            {
-                ShowInviteMessage("Please enter an email address", "text-danger");
-                return;
-            }
-
-            try
-            {
-                // Check if user exists
-                var userSnapshot = await db.Collection("users").WhereEqualTo("email", email).GetSnapshotAsync();
-                if (userSnapshot.Count == 0)
-                {
-                    ShowInviteMessage("User not found", "text-danger");
-                    return;
-                }
-
-                var userDoc = userSnapshot.Documents[0];
-                string userName = userDoc.GetValue<string>("firstName") + " " + userDoc.GetValue<string>("lastName");
-
-                // Check if already a member
-                var roomRef = db.Collection("chatRooms").Document(roomId);
-                var memberDoc = await roomRef.Collection("members").Document(email).GetSnapshotAsync();
-
-                if (memberDoc.Exists && GetSafeValue(memberDoc.ToDictionary(), "status", "") == "active")
-                {
-                    ShowInviteMessage("User is already a member", "text-warning");
-                    return;
-                }
-
-                // Add as member
-                await roomRef.Collection("members").Document(email).SetAsync(new
-                {
-                    email = email,
-                    name = userName,
-                    role = "member",
-                    joinedAt = FieldValue.ServerTimestamp,
-                    status = "active",
-                    lastSeen = FieldValue.ServerTimestamp
-                });
-
-                // Add system message
-                await roomRef.Collection("messages").AddAsync(new
-                {
-                    senderId = "system",
-                    senderName = "System",
-                    content = $"{userName} was invited to join the room",
-                    type = "system",
-                    timestamp = FieldValue.ServerTimestamp
-                });
-
-                // Update last activity
-                await roomRef.UpdateAsync("lastActivity", FieldValue.ServerTimestamp);
-
-                txtInviteEmail.Text = "";
-                ShowInviteMessage($"{userName} invited successfully!", "text-success");
-                LoadCurrentRoomAsync(); // Refresh member count
-            }
-            catch (Exception ex)
-            {
-                ShowInviteMessage("Error inviting user: " + ex.Message, "text-danger");
             }
         }
 
@@ -529,7 +580,6 @@ namespace YourProjectNamespace
             {
                 pnlNoRoom.Visible = true;
                 pnlChatInterface.Visible = false;
-                pnlInviteSection.Visible = false;
                 return;
             }
 
@@ -545,19 +595,40 @@ namespace YourProjectNamespace
                 }
 
                 var roomData = roomSnapshot.ToDictionary();
+                string roomType = GetSafeValue(roomData, "type", "group");
 
-                // Get member count
+                // Get member count and room name
                 var membersSnapshot = await roomRef.Collection("members")
                     .WhereEqualTo("status", "active")
                     .GetSnapshotAsync();
 
+                string roomName;
+                if (roomType == "direct")
+                {
+                    // For direct chats, show the other participant's name
+                    roomName = "Direct Chat";
+                    foreach (var member in membersSnapshot.Documents)
+                    {
+                        var memberInfo = member.ToDictionary();
+                        string memberEmail = GetSafeValue(memberInfo, "email", "");
+                        if (memberEmail != currentUserEmail)
+                        {
+                            roomName = GetSafeValue(memberInfo, "name", memberEmail);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    roomName = GetSafeValue(roomData, "name", "Unnamed Room");
+                }
+
                 // Update UI
-                lblCurrentRoom.Text = GetSafeValue(roomData, "name", "Unnamed Room");
-                lblMemberCount.Text = $"{membersSnapshot.Count} members";
+                lblCurrentRoom.Text = roomName;
+                lblMemberCount.Text = roomType == "direct" ? "Direct Chat" : $"{membersSnapshot.Count} members";
 
                 pnlNoRoom.Visible = false;
                 pnlChatInterface.Visible = true;
-                pnlInviteSection.Visible = true;
 
                 // Load messages
                 await LoadMessagesAsync(roomId);
@@ -653,43 +724,6 @@ namespace YourProjectNamespace
             return defaultValue;
         }
 
-        private bool GetSafeBoolValue(Dictionary<string, object> dict, string key, bool defaultValue)
-        {
-            try
-            {
-                if (key.Contains(".")) // Handle nested keys like "settings.isPrivate"
-                {
-                    var keys = key.Split('.');
-                    object current = dict;
-
-                    foreach (var k in keys)
-                    {
-                        if (current is Dictionary<string, object> currentDict && currentDict.ContainsKey(k))
-                        {
-                            current = currentDict[k];
-                        }
-                        else
-                        {
-                            return defaultValue;
-                        }
-                    }
-
-                    return current is bool ? (bool)current : defaultValue;
-                }
-
-                if (dict.ContainsKey(key) && dict[key] is bool)
-                {
-                    return (bool)dict[key];
-                }
-            }
-            catch (Exception)
-            {
-                // Return default on any error
-            }
-
-            return defaultValue;
-        }
-
         private string GetCreatorName(string creatorEmail)
         {
             if (string.IsNullOrEmpty(creatorEmail)) return "Unknown";
@@ -729,10 +763,10 @@ namespace YourProjectNamespace
             lblCreateStatus.CssClass = $"status-message show {cssClass}";
         }
 
-        private void ShowInviteMessage(string message, string cssClass)
+        private void ShowSearchMessage(string message, string cssClass)
         {
-            lblInviteStatus.Text = message;
-            lblInviteStatus.CssClass = $"status-message show {cssClass}";
+            lblSearchStatus.Text = message;
+            lblSearchStatus.CssClass = $"status-message show {cssClass}";
         }
 
         // DATA CLASSES
@@ -756,6 +790,12 @@ namespace YourProjectNamespace
             public string Type { get; set; }
             public DateTime Timestamp { get; set; }
             public string FormattedTime { get; set; }
+        }
+
+        public class UserSearchResult
+        {
+            public string Email { get; set; }
+            public string Name { get; set; }
         }
     }
 }
