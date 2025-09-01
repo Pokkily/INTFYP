@@ -287,6 +287,114 @@
             position: relative;
         }
 
+        /* Search Bar Styles */
+        .search-container {
+            position: relative;
+            flex-grow: 1;
+        }
+
+        .search-input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(103, 126, 234, 0.2);
+            border-radius: 25px;
+            padding: 12px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .search-input-group:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(103, 126, 234, 0.3);
+            transform: scale(1.02);
+        }
+
+        .search-icon {
+            color: #667eea;
+            font-size: 16px;
+            margin-right: 12px;
+        }
+
+        .search-input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            font-size: 14px;
+            color: #2c3e50;
+            outline: none;
+        }
+
+        .search-input::placeholder {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .clear-search-btn {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .clear-search-btn:hover {
+            background: #ff6b6b;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* Book Count Display Styles */
+        .book-count-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+        }
+
+        .book-count-badge {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(103, 126, 234, 0.2);
+            border-radius: 25px;
+            padding: 8px 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .book-count-badge:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(103, 126, 234, 0.2);
+            border-color: rgba(103, 126, 234, 0.3);
+        }
+
+        .book-count-text {
+            color: #667eea !important;
+            font-weight: 600;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .text-primary {
+            color: #667eea !important;
+            text-decoration: underline;
+        }
+
+        .text-primary:hover {
+            color: #5a6fd8 !important;
+        }
+
         /* Animations */
         @keyframes slideInFromTop {
             from {
@@ -360,6 +468,30 @@
                 margin-top: 10px;
                 display: block;
             }
+
+            .book-count-container {
+                min-width: auto;
+                margin-top: 10px;
+            }
+            
+            .book-count-badge {
+                padding: 6px 12px;
+            }
+            
+            .book-count-text {
+                font-size: 12px;
+            }
+            
+            /* Stack search and count vertically on mobile */
+            .d-flex.justify-content-between.align-items-center.mb-4 {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-container.me-3 {
+                margin-right: 0 !important;
+                margin-bottom: 15px;
+            }
         }
 
         /* Utility Classes */
@@ -375,82 +507,8 @@
         .justify-content-between { justify-content: space-between; }
         .align-items-center { align-items: center; }
         .text-center { text-align: center; }
-
-        /* Search Bar Styles */
-        .search-container {
-            position: relative;
-            max-width: 600px;
-        }
-
-        .search-input-group {
-            position: relative;
-            display: flex;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(103, 126, 234, 0.2);
-            border-radius: 25px;
-            padding: 12px 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .search-input-group:focus-within {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(103, 126, 234, 0.3);
-            transform: scale(1.02);
-        }
-
-        .search-icon {
-            color: #667eea;
-            font-size: 16px;
-            margin-right: 12px;
-        }
-
-        .search-input {
-            flex: 1;
-            border: none;
-            background: transparent;
-            font-size: 14px;
-            color: #2c3e50;
-            outline: none;
-        }
-
-        .search-input::placeholder {
-            color: #7f8c8d;
-            font-style: italic;
-        }
-
-        .clear-search-btn {
-            background: rgba(255, 107, 107, 0.1);
-            border: 1px solid rgba(255, 107, 107, 0.3);
-            color: #ff6b6b;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            margin-left: 10px;
-        }
-
-        .clear-search-btn:hover {
-            background: #ff6b6b;
-            color: white;
-            transform: scale(1.1);
-        }
-
-        .text-primary {
-            color: #667eea !important;
-            text-decoration: underline;
-        }
-
-        .text-primary:hover {
-            color: #5a6fd8 !important;
-        }
+        .me-3 { margin-right: 15px; }
+        .flex-grow-1 { flex-grow: 1; }
     </style>
 
     <div class="add-book-page">
@@ -584,15 +642,25 @@
                     Your Learning Materials
                 </div>
                 <div class="card-body">
-                    <!-- Search Bar -->
-                    <div class="search-container mb-4">
-                        <div class="search-input-group">
-                            <i class="fas fa-search search-icon"></i>
-                            <asp:TextBox ID="txtSearch" runat="server" CssClass="search-input" 
-                                       placeholder="Search books by title, author, or category..." 
-                                       AutoPostBack="true" OnTextChanged="txtSearch_TextChanged" />
-                            <asp:Button ID="btnClearSearch" runat="server" Text="×" CssClass="clear-search-btn" 
-                                      OnClick="btnClearSearch_Click" ToolTip="Clear search" />
+                    <!-- Search Bar with Book Count -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="search-container me-3">
+                            <div class="search-input-group">
+                                <i class="fas fa-search search-icon"></i>
+                                <asp:TextBox ID="txtSearch" runat="server" CssClass="search-input" 
+                                           placeholder="Search books by title, author, or category..." 
+                                           AutoPostBack="true" OnTextChanged="txtSearch_TextChanged" />
+                                <asp:Button ID="btnClearSearch" runat="server" Text="×" CssClass="clear-search-btn" 
+                                          OnClick="btnClearSearch_Click" ToolTip="Clear search" />
+                            </div>
+                        </div>
+                        
+                        <!-- Book Count Display -->
+                        <div class="book-count-container">
+                            <div class="book-count-badge">
+                                <i class="fas fa-books me-1"></i>
+                                <asp:Label ID="lblBookCount" runat="server" Text="0 books" CssClass="book-count-text" />
+                            </div>
                         </div>
                     </div>
                     
