@@ -583,7 +583,7 @@
                 <!-- UPDATED: Scholarship Application Button with Teal Design -->
                 <a href="scholarshipApp.aspx" class="scholarship-app-button" onclick="handleScholarshipAppClick(event)">
                     <span class="icon">📝</span>
-                    <span>Start New Application</span>
+                    <span>Apply School Scholarship</span>
                 </a>
             </div>
 

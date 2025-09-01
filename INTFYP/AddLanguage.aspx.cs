@@ -14,7 +14,7 @@ namespace INTFYP
         private static FirestoreDb db;
         private static readonly object dbLock = new object();
 
-        // Data Models
+        // Data Model
         [FirestoreData]
         public class Language
         {
@@ -40,35 +40,7 @@ namespace INTFYP
             public DateTime CreatedDate { get; set; }
 
             [FirestoreProperty]
-            public int StudentCount { get; set; }
-
-            [FirestoreProperty]
             public bool IsActive { get; set; }
-        }
-
-        [FirestoreData]
-        public class StudentEnrollment
-        {
-            [FirestoreProperty]
-            public string Id { get; set; }
-
-            [FirestoreProperty]
-            public string LanguageId { get; set; }
-
-            [FirestoreProperty]
-            public string StudentId { get; set; }
-
-            [FirestoreProperty]
-            public string StudentName { get; set; }
-
-            [FirestoreProperty]
-            public string StudentEmail { get; set; }
-
-            [FirestoreProperty]
-            public DateTime EnrollmentDate { get; set; }
-
-            [FirestoreProperty]
-            public string Status { get; set; } // Active, Completed, Dropped
         }
 
         protected void Page_Load(object sender, EventArgs e)
@@ -119,7 +91,6 @@ namespace INTFYP
                     Flag = txtFlag.Text.Trim(),
                     Difficulty = "Beginner", // Default value
                     CreatedDate = DateTime.UtcNow,
-                    StudentCount = 0,
                     IsActive = true
                 };
 
@@ -195,11 +166,6 @@ namespace INTFYP
             txtFlag.Text = "";
         }
 
-        protected async void btnRefreshLanguages_Click(object sender, EventArgs e)
-        {
-            await LoadLanguagesAsync();
-        }
-
         private async void LoadLanguages()
         {
             await LoadLanguagesAsync();
@@ -209,7 +175,7 @@ namespace INTFYP
         {
             try
             {
-                var languages = await GetAllLanguagesWithStudentCount();
+                var languages = await GetAllLanguages();
 
                 if (languages.Any())
                 {
@@ -230,7 +196,7 @@ namespace INTFYP
             }
         }
 
-        private async Task<List<Language>> GetAllLanguagesWithStudentCount()
+        private async Task<List<Language>> GetAllLanguages()
         {
             var languages = new List<Language>();
 
@@ -246,10 +212,6 @@ namespace INTFYP
                     if (document.Exists)
                     {
                         var language = document.ConvertTo<Language>();
-
-                        // Get real-time student count for this language
-                        language.StudentCount = await GetStudentCountForLanguage(language.Id);
-
                         languages.Add(language);
                     }
                 }
@@ -260,23 +222,6 @@ namespace INTFYP
             }
 
             return languages;
-        }
-
-        private async Task<int> GetStudentCountForLanguage(string languageId)
-        {
-            try
-            {
-                Query query = db.Collection("enrollments")
-                               .WhereEqualTo("LanguageId", languageId)
-                               .WhereEqualTo("Status", "Active");
-
-                QuerySnapshot snapshot = await query.GetSnapshotAsync();
-                return snapshot.Documents.Count;
-            }
-            catch
-            {
-                return 0;
-            }
         }
 
         protected async void rptLanguages_ItemCommand(object source, RepeaterCommandEventArgs e)
@@ -293,14 +238,6 @@ namespace INTFYP
 
                     case "DeleteLanguage":
                         await DeleteLanguage(languageId);
-                        break;
-
-                    case "ViewStudents":
-                        await ViewEnrolledStudents(languageId);
-                        break;
-
-                    case "JoinLanguage":
-                        await EnrollStudentInLanguage(languageId);
                         break;
                 }
             }
@@ -323,13 +260,34 @@ namespace INTFYP
 
                 if (txtEditName != null && txtEditCode != null)
                 {
+                    // Validate the input
+                    if (string.IsNullOrWhiteSpace(txtEditName.Text))
+                    {
+                        ShowAlert("Please enter a language name.", "error");
+                        return;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(txtEditCode.Text))
+                    {
+                        ShowAlert("Please enter a language code.", "error");
+                        return;
+                    }
+
+                    // Check if the new language code already exists (excluding current language)
+                    string newCode = txtEditCode.Text.Trim().ToUpper();
+                    if (await LanguageCodeExistsExcluding(newCode, languageId))
+                    {
+                        ShowAlert($"A language with code '{newCode}' already exists!", "error");
+                        return;
+                    }
+
                     // Update language in Firestore
                     DocumentReference languageRef = db.Collection("languages").Document(languageId);
 
                     await languageRef.UpdateAsync(new Dictionary<string, object>
                     {
                         { "Name", txtEditName.Text.Trim() },
-                        { "Code", txtEditCode.Text.Trim().ToUpper() },
+                        { "Code", newCode },
                         { "Flag", txtEditFlag?.Text.Trim() ?? "" },
                         { "Description", txtEditDesc?.Text.Trim() ?? "" }
                     });
@@ -344,6 +302,25 @@ namespace INTFYP
             }
         }
 
+        private async Task<bool> LanguageCodeExistsExcluding(string code, string excludeLanguageId)
+        {
+            try
+            {
+                Query query = db.Collection("languages")
+                               .WhereEqualTo("Code", code)
+                               .WhereEqualTo("IsActive", true);
+
+                QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+                // Check if any document exists with this code that's not the current language
+                return snapshot.Documents.Any(doc => doc.Id != excludeLanguageId);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private async Task DeleteLanguage(string languageId)
         {
             try
@@ -352,20 +329,6 @@ namespace INTFYP
                 DocumentReference languageRef = db.Collection("languages").Document(languageId);
                 DocumentSnapshot languageDoc = await languageRef.GetSnapshotAsync();
                 string languageName = languageDoc.Exists ? languageDoc.GetValue<string>("Name") : "Unknown";
-
-                // Update all enrollments to inactive (soft delete)
-                Query enrollmentQuery = db.Collection("enrollments")
-                                         .WhereEqualTo("LanguageId", languageId);
-
-                QuerySnapshot enrollmentSnapshot = await enrollmentQuery.GetSnapshotAsync();
-
-                foreach (DocumentSnapshot doc in enrollmentSnapshot.Documents)
-                {
-                    await doc.Reference.UpdateAsync(new Dictionary<string, object>
-                    {
-                        { "Status", "Inactive" }
-                    });
-                }
 
                 // Soft delete the language (mark as inactive instead of hard delete)
                 await languageRef.UpdateAsync(new Dictionary<string, object>
@@ -382,117 +345,26 @@ namespace INTFYP
             }
         }
 
-        private async Task ViewEnrolledStudents(string languageId)
+        private void ShowAlert(string message, string type)
         {
-            try
-            {
-                var enrollments = await GetEnrollmentsForLanguage(languageId);
+            pnlAlert.Visible = true;
+            lblMessage.Text = message;
 
-                if (enrollments.Any())
-                {
-                    string studentList = string.Join(", ", enrollments.Select(e => e.StudentName));
-                    ShowAlert($"Enrolled Students ({enrollments.Count}): {studentList}", "success");
-                }
-                else
-                {
-                    ShowAlert("No students currently enrolled in this course.", "error");
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowAlert($"Error retrieving student list: {ex.Message}", "error");
-            }
+            string cssClass = type == "success" ? "alert-message" : "alert-message alert-danger";
+            alertDiv.Attributes["class"] = cssClass;
         }
 
-        private async Task EnrollStudentInLanguage(string languageId)
+
+
+        public async Task<List<Language>> GetLanguagesByDifficulty(string difficulty)
         {
             try
             {
-                string studentId = GetCurrentStudentId();
-                string studentName = GetCurrentStudentName();
-                string studentEmail = GetCurrentStudentEmail();
+                var languages = new List<Language>();
 
-                // Check if student is already enrolled
-                if (await IsStudentEnrolled(studentId, languageId))
-                {
-                    ShowAlert("Student is already enrolled in this language course!", "error");
-                    return;
-                }
-
-                // Create enrollment record
-                var enrollment = new StudentEnrollment
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    LanguageId = languageId,
-                    StudentId = studentId,
-                    StudentName = studentName,
-                    StudentEmail = studentEmail,
-                    EnrollmentDate = DateTime.UtcNow,
-                    Status = "Active"
-                };
-
-                // Add enrollment to Firestore
-                DocumentReference docRef = db.Collection("enrollments").Document(enrollment.Id);
-                await docRef.SetAsync(enrollment);
-
-                // Update language student count
-                await UpdateLanguageStudentCount(languageId);
-
-                ShowAlert($"Student '{studentName}' successfully enrolled!", "success");
-                await LoadLanguagesAsync(); // Refresh to show updated count
-            }
-            catch (Exception ex)
-            {
-                ShowAlert($"Error enrolling student: {ex.Message}", "error");
-            }
-        }
-
-        private async Task<bool> IsStudentEnrolled(string studentId, string languageId)
-        {
-            try
-            {
-                Query query = db.Collection("enrollments")
-                               .WhereEqualTo("StudentId", studentId)
-                               .WhereEqualTo("LanguageId", languageId)
-                               .WhereEqualTo("Status", "Active");
-
-                QuerySnapshot snapshot = await query.GetSnapshotAsync();
-                return snapshot.Documents.Count > 0;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private async Task UpdateLanguageStudentCount(string languageId)
-        {
-            try
-            {
-                int count = await GetStudentCountForLanguage(languageId);
-                DocumentReference languageRef = db.Collection("languages").Document(languageId);
-
-                await languageRef.UpdateAsync(new Dictionary<string, object>
-                {
-                    { "StudentCount", count }
-                });
-            }
-            catch (Exception ex)
-            {
-                // Log error but don't fail the main operation
-                System.Diagnostics.Debug.WriteLine($"Error updating student count: {ex.Message}");
-            }
-        }
-
-        public async Task<List<StudentEnrollment>> GetEnrollmentsForLanguage(string languageId)
-        {
-            var enrollments = new List<StudentEnrollment>();
-
-            try
-            {
-                Query query = db.Collection("enrollments")
-                               .WhereEqualTo("LanguageId", languageId)
-                               .WhereEqualTo("Status", "Active");
+                Query query = db.Collection("languages")
+                               .WhereEqualTo("Difficulty", difficulty)
+                               .WhereEqualTo("IsActive", true);
 
                 QuerySnapshot snapshot = await query.GetSnapshotAsync();
 
@@ -500,172 +372,11 @@ namespace INTFYP
                 {
                     if (document.Exists)
                     {
-                        enrollments.Add(document.ConvertTo<StudentEnrollment>());
+                        languages.Add(document.ConvertTo<Language>());
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error getting enrollments: {ex.Message}");
-            }
 
-            return enrollments;
-        }
-
-        // Teacher Management Methods
-
-        public async Task<bool> UnenrollStudent(string studentId, string languageId)
-        {
-            try
-            {
-                Query query = db.Collection("enrollments")
-                               .WhereEqualTo("StudentId", studentId)
-                               .WhereEqualTo("LanguageId", languageId)
-                               .WhereEqualTo("Status", "Active");
-
-                QuerySnapshot snapshot = await query.GetSnapshotAsync();
-
-                foreach (DocumentSnapshot document in snapshot.Documents)
-                {
-                    await document.Reference.UpdateAsync(new Dictionary<string, object>
-                    {
-                        { "Status", "Dropped" }
-                    });
-                }
-
-                await UpdateLanguageStudentCount(languageId);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public async Task<Dictionary<string, object>> GetLanguageStatistics(string languageId)
-        {
-            try
-            {
-                var stats = new Dictionary<string, object>();
-
-                // Get total enrollments (all time)
-                Query totalQuery = db.Collection("enrollments")
-                                    .WhereEqualTo("LanguageId", languageId);
-                QuerySnapshot totalSnapshot = await totalQuery.GetSnapshotAsync();
-                stats["TotalEnrollments"] = totalSnapshot.Documents.Count;
-
-                // Get active enrollments
-                Query activeQuery = db.Collection("enrollments")
-                                     .WhereEqualTo("LanguageId", languageId)
-                                     .WhereEqualTo("Status", "Active");
-                QuerySnapshot activeSnapshot = await activeQuery.GetSnapshotAsync();
-                stats["ActiveEnrollments"] = activeSnapshot.Documents.Count;
-
-                // Get completed enrollments
-                Query completedQuery = db.Collection("enrollments")
-                                        .WhereEqualTo("LanguageId", languageId)
-                                        .WhereEqualTo("Status", "Completed");
-                QuerySnapshot completedSnapshot = await completedQuery.GetSnapshotAsync();
-                stats["CompletedEnrollments"] = completedSnapshot.Documents.Count;
-
-                // Calculate completion rate
-                int total = totalSnapshot.Documents.Count;
-                int completed = completedSnapshot.Documents.Count;
-                stats["CompletionRate"] = total > 0 ? (double)completed / total * 100 : 0;
-
-                return stats;
-            }
-            catch
-            {
-                return new Dictionary<string, object>();
-            }
-        }
-
-        // Helper methods for student information
-        private string GetCurrentStudentId()
-        {
-            if (Session["StudentId"] != null)
-                return Session["StudentId"].ToString();
-
-            // Generate a demo student ID if none exists
-            string demoStudentId = "DEMO_" + DateTime.Now.Ticks.ToString();
-            Session["StudentId"] = demoStudentId;
-            return demoStudentId;
-        }
-
-        private string GetCurrentStudentName()
-        {
-            if (Session["StudentName"] != null)
-                return Session["StudentName"].ToString();
-
-            // Demo student name
-            string demoName = "Demo Student";
-            Session["StudentName"] = demoName;
-            return demoName;
-        }
-
-        private string GetCurrentStudentEmail()
-        {
-            if (Session["StudentEmail"] != null)
-                return Session["StudentEmail"].ToString();
-
-            // Demo email
-            string demoEmail = "demo.student@example.com";
-            Session["StudentEmail"] = demoEmail;
-            return demoEmail;
-        }
-
-        private void ShowAlert(string message, string type)
-        {
-            pnlAlert.Visible = true;
-            lblMessage.Text = message;
-
-            string cssClass = type == "success" ? "alert alert-success" : "alert alert-danger";
-            alertDiv.Attributes["class"] = cssClass;
-        }
-
-        // Additional Teacher Methods
-
-        public async Task<bool> ActivateLanguage(string languageId)
-        {
-            try
-            {
-                DocumentReference languageRef = db.Collection("languages").Document(languageId);
-                await languageRef.UpdateAsync(new Dictionary<string, object>
-                {
-                    { "IsActive", true }
-                });
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public async Task<bool> DeactivateLanguage(string languageId)
-        {
-            try
-            {
-                DocumentReference languageRef = db.Collection("languages").Document(languageId);
-                await languageRef.UpdateAsync(new Dictionary<string, object>
-                {
-                    { "IsActive", false }
-                });
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public async Task<List<Language>> GetPopularLanguages(int limit = 5)
-        {
-            try
-            {
-                var languages = await GetAllLanguagesWithStudentCount();
-                return languages.OrderByDescending(l => l.StudentCount).Take(limit).ToList();
+                return languages.OrderBy(l => l.Name).ToList();
             }
             catch
             {
@@ -673,37 +384,114 @@ namespace INTFYP
             }
         }
 
-        public async Task<Dictionary<string, int>> GetLanguageEnrollmentTrends(string languageId, int days = 30)
+        public async Task<Language> GetLanguageById(string languageId)
         {
-            var trends = new Dictionary<string, int>();
-
             try
             {
-                DateTime startDate = DateTime.UtcNow.AddDays(-days);
+                DocumentReference languageRef = db.Collection("languages").Document(languageId);
+                DocumentSnapshot languageDoc = await languageRef.GetSnapshotAsync();
 
-                Query query = db.Collection("enrollments")
-                               .WhereEqualTo("LanguageId", languageId)
-                               .WhereGreaterThan("EnrollmentDate", startDate);
-
-                QuerySnapshot snapshot = await query.GetSnapshotAsync();
-
-                foreach (DocumentSnapshot doc in snapshot.Documents)
+                if (languageDoc.Exists)
                 {
-                    var enrollment = doc.ConvertTo<StudentEnrollment>();
-                    string dateKey = enrollment.EnrollmentDate.ToString("yyyy-MM-dd");
-
-                    if (trends.ContainsKey(dateKey))
-                        trends[dateKey]++;
-                    else
-                        trends[dateKey] = 1;
+                    return languageDoc.ConvertTo<Language>();
                 }
+
+                return null;
             }
             catch
             {
-                // Return empty trends on error
+                return null;
             }
+        }
 
-            return trends;
+        public async Task<Language> GetLanguageByCode(string languageCode)
+        {
+            try
+            {
+                Query query = db.Collection("languages")
+                               .WhereEqualTo("Code", languageCode.ToUpper())
+                               .WhereEqualTo("IsActive", true)
+                               .Limit(1);
+
+                QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+                if (snapshot.Documents.Count > 0)
+                {
+                    return snapshot.Documents[0].ConvertTo<Language>();
+                }
+
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<bool> UpdateLanguageDifficulty(string languageId, string difficulty)
+        {
+            try
+            {
+                DocumentReference languageRef = db.Collection("languages").Document(languageId);
+                await languageRef.UpdateAsync(new Dictionary<string, object>
+                {
+                    { "Difficulty", difficulty }
+                });
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<int> GetTotalLanguageCount()
+        {
+            try
+            {
+                Query query = db.Collection("languages").WhereEqualTo("IsActive", true);
+                QuerySnapshot snapshot = await query.GetSnapshotAsync();
+                return snapshot.Documents.Count;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        public async Task<Dictionary<string, int>> GetLanguageStatistics()
+        {
+            try
+            {
+                var stats = new Dictionary<string, int>();
+
+                // Get total active languages
+                Query activeQuery = db.Collection("languages").WhereEqualTo("IsActive", true);
+                QuerySnapshot activeSnapshot = await activeQuery.GetSnapshotAsync();
+                stats["ActiveLanguages"] = activeSnapshot.Documents.Count;
+
+                // Get total inactive languages
+                Query inactiveQuery = db.Collection("languages").WhereEqualTo("IsActive", false);
+                QuerySnapshot inactiveSnapshot = await inactiveQuery.GetSnapshotAsync();
+                stats["InactiveLanguages"] = inactiveSnapshot.Documents.Count;
+
+                // Get languages by difficulty
+                var difficulties = new[] { "Beginner", "Intermediate", "Advanced", "Expert" };
+                foreach (var difficulty in difficulties)
+                {
+                    Query difficultyQuery = db.Collection("languages")
+                                             .WhereEqualTo("Difficulty", difficulty)
+                                             .WhereEqualTo("IsActive", true);
+                    QuerySnapshot difficultySnapshot = await difficultyQuery.GetSnapshotAsync();
+                    stats[$"{difficulty}Languages"] = difficultySnapshot.Documents.Count;
+                }
+
+                return stats;
+            }
+            catch
+            {
+                return new Dictionary<string, int>();
+            }
         }
     }
 }

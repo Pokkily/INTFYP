@@ -63,38 +63,32 @@ namespace YourProjectNamespace
                     IsActive = ""
                 },
                 new TeacherNavItem {
-                    Text = "Assignment Grouping",
-                    Description = "Automated grouping",
-                    Link = "~/AssignmentGrouping.aspx",
+                    Text = "Learning Resources",
+                    Description = "Manage books and study materials",
+                    Link = "AddBook.aspx",
                     IsActive = ""
                 },
                 new TeacherNavItem {
-                    Text = "Student Materials",
-                    Description = "Library Materials",
-                    Link = "AddBook.aspx",
-                    IsActive = ""
-                },               
-                new TeacherNavItem {
-                    Text = "Scholarship Post",
-                    Description = "All Your Support",
+                    Text = "Scholarship Opportunities",
+                    Description = "Post and manage student scholarships",
                     Link = "AddScholarship.aspx",
                     IsActive = ""
                 },
                 new TeacherNavItem {
-                    Text = "Lesson Adding",
-                    Description = "All Language You need",
+                    Text = "Lesson Management",
+                    Description = "Create and organize language lessons",
                     Link = "AddLanguage.aspx",
                     IsActive = ""
-                },                
+                },
                 new TeacherNavItem {
-                    Text = "Question",
-                    Description = "All Language You need",
+                    Text = "Question Bank",
+                    Description = "Add and manage assessment questions",
                     Link = "AddQuestion.aspx",
                     IsActive = ""
-                },               
+                },
                 new TeacherNavItem {
-                    Text = "Language Report",
-                    Description = "All Report You need",
+                    Text = "Progress Reports",
+                    Description = "View student language learning analytics",
                     Link = "LanguageReports.aspx",
                     IsActive = ""
                 }

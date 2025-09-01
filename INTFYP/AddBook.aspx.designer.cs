@@ -6,7 +6,6 @@
 //     the code is regenerated. 
 // </auto-generated>
 //------------------------------------------------------------------------------
-
 namespace INTFYP
 {
     public partial class AddBook
@@ -19,7 +18,6 @@ namespace INTFYP
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel pnlStatus;
-
         /// <summary>
         /// lblStatus control.
         /// </summary>
@@ -28,7 +26,6 @@ namespace INTFYP
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblStatus;
-
         /// <summary>
         /// txtTitle control.
         /// </summary>
@@ -37,7 +34,6 @@ namespace INTFYP
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtTitle;
-
         /// <summary>
         /// txtAuthor control.
         /// </summary>
@@ -46,7 +42,6 @@ namespace INTFYP
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtAuthor;
-
         /// <summary>
         /// ddlCategory control.
         /// </summary>
@@ -55,7 +50,6 @@ namespace INTFYP
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.DropDownList ddlCategory;
-
         /// <summary>
         /// txtTag control.
         /// </summary>
@@ -64,7 +58,6 @@ namespace INTFYP
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtTag;
-
         /// <summary>
         /// filePdf control.
         /// </summary>
@@ -73,7 +66,6 @@ namespace INTFYP
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.FileUpload filePdf;
-
         /// <summary>
         /// btnSubmit control.
         /// </summary>
@@ -82,7 +74,22 @@ namespace INTFYP
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnSubmit;
-
+        /// <summary>
+        /// txtSearch control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtSearch;
+        /// <summary>
+        /// btnClearSearch control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnClearSearch;
         /// <summary>
         /// lblBookStatus control.
         /// </summary>
@@ -91,7 +98,6 @@ namespace INTFYP
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblBookStatus;
-
         /// <summary>
         /// rptBooks control.
         /// </summary>
@@ -100,7 +106,6 @@ namespace INTFYP
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater rptBooks;
-
         /// <summary>
         /// pnlNoBooks control.
         /// </summary>
@@ -109,5 +114,29 @@ namespace INTFYP
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Panel pnlNoBooks;
+        /// <summary>
+        /// pnlNoSearchResults control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlNoSearchResults;
+        /// <summary>
+        /// pnlNoBooksAtAll control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Panel pnlNoBooksAtAll;
+        /// <summary>
+        /// lnkClearSearch control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.LinkButton lnkClearSearch;
     }
 }

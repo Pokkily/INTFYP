@@ -183,6 +183,29 @@ namespace YourProjectNamespace
             if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem)
             {
                 var feedback = (dynamic)e.Item.DataItem;
+
+                // Handle the modal comments repeater
+                var rptCommentsDetail = (Repeater)e.Item.FindControl("rptCommentsDetail");
+                var noCommentsDetailDiv = (HtmlGenericControl)e.Item.FindControl("noCommentsDetailDiv");
+
+                if (rptCommentsDetail != null)
+                {
+                    rptCommentsDetail.DataSource = feedback.Comments;
+                    rptCommentsDetail.DataBind();
+
+                    if (feedback.Comments.Count == 0)
+                    {
+                        if (noCommentsDetailDiv != null) noCommentsDetailDiv.Style["display"] = "block";
+                        rptCommentsDetail.Visible = false;
+                    }
+                    else
+                    {
+                        if (noCommentsDetailDiv != null) noCommentsDetailDiv.Style["display"] = "none";
+                        rptCommentsDetail.Visible = true;
+                    }
+                }
+
+                // Also handle regular comments repeater if it exists
                 var rptComments = (Repeater)e.Item.FindControl("rptComments");
                 var noCommentsDiv = (HtmlGenericControl)e.Item.FindControl("noCommentsDiv");
 
@@ -251,12 +274,18 @@ namespace YourProjectNamespace
                 string userId = Session["userId"]?.ToString();
                 string username = Session["username"]?.ToString() ?? "Anonymous";
 
-                var txtCommentInput = (TextBox)e.Item.FindControl("txtCommentInput");
+                // Try to find the modal comment controls first
+                var txtCommentInputDetail = (TextBox)e.Item.FindControl("txtCommentInputDetail");
+                var lblCommentErrorDetail = (Label)e.Item.FindControl("lblCommentErrorDetail");
+
+                // If modal controls not found, try regular controls (fallback)
+                var txtCommentInput = txtCommentInputDetail ?? (TextBox)e.Item.FindControl("txtCommentInput");
+                var lblCommentError = lblCommentErrorDetail ?? (Label)e.Item.FindControl("lblCommentError");
+
                 string commentText = txtCommentInput?.Text.Trim();
 
                 if (string.IsNullOrEmpty(userId))
                 {
-                    var lblCommentError = (Label)e.Item.FindControl("lblCommentError");
                     if (lblCommentError != null)
                     {
                         lblCommentError.Text = "Please login to comment";
@@ -267,7 +296,6 @@ namespace YourProjectNamespace
 
                 if (string.IsNullOrWhiteSpace(commentText))
                 {
-                    var lblCommentError = (Label)e.Item.FindControl("lblCommentError");
                     if (lblCommentError != null)
                     {
                         lblCommentError.Text = "Comment cannot be empty";
@@ -292,14 +320,23 @@ namespace YourProjectNamespace
                     if (txtCommentInput != null) txtCommentInput.Text = "";
 
                     // Hide any previous error
-                    var lblCommentError = (Label)e.Item.FindControl("lblCommentError");
                     if (lblCommentError != null) lblCommentError.Visible = false;
 
                     await LoadAllFeedbacks();
+
+                    // Add JavaScript to keep the modal open after postback
+                    string script = $@"
+                        <script type='text/javascript'>
+                            $(document).ready(function() {{
+                                setTimeout(function() {{
+                                    openCardDetail('{postId}');
+                                }}, 500);
+                            }});
+                        </script>";
+                    ClientScript.RegisterStartupScript(this.GetType(), "ReopenModal", script);
                 }
                 catch (Exception ex)
                 {
-                    var lblCommentError = (Label)e.Item.FindControl("lblCommentError");
                     if (lblCommentError != null)
                     {
                         lblCommentError.Text = "Error submitting comment: " + ex.Message;
