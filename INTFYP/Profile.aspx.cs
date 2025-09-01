@@ -309,40 +309,127 @@ namespace YourProjectNamespace
             try
             {
                 var classes = new List<dynamic>();
-                string userEmail = Session["email"]?.ToString()?.ToLower();
-                string userPosition = Session["position"]?.ToString()?.ToLower();
 
-                if (string.IsNullOrEmpty(userEmail))
+                // Get session data without any modifications first
+                string sessionEmail = Session["email"]?.ToString();
+                string sessionPosition = Session["position"]?.ToString();
+                string sessionUserId = Session["userId"]?.ToString();
+                string sessionUsername = Session["username"]?.ToString();
+
+                System.Diagnostics.Debug.WriteLine($"=== COMPLETE DEBUG SESSION INFO ===");
+                System.Diagnostics.Debug.WriteLine($"Session UserId: '{sessionUserId}'");
+                System.Diagnostics.Debug.WriteLine($"Session Email: '{sessionEmail}'");
+                System.Diagnostics.Debug.WriteLine($"Session Username: '{sessionUsername}'");
+                System.Diagnostics.Debug.WriteLine($"Session Position: '{sessionPosition}'");
+                System.Diagnostics.Debug.WriteLine($"Current UserId Field: '{currentUserId}'");
+                System.Diagnostics.Debug.WriteLine($"==========================================");
+
+                // Check if session data exists
+                if (string.IsNullOrEmpty(sessionEmail) || string.IsNullOrEmpty(sessionPosition))
                 {
-                    System.Diagnostics.Debug.WriteLine("User email is empty in LoadUserClasses");
-                    pnlNoClasses.Visible = true;
+                    System.Diagnostics.Debug.WriteLine("❌ SESSION DATA MISSING - redirecting to login");
+                    Response.Redirect("Login.aspx");
                     return;
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Loading classes for user: {userEmail}, position: {userPosition}");
+                string userPosition = sessionPosition.ToLower();
 
                 if (userPosition == "teacher")
                 {
-                    System.Diagnostics.Debug.WriteLine("Loading classes created by teacher...");
+                    System.Diagnostics.Debug.WriteLine($"🧑‍🏫 TEACHER MODE - Looking for classes created by: '{sessionEmail}'");
 
-                    // For teachers: get classes they created
-                    var teacherClassesSnapshot = await db.Collection("classrooms")
-                        .WhereEqualTo("createdBy", userEmail)
-                        .WhereEqualTo("isArchived", false) // Only get active classes
-                        .GetSnapshotAsync();
+                    // First, let's see ALL classrooms in the database
+                    System.Diagnostics.Debug.WriteLine("=== DEBUGGING: ALL CLASSROOMS IN DATABASE ===");
+                    var allClassroomsSnapshot = await db.Collection("classrooms").GetSnapshotAsync();
+                    System.Diagnostics.Debug.WriteLine($"Total classrooms found: {allClassroomsSnapshot?.Count ?? 0}");
 
-                    System.Diagnostics.Debug.WriteLine($"Found {teacherClassesSnapshot?.Count ?? 0} classes created by teacher");
-
-                    if (teacherClassesSnapshot != null)
+                    if (allClassroomsSnapshot != null && allClassroomsSnapshot.Count > 0)
                     {
-                        foreach (var classDoc in teacherClassesSnapshot.Documents)
+                        int classIndex = 1;
+                        foreach (var classroom in allClassroomsSnapshot.Documents)
+                        {
+                            try
+                            {
+                                var classroomData = classroom.ToDictionary();
+                                if (classroomData != null)
+                                {
+                                    string createdBy = GetSafeValue(classroomData, "createdBy");
+                                    string name = GetSafeValue(classroomData, "name");
+                                    bool isArchived = classroomData.ContainsKey("isArchived") ? Convert.ToBoolean(classroomData["isArchived"]) : false;
+
+                                    System.Diagnostics.Debug.WriteLine($"Classroom #{classIndex}:");
+                                    System.Diagnostics.Debug.WriteLine($"  - ID: {classroom.Id}");
+                                    System.Diagnostics.Debug.WriteLine($"  - Name: '{name}'");
+                                    System.Diagnostics.Debug.WriteLine($"  - CreatedBy: '{createdBy}'");
+                                    System.Diagnostics.Debug.WriteLine($"  - IsArchived: {isArchived}");
+                                    System.Diagnostics.Debug.WriteLine($"  - Email Match (Exact): {createdBy == sessionEmail}");
+                                    System.Diagnostics.Debug.WriteLine($"  - Email Match (Case Insensitive): {string.Equals(createdBy, sessionEmail, StringComparison.OrdinalIgnoreCase)}");
+                                    System.Diagnostics.Debug.WriteLine($"  - Should Include: {createdBy == sessionEmail && !isArchived}");
+                                    System.Diagnostics.Debug.WriteLine("  ---");
+
+                                    classIndex++;
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Error reading classroom {classroom.Id}: {ex.Message}");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("❌ NO CLASSROOMS FOUND IN DATABASE");
+                    }
+
+                    // Use manual filtering instead of compound query to avoid Firestore limitations
+                    System.Diagnostics.Debug.WriteLine("=== USING MANUAL FILTERING (more reliable) ===");
+
+                    List<DocumentSnapshot> matchingClassrooms = new List<DocumentSnapshot>();
+
+                    if (allClassroomsSnapshot != null)
+                    {
+                        foreach (var classroom in allClassroomsSnapshot.Documents)
+                        {
+                            try
+                            {
+                                var classroomData = classroom.ToDictionary();
+                                if (classroomData != null)
+                                {
+                                    string createdBy = GetSafeValue(classroomData, "createdBy");
+                                    bool isArchived = classroomData.ContainsKey("isArchived") ? Convert.ToBoolean(classroomData["isArchived"]) : false;
+
+                                    // Manual filtering
+                                    if (createdBy == sessionEmail && !isArchived)
+                                    {
+                                        matchingClassrooms.Add(classroom);
+                                        System.Diagnostics.Debug.WriteLine($"✅ Manual match found: {GetSafeValue(classroomData, "name")} (ID: {classroom.Id})");
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Error filtering classroom {classroom.Id}: {ex.Message}");
+                            }
+                        }
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"📚 Manual filtering found {matchingClassrooms.Count} matching classes");
+
+                    // Process the manually filtered results
+                    if (matchingClassrooms.Count > 0)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"📚 Processing {matchingClassrooms.Count} teacher classes...");
+
+                        foreach (var classDoc in matchingClassrooms)
                         {
                             try
                             {
                                 var classData = classDoc.ToDictionary();
                                 if (classData == null) continue;
 
-                                // Get student count for this class
+                                System.Diagnostics.Debug.WriteLine($"Processing class: {classDoc.Id} - {GetSafeValue(classData, "name")}");
+
+                                // Get student count
                                 var invitedStudentsSnapshot = await classDoc.Reference.Collection("invitedStudents")
                                     .WhereEqualTo("status", "accepted")
                                     .GetSnapshotAsync();
@@ -357,44 +444,49 @@ namespace YourProjectNamespace
                                             createdAtDate = timestamp.ToDateTime().ToString("MMM dd, yyyy");
                                         }
                                     }
-                                    catch
+                                    catch (Exception ex)
                                     {
-                                        createdAtDate = "Unknown";
+                                        System.Diagnostics.Debug.WriteLine($"Error parsing createdAt: {ex.Message}");
                                     }
                                 }
 
-                                classes.Add(new
+                                var classItem = new
                                 {
                                     classId = classDoc.Id,
                                     className = GetSafeValue(classData, "name", "Unknown Class"),
-                                    teacherName = "You", // Since this is a class created by the user
+                                    teacherName = "You",
                                     schedule = GetSafeValue(classData, "schedule", "Not specified"),
                                     studentCount = invitedStudentsSnapshot?.Count ?? 0,
                                     enrolledAt = createdAtDate
-                                });
+                                };
 
-                                System.Diagnostics.Debug.WriteLine($"Added teacher class: {GetSafeValue(classData, "name")}");
+                                classes.Add(classItem);
+                                System.Diagnostics.Debug.WriteLine($"✅ Added class: {classItem.className}");
                             }
                             catch (Exception ex)
                             {
-                                System.Diagnostics.Debug.WriteLine($"Error processing teacher class {classDoc.Id}: {ex.Message}");
+                                System.Diagnostics.Debug.WriteLine($"❌ Error processing class {classDoc.Id}: {ex.Message}");
                             }
                         }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("❌ No matching classrooms found with manual filtering");
                     }
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine("Loading classes for student...");
+                    // Student logic with debugging
+                    System.Diagnostics.Debug.WriteLine($"👨‍🎓 STUDENT MODE - Looking for invitations for: '{sessionEmail}'");
 
-                    // For students: get classes they're invited to and accepted
                     var invitedSnapshot = await db.CollectionGroup("invitedStudents")
-                        .WhereEqualTo("email", userEmail)
-                        .WhereEqualTo("status", "accepted") // Only get accepted invitations
+                        .WhereEqualTo("email", sessionEmail)
+                        .WhereEqualTo("status", "accepted")
                         .GetSnapshotAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"Found {invitedSnapshot?.Count ?? 0} accepted invitations for student");
+                    System.Diagnostics.Debug.WriteLine($"Student invitations found: {invitedSnapshot?.Count ?? 0}");
 
-                    if (invitedSnapshot != null)
+                    if (invitedSnapshot != null && invitedSnapshot.Count > 0)
                     {
                         foreach (var inviteDoc in invitedSnapshot.Documents)
                         {
@@ -422,7 +514,7 @@ namespace YourProjectNamespace
                                 string creatorEmail = GetSafeValue(classroomData, "createdBy");
                                 string teacherName = await GetUserFullName(creatorEmail);
 
-                                // Get student count for this class
+                                // Get student count
                                 var studentsSnapshot = await classroomRef.Collection("invitedStudents")
                                     .WhereEqualTo("status", "accepted")
                                     .GetSnapshotAsync();
@@ -437,10 +529,7 @@ namespace YourProjectNamespace
                                             joinedAtDate = timestamp.ToDateTime().ToString("MMM dd, yyyy");
                                         }
                                     }
-                                    catch
-                                    {
-                                        joinedAtDate = "Unknown";
-                                    }
+                                    catch { }
                                 }
                                 else if (inviteData.ContainsKey("invitedAt") && inviteData["invitedAt"] != null)
                                 {
@@ -451,10 +540,7 @@ namespace YourProjectNamespace
                                             joinedAtDate = timestamp.ToDateTime().ToString("MMM dd, yyyy");
                                         }
                                     }
-                                    catch
-                                    {
-                                        joinedAtDate = "Unknown";
-                                    }
+                                    catch { }
                                 }
 
                                 classes.Add(new
@@ -467,18 +553,20 @@ namespace YourProjectNamespace
                                     enrolledAt = joinedAtDate
                                 });
 
-                                System.Diagnostics.Debug.WriteLine($"Added student class: {GetSafeValue(classroomData, "name")}");
+                                System.Diagnostics.Debug.WriteLine($"✅ Added student class: {GetSafeValue(classroomData, "name")}");
                             }
                             catch (Exception ex)
                             {
-                                System.Diagnostics.Debug.WriteLine($"Error processing student invitation {inviteDoc.Id}: {ex.Message}");
+                                System.Diagnostics.Debug.WriteLine($"❌ Error processing student invitation {inviteDoc.Id}: {ex.Message}");
                             }
                         }
                     }
                 }
 
-                System.Diagnostics.Debug.WriteLine($"Total classes found: {classes.Count}");
+                System.Diagnostics.Debug.WriteLine($"=== FINAL RESULTS ===");
+                System.Diagnostics.Debug.WriteLine($"Total classes to display: {classes.Count}");
 
+                // Bind data
                 rptClasses.DataSource = classes;
                 rptClasses.DataBind();
 
@@ -486,12 +574,19 @@ namespace YourProjectNamespace
 
                 if (classes.Count == 0)
                 {
-                    System.Diagnostics.Debug.WriteLine("No classes found for user");
+                    System.Diagnostics.Debug.WriteLine("❌ NO CLASSES WILL BE DISPLAYED");
+                    ShowMessage("No classes found. Check debug output for details.", "info");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"✅ {classes.Count} CLASSES WILL BE DISPLAYED");
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"LoadUserClasses error: {ex}");
+                System.Diagnostics.Debug.WriteLine($"❌ CRITICAL ERROR in LoadUserClasses: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                ShowMessage($"Error loading classes: {ex.Message}", "danger");
                 pnlNoClasses.Visible = true;
             }
         }
