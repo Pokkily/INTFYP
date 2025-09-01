@@ -335,7 +335,6 @@
     <Content Include="Global.asax" />
     <Content Include="Images\dprofile.jpg" />
     <Content Include="Images\logo.png" />
-    <Content Include="Korean.aspx" />
     <Content Include="Language.aspx" />
     <Content Include="LanguageReports.aspx" />
     <Content Include="Library.aspx" />
@@ -544,13 +543,6 @@
     </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
-    </Compile>
-    <Compile Include="Korean.aspx.cs">
-      <DependentUpon>Korean.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Korean.aspx.designer.cs">
-      <DependentUpon>Korean.aspx</DependentUpon>
     </Compile>
     <Compile Include="Language.aspx.cs">
       <DependentUpon>Language.aspx</DependentUpon>
