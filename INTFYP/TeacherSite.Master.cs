@@ -59,7 +59,7 @@ namespace YourProjectNamespace
                 new TeacherNavItem {
                     Text = "View Quiz Result",
                     Description = "Check result",
-                    Link = "~/ViewQuizResult.aspx",
+                    Link = "QuizAnalytics.aspx",
                     IsActive = ""
                 },
                 new TeacherNavItem {

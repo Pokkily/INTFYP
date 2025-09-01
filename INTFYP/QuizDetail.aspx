@@ -325,6 +325,9 @@
             box-shadow: 0 20px 50px rgba(0,0,0,0.15);
             border: 1px solid rgba(255, 255, 255, 0.3);
             margin: 40px 20px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .score-circle {
@@ -372,6 +375,13 @@
             line-height: 1.6;
         }
 
+        .results-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
         @media (max-width: 768px) {
             .main-content {
                 padding: 20px 15px;
@@ -413,6 +423,15 @@
                 height: 150px;
                 font-size: 36px;
             }
+
+            .results-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .results-buttons .btn {
+                width: 200px;
+            }
         }
     </style>
 
@@ -429,66 +448,71 @@
             <asp:Image ID="imgQuiz" runat="server" CssClass="quiz-image" Visible="false" />
         </asp:Panel>
 
-        <div class="main-content">
-            <!-- Progress Bar -->
-            <asp:Panel ID="pnlProgress" runat="server" CssClass="progress-container">
-                <div class="progress-bar" id="progressBar" style="width: 0%"></div>
-            </asp:Panel>
-            <div class="progress-text">
-                Question <asp:Label ID="lblCurrentQuestion" runat="server" /> of <asp:Label ID="lblTotalQuestions" runat="server" />
-            </div>
+        <!-- Quiz Content Panel (includes everything except results) -->
+        <asp:Panel ID="pnlQuizContent" runat="server">
+            <div class="main-content">
+                <!-- Progress Bar -->
+                <asp:Panel ID="pnlProgress" runat="server" CssClass="progress-container">
+                    <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                </asp:Panel>
+                <div class="progress-text">
+                    Question <asp:Label ID="lblCurrentQuestion" runat="server" /> of <asp:Label ID="lblTotalQuestions" runat="server" />
+                </div>
 
-            <!-- Question Container -->
-            <asp:Panel ID="pnlQuestion" runat="server" CssClass="question-container">
-                <div class="question-header">
-                    <div class="question-number">
-                        <asp:Label ID="lblQuestionNumber" runat="server" />
+                <!-- Question Container -->
+                <asp:Panel ID="pnlQuestion" runat="server" CssClass="question-container">
+                    <div class="question-header">
+                        <div class="question-number">
+                            <asp:Label ID="lblQuestionNumber" runat="server" />
+                        </div>
+                        <div class="question-type">
+                            <asp:Label ID="lblQuestionType" runat="server" />
+                        </div>
                     </div>
-                    <div class="question-type">
-                        <asp:Label ID="lblQuestionType" runat="server" />
+
+                    <div class="question-text">
+                        <asp:Label ID="lblQuestion" runat="server" />
                     </div>
+
+                    <asp:Image ID="imgQuestion" runat="server" CssClass="question-image" Visible="false" />
+
+                    <div class="options-container">
+                        <asp:Repeater ID="rptOptions" runat="server">
+                            <ItemTemplate>
+                                <div class="option-item" onclick="selectOption(this, <%# Container.ItemIndex %>, '<%# IsMultipleAnswer ? "checkbox" : "radio" %>')">
+                                    <asp:CheckBox ID="chkOption" runat="server" CssClass="option-input" Visible='<%# IsMultipleAnswer %>' />
+                                    <asp:RadioButton ID="rdoOption" runat="server" GroupName="options" CssClass="option-input" Visible='<%# !IsMultipleAnswer %>' />
+                                    <span class="option-text"><%# Container.DataItem %></span>
+                                </div>
+                            </ItemTemplate>
+                        </asp:Repeater>
+                    </div>
+                </asp:Panel>
+
+                <!-- Navigation -->
+                <div class="navigation-container">
+                    <asp:Button ID="btnPrevious" runat="server" Text="← Previous" CssClass="btn btn-secondary" OnClick="btnPrevious_Click" Visible="false" />
+                    <div></div>
+                    <asp:Button ID="btnNext" runat="server" Text="Next →" CssClass="btn btn-primary" OnClick="btnNext_Click" />
+                    <asp:Button ID="btnFinish" runat="server" Text="Finish Quiz" CssClass="btn btn-success" OnClick="btnFinish_Click" Visible="false" />
                 </div>
-
-                <div class="question-text">
-                    <asp:Label ID="lblQuestion" runat="server" />
-                </div>
-
-                <asp:Image ID="imgQuestion" runat="server" CssClass="question-image" Visible="false" />
-
-                <div class="options-container">
-                    <asp:Repeater ID="rptOptions" runat="server">
-                        <ItemTemplate>
-                            <div class="option-item" onclick="selectOption(this, <%# Container.ItemIndex %>, '<%# IsMultipleAnswer ? "checkbox" : "radio" %>')">
-                                <asp:CheckBox ID="chkOption" runat="server" CssClass="option-input" Visible='<%# IsMultipleAnswer %>' />
-                                <asp:RadioButton ID="rdoOption" runat="server" GroupName="options" CssClass="option-input" Visible='<%# !IsMultipleAnswer %>' />
-                                <span class="option-text"><%# Container.DataItem %></span>
-                            </div>
-                        </ItemTemplate>
-                    </asp:Repeater>
-                </div>
-            </asp:Panel>
-
-            <!-- Navigation -->
-            <div class="navigation-container">
-                <asp:Button ID="btnPrevious" runat="server" Text="← Previous" CssClass="btn btn-secondary" OnClick="btnPrevious_Click" Visible="false" />
-                <div></div>
-                <asp:Button ID="btnNext" runat="server" Text="Next →" CssClass="btn btn-primary" OnClick="btnNext_Click" />
-                <asp:Button ID="btnFinish" runat="server" Text="Finish Quiz" CssClass="btn btn-success" OnClick="btnFinish_Click" Visible="false" />
             </div>
-        </div>
+        </asp:Panel>
 
         <!-- Results Container -->
         <asp:Panel ID="pnlResults" runat="server" CssClass="results-container" Visible="false">
-    <div class="score-circle">
-        <span><asp:Label ID="lblScorePercentage" runat="server" />%</span>
-    </div>
-    <div class="results-title">Quiz Completed!</div>
-    <div class="results-details">
-        You scored <asp:Label ID="lblCorrectAnswers" runat="server" /> out of <asp:Label ID="lblTotalQuestionsResult" runat="server" /> questions correctly.
-    </div>
-    <asp:Button ID="btnTryAgain" runat="server" Text="Try Again" CssClass="btn btn-primary" OnClick="btnTryAgain_Click" />
-    <asp:Button ID="btnBackToQuizzes" runat="server" Text="Back to Quizzes" CssClass="btn btn-secondary" OnClick="btnBackToQuizzes_Click" style="margin-left: 15px;" />
-</asp:Panel>
+            <div class="score-circle">
+                <span><asp:Label ID="lblScorePercentage" runat="server" />%</span>
+            </div>
+            <div class="results-title">Quiz Completed!</div>
+            <div class="results-details">
+                You scored <asp:Label ID="lblCorrectAnswers" runat="server" /> out of <asp:Label ID="lblTotalQuestionsResult" runat="server" /> questions correctly.
+            </div>
+            <div class="results-buttons">
+                <asp:Button ID="btnTryAgain" runat="server" Text="Try Again" CssClass="btn btn-primary" OnClick="btnTryAgain_Click" />
+                <asp:Button ID="btnBackToQuizzes" runat="server" Text="Back to Quizzes" CssClass="btn btn-secondary" OnClick="btnBackToQuizzes_Click" />
+            </div>
+        </asp:Panel>
     </div>
 
     <script type="text/javascript">
