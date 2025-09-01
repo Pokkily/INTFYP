@@ -1,14 +1,14 @@
-﻿using Google.Cloud.Firestore;
+﻿using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using Google.Cloud.Firestore;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using System.IO;
-using System.Configuration;
-using CloudinaryDotNet;
-using CloudinaryDotNet.Actions;
 
 namespace YourProjectNamespace
 {
@@ -17,6 +17,7 @@ namespace YourProjectNamespace
         private FirestoreDb db;
         private string currentUserEmail;
         private string currentUserName;
+        private Dictionary<string, string> userProfilePictures = new Dictionary<string, string>();
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -139,7 +140,6 @@ namespace YourProjectNamespace
                         "setTimeout(() => showMembersList(), 100);", true);
                     break;
 
-                // NEW: Handle message deletion
                 case "DeleteMessage":
                     if (!string.IsNullOrEmpty(eventArgument))
                     {
@@ -166,7 +166,282 @@ namespace YourProjectNamespace
             }
         }
 
-        // NEW: Delete message method
+        // NEW: Get user profile picture method
+        protected string GetUserProfilePicture(string userEmail)
+        {
+            if (string.IsNullOrEmpty(userEmail))
+                return "";
+
+            // Check cache first
+            if (userProfilePictures.ContainsKey(userEmail))
+            {
+                return userProfilePictures[userEmail];
+            }
+
+            try
+            {
+                // Get from Firestore - this will be called synchronously from markup
+                // For better performance, consider caching these during page load
+                var task = Task.Run(async () =>
+                {
+                    try
+                    {
+                        var userQuery = db.Collection("users")
+                            .WhereEqualTo("email", userEmail)
+                            .Limit(1);
+
+                        var userSnapshot = await userQuery.GetSnapshotAsync();
+
+                        if (userSnapshot?.Count > 0)
+                        {
+                            var userData = userSnapshot.Documents[0].ToDictionary();
+                            return GetSafeValue(userData, "profileImageUrl", "");
+                        }
+                        return "";
+                    }
+                    catch
+                    {
+                        return "";
+                    }
+                });
+
+                string profileUrl = task.Result;
+
+                // Cache the result
+                if (!userProfilePictures.ContainsKey(userEmail))
+                {
+                    userProfilePictures[userEmail] = profileUrl;
+                }
+
+                return profileUrl;
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        // IMPROVED: User search with both email and username support
+        protected async void btnSearchUser_Click(object sender, EventArgs e)
+        {
+            string searchTerm = txtUserSearch.Text.Trim().ToLower();
+
+            if (string.IsNullOrEmpty(searchTerm))
+            {
+                ShowSearchMessage("Please enter an email address or username", "text-danger");
+                return;
+            }
+
+            if (searchTerm == currentUserEmail.ToLower())
+            {
+                ShowSearchMessage("You cannot start a chat with yourself", "text-warning");
+                return;
+            }
+
+            hfActiveTab.Value = "private-chat";
+
+            try
+            {
+                var userResults = new List<UserSearchResult>();
+
+                // Search by email first
+                var emailSnapshot = await db.Collection("users")
+                    .WhereEqualTo("email", searchTerm)
+                    .GetSnapshotAsync();
+
+                if (emailSnapshot.Count > 0)
+                {
+                    var userDoc = emailSnapshot.Documents[0];
+                    var userData = userDoc.ToDictionary();
+
+                    string firstName = GetSafeValue(userData, "firstName", "");
+                    string lastName = GetSafeValue(userData, "lastName", "");
+                    string fullName = $"{firstName} {lastName}".Trim();
+                    string username = GetSafeValue(userData, "username", "");
+
+                    if (string.IsNullOrEmpty(fullName))
+                    {
+                        fullName = searchTerm.Split('@')[0];
+                    }
+
+                    userResults.Add(new UserSearchResult
+                    {
+                        Email = searchTerm,
+                        Name = fullName,
+                        Username = username
+                    });
+                }
+                else
+                {
+                    // If not found by email, search by username
+                    var usernameSnapshot = await db.Collection("users")
+                        .WhereEqualTo("username", searchTerm)
+                        .GetSnapshotAsync();
+
+                    if (usernameSnapshot.Count > 0)
+                    {
+                        var userDoc = usernameSnapshot.Documents[0];
+                        var userData = userDoc.ToDictionary();
+
+                        string firstName = GetSafeValue(userData, "firstName", "");
+                        string lastName = GetSafeValue(userData, "lastName", "");
+                        string fullName = $"{firstName} {lastName}".Trim();
+                        string email = GetSafeValue(userData, "email", "");
+                        string username = GetSafeValue(userData, "username", "");
+
+                        if (string.IsNullOrEmpty(fullName))
+                        {
+                            fullName = username;
+                        }
+
+                        // Check if it's not the current user
+                        if (email.ToLower() != currentUserEmail.ToLower())
+                        {
+                            userResults.Add(new UserSearchResult
+                            {
+                                Email = email,
+                                Name = fullName,
+                                Username = username
+                            });
+                        }
+                        else
+                        {
+                            ShowSearchMessage("You cannot start a chat with yourself", "text-warning");
+                            pnlUserSearchResults.Visible = false;
+                            return;
+                        }
+                    }
+                }
+
+                if (userResults.Count > 0)
+                {
+                    rptUserSearchResults.DataSource = userResults;
+                    rptUserSearchResults.DataBind();
+                    pnlUserSearchResults.Visible = true;
+
+                    ShowSearchMessage("User found!", "text-success");
+                }
+                else
+                {
+                    pnlUserSearchResults.Visible = false;
+                    ShowSearchMessage("User not found. Please check the email or username.", "text-danger");
+                }
+            }
+            catch (Exception ex)
+            {
+                pnlUserSearchResults.Visible = false;
+                ShowSearchMessage("Error searching for user: " + ex.Message, "text-danger");
+            }
+        }
+
+        // IMPROVED: Invite user with both email and username support
+        protected async void btnInviteUser_Click(object sender, EventArgs e)
+        {
+            string inviteInput = txtInviteEmail.Text.Trim().ToLower();
+            string roomId = hfCurrentRoomId.Value;
+
+            if (string.IsNullOrEmpty(inviteInput))
+            {
+                ShowInviteMessage("Please enter an email address or username", "text-danger");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(roomId))
+            {
+                ShowInviteMessage("No room selected", "text-danger");
+                return;
+            }
+
+            if (inviteInput == currentUserEmail.ToLower())
+            {
+                ShowInviteMessage("You are already in this room", "text-warning");
+                return;
+            }
+
+            try
+            {
+                var roomRef = db.Collection("chatRooms").Document(roomId);
+                var roomSnapshot = await roomRef.GetSnapshotAsync();
+
+                if (!roomSnapshot.Exists)
+                {
+                    ShowInviteMessage("Room not found", "text-danger");
+                    return;
+                }
+
+                // First try to find user by email
+                var userSnapshot = await db.Collection("users")
+                    .WhereEqualTo("email", inviteInput)
+                    .GetSnapshotAsync();
+
+                // If not found by email, try username
+                if (userSnapshot.Count == 0)
+                {
+                    userSnapshot = await db.Collection("users")
+                        .WhereEqualTo("username", inviteInput)
+                        .GetSnapshotAsync();
+                }
+
+                if (userSnapshot.Count == 0)
+                {
+                    ShowInviteMessage("User not found", "text-danger");
+                    return;
+                }
+
+                var userData = userSnapshot.Documents[0].ToDictionary();
+                string userEmail = GetSafeValue(userData, "email", "");
+
+                if (userEmail.ToLower() == currentUserEmail.ToLower())
+                {
+                    ShowInviteMessage("You are already in this room", "text-warning");
+                    return;
+                }
+
+                var existingMember = await roomRef.Collection("members")
+                    .Document(userEmail).GetSnapshotAsync();
+
+                if (existingMember.Exists)
+                {
+                    var memberData = existingMember.ToDictionary();
+                    if (GetSafeValue(memberData, "status", "") == "active")
+                    {
+                        ShowInviteMessage("User is already a member", "text-warning");
+                        return;
+                    }
+                }
+
+                string firstName = GetSafeValue(userData, "firstName", "");
+                string lastName = GetSafeValue(userData, "lastName", "");
+                string fullName = $"{firstName} {lastName}".Trim();
+
+                if (string.IsNullOrEmpty(fullName))
+                {
+                    fullName = userEmail.Split('@')[0];
+                }
+
+                await roomRef.Collection("members").Document(userEmail).SetAsync(new
+                {
+                    email = userEmail,
+                    name = fullName,
+                    role = "member",
+                    joinedAt = FieldValue.ServerTimestamp,
+                    status = "active",
+                    lastSeen = FieldValue.ServerTimestamp
+                });
+
+                await roomRef.UpdateAsync("lastActivity", FieldValue.ServerTimestamp);
+
+                txtInviteEmail.Text = "";
+
+                Response.Redirect($"ChatRoom.aspx?room={roomId}&tab={hfActiveTab.Value}&action=user-invited");
+            }
+            catch (Exception ex)
+            {
+                ShowInviteMessage("Error inviting user: " + ex.Message, "text-danger");
+            }
+        }
+
+        // Delete message method
         private async void DeleteMessageAsync(string messageId)
         {
             string roomId = hfCurrentRoomId.Value;
@@ -217,7 +492,7 @@ namespace YourProjectNamespace
             }
         }
 
-        // File upload to Cloudinary method (similar to AddBook)
+        // File upload to Cloudinary method
         private async System.Threading.Tasks.Task<FileUploadResult> UploadFileToCloudinary(FileUpload fileUpload)
         {
             var account = new Account(
@@ -356,7 +631,7 @@ namespace YourProjectNamespace
                     { "type", "text" },
                     { "timestamp", FieldValue.ServerTimestamp },
                     { "edited", false },
-                    { "isDeleted", false } // NEW: Add isDeleted field for new messages
+                    { "isDeleted", false }
                 };
 
                 // Handle file upload if present
@@ -608,71 +883,6 @@ namespace YourProjectNamespace
             }
         }
 
-        protected async void btnSearchUser_Click(object sender, EventArgs e)
-        {
-            string searchEmail = txtUserSearch.Text.Trim().ToLower();
-
-            if (string.IsNullOrEmpty(searchEmail))
-            {
-                ShowSearchMessage("Please enter an email address", "text-danger");
-                return;
-            }
-
-            if (searchEmail == currentUserEmail.ToLower())
-            {
-                ShowSearchMessage("You cannot start a chat with yourself", "text-warning");
-                return;
-            }
-
-            hfActiveTab.Value = "private-chat";
-
-            try
-            {
-                var userResults = new List<UserSearchResult>();
-
-                var userSnapshot = await db.Collection("users")
-                    .WhereEqualTo("email", searchEmail)
-                    .GetSnapshotAsync();
-
-                if (userSnapshot.Count > 0)
-                {
-                    var userDoc = userSnapshot.Documents[0];
-                    var userData = userDoc.ToDictionary();
-
-                    string firstName = GetSafeValue(userData, "firstName", "");
-                    string lastName = GetSafeValue(userData, "lastName", "");
-                    string fullName = $"{firstName} {lastName}".Trim();
-
-                    if (string.IsNullOrEmpty(fullName))
-                    {
-                        fullName = searchEmail.Split('@')[0];
-                    }
-
-                    userResults.Add(new UserSearchResult
-                    {
-                        Email = searchEmail,
-                        Name = fullName
-                    });
-
-                    rptUserSearchResults.DataSource = userResults;
-                    rptUserSearchResults.DataBind();
-                    pnlUserSearchResults.Visible = true;
-
-                    ShowSearchMessage("User found!", "text-success");
-                }
-                else
-                {
-                    pnlUserSearchResults.Visible = false;
-                    ShowSearchMessage("User not found", "text-danger");
-                }
-            }
-            catch (Exception ex)
-            {
-                pnlUserSearchResults.Visible = false;
-                ShowSearchMessage("Error searching for user: " + ex.Message, "text-danger");
-            }
-        }
-
         protected async void rptUserSearchResults_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             if (e.CommandName == "StartChat")
@@ -814,95 +1024,6 @@ namespace YourProjectNamespace
             {
                 ShowMessage("Error creating room: " + ex.Message, "text-danger");
                 hfActiveTab.Value = "create-room";
-            }
-        }
-
-        protected async void btnInviteUser_Click(object sender, EventArgs e)
-        {
-            string inviteEmail = txtInviteEmail.Text.Trim().ToLower();
-            string roomId = hfCurrentRoomId.Value;
-
-            if (string.IsNullOrEmpty(inviteEmail))
-            {
-                ShowInviteMessage("Please enter an email address", "text-danger");
-                return;
-            }
-
-            if (string.IsNullOrEmpty(roomId))
-            {
-                ShowInviteMessage("No room selected", "text-danger");
-                return;
-            }
-
-            if (inviteEmail == currentUserEmail.ToLower())
-            {
-                ShowInviteMessage("You are already in this room", "text-warning");
-                return;
-            }
-
-            try
-            {
-                var roomRef = db.Collection("chatRooms").Document(roomId);
-                var roomSnapshot = await roomRef.GetSnapshotAsync();
-
-                if (!roomSnapshot.Exists)
-                {
-                    ShowInviteMessage("Room not found", "text-danger");
-                    return;
-                }
-
-                var userSnapshot = await db.Collection("users")
-                    .WhereEqualTo("email", inviteEmail)
-                    .GetSnapshotAsync();
-
-                if (userSnapshot.Count == 0)
-                {
-                    ShowInviteMessage("User not found", "text-danger");
-                    return;
-                }
-
-                var existingMember = await roomRef.Collection("members")
-                    .Document(inviteEmail).GetSnapshotAsync();
-
-                if (existingMember.Exists)
-                {
-                    var memberData = existingMember.ToDictionary();
-                    if (GetSafeValue(memberData, "status", "") == "active")
-                    {
-                        ShowInviteMessage("User is already a member", "text-warning");
-                        return;
-                    }
-                }
-
-                var userData = userSnapshot.Documents[0].ToDictionary();
-                string firstName = GetSafeValue(userData, "firstName", "");
-                string lastName = GetSafeValue(userData, "lastName", "");
-                string fullName = $"{firstName} {lastName}".Trim();
-
-                if (string.IsNullOrEmpty(fullName))
-                {
-                    fullName = inviteEmail.Split('@')[0];
-                }
-
-                await roomRef.Collection("members").Document(inviteEmail).SetAsync(new
-                {
-                    email = inviteEmail,
-                    name = fullName,
-                    role = "member",
-                    joinedAt = FieldValue.ServerTimestamp,
-                    status = "active",
-                    lastSeen = FieldValue.ServerTimestamp
-                });
-
-                await roomRef.UpdateAsync("lastActivity", FieldValue.ServerTimestamp);
-
-                txtInviteEmail.Text = "";
-
-                Response.Redirect($"ChatRoom.aspx?room={roomId}&tab={hfActiveTab.Value}&action=user-invited");
-            }
-            catch (Exception ex)
-            {
-                ShowInviteMessage("Error inviting user: " + ex.Message, "text-danger");
             }
         }
 
@@ -1109,7 +1230,6 @@ namespace YourProjectNamespace
             }
         }
 
-        // UPDATED: Load messages with deletion support
         private async Task LoadMessagesAsync(string roomId)
         {
             try
@@ -1135,7 +1255,6 @@ namespace YourProjectNamespace
                         timestamp = ((Timestamp)data["timestamp"]).ToDateTime();
                     }
 
-                    // NEW: Check if message is deleted
                     bool isDeleted = false;
                     if (data.ContainsKey("isDeleted"))
                     {
@@ -1154,7 +1273,7 @@ namespace YourProjectNamespace
                         FileUrl = GetSafeValue(data, "fileUrl", ""),
                         FileName = GetSafeValue(data, "fileName", ""),
                         FileType = GetSafeValue(data, "fileType", ""),
-                        IsDeleted = isDeleted // NEW: Add deleted status
+                        IsDeleted = isDeleted
                     });
                 }
 
@@ -1205,13 +1324,12 @@ namespace YourProjectNamespace
                 parts[0][0].ToString().ToUpper();
         }
 
-        // NEW: Helper method to get current user email for template access
         protected string GetCurrentUserEmail()
         {
             return currentUserEmail ?? "";
         }
 
-        private string GetSafeValue(Dictionary<string, object> dict, string key, string defaultValue)
+        private string GetSafeValue(Dictionary<string, object> dict, string key, string defaultValue = "")
         {
             if (dict.ContainsKey(key) && dict[key] != null)
             {
@@ -1282,7 +1400,6 @@ namespace YourProjectNamespace
             public bool IsPublic { get; set; }
         }
 
-        // UPDATED: ChatMessage class with deletion support
         public class ChatMessage
         {
             public string Id { get; set; }
@@ -1295,13 +1412,14 @@ namespace YourProjectNamespace
             public string FileUrl { get; set; }
             public string FileName { get; set; }
             public string FileType { get; set; }
-            public bool IsDeleted { get; set; } // NEW: Deletion status
+            public bool IsDeleted { get; set; }
         }
 
         public class UserSearchResult
         {
             public string Email { get; set; }
             public string Name { get; set; }
+            public string Username { get; set; }
         }
 
         public class RoomMember

@@ -248,10 +248,7 @@
             background: linear-gradient(135deg, #44a08d 0%, #4ecdc4 100%);
         }
 
-        .secondary-button {
-            background: rgba(255, 255, 255, 0.9);
-            color: #667eea;
-            border: 1px solid rgba(103, 126, 234, 0.3);
+        .secondary-button, .success-button, .danger-button {
             padding: 8px 16px;
             border-radius: 20px;
             font-weight: 500;
@@ -260,104 +257,17 @@
             cursor: pointer;
             position: relative;
             overflow: hidden;
-        }
-
-        .secondary-button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(103, 126, 234, 0.1);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.6s ease;
-        }
-
-        .secondary-button:hover::before {
-            width: 200px;
-            height: 200px;
-        }
-
-        .secondary-button:hover {
-            background: #667eea;
-            color: white;
-            transform: scale(1.05);
+            border: none;
         }
 
         .success-button {
             background: linear-gradient(45deg, #56ab2f, #a8e6cf);
             color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 500;
-            font-size: 12px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .success-button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.6s ease;
-        }
-
-        .success-button:hover::before {
-            width: 200px;
-            height: 200px;
-        }
-
-        .success-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(86, 171, 47, 0.4);
         }
 
         .danger-button {
             background: linear-gradient(45deg, #ff6b6b, #ee5a52);
             color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 500;
-            font-size: 12px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .danger-button::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.6s ease;
-        }
-
-        .danger-button:hover::before {
-            width: 200px;
-            height: 200px;
-        }
-
-        .danger-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
         }
 
         .room-item {
@@ -368,53 +278,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            backdrop-filter: blur(5px);
-            position: relative;
-            overflow: hidden;
-            animation: cardEntrance 0.8s ease-out both;
-            animation-delay: calc(var(--room-index, 0) * 0.1s);
-        }
-
-        @keyframes cardEntrance {
-            from { 
-                opacity: 0; 
-                transform: translateX(-30px) rotate(-1deg); 
-            }
-            to { 
-                opacity: 1; 
-                transform: translateX(0) rotate(0deg); 
-            }
-        }
-
-        .room-item::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.6s ease;
-            z-index: -1;
-        }
-
-        .room-item:hover::before {
-            width: 400px;
-            height: 400px;
         }
 
         .room-item:hover {
             background: rgba(248, 249, 250, 0.8);
             transform: translateX(5px) translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
         .room-item.active {
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
             border-left: 4px solid #667eea;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
         }
 
         .room-info h4 {
@@ -454,7 +327,6 @@
             padding: 4px 10px;
             font-size: 11px;
             font-weight: 600;
-            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
         }
 
         .main-chat {
@@ -471,14 +343,12 @@
             justify-content: space-between;
             align-items: center;
             border-radius: 20px 20px 0 0;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
         .chat-title {
             margin: 0;
             font-size: 20px;
             font-weight: 600;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .chat-members {
@@ -495,12 +365,6 @@
             font-size: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
-            backdrop-filter: blur(5px);
-        }
-
-        .manage-btn:hover, .leave-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.05);
         }
 
         .messages-container {
@@ -508,18 +372,11 @@
             padding: 20px;
             overflow-y: auto;
             background: linear-gradient(135deg, rgba(248, 249, 250, 0.9) 0%, rgba(255, 255, 255, 0.9) 100%);
-            backdrop-filter: blur(10px);
             border-radius: 0 0 20px 20px;
-            scroll-behavior: smooth;
         }
 
         .messages-container::-webkit-scrollbar {
             width: 8px;
-        }
-
-        .messages-container::-webkit-scrollbar-track {
-            background: rgba(241, 243, 244, 0.5);
-            border-radius: 10px;
         }
 
         .messages-container::-webkit-scrollbar-thumb {
@@ -531,18 +388,12 @@
             margin-bottom: 20px;
             display: flex;
             gap: 12px;
-            max-width: 100%;
             animation: messageSlideIn 0.3s ease-out;
             position: relative;
         }
 
         .message.own {
             flex-direction: row-reverse;
-        }
-
-        /* NEW: Deleted message styling */
-        .message.deleted {
-            opacity: 0.6;
         }
 
         .message.deleted .message-content {
@@ -555,6 +406,20 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
+            flex-shrink: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .message-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .message-avatar-fallback {
+            width: 100%;
+            height: 100%;
             background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
             display: flex;
@@ -562,24 +427,17 @@
             justify-content: center;
             font-weight: bold;
             font-size: 14px;
-            flex-shrink: 0;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
-        .message.own .message-avatar {
+        .message.own .message-avatar-fallback {
             background: linear-gradient(135deg, #56ab2f, #a8e6cf);
         }
 
         .message-content {
             max-width: 70%;
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
             padding: 15px 20px;
             border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            word-wrap: break-word;
-            overflow-wrap: break-word;
             position: relative;
         }
 
@@ -588,15 +446,12 @@
             color: white;
         }
 
-        /* NEW: Message actions (delete button) */
         .message-actions {
             position: absolute;
             top: 8px;
             right: 8px;
             opacity: 0;
-            transition: all 0.3s ease;
-            display: flex;
-            gap: 4px;
+            transition: opacity 0.3s ease;
         }
 
         .message:hover .message-actions {
@@ -615,23 +470,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
-        }
-
-        .message-delete-btn:hover {
-            background: rgba(255, 107, 107, 1);
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.5);
-        }
-
-        /* For own messages in dark background */
-        .message.own .message-delete-btn {
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .message.own .message-delete-btn:hover {
-            background: rgba(255, 107, 107, 0.9);
         }
 
         .message-header {
@@ -639,7 +477,7 @@
             align-items: center;
             gap: 8px;
             margin-bottom: 6px;
-            padding-right: 30px; /* Space for delete button */
+            padding-right: 30px;
         }
 
         .message-sender {
@@ -655,80 +493,11 @@
         .message-text {
             font-size: 14px;
             line-height: 1.5;
-            word-wrap: break-word;
-        }
-
-        /* File message styles */
-        .message-file {
-            margin-top: 10px;
-            padding: 12px;
-            background: rgba(248, 249, 250, 0.5);
-            border-radius: 10px;
-            border: 1px solid rgba(233, 236, 239, 0.8);
-        }
-
-        .message.own .message-file {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-
-        .file-preview {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .file-icon {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            font-size: 18px;
-        }
-
-        .file-icon.pdf {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
-            color: white;
-        }
-
-        .file-icon.image {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-        }
-
-        .file-info {
-            flex: 1;
-        }
-
-        .file-name {
-            font-weight: 500;
-            font-size: 13px;
-            margin-bottom: 2px;
-        }
-
-        .file-size {
-            font-size: 11px;
-            opacity: 0.7;
-        }
-
-        .file-image {
-            max-width: 200px;
-            max-height: 150px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-
-        .file-image:hover {
-            transform: scale(1.05);
         }
 
         .message-input-area {
             padding: 20px;
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
             border-top: 1px solid rgba(233, 236, 239, 0.8);
             border-radius: 0 0 20px 20px;
         }
@@ -749,102 +518,29 @@
             min-height: 20px;
             max-height: 100px;
             overflow-y: auto;
-            box-sizing: border-box;
-            font-family: inherit;
-            background: rgba(255, 255, 255, 0.9);
-            transition: all 0.3s ease;
         }
 
-        .message-input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(103, 126, 234, 0.3);
-            transform: scale(1.02);
+        .file-upload-btn, .send-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            position: relative;
+            overflow: hidden;
         }
 
         .file-upload-btn {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
             background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: bold;
-            position: relative;
-            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
-            overflow: hidden;
-        }
-
-        .file-upload-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.6s ease;
-        }
-
-        .file-upload-btn:hover::before {
-            width: 200px;
-            height: 200px;
-        }
-
-        .file-upload-btn:hover {
-            transform: scale(1.1) rotate(3deg);
-            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
-            background: linear-gradient(135deg, #44a08d 0%, #4ecdc4 100%);
         }
 
         .send-btn {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
             background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            font-size: 18px;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .send-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 0.6s ease;
-        }
-
-        .send-btn:hover::before {
-            width: 200px;
-            height: 200px;
-        }
-
-        .send-btn:hover {
-            transform: scale(1.1) rotate(-3deg);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
 
         .empty-state {
@@ -858,7 +554,6 @@
             padding: 60px 20px;
             background: linear-gradient(135deg, rgba(248, 249, 250, 0.9) 0%, rgba(255, 255, 255, 0.9) 100%);
             border-radius: 20px;
-            backdrop-filter: blur(10px);
         }
 
         .empty-state h3 {
@@ -873,8 +568,6 @@
             border-radius: 10px;
             font-size: 13px;
             display: none;
-            backdrop-filter: blur(5px);
-            animation: statusSlideIn 0.5s ease-out;
         }
 
         .status-message.show {
@@ -899,7 +592,6 @@
             border: 1px solid rgba(255, 193, 7, 0.3);
         }
 
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -908,22 +600,16 @@
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
             background-color: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
         }
 
         .modal-content {
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
             margin: 5% auto;
             padding: 0;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
             width: 90%;
             max-width: 600px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            animation: modalSlideIn 0.3s ease-out;
         }
 
         .modal-header {
@@ -936,31 +622,15 @@
             align-items: center;
         }
 
-        .modal-header h3 {
-            margin: 0;
-            font-weight: 600;
-        }
-
         .close {
             color: white;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .close:hover {
-            opacity: 0.7;
-            transform: scale(1.1);
         }
 
         .modal-body {
             padding: 25px;
-        }
-
-        .member-list {
-            max-height: 400px;
-            overflow-y: auto;
         }
 
         .member-item {
@@ -969,22 +639,38 @@
             align-items: center;
             padding: 15px;
             border-bottom: 1px solid rgba(233, 236, 239, 0.8);
-            transition: all 0.3s ease;
-        }
-
-        .member-item:hover {
-            background: rgba(248, 249, 250, 0.8);
-            transform: translateX(5px);
-        }
-
-        .member-item:last-child {
-            border-bottom: none;
         }
 
         .member-details {
             display: flex;
             align-items: center;
             gap: 15px;
+        }
+
+        .member-avatar, .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .member-avatar img, .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .member-avatar-fallback, .user-avatar-fallback {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
         }
 
         .member-role {
@@ -1001,123 +687,60 @@
             color: white;
         }
 
-        .loading-members {
-            text-align: center;
-            padding: 40px;
+        .user-search-result {
+            padding: 12px 15px;
+            border: 1px solid rgba(233, 236, 239, 0.8);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .user-email, .user-username {
+            font-size: 12px;
             color: #7f8c8d;
         }
 
-        .loading-spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(103, 126, 234, 0.3);
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
-
-        /* Animations */
         @keyframes slideInFromTop {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes slideInFromBottom {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes messageSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes statusSlideIn {
-            from {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50px) scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .chat-container {
-                flex-direction: column;
-                height: auto;
-                gap: 15px;
-            }
-            
-            .sidebar {
-                width: 100%;
-                max-height: 300px;
-            }
-            
-            .main-chat {
-                min-height: 500px;
-            }
-            
-            .message-content {
-                max-width: 85%;
-            }
-
-            .modal-content {
-                width: 95%;
-                margin: 10% auto;
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* Utility Classes */
         .form-group { margin-bottom: 15px; }
         .search-section { padding: 15px 20px; border-bottom: 1px solid rgba(233, 236, 239, 0.8); background: rgba(248, 249, 250, 0.9); }
-        .create-room-section { padding: 20px; border-bottom: 1px solid rgba(233, 236, 239, 0.8); }
-        .start-chat-section { padding: 20px; border-bottom: 1px solid rgba(233, 236, 239, 0.8); }
+        .create-room-section, .start-chat-section { padding: 20px; border-bottom: 1px solid rgba(233, 236, 239, 0.8); }
         .rooms-list { flex: 1; overflow-y: auto; padding: 0; }
         .search-input { width: 100%; padding: 10px 12px 10px 35px; border: 1px solid rgba(103, 126, 234, 0.2); border-radius: 25px; font-size: 13px; box-sizing: border-box; background: rgba(255, 255, 255, 0.9); }
         .search-box { position: relative; }
         .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #667eea; }
-        .user-search-result { padding: 12px 15px; border: 1px solid rgba(233, 236, 239, 0.8); border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(255, 255, 255, 0.5); }
-        .user-info { display: flex; align-items: center; gap: 10px; }
-        .user-avatar { width: 35px; height: 35px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px; }
         .room-controls { display: flex; gap: 10px; align-items: center; }
     </style>
 
@@ -1187,10 +810,10 @@
                         <h4 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 16px;">Start New Private Chat</h4>
                         
                         <div class="form-group">
-                            <label class="form-label">Search by Email</label>
+                            <label class="form-label">Search by Email or Username</label>
                             <div style="display: flex; gap: 8px;">
                                 <asp:TextBox ID="txtUserSearch" runat="server" CssClass="form-control" 
-                                           placeholder="Enter email address" style="flex: 1;" />
+                                           placeholder="Enter email or username" style="flex: 1;" />
                                 <asp:Button ID="btnSearchUser" runat="server" Text="Search" 
                                           CssClass="primary-button" OnClick="btnSearchUser_Click" />
                             </div>
@@ -1203,11 +826,21 @@
                                     <div class="user-search-result">
                                         <div class="user-info">
                                             <div class="user-avatar">
-                                                <%# GetInitials(Eval("Name").ToString()) %>
+                                                <asp:Image ID="imgUserAvatar" runat="server" 
+                                                         ImageUrl='<%# GetUserProfilePicture(Eval("Email").ToString()) %>'
+                                                         AlternateText="Profile" 
+                                                         Visible='<%# !string.IsNullOrEmpty(GetUserProfilePicture(Eval("Email").ToString())) %>' />
+                                                <div class="user-avatar-fallback" runat="server" 
+                                                     visible='<%# string.IsNullOrEmpty(GetUserProfilePicture(Eval("Email").ToString())) %>'>
+                                                    <%# GetInitials(Eval("Name").ToString()) %>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <div style="font-weight: 500;"><%# Eval("Name") %></div>
-                                                <div style="font-size: 12px; color: #7f8c8d;"><%# Eval("Email") %></div>
+                                            <div class="user-details">
+                                                <div class="user-name"><%# Eval("Name") %></div>
+                                                <div class="user-email"><%# Eval("Email") %></div>
+                                                <div class="user-username" style='<%# string.IsNullOrEmpty(Eval("Username").ToString()) ? "display: none;" : "" %>'>
+                                                    @<%# Eval("Username") %>
+                                                </div>
                                             </div>
                                         </div>
                                         <asp:Button runat="server" Text="Chat" CommandName="StartChat" 
@@ -1254,7 +887,7 @@
                             <asp:TextBox ID="txtRoomName" runat="server" CssClass="form-control" placeholder="Enter room name" />
                         </div>
 
-                        <asp:Button ID="btnCreateRoom" runat="server" Text="✨ Create Room" 
+                        <asp:Button ID="btnCreateRoom" runat="server" Text="Create Room" 
                                   CssClass="primary-button" OnClick="btnCreateRoom_Click" style="width: 100%;" />
                         
                         <asp:Label ID="lblCreateStatus" runat="server" CssClass="status-message" />
@@ -1270,7 +903,7 @@
                     <p>Select a room from the sidebar to start chatting, or create/start new chats</p>
                     <div style="margin-top: 20px; color: #2c3e50;">
                         <p><strong>Getting Started:</strong></p>
-                        <p>• Start private chats with other users by searching their email</p>
+                        <p>• Start private chats with other users by searching their email or username</p>
                         <p>• Create group rooms and invite others</p>
                         <p>• Share files and images in your conversations</p>
                         <p>• Switch between multiple conversations</p>
@@ -1293,7 +926,7 @@
                             <!-- Management button -->
                             <asp:Panel ID="pnlManageButton" runat="server" Visible="false">
                                 <button type="button" class="manage-btn" onclick="showManageModal(); return false;">
-                                    <i class="fas fa-cog"></i> Manage
+                                    Manage
                                 </button>
                             </asp:Panel>
                             
@@ -1310,11 +943,20 @@
                         <asp:Repeater ID="rptMessages" runat="server">
                             <ItemTemplate>
                                 <div class="message <%# GetMessageClass(Eval("SenderId").ToString(), Eval("Type").ToString()) %> <%# Eval("IsDeleted").ToString().ToLower() == "true" ? "deleted" : "" %>">
+                                    <!-- Message avatar with profile pictures -->
                                     <div class="message-avatar">
-                                        <%# GetInitials(Eval("SenderName").ToString()) %>
+                                        <asp:Image ID="imgMessageAvatar" runat="server" 
+                                                 ImageUrl='<%# GetUserProfilePicture(Eval("SenderId").ToString()) %>'
+                                                 AlternateText="Avatar" 
+                                                 Visible='<%# !string.IsNullOrEmpty(GetUserProfilePicture(Eval("SenderId").ToString())) %>' />
+                                        <div class="message-avatar-fallback" runat="server" 
+                                             visible='<%# string.IsNullOrEmpty(GetUserProfilePicture(Eval("SenderId").ToString())) %>'>
+                                            <%# GetInitials(Eval("SenderName").ToString()) %>
+                                        </div>
                                     </div>
+                                    
                                     <div class="message-content">
-                                        <!-- NEW: Message actions (delete button) for own messages only -->
+                                        <!-- Message actions (delete button) for own messages only -->
                                         <%# Eval("SenderId").ToString() == GetCurrentUserEmail() && Eval("IsDeleted").ToString().ToLower() != "true" ? 
                                             "<div class=\"message-actions\">" +
                                             "<button type=\"button\" class=\"message-delete-btn\" onclick=\"deleteMessage('" + Eval("Id") + "'); return false;\" title=\"Delete message\">×</button>" +
@@ -1384,10 +1026,10 @@
                     <div style="margin-bottom: 25px;">
                         <h4>Invite Members</h4>
                         <div class="form-group">
-                            <label class="form-label">Email Address</label>
+                            <label class="form-label">Email Address or Username</label>
                             <div style="display: flex; gap: 8px;">
                                 <asp:TextBox ID="txtInviteEmail" runat="server" CssClass="form-control" 
-                                           placeholder="Enter email address" style="flex: 1;" />
+                                           placeholder="Enter email or username" style="flex: 1;" />
                                 <asp:Button ID="btnInviteUser" runat="server" Text="Invite" 
                                           CssClass="success-button" OnClick="btnInviteUser_Click" />
                             </div>
@@ -1398,17 +1040,21 @@
                     <!-- Members List -->
                     <div>
                         <h4>Current Members</h4>
-                        <div id="membersLoadingDiv" class="loading-members">
-                            <div class="loading-spinner"></div>
-                            <p>Loading members...</p>
-                        </div>
-                        <div class="member-list" id="membersList" style="display: none;">
+                        <div class="member-list">
                             <asp:Repeater ID="rptMembers" runat="server" OnItemCommand="rptMembers_ItemCommand">
                                 <ItemTemplate>
                                     <div class="member-item">
                                         <div class="member-details">
-                                            <div class="user-avatar">
-                                                <%# GetInitials(Eval("Name").ToString()) %>
+                                            <!-- Member avatar with profile pictures -->
+                                            <div class="member-avatar">
+                                                <asp:Image ID="imgMemberAvatar" runat="server" 
+                                                         ImageUrl='<%# GetUserProfilePicture(Eval("Email").ToString()) %>'
+                                                         AlternateText="Profile" 
+                                                         Visible='<%# !string.IsNullOrEmpty(GetUserProfilePicture(Eval("Email").ToString())) %>' />
+                                                <div class="member-avatar-fallback" runat="server" 
+                                                     visible='<%# string.IsNullOrEmpty(GetUserProfilePicture(Eval("Email").ToString())) %>'>
+                                                    <%# GetInitials(Eval("Name").ToString()) %>
+                                                </div>
                                             </div>
                                             <div>
                                                 <div style="font-weight: 500;"><%# Eval("Name") %></div>
@@ -1449,26 +1095,11 @@
         function showManageModal() {
             console.log('Opening manage modal...');
             document.getElementById('manageModal').style.display = 'block';
-            
-            membersLoaded = false;
-            document.getElementById('membersLoadingDiv').style.display = 'block';
-            document.getElementById('membersList').style.display = 'none';
-            
-            console.log('Automatically loading members...');
-            membersLoaded = true;
-            __doPostBack('LoadMembers', '');
-            
             return false;
         }
 
         function closeManageModal() {
             document.getElementById('manageModal').style.display = 'none';
-        }
-
-        function showMembersList() {
-            document.getElementById('membersLoadingDiv').style.display = 'none';
-            document.getElementById('membersList').style.display = 'block';
-            document.getElementById('manageModal').style.display = 'block';
         }
 
         // Close modal when clicking outside
@@ -1479,7 +1110,7 @@
             }
         }
 
-        // NEW: Message deletion function
+        // Message deletion function
         function deleteMessage(messageId) {
             if (confirm('Are you sure you want to delete this message?')) {
                 console.log('Deleting message:', messageId);
@@ -1568,32 +1199,11 @@
                 targetContent.classList.add('active');
             }
 
-            if (tabName === 'private-chat') {
-                setTimeout(() => {
-                    loadPrivateChatsIfNeeded();
-                }, 100);
-            }
-
             setTimeout(() => {
                 isTabSwitching = false;
             }, 300);
 
             return false;
-        }
-
-        function loadPrivateChatsIfNeeded() {
-            const privateChatsList = document.getElementById('privateChatsList');
-            if (!privateChatsList) return;
-
-            const hasContent = privateChatsList.querySelectorAll('.room-item').length > 0;
-            const isEmptyStateVisible = document.getElementById('<%= pnlNoPrivateChats.ClientID %>') &&
-                document.getElementById('<%= pnlNoPrivateChats.ClientID %>').style.display !== 'none';
-
-            if (!hasContent && !isEmptyStateVisible && !window.privateChatsLoaded) {
-                console.log('Loading private chats...');
-                window.privateChatsLoaded = true;
-                __doPostBack('LoadPrivateChats', '');
-            }
         }
 
         function selectRoom(roomId, roomName, roomType) {
@@ -1614,105 +1224,6 @@
             }
             
             __doPostBack('LoadRoom', roomId);
-        }
-
-        function filterRooms() {
-            const searchInput = document.getElementById('<%= txtSearchMyRooms.ClientID %>');
-            if (!searchInput) return;
-            
-            const filter = searchInput.value.toLowerCase();
-            const rooms = document.querySelectorAll('#myRoomsList .room-item');
-
-            rooms.forEach(room => {
-                const roomNameEl = room.querySelector('h4');
-                const roomDescEl = room.querySelector('p');
-                
-                if (roomNameEl && roomDescEl) {
-                    const roomName = roomNameEl.textContent.toLowerCase();
-                    const roomDesc = roomDescEl.textContent.toLowerCase();
-
-                    if (roomName.includes(filter) || roomDesc.includes(filter)) {
-                        room.style.display = 'flex';
-                    } else {
-                        room.style.display = 'none';
-                    }
-                }
-            });
-        }
-
-        function scrollToBottom(force = false) {
-            const container = document.getElementById('messagesContainer');
-            if (container) {
-                const isNearBottom = force || 
-                    (container.scrollHeight - container.scrollTop - container.clientHeight < 100);
-                
-                if (isNearBottom) {
-                    container.scrollTop = container.scrollHeight;
-                }
-            }
-        }
-
-        function setupMessageInput() {
-            const messageInput = document.getElementById('<%= txtMessage.ClientID %>');
-            const sendBtn = document.getElementById('<%= btnSend.ClientID %>');
-
-            if (messageInput) {
-                messageInput.addEventListener('input', function () {
-                    this.style.height = 'auto';
-                    const newHeight = Math.min(this.scrollHeight, 100);
-                    this.style.height = newHeight + 'px';
-                });
-
-                messageInput.addEventListener('keydown', function (e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        if (sendBtn && (this.value.trim() || selectedFile)) {
-                            sendBtn.click();
-                        }
-                    }
-                });
-
-                messageInput.addEventListener('focus', function () {
-                    setTimeout(() => {
-                        scrollToBottom(true);
-                        this.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    }, 100);
-                });
-            }
-        }
-
-        function restoreTabState() {
-            const hfActiveTab = document.getElementById('<%= hfActiveTab.ClientID %>');
-            const activeTab = hfActiveTab ? hfActiveTab.value : 'my-rooms';
-            
-            console.log('Restoring tab state:', activeTab);
-            currentActiveTab = activeTab;
-
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-
-            const targetBtn = document.querySelector(`[data-tab="${activeTab}"]`);
-            if (targetBtn) targetBtn.classList.add('active');
-            
-            const targetTab = document.getElementById(activeTab + '-tab');
-            if (targetTab) targetTab.classList.add('active');
-        }
-
-        function clearStatusMessages() {
-            setTimeout(function () {
-                const statusMessages = document.querySelectorAll('.status-message.show');
-                statusMessages.forEach(msg => {
-                    if (msg.textContent.trim()) {
-                        msg.style.transition = 'opacity 0.5s';
-                        msg.style.opacity = '0';
-                        setTimeout(() => {
-                            msg.textContent = '';
-                            msg.classList.remove('show');
-                            msg.style.opacity = '1';
-                        }, 500);
-                    }
-                });
-            }, 5000);
         }
 
         function setupEventHandlers() {
@@ -1740,76 +1251,12 @@
                     }
                 }
             });
-
-            const searchInput = document.getElementById('<%= txtSearchMyRooms.ClientID %>');
-            if (searchInput) {
-                searchInput.addEventListener('input', filterRooms);
-                searchInput.addEventListener('keyup', filterRooms);
-            }
         }
 
         // Main initialization
         document.addEventListener('DOMContentLoaded', function () {
             console.log('Chat page loaded, initializing...');
-
             setupEventHandlers();
-            setupMessageInput();
-            setTimeout(restoreTabState, 100);
-
-            if (!window.privateChatsLoaded) {
-                setTimeout(() => {
-                    window.privateChatsLoaded = true;
-                    if (typeof __doPostBack === 'function') {
-                        __doPostBack('LoadPrivateChats', '');
-                    }
-                }, 1000);
-            }
-
-            clearStatusMessages();
-
-            setTimeout(() => {
-                const messageInput = document.getElementById('<%= txtMessage.ClientID %>');
-                const chatInterface = document.getElementById('<%= pnlChatInterface.ClientID %>');
-
-                if (messageInput && chatInterface &&
-                    chatInterface.style.display !== 'none' &&
-                    window.getComputedStyle(chatInterface).display !== 'none') {
-                    messageInput.focus();
-                    scrollToBottom(true);
-                }
-            }, 1200);
         });
-
-        window.addEventListener('resize', function () {
-            setTimeout(() => {
-                scrollToBottom(false);
-            }, 100);
-        });
-
-        window.addEventListener('beforeunload', function () {
-            const container = document.getElementById('messagesContainer');
-            if (container) {
-                sessionStorage.setItem('chatScrollPos', container.scrollTop);
-            }
-        });
-
-        function restoreScrollPosition() {
-            const container = document.getElementById('messagesContainer');
-            if (container) {
-                const savedPos = sessionStorage.getItem('chatScrollPos');
-                if (savedPos) {
-                    container.scrollTop = parseInt(savedPos);
-                    sessionStorage.removeItem('chatScrollPos');
-                } else {
-                    setTimeout(() => scrollToBottom(true), 200);
-                }
-            }
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', restoreScrollPosition);
-        } else {
-            restoreScrollPosition();
-        }
     </script>
 </asp:Content>
