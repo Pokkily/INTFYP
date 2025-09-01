@@ -142,7 +142,7 @@ namespace YourProjectNamespace
         {
             try
             {
-                string userEmail = Session["email"]?.ToString()?.ToLower();
+                string userEmail = Session["email"]?.ToString(); // Don't lowercase here
                 string userPosition = Session["position"]?.ToString()?.ToLower();
 
                 int classesCount = 0;
@@ -151,24 +151,53 @@ namespace YourProjectNamespace
                 {
                     if (userPosition == "teacher")
                     {
-                        // For teachers: count classes they created
-                        var teacherClassesSnapshot = await db.Collection("classrooms")
-                            .WhereEqualTo("createdBy", userEmail)
-                            .WhereEqualTo("isArchived", false) // Only active classes
-                            .GetSnapshotAsync();
-                        classesCount = teacherClassesSnapshot?.Count ?? 0;
+                        System.Diagnostics.Debug.WriteLine($"📊 STATS: Counting classes for teacher: '{userEmail}'");
+
+                        // Use manual filtering instead of compound query (same fix as LoadUserClasses)
+                        var allClassroomsSnapshot = await db.Collection("classrooms").GetSnapshotAsync();
+
+                        if (allClassroomsSnapshot != null)
+                        {
+                            foreach (var classroom in allClassroomsSnapshot.Documents)
+                            {
+                                try
+                                {
+                                    var classroomData = classroom.ToDictionary();
+                                    if (classroomData != null)
+                                    {
+                                        string createdBy = GetSafeValue(classroomData, "createdBy");
+                                        bool isArchived = classroomData.ContainsKey("isArchived") ?
+                                            Convert.ToBoolean(classroomData["isArchived"]) : false;
+
+                                        // Manual filtering - count only non-archived classes created by this teacher
+                                        if (createdBy == userEmail && !isArchived)
+                                        {
+                                            classesCount++;
+                                            System.Diagnostics.Debug.WriteLine($"📊 Counted class: {GetSafeValue(classroomData, "name")} (ID: {classroom.Id})");
+                                        }
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    System.Diagnostics.Debug.WriteLine($"Error processing classroom for stats: {ex.Message}");
+                                }
+                            }
+                        }
+
+                        System.Diagnostics.Debug.WriteLine($"📊 Total teacher classes counted: {classesCount}");
                     }
                     else
                     {
-                        // For students: count accepted invitations
+                        System.Diagnostics.Debug.WriteLine($"📊 STATS: Counting classes for student: '{userEmail}'");
+
+                        // For students: count accepted invitations to non-archived classes
                         var invitedSnapshot = await db.CollectionGroup("invitedStudents")
-                            .WhereEqualTo("email", userEmail)
+                            .WhereEqualTo("email", userEmail) // Use original case
                             .WhereEqualTo("status", "accepted")
                             .GetSnapshotAsync();
 
                         if (invitedSnapshot != null)
                         {
-                            // Count only non-archived classes
                             foreach (var inviteDoc in invitedSnapshot.Documents)
                             {
                                 try
@@ -187,21 +216,24 @@ namespace YourProjectNamespace
                                             if (!isArchived)
                                             {
                                                 classesCount++;
+                                                System.Diagnostics.Debug.WriteLine($"📊 Counted student class: {GetSafeValue(classroomData, "name")}");
                                             }
                                         }
                                     }
                                 }
                                 catch (Exception ex)
                                 {
-                                    System.Diagnostics.Debug.WriteLine($"Error checking class archive status: {ex.Message}");
+                                    System.Diagnostics.Debug.WriteLine($"Error checking class archive status for stats: {ex.Message}");
                                 }
                             }
                         }
+
+                        System.Diagnostics.Debug.WriteLine($"📊 Total student classes counted: {classesCount}");
                     }
                 }
 
                 ltClassesCount.Text = classesCount.ToString();
-                System.Diagnostics.Debug.WriteLine($"Classes count updated: {classesCount}");
+                System.Diagnostics.Debug.WriteLine($"📊 Classes count updated in UI: {classesCount}");
 
                 // Get posts count (posts created by user)
                 var allGroupsSnapshot = await db.Collection("studyHubs").GetSnapshotAsync();
@@ -292,6 +324,8 @@ namespace YourProjectNamespace
                     }
                 }
                 ltSavedCount.Text = savedCount.ToString();
+
+                System.Diagnostics.Debug.WriteLine($"📊 Final stats - Classes: {classesCount}, Posts: {postsCount}, Likes: {totalLikes}, Saved: {savedCount}");
             }
             catch (Exception ex)
             {
