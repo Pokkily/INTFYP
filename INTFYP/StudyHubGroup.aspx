@@ -6,7 +6,7 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Enhanced Study Group Page Design */
+        /* Enhanced Study Group Page Design with Profile Image Support */
         
         .study-group-container {
             max-width: 800px;
@@ -375,17 +375,53 @@
             gap: 15px;
         }
 
+        /* Enhanced Author Avatar with Profile Image Support */
         .author-avatar {
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 600;
             font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .author-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .author-avatar-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .author-avatar-initials {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .author-avatar-initials.hide {
+            display: none;
         }
 
         .author-info {
@@ -397,6 +433,12 @@
             font-weight: 600;
             color: #2c3e50;
             font-size: 16px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .author-name:hover {
+            color: #667eea;
         }
 
         .post-timestamp {
@@ -632,17 +674,53 @@
             gap: 10px;
         }
 
+        /* Enhanced Comment Avatar with Profile Image Support */
         .comment-avatar {
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #4ecdc4, #44a08d);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 600;
             font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .comment-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        .comment-avatar-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .comment-avatar-initials {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .comment-avatar-initials.hide {
+            display: none;
         }
 
         .comment-text {
@@ -820,6 +898,16 @@
             .file-preview-item {
                 padding: 8px;
             }
+
+            .author-avatar {
+                width: 42px;
+                height: 42px;
+            }
+
+            .comment-avatar {
+                width: 32px;
+                height: 32px;
+            }
         }
 
         /* Accessibility improvements */
@@ -903,18 +991,30 @@
                     </div>
                 </div>
 
-                <!-- Enhanced Posts List -->
+                <!-- Enhanced Posts List with Profile Images -->
                 <asp:Repeater ID="rptPosts" runat="server" OnItemCommand="rptPosts_ItemCommand">
                     <ItemTemplate>
                         <div class="post-card" data-post-id='<%# Eval("postId") %>'>
-                            <!-- Post Header -->
+                            <!-- Post Header with Profile Image -->
                             <div class="post-header">
                                 <div class="post-author">
-                                    <div class="author-avatar">
-                                        <%# Eval("creatorUsername").ToString().Substring(0, 1).ToUpper() %>
+                                    <div class="author-avatar" onclick="navigateToProfile('<%# Eval("creatorUserId") %>')">
+                                        <!-- Profile Image (if available) -->
+                                        <img class="author-avatar-image" 
+                                             src='<%# Eval("creatorProfileImage") %>' 
+                                             alt="Profile Picture" 
+                                             style='<%# (bool)Eval("hasProfileImage") ? "display: block;" : "display: none;" %>'
+                                             onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hide');" />
+                                        
+                                        <!-- Profile Initials (fallback) -->
+                                        <div class='<%# "author-avatar-initials" + ((bool)Eval("hasProfileImage") ? " hide" : "") %>'>
+                                            <%# Eval("creatorInitials") %>
+                                        </div>
                                     </div>
                                     <div class="author-info">
-                                        <div class="author-name"><%# Eval("creatorUsername") %></div>
+                                        <div class="author-name" onclick="navigateToProfile('<%# Eval("creatorUserId") %>')">
+                                            <%# Eval("creatorUsername") %>
+                                        </div>
                                         <div class="post-timestamp"><%# Eval("timestamp") %></div>
                                     </div>
                                 </div>
@@ -1036,7 +1136,7 @@
                                 </div>
                             </div>
 
-                            <!-- Enhanced Comments Section -->
+                            <!-- Enhanced Comments Section with Profile Images -->
                             <div class="comments-section">
                                 <div class="comments-header">
                                     💬 Comments (<%# ((List<dynamic>)Eval("comments")).Count %>)
@@ -1048,11 +1148,23 @@
                                         <div class="comment-item">
                                             <div class="comment-header">
                                                 <div class="comment-author">
-                                                    <div class="comment-avatar">
-                                                        <%# Eval("username").ToString().Substring(0, 1).ToUpper() %>
+                                                    <div class="comment-avatar" onclick="navigateToProfile('<%# Eval("userId") %>')">
+                                                        <!-- Comment Profile Image (if available) -->
+                                                        <img class="comment-avatar-image" 
+                                                             src='<%# Eval("profileImage") %>' 
+                                                             alt="Profile Picture" 
+                                                             style='<%# (bool)Eval("hasProfileImage") ? "display: block;" : "display: none;" %>'
+                                                             onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hide');" />
+                                                        
+                                                        <!-- Comment Profile Initials (fallback) -->
+                                                        <div class='<%# "comment-avatar-initials" + ((bool)Eval("hasProfileImage") ? " hide" : "") %>'>
+                                                            <%# Eval("initials") %>
+                                                        </div>
                                                     </div>
                                                     <div>
-                                                        <strong><%# Eval("username") %></strong>
+                                                        <strong onclick="navigateToProfile('<%# Eval("userId") %>')" style="cursor: pointer;">
+                                                            <%# Eval("username") %>
+                                                        </strong>
                                                         <div class="post-timestamp"><%# Eval("timestamp") %></div>
                                                     </div>
                                                 </div>

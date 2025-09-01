@@ -488,93 +488,6 @@
             color: #f39c12;
         }
 
-        .settings-section {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid #e9ecef;
-        }
-
-        .settings-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .slider {
-            background-color: #667eea;
-        }
-
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-
-        .danger-zone {
-            background: linear-gradient(135deg, #ffe8e8 0%, #ffebeb 100%);
-            border: 1px solid rgba(231, 76, 60, 0.2);
-            border-radius: 15px;
-            padding: 30px;
-            margin-top: 40px;
-        }
-
-        .danger-title {
-            color: #e74c3c;
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .danger-description {
-            color: #c0392b;
-            margin-bottom: 20px;
-            line-height: 1.6;
-        }
-
         .empty-state {
             text-align: center;
             padding: 60px 30px;
@@ -827,7 +740,7 @@
                     </div>
                 </div>
 
-                <!-- Navigation Tabs - FIXED: Added type="button" to prevent form submission -->
+                <!-- Navigation Tabs -->
                 <div class="profile-tabs">
                     <button type="button" class="tab-button active" onclick="showTab('overview')">
                         <span class="tab-icon">👤</span>
@@ -840,10 +753,6 @@
                     <button type="button" class="tab-button" onclick="showTab('activity')">
                         <span class="tab-icon">📱</span>
                         <span>Activity</span>
-                    </button>
-                    <button type="button" class="tab-button" onclick="showTab('settings')">
-                        <span class="tab-icon">⚙️</span>
-                        <span>Settings</span>
                     </button>
                 </div>
 
@@ -962,302 +871,186 @@
                         </asp:Panel>
                     </div>
 
-                   <!-- Activity Tab - Replace the existing activity tab with this updated version -->
-<div id="activity" class="tab-panel">
-    <div class="section-header">
-        <span class="section-icon">📱</span>
-        Study Hub Activity
-    </div>
-
-    <!-- Activity Filter -->
-    <div class="activity-filter">
-        <button type="button" class="filter-btn active" onclick="filterActivity('all')">All Activity</button>
-        <button type="button" class="filter-btn" onclick="filterActivity('liked')">❤️ Liked Posts</button>
-        <button type="button" class="filter-btn" onclick="filterActivity('saved')">⭐ Saved Posts</button>
-        <button type="button" class="filter-btn" onclick="filterActivity('shared')">📤 Shared Posts</button>
-    </div>
-
-    <!-- Activity Content -->
-    <asp:Panel ID="pnlActivity" runat="server">
-        <div class="activity-grid">
-            <!-- Liked Posts -->
-            <asp:Repeater ID="rptLikedPosts" runat="server">
-                <ItemTemplate>
-                    <div class="post-card activity-item liked-post" data-activity-type="liked">
-                        <div class="post-header">
-                            <div class="post-author">
-                                <div class="post-avatar">
-                                    <%# Eval("authorName").ToString().Substring(0, 1).ToUpper() %>
-                                </div>
-                                <div class="post-meta">
-                                    <div class="post-author-name"><%# Eval("authorName") %></div>
-                                    <div class="post-time"><%# Eval("timestamp") %></div>
-                                    <div class="post-group">in <%# Eval("groupName") %></div>
-                                </div>
-                            </div>
-                            <div class="activity-badge liked">
-                                <span class="badge-icon">❤️</span>
-                                <span class="badge-text">Liked</span>
-                            </div>
-                        </div>
-                        <div class="post-content">
-                            <div class="post-text"><%# Eval("content") %></div>
-                        </div>
-                        <div class="post-stats">
-                            <div class="stat-item">
-                                <span class="stat-icon">❤️</span>
-                                <span class="stat-count"><%# Eval("likeCount") %></span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-icon">💬</span>
-                                <span class="stat-count"><%# Eval("commentCount") %></span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-icon">📤</span>
-                                <span class="stat-count"><%# Eval("shareCount") %></span>
-                            </div>
-                        </div>
-                        <div class="post-actions">
-                            <a href="StudyHubGroup.aspx?groupId=<%# Eval("groupId") %>&postId=<%# Eval("postId") %>" class="action-btn view-post">
-                                <span class="action-icon">👁️</span>
-                                View Post
-                            </a>
-                        </div>
-                    </div>
-                </ItemTemplate>
-            </asp:Repeater>
-
-            <!-- Saved Posts -->
-            <asp:Repeater ID="rptSavedPosts" runat="server">
-                <ItemTemplate>
-                    <div class="post-card activity-item saved-post" data-activity-type="saved">
-                        <div class="post-header">
-                            <div class="post-author">
-                                <div class="post-avatar">
-                                    <%# Eval("authorName").ToString().Substring(0, 1).ToUpper() %>
-                                </div>
-                                <div class="post-meta">
-                                    <div class="post-author-name"><%# Eval("authorName") %></div>
-                                    <div class="post-time"><%# Eval("timestamp") %></div>
-                                    <div class="post-group">in <%# Eval("groupName") %></div>
-                                </div>
-                            </div>
-                            <div class="activity-badge saved">
-                                <span class="badge-icon">⭐</span>
-                                <span class="badge-text">Saved</span>
-                            </div>
-                        </div>
-                        <div class="post-content">
-                            <div class="post-text"><%# Eval("content") %></div>
-                        </div>
-                        <div class="post-stats">
-                            <div class="stat-item">
-                                <span class="stat-icon">❤️</span>
-                                <span class="stat-count"><%# Eval("likeCount") %></span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-icon">💬</span>
-                                <span class="stat-count"><%# Eval("commentCount") %></span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-icon">📤</span>
-                                <span class="stat-count"><%# Eval("shareCount") %></span>
-                            </div>
-                        </div>
-                        <div class="post-actions">
-                            <a href="StudyHubGroup.aspx?groupId=<%# Eval("groupId") %>&postId=<%# Eval("postId") %>" class="action-btn view-post">
-                                <span class="action-icon">👁️</span>
-                                View Post
-                            </a>
-                            <asp:LinkButton ID="btnUnsave" runat="server" 
-                                CommandArgument='<%# Eval("postId") + "|" + Eval("groupId") %>'
-                                OnClick="btnUnsavePost_Click" 
-                                CssClass="action-btn unsave-btn"
-                                OnClientClick="return confirm('Remove this post from your saved items?');">
-                                <span class="action-icon">🗑️</span>
-                                Unsave
-                            </asp:LinkButton>
-                        </div>
-                    </div>
-                </ItemTemplate>
-            </asp:Repeater>
-
-            <!-- Shared Posts -->
-            <asp:Repeater ID="rptSharedPosts" runat="server">
-                <ItemTemplate>
-                    <div class="post-card activity-item shared-post" data-activity-type="shared">
-                        <div class="post-header">
-                            <div class="post-author">
-                                <div class="post-avatar">
-                                    <%# Eval("authorName").ToString().Substring(0, 1).ToUpper() %>
-                                </div>
-                                <div class="post-meta">
-                                    <div class="post-author-name"><%# Eval("authorName") %></div>
-                                    <div class="post-time"><%# Eval("timestamp") %></div>
-                                    <div class="post-group">in <%# Eval("groupName") %></div>
-                                </div>
-                            </div>
-                            <div class="activity-badge shared">
-                                <span class="badge-icon">📤</span>
-                                <span class="badge-text">Shared</span>
-                            </div>
-                        </div>
-                        <div class="post-content">
-                            <div class="post-text"><%# Eval("content") %></div>
-                        </div>
-                        <div class="post-stats">
-                            <div class="stat-item">
-                                <span class="stat-icon">❤️</span>
-                                <span class="stat-count"><%# Eval("likeCount") %></span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-icon">💬</span>
-                                <span class="stat-count"><%# Eval("commentCount") %></span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-icon">📤</span>
-                                <span class="stat-count"><%# Eval("shareCount") %></span>
-                            </div>
-                        </div>
-                        <div class="post-actions">
-                            <a href="StudyHubGroup.aspx?groupId=<%# Eval("groupId") %>&postId=<%# Eval("postId") %>" class="action-btn view-post">
-                                <span class="action-icon">👁️</span>
-                                View Post
-                            </a>
-                        </div>
-                    </div>
-                </ItemTemplate>
-            </asp:Repeater>
-        </div>
-
-        <!-- No Activity -->
-        <asp:Panel ID="pnlNoActivity" runat="server" Visible="false">
-            <div class="empty-state">
-                <div class="empty-state-icon">📱</div>
-                <h3 class="empty-state-title">No Activity Yet</h3>
-                <p class="empty-state-text">Start engaging with StudyHub posts to see your activity here!</p>
-                <a href="StudyHub.aspx" class="btn btn-primary" style="margin-top: 20px;">
-                    🚀 Explore StudyHub
-                </a>
-            </div>
-        </asp:Panel>
-    </asp:Panel>
-</div>
-
-                    <!-- Settings Tab -->
-                    <div id="settings" class="tab-panel">
+                    <!-- Activity Tab -->
+                    <div id="activity" class="tab-panel">
                         <div class="section-header">
-                            <span class="section-icon">⚙️</span>
-                            Account Settings
+                            <span class="section-icon">📱</span>
+                            Study Hub Activity
                         </div>
 
-                        <!-- Password Change -->
-                        <div class="settings-section">
-                            <h3 class="settings-title">
-                                🔒 Change Password
-                            </h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Current Password</label>
-                                    <asp:TextBox ID="txtCurrentPassword" runat="server" CssClass="form-control" 
-                                        TextMode="Password" />
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">New Password</label>
-                                    <asp:TextBox ID="txtNewPassword" runat="server" CssClass="form-control" 
-                                        TextMode="Password" />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Confirm New Password</label>
-                                <asp:TextBox ID="txtConfirmPassword" runat="server" CssClass="form-control" 
-                                    TextMode="Password" />
-                            </div>
-                            <asp:Button ID="btnChangePassword" runat="server" Text="🔄 Update Password" 
-                                CssClass="btn btn-primary" OnClick="btnChangePassword_Click" />
+                        <!-- Activity Filter -->
+                        <div class="activity-filter">
+                            <button type="button" class="filter-btn active" onclick="filterActivity('all')">All Activity</button>
+                            <button type="button" class="filter-btn" onclick="filterActivity('liked')">❤️ Liked Posts</button>
+                            <button type="button" class="filter-btn" onclick="filterActivity('saved')">⭐ Saved Posts</button>
+                            <button type="button" class="filter-btn" onclick="filterActivity('shared')">📤 Shared Posts</button>
                         </div>
 
-                        <!-- Notification Settings -->
-                        <div class="settings-section">
-                            <h3 class="settings-title">
-                                🔔 Notification Preferences
-                            </h3>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                <div>
-                                    <strong>Email Notifications</strong>
-                                    <br><small style="color: #6c757d;">Receive email updates about your account</small>
-                                </div>
-                                <label class="toggle-switch">
-                                    <asp:CheckBox ID="chkEmailNotifications" runat="server" />
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                <div>
-                                    <strong>StudyHub Notifications</strong>
-                                    <br><small style="color: #6c757d;">Get notified about likes, comments, and shares</small>
-                                </div>
-                                <label class="toggle-switch">
-                                    <asp:CheckBox ID="chkStudyHubNotifications" runat="server" />
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                <div>
-                                    <strong>Class Updates</strong>
-                                    <br><small style="color: #6c757d;">Receive notifications about class activities</small>
-                                </div>
-                                <label class="toggle-switch">
-                                    <asp:CheckBox ID="chkClassNotifications" runat="server" />
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <asp:Button ID="btnSaveNotifications" runat="server" Text="💾 Save Preferences" 
-                                CssClass="btn btn-primary" OnClick="btnSaveNotifications_Click" />
-                        </div>
+                        <!-- Activity Content -->
+                        <asp:Panel ID="pnlActivity" runat="server">
+                            <div class="activity-grid">
+                                <!-- Liked Posts -->
+                                <asp:Repeater ID="rptLikedPosts" runat="server">
+                                    <ItemTemplate>
+                                        <div class="post-card activity-item liked-post" data-activity-type="liked">
+                                            <div class="post-header">
+                                                <div class="post-author">
+                                                    <div class="post-avatar">
+                                                        <%# Eval("authorName").ToString().Substring(0, 1).ToUpper() %>
+                                                    </div>
+                                                    <div class="post-meta">
+                                                        <div class="post-author-name"><%# Eval("authorName") %></div>
+                                                        <div class="post-time"><%# Eval("timestamp") %></div>
+                                                        <div class="post-group">in <%# Eval("groupName") %></div>
+                                                    </div>
+                                                </div>
+                                                <div class="activity-badge liked">
+                                                    <span class="badge-icon">❤️</span>
+                                                    <span class="badge-text">Liked</span>
+                                                </div>
+                                            </div>
+                                            <div class="post-content">
+                                                <div class="post-text"><%# Eval("content") %></div>
+                                            </div>
+                                            <div class="post-stats">
+                                                <div class="stat-item">
+                                                    <span class="stat-icon">❤️</span>
+                                                    <span class="stat-count"><%# Eval("likeCount") %></span>
+                                                </div>
+                                                <div class="stat-item">
+                                                    <span class="stat-icon">💬</span>
+                                                    <span class="stat-count"><%# Eval("commentCount") %></span>
+                                                </div>
+                                                <div class="stat-item">
+                                                    <span class="stat-icon">📤</span>
+                                                    <span class="stat-count"><%# Eval("shareCount") %></span>
+                                                </div>
+                                            </div>
+                                            <div class="post-actions">
+                                                <a href="StudyHubGroup.aspx?groupId=<%# Eval("groupId") %>&postId=<%# Eval("postId") %>" class="action-btn view-post">
+                                                    <span class="action-icon">👁️</span>
+                                                    View Post
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </ItemTemplate>
+                                </asp:Repeater>
 
-                        <!-- Privacy Settings -->
-                        <div class="settings-section">
-                            <h3 class="settings-title">
-                                👁️ Privacy Settings
-                            </h3>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                <div>
-                                    <strong>Public Profile</strong>
-                                    <br><small style="color: #6c757d;">Allow others to view your profile information</small>
-                                </div>
-                                <label class="toggle-switch">
-                                    <asp:CheckBox ID="chkPublicProfile" runat="server" />
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                <div>
-                                    <strong>Show Activity</strong>
-                                    <br><small style="color: #6c757d;">Display your StudyHub activity to others</small>
-                                </div>
-                                <label class="toggle-switch">
-                                    <asp:CheckBox ID="chkShowActivity" runat="server" />
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <asp:Button ID="btnSavePrivacy" runat="server" Text="💾 Save Privacy Settings" 
-                                CssClass="btn btn-primary" OnClick="btnSavePrivacy_Click" />
-                        </div>
+                                <!-- Saved Posts -->
+                                <asp:Repeater ID="rptSavedPosts" runat="server">
+                                    <ItemTemplate>
+                                        <div class="post-card activity-item saved-post" data-activity-type="saved">
+                                            <div class="post-header">
+                                                <div class="post-author">
+                                                    <div class="post-avatar">
+                                                        <%# Eval("authorName").ToString().Substring(0, 1).ToUpper() %>
+                                                    </div>
+                                                    <div class="post-meta">
+                                                        <div class="post-author-name"><%# Eval("authorName") %></div>
+                                                        <div class="post-time"><%# Eval("timestamp") %></div>
+                                                        <div class="post-group">in <%# Eval("groupName") %></div>
+                                                    </div>
+                                                </div>
+                                                <div class="activity-badge saved">
+                                                    <span class="badge-icon">⭐</span>
+                                                    <span class="badge-text">Saved</span>
+                                                </div>
+                                            </div>
+                                            <div class="post-content">
+                                                <div class="post-text"><%# Eval("content") %></div>
+                                            </div>
+                                            <div class="post-stats">
+                                                <div class="stat-item">
+                                                    <span class="stat-icon">❤️</span>
+                                                    <span class="stat-count"><%# Eval("likeCount") %></span>
+                                                </div>
+                                                <div class="stat-item">
+                                                    <span class="stat-icon">💬</span>
+                                                    <span class="stat-count"><%# Eval("commentCount") %></span>
+                                                </div>
+                                                <div class="stat-item">
+                                                    <span class="stat-icon">📤</span>
+                                                    <span class="stat-count"><%# Eval("shareCount") %></span>
+                                                </div>
+                                            </div>
+                                            <div class="post-actions">
+                                                <a href="StudyHubGroup.aspx?groupId=<%# Eval("groupId") %>&postId=<%# Eval("postId") %>" class="action-btn view-post">
+                                                    <span class="action-icon">👁️</span>
+                                                    View Post
+                                                </a>
+                                                <asp:LinkButton ID="btnUnsave" runat="server" 
+                                                    CommandArgument='<%# Eval("postId") + "|" + Eval("groupId") %>'
+                                                    OnClick="btnUnsavePost_Click" 
+                                                    CssClass="action-btn unsave-btn"
+                                                    OnClientClick="return confirm('Remove this post from your saved items?');">
+                                                    <span class="action-icon">🗑️</span>
+                                                    Unsave
+                                                </asp:LinkButton>
+                                            </div>
+                                        </div>
+                                    </ItemTemplate>
+                                </asp:Repeater>
 
-                        <!-- Danger Zone -->
-                        <div class="danger-zone">
-                            <h3 class="danger-title">
-                                ⚠️ Danger Zone
-                            </h3>
-                            <p class="danger-description">
-                                These actions cannot be undone. Please be certain before proceeding.
-                            </p>
-                            <asp:Button ID="btnDeactivateAccount" runat="server" Text="🚫 Deactivate Account" 
-                                CssClass="btn btn-danger" 
-                                OnClientClick="return confirm('Are you sure you want to deactivate your account? This action can be reversed by contacting support.');"
-                                OnClick="btnDeactivateAccount_Click" />
-                        </div>
+                                <!-- Shared Posts -->
+                                <asp:Repeater ID="rptSharedPosts" runat="server">
+                                    <ItemTemplate>
+                                        <div class="post-card activity-item shared-post" data-activity-type="shared">
+                                            <div class="post-header">
+                                                <div class="post-author">
+                                                    <div class="post-avatar">
+                                                        <%# Eval("authorName").ToString().Substring(0, 1).ToUpper() %>
+                                                    </div>
+                                                    <div class="post-meta">
+                                                        <div class="post-author-name"><%# Eval("authorName") %></div>
+                                                        <div class="post-time"><%# Eval("timestamp") %></div>
+                                                        <div class="post-group">in <%# Eval("groupName") %></div>
+                                                    </div>
+                                                </div>
+                                                <div class="activity-badge shared">
+                                                    <span class="badge-icon">📤</span>
+                                                    <span class="badge-text">Shared</span>
+                                                </div>
+                                            </div>
+                                            <div class="post-content">
+                                                <div class="post-text"><%# Eval("content") %></div>
+                                            </div>
+                                            <div class="post-stats">
+                                                <div class="stat-item">
+                                                    <span class="stat-icon">❤️</span>
+                                                    <span class="stat-count"><%# Eval("likeCount") %></span>
+                                                </div>
+                                                <div class="stat-item">
+                                                    <span class="stat-icon">💬</span>
+                                                    <span class="stat-count"><%# Eval("commentCount") %></span>
+                                                </div>
+                                                <div class="stat-item">
+                                                    <span class="stat-icon">📤</span>
+                                                    <span class="stat-count"><%# Eval("shareCount") %></span>
+                                                </div>
+                                            </div>
+                                            <div class="post-actions">
+                                                <a href="StudyHubGroup.aspx?groupId=<%# Eval("groupId") %>&postId=<%# Eval("postId") %>" class="action-btn view-post">
+                                                    <span class="action-icon">👁️</span>
+                                                    View Post
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </ItemTemplate>
+                                </asp:Repeater>
+                            </div>
+
+                            <!-- No Activity -->
+                            <asp:Panel ID="pnlNoActivity" runat="server" Visible="false">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">📱</div>
+                                    <h3 class="empty-state-title">No Activity Yet</h3>
+                                    <p class="empty-state-text">Start engaging with StudyHub posts to see your activity here!</p>
+                                    <a href="StudyHub.aspx" class="btn btn-primary" style="margin-top: 20px;">
+                                        🚀 Explore StudyHub
+                                    </a>
+                                </div>
+                            </asp:Panel>
+                        </asp:Panel>
                     </div>
                 </div>
             </div>
@@ -1268,7 +1061,7 @@
     </asp:UpdatePanel>
 
     <script>
-        // FIXED: Improved Tab switching functionality
+        // Tab switching functionality
         function showTab(tabName) {
             try {
                 // Hide all tab panels
@@ -1354,12 +1147,6 @@
             }
         }
 
-        // Initialize activity display
-        document.addEventListener('DOMContentLoaded', function () {
-            // Set up any initialization needed for activity display
-            console.log('Activity section initialized');
-        });
-
         // Form reset functionality
         function resetForm() {
             if (confirm('Are you sure you want to reset all changes?')) {
@@ -1405,45 +1192,12 @@
             }, 5000);
         }
 
-        // Auto-save functionality for settings
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.toggle-switch input').forEach(toggle => {
-                toggle.addEventListener('change', function () {
-                    // Auto-save setting changes
-                    console.log('Setting changed:', this.id, this.checked);
-                    // You can implement auto-save here
-                });
-            });
-        });
-
-        // Password strength indicator
-        document.addEventListener('DOMContentLoaded', function () {
-            const newPasswordField = document.getElementById('<%= txtNewPassword.ClientID %>');
-            if (newPasswordField) {
-                newPasswordField.addEventListener('input', function () {
-                    const password = this.value;
-                    const strength = calculatePasswordStrength(password);
-                    // Add visual feedback for password strength
-                });
-            }
-        });
-
-        function calculatePasswordStrength(password) {
-            let strength = 0;
-            if (password.length >= 8) strength++;
-            if (/[A-Z]/.test(password)) strength++;
-            if (/[a-z]/.test(password)) strength++;
-            if (/[0-9]/.test(password)) strength++;
-            if (/[^A-Za-z0-9]/.test(password)) strength++;
-            return strength;
-        }
-
-        // Initialize tooltips and other UI enhancements
+        // Initialize page
         document.addEventListener('DOMContentLoaded', function () {
             // Add smooth scrolling to tab switching
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.addEventListener('click', function (e) {
-                    e.preventDefault(); // Prevent any default behavior
+                    e.preventDefault();
                     document.querySelector('.tab-content').scrollIntoView({
                         behavior: 'smooth',
                         block: 'start'
@@ -1451,13 +1205,7 @@
                 });
             });
 
-            // Add form validation
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
-                form.addEventListener('submit', function (e) {
-                    // Add form validation logic here
-                });
-            });
+            console.log('Profile page initialized');
         });
 
         // Keyboard navigation support
@@ -1475,10 +1223,6 @@
                     case '3':
                         e.preventDefault();
                         showTab('activity');
-                        break;
-                    case '4':
-                        e.preventDefault();
-                        showTab('settings');
                         break;
                 }
             }

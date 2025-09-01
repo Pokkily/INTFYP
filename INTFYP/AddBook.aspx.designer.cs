@@ -99,6 +99,14 @@ namespace INTFYP
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label lblBookStatus;
         /// <summary>
+        /// lblBookCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblBookCount;
+        /// <summary>
         /// rptBooks control.
         /// </summary>
         /// <remarks>

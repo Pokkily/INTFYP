@@ -22,6 +22,11 @@ namespace YourProjectNamespace
         private static HashSet<string> editingPostIds = new HashSet<string>();
         private static HashSet<string> editingCommentKeys = new HashSet<string>();
 
+        // Cache for profile images to avoid multiple Firestore calls
+        private static Dictionary<string, (string imageUrl, string initials, DateTime cachedAt)> profileCache =
+            new Dictionary<string, (string, string, DateTime)>();
+        private static readonly TimeSpan CacheExpiry = TimeSpan.FromMinutes(30);
+
         protected async void Page_Load(object sender, EventArgs e)
         {
             if (Session["userId"] == null || Session["username"] == null)
@@ -37,14 +42,14 @@ namespace YourProjectNamespace
 
             if (string.IsNullOrEmpty(groupId))
             {
-                Response.Redirect("StudyHubGroup.aspx");
+                Response.Redirect("StudyHub.aspx");
                 return;
             }
 
             if (!IsPostBack)
                 await LoadGroup();
         }
-        
+
         protected override void OnPreRender(EventArgs e)
         {
             base.OnPreRender(e);
@@ -73,6 +78,15 @@ namespace YourProjectNamespace
 
                 // Also restore on initial page load
                 window.addEventListener('load', restoreScrollPosition);
+
+                // Profile navigation function
+                function navigateToProfile(userId) {
+                    if (userId && userId !== '" + currentUserId + @"') {
+                        window.location.href = 'ProfileOthers.aspx?userId=' + userId;
+                    } else if (userId === '" + currentUserId + @"') {
+                        window.location.href = 'Profile.aspx';
+                    }
+                }
             ";
 
             ScriptManager.RegisterStartupScript(this, GetType(), "scrollMaintenance", scrollScript, true);
@@ -191,6 +205,11 @@ namespace YourProjectNamespace
                 {
                     var p = postDoc.ToDictionary();
                     string postId = postDoc.Id;
+                    string postCreatorId = p.GetValueOrDefault("postedBy", "").ToString();
+                    string postCreatorName = p.GetValueOrDefault("postedByName", "Unknown").ToString();
+
+                    // Load profile image for post creator
+                    var creatorProfile = await LoadUserProfileImageSync(postCreatorId, postCreatorName);
 
                     // Load comments
                     var comments = await LoadCommentsForPost(postId);
@@ -213,8 +232,12 @@ namespace YourProjectNamespace
                         content = p.GetValueOrDefault("content", "").ToString(),
                         timestamp = p.ContainsKey("timestamp") ?
                             ((Timestamp)p["timestamp"]).ToDateTime().ToString("MMM dd, yyyy 'at' h:mm tt") : "",
-                        creatorUsername = p.GetValueOrDefault("postedByName", "Unknown").ToString(),
-                        isOwner = p.GetValueOrDefault("postedBy", "").ToString() == currentUserId,
+                        creatorUsername = postCreatorName,
+                        creatorUserId = postCreatorId,
+                        creatorProfileImage = creatorProfile.imageUrl,
+                        creatorInitials = creatorProfile.initials,
+                        hasProfileImage = !string.IsNullOrEmpty(creatorProfile.imageUrl),
+                        isOwner = postCreatorId == currentUserId,
                         IsEditingPost = editingPostIds.Contains(postId),
                         comments,
                         commentCount = comments.Count,
@@ -251,16 +274,25 @@ namespace YourProjectNamespace
                     var c = cDoc.ToDictionary();
                     string commentId = cDoc.Id;
                     string commentKey = postId + "|" + commentId;
+                    string commenterId = c.GetValueOrDefault("commenterId", "").ToString();
+                    string commenterName = c.GetValueOrDefault("commenterName", "Unknown").ToString();
+
+                    // Load profile image for commenter
+                    var commenterProfile = await LoadUserProfileImageSync(commenterId, commenterName);
 
                     comments.Add(new
                     {
                         postId,
                         commentId,
-                        username = c.GetValueOrDefault("commenterName", "Unknown").ToString(),
+                        username = commenterName,
+                        userId = commenterId,
+                        profileImage = commenterProfile.imageUrl,
+                        initials = commenterProfile.initials,
+                        hasProfileImage = !string.IsNullOrEmpty(commenterProfile.imageUrl),
                         content = c.GetValueOrDefault("text", "").ToString(),
                         timestamp = c.ContainsKey("timestamp") ?
                             ((Timestamp)c["timestamp"]).ToDateTime().ToString("MMM dd 'at' h:mm tt") : "",
-                        isOwner = c.GetValueOrDefault("commenterId", "").ToString() == currentUserId,
+                        isOwner = commenterId == currentUserId,
                         IsEditingComment = editingCommentKeys.Contains(commentKey),
                         likes = c.ContainsKey("likes") ? ((List<object>)c["likes"]).Count : 0
                     });
@@ -268,10 +300,58 @@ namespace YourProjectNamespace
             }
             catch (Exception ex)
             {
-                // Log error but don't fail
+                System.Diagnostics.Debug.WriteLine($"Error loading comments: {ex.Message}");
             }
 
             return comments;
+        }
+
+        private async Task<(string imageUrl, string initials)> LoadUserProfileImageSync(string userId, string username)
+        {
+            if (string.IsNullOrEmpty(userId))
+                return ("", GenerateUserInitials("", "", username));
+
+            try
+            {
+                // Check cache first
+                if (profileCache.ContainsKey(userId))
+                {
+                    var cached = profileCache[userId];
+                    if (DateTime.Now - cached.cachedAt < CacheExpiry)
+                    {
+                        return (cached.imageUrl, cached.initials);
+                    }
+                    else
+                    {
+                        profileCache.Remove(userId);
+                    }
+                }
+
+                // Load from Firestore
+                var userRef = db.Collection("users").Document(userId);
+                var userSnap = await userRef.GetSnapshotAsync();
+
+                if (userSnap.Exists)
+                {
+                    var userData = userSnap.ToDictionary();
+                    string profileImageUrl = GetSafeValue(userData, "profileImageUrl");
+                    string firstName = GetSafeValue(userData, "firstName");
+                    string lastName = GetSafeValue(userData, "lastName");
+                    string initials = GenerateUserInitials(firstName, lastName, username);
+
+                    // Cache the result
+                    profileCache[userId] = (profileImageUrl, initials, DateTime.Now);
+
+                    return (profileImageUrl, initials);
+                }
+
+                return ("", GenerateUserInitials("", "", username));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error loading profile for {userId}: {ex.Message}");
+                return ("", GenerateUserInitials("", "", username));
+            }
         }
 
         private async Task<List<dynamic>> LoadAttachmentsForPost(string postId)
@@ -297,7 +377,6 @@ namespace YourProjectNamespace
             }
             catch (Exception ex)
             {
-                // Log error but don't fail
                 System.Diagnostics.Debug.WriteLine($"Error loading attachments: {ex.Message}");
             }
 
@@ -344,7 +423,6 @@ namespace YourProjectNamespace
                     bool uploadSuccess = await HandleFileUploads(postId);
                     if (!uploadSuccess)
                     {
-                        // If file upload fails, you might want to delete the post or show a warning
                         ShowMessage("Post created but some files failed to upload. Please try again.", "warning");
                     }
                 }
@@ -355,8 +433,6 @@ namespace YourProjectNamespace
                 // Clear form
                 txtPostContent.Text = "";
                 chkAnonymous.Checked = false;
-
-                // Clear file upload and file preview
                 fileUpload.Attributes.Clear();
 
                 // Add script to clear file preview on client side
@@ -480,7 +556,6 @@ namespace YourProjectNamespace
                                 };
 
                                 await attachmentRef.SetAsync(attachmentData);
-
                                 System.Diagnostics.Debug.WriteLine($"Successfully uploaded and saved: {file.FileName}");
                             }
                             else
@@ -942,6 +1017,29 @@ namespace YourProjectNamespace
             {
                 // Log error but don't fail the main operation
             }
+        }
+
+        // Helper methods
+        private string GenerateUserInitials(string firstName, string lastName, string username)
+        {
+            if (!string.IsNullOrEmpty(firstName) && !string.IsNullOrEmpty(lastName))
+            {
+                return (firstName.Substring(0, 1) + lastName.Substring(0, 1)).ToUpper();
+            }
+            else if (!string.IsNullOrEmpty(username))
+            {
+                return username.Length >= 2 ? username.Substring(0, 2).ToUpper() : username.Substring(0, 1).ToUpper();
+            }
+            return "?";
+        }
+
+        private string GetSafeValue(Dictionary<string, object> dictionary, string key, string defaultValue = "")
+        {
+            if (dictionary == null || !dictionary.ContainsKey(key) || dictionary[key] == null)
+            {
+                return defaultValue;
+            }
+            return dictionary[key].ToString();
         }
 
         private void ShowMessage(string message, string type)

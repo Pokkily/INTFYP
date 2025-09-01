@@ -1,4 +1,4 @@
-﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="YourProjectNamespace.Site" %>
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs"  Inherits="YourProjectNamespace.Site" %>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -87,7 +87,7 @@
             filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.2));
         }
 
-        /* FIXED PROFILE SECTION */
+        /* ENHANCED PROFILE SECTION WITH DYNAMIC IMAGE LOADING */
         .profile-section {
             display: flex;
             align-items: center;
@@ -99,10 +99,12 @@
             transform: scale(1.02);
         }
 
-        /* Profile Image Container - Fixed Size Issues */
+        /* Profile Image Container - Enhanced with dynamic loading */
         .profile-img-container {
             position: relative;
             display: inline-block;
+            border-radius: 50%;
+            overflow: hidden;
         }
 
         .profile-img {
@@ -116,9 +118,36 @@
             cursor: pointer;
             position: relative;
             z-index: 2;
+            background: linear-gradient(135deg, #667eea, #764ba2);
         }
 
-        /* Profile Link Styling - Fixed */
+        /* Default profile icon styling when no image is available */
+        .profile-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Guest user default icon */
+        .guest-profile-icon {
+            background: linear-gradient(135deg, #6c757d, #495057);
+        }
+
+        /* Profile Link Styling - Enhanced */
         .profile-link {
             text-decoration: none !important;
             display: inline-block;
@@ -126,26 +155,29 @@
             border-radius: 50%;
             width: 40px;
             height: 40px;
+            overflow: hidden;
         }
 
         .profile-link:hover {
             text-decoration: none !important;
         }
 
-        /* Enhanced profile image hover effect - Fixed proportions */
-        .profile-link .profile-img {
+        /* Enhanced profile image/icon hover effect */
+        .profile-link .profile-img,
+        .profile-link .profile-icon {
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .profile-link:hover .profile-img {
+        .profile-link:hover .profile-img,
+        .profile-link:hover .profile-icon {
             transform: scale(1.1);
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
             border-color: rgba(103, 126, 234, 0.6);
             border-width: 2px;
         }
 
-        /* Subtle glow effect on hover - Fixed */
+        /* Subtle glow effect on hover */
         .profile-link::after {
             content: '';
             position: absolute;
@@ -161,9 +193,9 @@
             opacity: 1;
         }
 
-        /* Tooltip on hover - Fixed positioning */
+        /* Tooltip on hover - Enhanced for different states */
         .profile-link::before {
-            content: 'View Profile';
+            content: attr(data-tooltip);
             position: absolute;
             bottom: -45px;
             left: 50%;
@@ -184,7 +216,7 @@
             opacity: 1;
         }
 
-        /* Status indicator dot - Fixed size */
+        /* Status indicator dot - Enhanced */
         .status-dot {
             position: absolute;
             bottom: 0;
@@ -195,6 +227,17 @@
             border: 2px solid white;
             border-radius: 50%;
             animation: pulse 2s infinite;
+            z-index: 3;
+        }
+
+        .status-dot.offline {
+            background: #6c757d;
+            animation: none;
+        }
+
+        .status-dot.guest {
+            background: #ffc107;
+            animation: guestPulse 3s infinite;
         }
 
         @keyframes pulse {
@@ -207,6 +250,46 @@
             100% {
                 box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
             }
+        }
+
+        @keyframes guestPulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 6px rgba(255, 193, 7, 0);
+            }
+        }
+
+        /* Loading state for profile image */
+        .profile-img-loading {
+            position: relative;
+        }
+
+        .profile-img-loading::after {
+            content: '';
+            position: absolute;
+            inset: 2px;
+            border: 2px solid rgba(103, 126, 234, 0.3);
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: profileSpin 1s linear infinite;
+        }
+
+        @keyframes profileSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Image error/fallback state */
+        .profile-img-error {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
         }
 
         .title-group {
@@ -272,6 +355,18 @@
             animation: bounceIn 0.8s ease-out 1.2s both;
         }
 
+        .title.guest {
+            color: #6c757d !important;
+            text-shadow: 0 1px 2px rgba(108, 117, 125, 0.1);
+        }
+
+        .title.guest::after {
+            content: '👤';
+            margin-left: 10px;
+            font-size: 16px;
+            animation: bounceIn 0.8s ease-out 1.2s both;
+        }
+
         @keyframes bounceIn {
             0% {
                 opacity: 0;
@@ -323,6 +418,10 @@
 
         .role-badge.student {
             background: linear-gradient(135deg, #007bff, #0056b3);
+        }
+
+        .role-badge.guest {
+            background: linear-gradient(135deg, #6c757d, #495057);
         }
 
         @keyframes slideInScale {
@@ -583,155 +682,6 @@
             font-weight: 700;
         }
 
-        /* Enhanced Teacher Quick Stats */
-        .teacher-stats {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            border-radius: 0 0 20px 20px;
-            padding: 25px 30px;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            display: none;
-            z-index: 999;
-            animation: statsSlideDown 0.4s ease-out;
-        }
-
-        .header:hover .teacher-stats {
-            display: block;
-        }
-
-        @keyframes statsSlideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-                backdrop-filter: blur(0px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-                backdrop-filter: blur(20px);
-            }
-        }
-
-        .stats-header {
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid rgba(40, 167, 69, 0.1);
-        }
-
-        .stats-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #28a745;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .stats-title::before {
-            content: '📊';
-            font-size: 20px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 20px 15px;
-            background: linear-gradient(135deg, rgba(40, 167, 69, 0.05), rgba(32, 201, 151, 0.05));
-            border-radius: 15px;
-            border: 1px solid rgba(40, 167, 69, 0.1);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-item::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #28a745, #20c997);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(40, 167, 69, 0.2);
-            border-color: rgba(40, 167, 69, 0.3);
-        }
-
-        .stat-item:hover::before {
-            transform: scaleX(1);
-        }
-
-        .stat-number {
-            font-size: 28px;
-            font-weight: 800;
-            color: #28a745;
-            margin-bottom: 8px;
-            display: block;
-            text-shadow: 0 1px 2px rgba(40, 167, 69, 0.1);
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: #6c757d;
-            text-transform: uppercase;
-            font-weight: 600;
-            letter-spacing: 1px;
-        }
-
-        .stat-icon {
-            font-size: 24px;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        /* Notification badges */
-        .notification-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            color: white;
-            border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            animation: notificationPulse 2s infinite;
-            box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4);
-        }
-
-        @keyframes notificationPulse {
-            0%, 100% { 
-                transform: scale(1);
-                box-shadow: 0 2px 8px rgba(255, 107, 107, 0.4);
-            }
-            50% { 
-                transform: scale(1.1);
-                box-shadow: 0 4px 15px rgba(255, 107, 107, 0.6);
-            }
-        }
-
         /* Welcome message animation */
         .welcome-message {
             position: fixed;
@@ -792,7 +742,8 @@
                 gap: 10px;
             }
 
-            .profile-img {
+            .profile-img,
+            .profile-icon {
                 width: 35px;
                 height: 35px;
             }
@@ -831,18 +782,6 @@
             .title-group .subtitle {
                 font-size: 12px;
             }
-
-            .teacher-stats {
-                position: relative;
-                display: block;
-                margin-top: 15px;
-                border-radius: 15px;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -854,7 +793,8 @@
                 flex: 1;
             }
 
-            .profile-img {
+            .profile-img,
+            .profile-icon {
                 width: 32px;
                 height: 32px;
             }
@@ -876,10 +816,6 @@
             .menu a {
                 padding: 6px 12px;
                 font-size: 11px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
             }
         }
 
@@ -915,7 +851,7 @@
             z-index: 9999;
         }
 
-        /* Header scroll effects - FIXED to prevent reloading */
+        /* Header scroll effects */
         .header.scrolled {
             background: rgba(255, 255, 255, 0.98);
             box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
@@ -926,7 +862,8 @@
             height: 35px;
         }
 
-        .header.scrolled .profile-img {
+        .header.scrolled .profile-img,
+        .header.scrolled .profile-icon {
             width: 36px;
             height: 36px;
         }
@@ -1002,12 +939,12 @@
     </style>
     
     <script>
-        // FIXED: Enhanced scroll effect with proper throttling to prevent reload issues
+        // Enhanced scroll effect with proper throttling
         let scrollTimeout;
         let isScrolling = false;
 
         function updateHeader() {
-            if (isScrolling) return; // Prevent multiple calls
+            if (isScrolling) return;
 
             isScrolling = true;
             const header = document.querySelector('.header');
@@ -1020,13 +957,11 @@
                 }
             }
 
-            // Reset the scrolling flag after a delay
             setTimeout(() => {
                 isScrolling = false;
-            }, 16); // ~60fps
+            }, 16);
         }
 
-        // FIXED: Improved scroll listener with proper debouncing
         function handleScroll() {
             if (scrollTimeout) {
                 clearTimeout(scrollTimeout);
@@ -1035,17 +970,187 @@
             scrollTimeout = setTimeout(updateHeader, 10);
         }
 
-        // FIXED: Enhanced loading state with proper event handling
+        // Enhanced profile image loading functionality
+        // FIXED: Enhanced profile image loading functionality
+        function loadUserProfileImage() {
+            const profileImg = document.getElementById('<%= imgProfileHeader.ClientID %>');
+    const profileIcon = document.getElementById('<%= divProfileIcon.ClientID %>');
+
+    if (!profileImg || !profileIcon) return;
+
+    const container = profileImg.closest('.profile-img-container');
+    let isImageLoaded = false;
+    let timeoutId = null;
+
+    // Clear any existing handlers
+    profileImg.onload = null;
+    profileImg.onerror = null;
+
+    // Add loading state
+    if (container) {
+        container.classList.add('profile-img-loading');
+    }
+
+    console.log('Starting profile image load:', profileImg.src);
+
+    // Handle successful image load
+    profileImg.onload = function () {
+        console.log('✅ Profile image loaded successfully');
+        isImageLoaded = true;
+
+        // Clear timeout since image loaded
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+        }
+
+        // Remove loading state
+        if (container) {
+            container.classList.remove('profile-img-loading');
+        }
+
+        // Show image, hide icon
+        this.style.display = 'block';
+        profileIcon.style.display = 'none';
+    };
+
+    // Handle image load error
+    profileImg.onerror = function () {
+        console.log('❌ Profile image failed to load');
+        isImageLoaded = false;
+
+        // Clear timeout
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+            timeoutId = null;
+        }
+
+        // Remove loading state
+        if (container) {
+            container.classList.remove('profile-img-loading');
+        }
+
+        // Show icon, hide image
+        this.style.display = 'none';
+        profileIcon.style.display = 'flex';
+    };
+
+    // FIXED: More reasonable timeout and better logic
+    timeoutId = setTimeout(() => {
+        if (!isImageLoaded) {
+            console.log('⏰ Profile image loading timed out after 10 seconds');
+
+            // Remove loading state
+            if (container) {
+                container.classList.remove('profile-img-loading');
+            }
+
+            // Only switch to icon if image hasn't loaded
+            if (!profileImg.complete || profileImg.naturalWidth === 0) {
+                profileImg.style.display = 'none';
+                profileIcon.style.display = 'flex';
+            }
+        }
+        timeoutId = null;
+    }, 10000); // Increased to 10 seconds
+
+    // FIXED: Better handling of cached/already loaded images
+    if (profileImg.complete) {
+        if (profileImg.naturalWidth > 0 && profileImg.naturalHeight > 0) {
+            console.log('✅ Profile image already loaded from cache');
+            isImageLoaded = true;
+
+            // Clear timeout
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+            }
+
+            // Remove loading state
+            if (container) {
+                container.classList.remove('profile-img-loading');
+            }
+
+            // Show image, hide icon
+            profileImg.style.display = 'block';
+            profileIcon.style.display = 'none';
+        } else {
+            console.log('❌ Profile image already failed to load');
+            isImageLoaded = false;
+
+            // Clear timeout
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+                timeoutId = null;
+            }
+
+            // Remove loading state
+            if (container) {
+                container.classList.remove('profile-img-loading');
+            }
+
+            // Show icon, hide image
+            profileImg.style.display = 'none';
+            profileIcon.style.display = 'flex';
+        }
+    }
+}
+
+        // Generate user initials for profile icon
+        function generateUserInitials(firstName, lastName, username) {
+            if (firstName && lastName) {
+                return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+            } else if (username) {
+                return username.length >= 2 ? username.substring(0, 2).toUpperCase() : username.charAt(0).toUpperCase();
+            }
+            return '?';
+        }
+
+        // Update profile section based on login status
+        function updateProfileSection(isLoggedIn, userData) {
+            const profileLink = document.querySelector('.profile-link');
+            const statusDot = document.querySelector('.status-dot');
+
+            if (!profileLink || !statusDot) return;
+
+            if (isLoggedIn && userData) {
+                // Set tooltip for logged in user
+                profileLink.setAttribute('data-tooltip', 'View Profile');
+                statusDot.classList.remove('guest', 'offline');
+                statusDot.classList.add('online');
+
+                // Update profile icon text if needed
+                const profileIcon = document.getElementById('<%= divProfileIcon.ClientID %>');
+                if (profileIcon && userData.initials) {
+                    profileIcon.textContent = userData.initials;
+                }
+            } else {
+                // Guest user
+                profileLink.setAttribute('data-tooltip', 'Sign in to view profile');
+                profileLink.href = 'Login.aspx';
+                statusDot.classList.remove('online');
+                statusDot.classList.add('guest');
+
+                const profileIcon = document.getElementById('<%= divProfileIcon.ClientID %>');
+                if (profileIcon) {
+                    profileIcon.textContent = '?';
+                    profileIcon.classList.add('guest-profile-icon');
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
-            // Add scroll listener only once and with proper throttling
+            // Add scroll listener
             window.addEventListener('scroll', handleScroll, { passive: true });
 
-            // Handle navigation links without causing reloads
+            // Load profile image if user is logged in
+            loadUserProfileImage();
+
+            // Handle navigation links
             const links = document.querySelectorAll('.menu a:not([href^="#"]):not([href^="javascript:"]), .btn:not([type="submit"])');
 
             links.forEach(link => {
                 link.addEventListener('click', function (e) {
-                    // Only apply loading effect to internal navigation
                     if (this.href &&
                         !this.href.includes('#') &&
                         !this.href.includes('javascript:') &&
@@ -1053,10 +1158,8 @@
                         !this.href.includes('mailto:') &&
                         !this.href.includes('tel:')) {
 
-                        // Add visual feedback
                         document.body.classList.add('loading');
 
-                        // Allow small delay for visual feedback
                         setTimeout(() => {
                             window.location.href = this.href;
                         }, 150);
@@ -1076,70 +1179,26 @@
             initializeRoleFeatures();
         });
 
-        // FIXED: Enhanced logout confirmation without page reload issues
         function confirmLogout() {
-            const confirmed = confirm('Are you sure you want to logout? 🚪\n\nYou will need to sign in again to access your account.');
+            const confirmed = confirm('Are you sure you want to logout?\n\nYou will need to sign in again to access your account.');
             return confirmed;
         }
 
-        // FIXED: Teacher dashboard features without causing reloads
-        function loadTeacherStats() {
-            try {
-                // Simulate loading teacher statistics
-                const stats = {
-                    totalStudents: Math.floor(Math.random() * 50) + 20,
-                    totalClasses: Math.floor(Math.random() * 10) + 3,
-                    pendingGrades: Math.floor(Math.random() * 15) + 2,
-                    todaySchedule: Math.floor(Math.random() * 6) + 1
-                };
-
-                // Update stat displays if elements exist
-                const updateStat = (id, value) => {
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.textContent = value;
-                        element.style.animation = 'none';
-                        element.offsetHeight; // Trigger reflow
-                        element.style.animation = 'countUp 1s ease-out';
-                    }
-                };
-
-                // Use requestAnimationFrame for smooth updates
-                requestAnimationFrame(() => {
-                    updateStat('totalStudents', stats.totalStudents);
-                    updateStat('totalClasses', stats.totalClasses);
-                    updateStat('pendingGrades', stats.pendingGrades);
-                    updateStat('todaySchedule', stats.todaySchedule);
-                });
-
-                console.log('Teacher statistics loaded:', stats);
-            } catch (error) {
-                console.error('Error loading teacher stats:', error);
-            }
-        }
-
-        // FIXED: Initialize features based on user role without reload issues
         function initializeRoleFeatures() {
             try {
                 const teacherMenus = document.querySelectorAll('.teacher-menu-item');
                 const adminMenus = document.querySelectorAll('.admin-menu-item');
 
                 if (teacherMenus.length > 0) {
-                    // Delay stats loading to prevent conflicts
-                    setTimeout(() => {
-                        loadTeacherStats();
-                    }, 500);
-
                     console.log('Teacher features initialized');
-                    showWelcomeMessage('Welcome back, Teacher! 👨‍🏫');
+                    showWelcomeMessage('Welcome back, Teacher!');
                 }
 
                 if (adminMenus.length > 0) {
                     console.log('Administrator features initialized');
-                    showWelcomeMessage('Welcome back, Administrator! 👑');
+                    showWelcomeMessage('Welcome back, Administrator!');
                 }
 
-                // Add hover effects to profile section
                 const profileSection = document.querySelector('.profile-section');
                 if (profileSection) {
                     profileSection.addEventListener('mouseenter', function () {
@@ -1155,10 +1214,8 @@
             }
         }
 
-        // FIXED: Welcome message function without causing issues
         function showWelcomeMessage(message) {
             try {
-                // Remove any existing welcome messages first
                 const existingMessages = document.querySelectorAll('.welcome-message');
                 existingMessages.forEach(msg => {
                     if (msg.parentNode) {
@@ -1171,7 +1228,6 @@
                 welcomeDiv.textContent = message;
                 document.body.appendChild(welcomeDiv);
 
-                // Clean up after animation
                 setTimeout(() => {
                     if (welcomeDiv.parentNode) {
                         welcomeDiv.parentNode.removeChild(welcomeDiv);
@@ -1182,7 +1238,6 @@
             }
         }
 
-        // FIXED: Add count-up animation for stats without conflicts
         function addCountUpAnimation() {
             if (!document.getElementById('countUpStyle')) {
                 const style = document.createElement('style');
@@ -1203,7 +1258,6 @@
             }
         }
 
-        // FIXED: Keyboard navigation support without reload issues
         function handleKeyboardNavigation() {
             document.addEventListener('keydown', function (e) {
                 if (e.key === 'Tab') {
@@ -1216,7 +1270,6 @@
             }, { passive: true });
         }
 
-        // FIXED: Add keyboard navigation styles without conflicts
         function addKeyboardStyles() {
             if (!document.getElementById('keyboardStyle')) {
                 const keyboardStyle = document.createElement('style');
@@ -1240,7 +1293,7 @@
             addKeyboardStyles();
         });
 
-        // Prevent multiple event listeners and memory leaks
+        // Prevent memory leaks
         window.addEventListener('beforeunload', function () {
             window.removeEventListener('scroll', handleScroll);
             if (scrollTimeout) {
@@ -1248,7 +1301,6 @@
             }
         });
 
-        // Logo click handler - FIXED to prevent reload issues
         function handleLogoClick() {
             try {
                 document.body.classList.add('loading');
@@ -1272,9 +1324,18 @@
                 
                 <div class="profile-section">
                     <div class="profile-img-container">
-                        <!-- FIXED: Make profile image clickable with proper sizing -->
-                        <asp:HyperLink ID="lnkProfile" runat="server" NavigateUrl="Profile.aspx" CssClass="profile-link">
-                            <img src="Images/dprofile.jpg" alt="Profile" class="profile-img" />
+                        <!-- Enhanced Profile Image/Icon with dynamic loading -->
+                        <asp:HyperLink ID="lnkProfile" runat="server" NavigateUrl="Profile.aspx" CssClass="profile-link" data-tooltip="View Profile">
+                            <!-- Profile Image (shown when user has uploaded image) -->
+                            <asp:Image ID="imgProfileHeader" runat="server" 
+                                CssClass="profile-img" 
+                                AlternateText="Profile Picture"
+                                Style="display: none;" />
+                            
+                            <!-- Profile Icon (fallback when no image or guest user) -->
+                            <div id="divProfileIcon" runat="server" class="profile-icon">
+                                ?
+                            </div>
                         </asp:HyperLink>
                         <div class="status-dot"></div>
                     </div>
@@ -1283,10 +1344,10 @@
                         <asp:PlaceHolder ID="phUser" runat="server" Visible="false">
                             <span id="lblUsername" runat="server" class="title username"></span>
                             <span class="subtitle">Welcome back!</span>
-                            <!-- Role badge will be added dynamically by code-behind -->
+                            <div id="divRoleBadge" runat="server" class="role-badge" style="display: none;"></div>
                         </asp:PlaceHolder>
                         <asp:PlaceHolder ID="phGuestLabel" runat="server" Visible="false">
-                            <span class="title">Guest User</span>
+                            <span class="title guest">Guest User</span>
                             <span class="subtitle">Please sign in to continue</span>
                         </asp:PlaceHolder>
                     </div>
@@ -1310,7 +1371,7 @@
                     <asp:HyperLink ID="lnkManage" runat="server" NavigateUrl="CreateClassroom.aspx" Text="Manage" CssClass="menu-link teacher-menu-item" />
                 </asp:PlaceHolder>
 
-                <!-- Admin-specific menu items (if needed) -->
+                <!-- Admin-specific menu items -->
                 <asp:PlaceHolder ID="phAdminMenu" runat="server" Visible="false">
                     <asp:HyperLink ID="lnkAdmin" runat="server" NavigateUrl="Admin.aspx" Text="Admin Panel" CssClass="menu-link admin-menu-item" />
                 </asp:PlaceHolder>
@@ -1331,38 +1392,6 @@
                     <a href="Register.aspx" class="btn black">Register</a>
                 </asp:PlaceHolder>
             </div>
-
-            <!-- Enhanced Teacher Quick Stats -->
-            <asp:PlaceHolder ID="phTeacherStats" runat="server" Visible="false">
-                <div class="teacher-stats">
-                    <div class="stats-header">
-                        <h3 class="stats-title">Teacher Dashboard</h3>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <span class="stat-icon">👨‍🎓</span>
-                            <div class="stat-number" id="totalStudents">-</div>
-                            <div class="stat-label">Total Students</div>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-icon">📚</span>
-                            <div class="stat-number" id="totalClasses">-</div>
-                            <div class="stat-label">Active Classes</div>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-icon">📝</span>
-                            <div class="stat-number" id="pendingGrades">-</div>
-                            <div class="stat-label">Pending Grades</div>
-                            <div class="notification-badge" id="pendingNotification">!</div>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-icon">📅</span>
-                            <div class="stat-number" id="todaySchedule">-</div>
-                            <div class="stat-label">Today's Sessions</div>
-                        </div>
-                    </div>
-                </div>
-            </asp:PlaceHolder>
         </div>
 
         <!-- Main Content -->
