@@ -136,8 +136,9 @@ namespace YourProjectNamespace
 
                 case "LoadMembers":
                     LoadMembersAsync();
-                    ClientScript.RegisterStartupScript(this.GetType(), "showMembers",
-                        "setTimeout(() => showMembersList(), 100);", true);
+                    // Register script to show modal after members are loaded
+                    ClientScript.RegisterStartupScript(this.GetType(), "showModalAfterLoad",
+                        "setTimeout(() => { document.getElementById('manageModal').style.display = 'block'; }, 100);", true);
                     break;
 
                 case "DeleteMessage":
@@ -221,18 +222,19 @@ namespace YourProjectNamespace
             }
         }
 
-        // IMPROVED: User search with both email and username support
+        // IMPROVED: User search with both email and username support (case-insensitive)
         protected async void btnSearchUser_Click(object sender, EventArgs e)
         {
-            string searchTerm = txtUserSearch.Text.Trim().ToLower();
+            string originalSearchTerm = txtUserSearch.Text.Trim();
+            string searchTermLower = originalSearchTerm.ToLower();
 
-            if (string.IsNullOrEmpty(searchTerm))
+            if (string.IsNullOrEmpty(originalSearchTerm))
             {
                 ShowSearchMessage("Please enter an email address or username", "text-danger");
                 return;
             }
 
-            if (searchTerm == currentUserEmail.ToLower())
+            if (searchTermLower == currentUserEmail.ToLower())
             {
                 ShowSearchMessage("You cannot start a chat with yourself", "text-warning");
                 return;
@@ -244,9 +246,9 @@ namespace YourProjectNamespace
             {
                 var userResults = new List<UserSearchResult>();
 
-                // Search by email first
+                // Search by email first (emails are typically lowercase)
                 var emailSnapshot = await db.Collection("users")
-                    .WhereEqualTo("email", searchTerm)
+                    .WhereEqualTo("email", searchTermLower)
                     .GetSnapshotAsync();
 
                 if (emailSnapshot.Count > 0)
@@ -258,28 +260,95 @@ namespace YourProjectNamespace
                     string lastName = GetSafeValue(userData, "lastName", "");
                     string fullName = $"{firstName} {lastName}".Trim();
                     string username = GetSafeValue(userData, "username", "");
+                    string email = GetSafeValue(userData, "email", "");
 
                     if (string.IsNullOrEmpty(fullName))
                     {
-                        fullName = searchTerm.Split('@')[0];
+                        fullName = email.Split('@')[0];
                     }
 
                     userResults.Add(new UserSearchResult
                     {
-                        Email = searchTerm,
+                        Email = email,
                         Name = fullName,
                         Username = username
                     });
                 }
                 else
                 {
-                    // If not found by email, search by username
+                    // If not found by email, search by username with multiple case variations
+                    // Try exact match first
                     var usernameSnapshot = await db.Collection("users")
-                        .WhereEqualTo("username", searchTerm)
+                        .WhereEqualTo("username", originalSearchTerm)
                         .GetSnapshotAsync();
 
-                    if (usernameSnapshot.Count > 0)
+                    // If exact match fails, try lowercase
+                    if (usernameSnapshot.Count == 0)
                     {
+                        usernameSnapshot = await db.Collection("users")
+                            .WhereEqualTo("username", searchTermLower)
+                            .GetSnapshotAsync();
+                    }
+
+                    // If lowercase fails, try with first letter capitalized
+                    if (usernameSnapshot.Count == 0 && originalSearchTerm.Length > 0)
+                    {
+                        string capitalizedSearch = char.ToUpper(originalSearchTerm[0]) + originalSearchTerm.Substring(1).ToLower();
+                        usernameSnapshot = await db.Collection("users")
+                            .WhereEqualTo("username", capitalizedSearch)
+                            .GetSnapshotAsync();
+                    }
+
+                    // If still no match, try all uppercase
+                    if (usernameSnapshot.Count == 0)
+                    {
+                        usernameSnapshot = await db.Collection("users")
+                            .WhereEqualTo("username", originalSearchTerm.ToUpper())
+                            .GetSnapshotAsync();
+                    }
+
+                    // As a last resort, get all users and search case-insensitively (less efficient but more thorough)
+                    if (usernameSnapshot.Count == 0)
+                    {
+                        var allUsersSnapshot = await db.Collection("users")
+                            .Limit(1000)  // Limit to avoid too much data
+                            .GetSnapshotAsync();
+
+                        foreach (var doc in allUsersSnapshot.Documents)
+                        {
+                            var userData = doc.ToDictionary();
+                            string dbUsername = GetSafeValue(userData, "username", "");
+
+                            if (!string.IsNullOrEmpty(dbUsername) &&
+                                dbUsername.Equals(originalSearchTerm, StringComparison.OrdinalIgnoreCase))
+                            {
+                                string firstName = GetSafeValue(userData, "firstName", "");
+                                string lastName = GetSafeValue(userData, "lastName", "");
+                                string fullName = $"{firstName} {lastName}".Trim();
+                                string email = GetSafeValue(userData, "email", "");
+
+                                if (string.IsNullOrEmpty(fullName))
+                                {
+                                    fullName = dbUsername;
+                                }
+
+                                // Check if it's not the current user
+                                if (email.ToLower() != currentUserEmail.ToLower())
+                                {
+                                    userResults.Add(new UserSearchResult
+                                    {
+                                        Email = email,
+                                        Name = fullName,
+                                        Username = dbUsername
+                                    });
+                                    break; // Found one match, that's enough
+                                }
+                            }
+                        }
+                    }
+                    else if (usernameSnapshot.Count > 0)
+                    {
+                        // Process the found user from direct username search
                         var userDoc = usernameSnapshot.Documents[0];
                         var userData = userDoc.ToDictionary();
 
@@ -674,26 +743,23 @@ namespace YourProjectNamespace
             if (fileType == "image")
             {
                 return $@"
-                    <div class='message-file'>
-                        <img src='{fileUrl}' alt='{fileName}' class='file-image' onclick='window.open(""{fileUrl}"", ""_blank"")' title='Click to view full size' />
+                    <div class='message-file' style='margin-top: 8px;'>
+                        <img src='{fileUrl}' alt='{fileName}' style='max-width: 300px; max-height: 200px; border-radius: 10px; cursor: pointer; object-fit: cover;' onclick='window.open(""{fileUrl}"", ""_blank"")' title='Click to view full size' />
                     </div>";
             }
             else if (fileType == "pdf")
             {
                 return $@"
-                    <div class='message-file'>
-                        <div class='file-preview'>
-                            <div class='file-icon pdf'>
-                                <i class='fas fa-file-pdf'></i>
-                            </div>
-                            <div class='file-info'>
-                                <div class='file-name'>{fileName}</div>
-                                <div class='file-size'>{FormatFileSize(0)}</div>
+                    <div class='message-file' style='margin-top: 8px; padding: 12px; background: rgba(248,249,250,0.9); border-radius: 10px; border: 1px solid rgba(233,236,239,0.8);'>
+                        <div style='display: flex; align-items: center; gap: 10px;'>
+                            <div style='width: 32px; height: 32px; background: #dc3545; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: bold;'>PDF</div>
+                            <div style='flex: 1;'>
+                                <div style='font-weight: 500; color: #2c3e50; font-size: 13px;'>{fileName}</div>
+                                <a href='{fileUrl}' target='_blank' style='color: #667eea; text-decoration: none; font-size: 12px; display: flex; align-items: center; gap: 4px; margin-top: 2px;'>
+                                    📄 Open PDF
+                                </a>
                             </div>
                         </div>
-                        <a href='{fileUrl}' target='_blank' style='color: inherit; text-decoration: none; font-size: 12px; margin-top: 8px; display: block;'>
-                            <i class='fas fa-external-link-alt'></i> Open PDF
-                        </a>
                     </div>";
             }
 
@@ -1027,17 +1093,26 @@ namespace YourProjectNamespace
             }
         }
 
+        // FIXED: Load members method with better error handling
         private async void LoadMembersAsync()
         {
             string roomId = hfCurrentRoomId.Value;
-            if (string.IsNullOrEmpty(roomId)) return;
+            if (string.IsNullOrEmpty(roomId))
+            {
+                ShowInviteMessage("No room selected", "text-danger");
+                return;
+            }
 
             try
             {
                 var roomRef = db.Collection("chatRooms").Document(roomId);
                 var roomSnapshot = await roomRef.GetSnapshotAsync();
 
-                if (!roomSnapshot.Exists) return;
+                if (!roomSnapshot.Exists)
+                {
+                    ShowInviteMessage("Room not found", "text-danger");
+                    return;
+                }
 
                 var roomData = roomSnapshot.ToDictionary();
                 string createdBy = GetSafeValue(roomData, "createdBy", "");
@@ -1066,12 +1141,18 @@ namespace YourProjectNamespace
                     });
                 }
 
-                rptMembers.DataSource = members.OrderBy(m => m.Role == "admin" ? 0 : 1).ThenBy(m => m.Name);
+                // Sort members: admins first, then by name
+                var sortedMembers = members.OrderBy(m => m.Role == "admin" ? 0 : 1).ThenBy(m => m.Name).ToList();
+
+                rptMembers.DataSource = sortedMembers;
                 rptMembers.DataBind();
+
+                System.Diagnostics.Debug.WriteLine($"Loaded {sortedMembers.Count} members for room {roomId}");
             }
             catch (Exception ex)
             {
                 ShowInviteMessage("Error loading members: " + ex.Message, "text-danger");
+                System.Diagnostics.Debug.WriteLine($"Error in LoadMembersAsync: {ex.Message}");
             }
         }
 
@@ -1281,7 +1362,7 @@ namespace YourProjectNamespace
                 rptMessages.DataBind();
 
                 ClientScript.RegisterStartupScript(this.GetType(), "scrollToBottom",
-                    "setTimeout(() => scrollToBottom(true), 200);", true);
+                    "setTimeout(() => { const container = document.getElementById('messagesContainer'); if(container) container.scrollTop = container.scrollHeight; }, 200);", true);
             }
             catch (Exception ex)
             {
