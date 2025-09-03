@@ -6,7 +6,7 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Enhanced Study Group Page Design with Profile Image Support */
+        /* Enhanced Study Group Page Design with Profile Image Support and Invitation Features */
         
         .study-group-container {
             max-width: 800px;
@@ -83,6 +83,243 @@
 
         .stat-icon {
             font-size: 20px;
+        }
+
+        /* Group Management Styles */
+        .group-management-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .group-management-card:hover {
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .management-header {
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4f1d4 100%);
+            padding: 25px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .management-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .management-body {
+            padding: 25px;
+        }
+
+        /* Capacity Display */
+        .capacity-info {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .capacity-display {
+            font-size: 18px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .capacity-current {
+            color: #28a745;
+        }
+
+        .capacity-total {
+            color: #6c757d;
+        }
+
+        .capacity-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .capacity-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .capacity-fill.warning {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        }
+
+        .capacity-fill.danger {
+            background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+        }
+
+        /* Invitation Section */
+        .invitation-section {
+            margin-top: 25px;
+        }
+
+        .section-subtitle {
+            font-size: 16px;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 15px;
+        }
+
+        .btn-invite {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.3);
+            width: 100%;
+        }
+
+        .btn-invite:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-invite:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-invite-bulk {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-invite-bulk:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        /* Bulk Invite Section */
+        .bulk-invite-section {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+
+        .bulk-invite-toggle {
+            cursor: pointer;
+            font-weight: 600;
+            color: #495057;
+            outline: none;
+        }
+
+        .bulk-invite-toggle:hover {
+            color: #007bff;
+        }
+
+        .bulk-invite-content {
+            margin-top: 15px;
+        }
+
+        /* Pending Invitations */
+        .pending-invitations {
+            border-top: 1px solid #e9ecef;
+            padding-top: 20px;
+        }
+
+        .pending-invite-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .pending-invite-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .invite-info {
+            flex: 1;
+        }
+
+        .invite-email {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 4px;
+        }
+
+        .invite-details {
+            font-size: 13px;
+            color: #6c757d;
+        }
+
+        .invite-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-resend {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-resend:hover {
+            background: #138496;
+        }
+
+        .btn-cancel-invite {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cancel-invite:hover {
+            background: #c82333;
+        }
+
+        .no-pending-invites {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-style: italic;
         }
 
         .post-creation-card {
@@ -595,6 +832,16 @@
             color: #3498db;
         }
 
+        /* Report button styling */
+        .reaction-btn.report-btn {
+            color: #6c757d;
+        }
+
+        .reaction-btn.report-btn:hover {
+            color: #dc3545;
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
         .reaction-icon {
             font-size: 18px;
         }
@@ -751,6 +998,16 @@
             color: #495057;
         }
 
+        /* Comment report button */
+        .comment-action-btn.report-comment-btn {
+            color: #6c757d;
+        }
+
+        .comment-action-btn.report-comment-btn:hover {
+            color: #dc3545;
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
         .new-comment-form {
             background: white;
             border-radius: 12px;
@@ -847,6 +1104,19 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Report Modal Styles */
+        .reported-content {
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 0.9em;
+            color: #495057;
+            word-wrap: break-word;
+        }
+
+        .modal-header.bg-danger {
+            background-color: #dc3545 !important;
+        }
+
         /* Responsive design */
         @media (max-width: 768px) {
             .study-group-container {
@@ -867,7 +1137,8 @@
             }
 
             .post-creation-header,
-            .post-creation-body {
+            .post-creation-body,
+            .management-body {
                 padding: 20px;
             }
 
@@ -885,6 +1156,7 @@
 
             .reaction-buttons {
                 gap: 15px;
+                flex-wrap: wrap;
             }
 
             .comments-section {
@@ -908,6 +1180,11 @@
                 width: 32px;
                 height: 32px;
             }
+
+            .btn-invite {
+                font-size: 13px;
+                padding: 10px 20px;
+            }
         }
 
         /* Accessibility improvements */
@@ -916,7 +1193,9 @@
         .btn-post:focus,
         .comment-submit-btn:focus,
         .file-input-btn:focus,
-        .file-remove-btn:focus {
+        .file-remove-btn:focus,
+        .btn-invite:focus,
+        .btn-invite-bulk:focus {
             outline: 3px solid rgba(103, 126, 234, 0.5);
             outline-offset: 2px;
         }
@@ -925,10 +1204,13 @@
         @media (prefers-color-scheme: dark) {
             .post-card,
             .post-creation-card,
+            .group-management-card,
             .comment-item,
             .new-comment-form,
             .file-preview-container,
-            .file-preview-item {
+            .file-preview-item,
+            .pending-invite-item,
+            .bulk-invite-section {
                 background: #1a1a1a;
                 border-color: #333;
                 color: #fff;
@@ -940,8 +1222,15 @@
                 border-color: #444;
                 color: #fff;
             }
+
+            .capacity-info {
+                background: #2a2a2a;
+            }
         }
     </style>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <asp:UpdatePanel ID="UpdatePanel1" runat="server">
         <ContentTemplate>
@@ -952,6 +1241,76 @@
                         <asp:Literal ID="ltGroupDetails" runat="server" />
                     </div>
                 </div>
+
+                <!-- Group Management Section (Only for Group Owner) -->
+                <asp:Panel ID="pnlGroupManagement" runat="server" Visible="false">
+                    <div class="group-management-card">
+                        <div class="management-header">
+                            <h5 class="management-title">👥 Group Management</h5>
+                        </div>
+                        <div class="management-body">
+                            <!-- Member Capacity Info -->
+                            <div class="capacity-info mb-3">
+                                <div class="capacity-display">
+                                    <span class="capacity-current">
+                                        <asp:Literal ID="ltCurrentMembers" runat="server" />
+                                    </span>
+                                    /
+                                    <span class="capacity-total">
+                                        <asp:Literal ID="ltTotalCapacity" runat="server" />
+                                    </span>
+                                    members
+                                </div>
+                                <div class="capacity-bar">
+                                    <div class="capacity-fill" id="capacityFill"></div>
+                                </div>
+                            </div>
+
+                            <!-- Invitation Section -->
+                            <div class="invitation-section">
+    <h6 class="section-subtitle">👥 Add Members by Email</h6>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <asp:TextBox ID="txtInviteEmail" runat="server" CssClass="form-control" 
+                placeholder="Enter email address (e.g., user@example.com)" />
+            <div class="form-text">
+                You can add <asp:Literal ID="ltAvailableSlots" runat="server" /> more members
+                <br />
+                <small class="text-muted">Note: User must have an account with this email to be added</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <asp:Button ID="btnSendInvite" runat="server" CssClass="btn-invite" 
+                Text="➕ Add Member" OnClick="btnSendInvite_Click" />
+        </div>
+    </div>
+
+    <!-- Multiple Email Addition -->
+    <div class="mt-3">
+        <details class="bulk-invite-section">
+            <summary class="bulk-invite-toggle">📋 Add Multiple Members</summary>
+            <div class="bulk-invite-content">
+                <asp:TextBox ID="txtBulkInviteEmails" runat="server" TextMode="MultiLine" 
+                    CssClass="form-control" Rows="4"
+                    placeholder="Enter multiple email addresses separated by commas or new lines:&#10;user1@example.com&#10;user2@example.com&#10;user3@example.com" />
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <small class="text-muted">
+                        Separate emails with commas or new lines<br />
+                        <em>Users must have accounts with these emails to be added</em>
+                    </small>
+                    <asp:Button ID="btnBulkInvite" runat="server" CssClass="btn-invite-bulk" 
+                        Text="➕ Add All Members" OnClick="btnBulkInvite_Click" />
+                </div>
+            </div>
+        </details>
+    </div>
+</div>
+
+                            
+                        </div>
+                    </div>
+                </asp:Panel>
 
                 <!-- Enhanced Create Post Section -->
                 <div class="post-creation-card">
@@ -1078,7 +1437,7 @@
                                 </asp:Panel>
                             </div>
 
-                            <!-- Enhanced Post Reactions -->
+                            <!-- Enhanced Post Reactions with Report Button -->
                             <div class="post-reactions">
                                 <div class="reaction-buttons">
                                     <asp:LinkButton ID="btnLike" runat="server" 
@@ -1118,15 +1477,13 @@
                                         <span><%# (bool)Eval("isSaved") ? "Saved" : "Save" %></span>
                                     </asp:LinkButton>
 
-                                    <asp:LinkButton ID="btnReport" runat="server" 
-                                        CommandName="ReportPost" 
-                                        CommandArgument='<%# Eval("postId") %>' 
-                                        CssClass="reaction-btn"
-                                        Visible='<%# !(bool)Eval("isOwner") %>'
-                                        OnClientClick="return confirm('Report this post as inappropriate?')">
+                                    <!-- Enhanced Report Button with Modal -->
+                                    <button type="button" class="reaction-btn report-btn" 
+                                           onclick="showReportModal('<%# Eval("postId") %>', 'post', '<%# Eval("content").ToString().Length > 50 ? Eval("content").ToString().Substring(0, 50) + "..." : Eval("content") %>')"
+                                           style='<%# (bool)Eval("isOwner") ? "display:none;" : "" %>'>
                                         <span class="reaction-icon">🚩</span>
                                         <span>Report</span>
-                                    </asp:LinkButton>
+                                    </button>
                                 </div>
                                 
                                 <div class="post-stats">
@@ -1188,12 +1545,18 @@
                                             <!-- Comment Content / Edit -->
                                             <asp:Panel ID="pnlCommentView" runat="server" Visible='<%# !(bool)Eval("IsEditingComment") %>'>
                                                 <div class="comment-text"><%# Eval("content") %></div>
+                                                <!-- Enhanced Comment Actions with Report -->
                                                 <div class="comment-actions">
                                                     <button class="comment-action-btn" onclick="toggleCommentLike(this, '<%# Eval("commentId") %>')">
                                                         <span>👍</span> Like
                                                     </button>
                                                     <button class="comment-action-btn" onclick="replyToComment('<%# Eval("commentId") %>')">
                                                         <span>💬</span> Reply
+                                                    </button>
+                                                    <button type="button" class="comment-action-btn report-comment-btn" 
+                                                           onclick="showReportModal('<%# Eval("commentId") %>', 'comment', '<%# Eval("content").ToString().Length > 30 ? Eval("content").ToString().Substring(0, 30) + "..." : Eval("content") %>')"
+                                                           style='<%# (bool)Eval("isOwner") ? "display:none;" : "" %>'>
+                                                        <span>🚩</span> Report
                                                     </button>
                                                 </div>
                                             </asp:Panel>
@@ -1247,8 +1610,78 @@
         </ContentTemplate>
         <Triggers>
             <asp:PostBackTrigger ControlID="btnPost" />
+            <asp:PostBackTrigger ControlID="btnSendInvite" />
+            <asp:PostBackTrigger ControlID="btnBulkInvite" />
         </Triggers>
     </asp:UpdatePanel>
+
+    <!-- Report Modal -->
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="reportModalLabel">
+                        <i class="bi bi-flag"></i> Report Content
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <strong>⚠️ Important:</strong> False reports may result in action against your account.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>You are reporting:</strong>
+                        <div class="reported-content p-2 bg-light border rounded mt-2" id="reportedContentPreview">
+                            <!-- Content will be populated by JavaScript -->
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="reportReason" class="form-label">Reason for reporting <span class="text-danger">*</span></label>
+                        <asp:DropDownList ID="ddlReportReason" runat="server" CssClass="form-select">
+                            <asp:ListItem Text="Select a reason..." Value="" Selected="True" />
+                            <asp:ListItem Text="Inappropriate content" Value="inappropriate_content" />
+                            <asp:ListItem Text="Harassment or bullying" Value="harassment" />
+                            <asp:ListItem Text="Spam" Value="spam" />
+                            <asp:ListItem Text="Hate speech" Value="hate_speech" />
+                            <asp:ListItem Text="Violence or threats" Value="violence" />
+                            <asp:ListItem Text="False information" Value="false_info" />
+                            <asp:ListItem Text="Other" Value="other" />
+                        </asp:DropDownList>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="reportDetails" class="form-label">Additional details (optional)</label>
+                        <asp:TextBox ID="txtReportDetails" runat="server" TextMode="MultiLine" 
+                                   CssClass="form-control" Rows="3" 
+                                   placeholder="Please provide any additional context..."></asp:TextBox>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong>📋 What happens next:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>Your report will be reviewed by administrators</li>
+                            <li>Appropriate action will be taken if violations are found</li>
+                            <li>You may receive updates on the report status</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <asp:Button ID="btnSubmitReport" runat="server" Text="Submit Report" 
+                               OnClick="btnSubmitReport_Click" CssClass="btn btn-danger" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden fields for report data -->
+    <asp:HiddenField ID="hdnReportItemId" runat="server" />
+    <asp:HiddenField ID="hdnReportItemType" runat="server" />
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         // File handling variables
@@ -1257,11 +1690,42 @@
 
         // Initialize file handling
         document.addEventListener('DOMContentLoaded', function () {
-            fileInput = document.querySelector('input[type="file"]');
-            if (fileInput) {
-                fileInput.addEventListener('change', handleFileSelection);
+            updateCapacityBar();
+
+            // Enable/disable add button based on available slots
+            const addBtn = document.getElementById('<%= btnSendInvite.ClientID %>');
+            const bulkAddBtn = document.getElementById('<%= btnBulkInvite.ClientID %>');
+
+            if (availableSlots <= 0) {
+                if (addBtn) {
+                    addBtn.disabled = true;
+                    addBtn.textContent = '❌ Group Full';
+                }
+                if (bulkAddBtn) {
+                    bulkAddBtn.disabled = true;
+                }
             }
         });
+
+        // Update capacity bar display
+        function updateCapacityBar() {
+            const currentMembers = parseInt(document.querySelector('.capacity-current')?.textContent || 0);
+            const totalCapacity = parseInt(document.querySelector('.capacity-total')?.textContent || 1);
+            const percentage = Math.min((currentMembers / totalCapacity) * 100, 100);
+
+            const fillElement = document.getElementById('capacityFill');
+            if (fillElement) {
+                fillElement.style.width = percentage + '%';
+
+                // Update color based on capacity
+                fillElement.className = 'capacity-fill';
+                if (percentage >= 90) {
+                    fillElement.classList.add('danger');
+                } else if (percentage >= 75) {
+                    fillElement.classList.add('warning');
+                }
+            }
+        }
 
         // Handle file selection
         function handleFileSelection() {
@@ -1381,6 +1845,33 @@
             updateFilePreview();
         }
 
+        // Enhanced Report Modal Functions
+        function showReportModal(itemId, itemType, contentPreview) {
+            // Set hidden fields
+            document.getElementById('<%= hdnReportItemId.ClientID %>').value = itemId;
+            document.getElementById('<%= hdnReportItemType.ClientID %>').value = itemType;
+
+            // Update modal title and content
+            const modalLabel = document.getElementById('reportModalLabel');
+            const contentDiv = document.getElementById('reportedContentPreview');
+
+            if (itemType === 'post') {
+                modalLabel.innerHTML = '<i class="bi bi-flag"></i> Report Post';
+                contentDiv.innerHTML = '<strong>Post:</strong> "' + contentPreview + '"';
+            } else {
+                modalLabel.innerHTML = '<i class="bi bi-flag"></i> Report Comment';
+                contentDiv.innerHTML = '<strong>Comment:</strong> "' + contentPreview + '"';
+            }
+
+            // Reset form
+            document.getElementById('<%= ddlReportReason.ClientID %>').selectedIndex = 0;
+            document.getElementById('<%= txtReportDetails.ClientID %>').value = '';
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('reportModal'));
+            modal.show();
+        }
+
         // Toggle dropdown menus
         function toggleDropdown(button) {
             const dropdown = button.nextElementSibling;
@@ -1438,19 +1929,36 @@
             commentInput.value = '@' + commentId + ' ';
         }
 
-        // Show notifications
+        // Enhanced notification function
         function showNotification(message, type) {
             const notification = document.createElement('div');
             notification.className = `alert alert-${type} alert-dismissible fade show`;
-            notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
+            notification.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);';
+
+            let icon = '';
+            switch (type) {
+                case 'success': icon = '✅'; break;
+                case 'danger': icon = '❌'; break;
+                case 'warning': icon = '⚠️'; break;
+                case 'info': icon = 'ℹ️'; break;
+                default: icon = '📢'; break;
+            }
+
             notification.innerHTML = `
-                ${message}
+                <strong>${icon}</strong> ${message}
                 <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
             `;
             document.body.appendChild(notification);
 
             setTimeout(() => {
-                notification.remove();
+                if (notification && notification.parentElement) {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 150);
+                }
             }, 5000);
         }
 
@@ -1477,6 +1985,15 @@
         // Clear files after successful post (called from code-behind)
         function clearFilesAfterPost() {
             clearFileSelection();
+        }
+
+        // Profile navigation function
+        function navigateToProfile(userId) {
+            if (userId && userId !== '<%= currentUserId %>') {
+                window.location.href = 'ProfileOthers.aspx?userId=' + userId;
+            } else if (userId === '<%= currentUserId %>') {
+                window.location.href = 'Profile.aspx';
+            }
         }
     </script>
 </asp:Content>

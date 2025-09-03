@@ -50,6 +50,7 @@ namespace YourProjectNamespace
                 if (!IsPostBack)
                 {
                     await LoadUsers();
+                    await LoadReports();
                     await LoadStatistics();
                 }
             }
@@ -66,6 +67,7 @@ namespace YourProjectNamespace
                 ShowErrorMessage("System error. Please try again later.");
             }
         }
+
         private bool IsAdminAuthenticated()
         {
             try
@@ -151,6 +153,8 @@ namespace YourProjectNamespace
             }
         }
 
+        #region User Management Methods
+
         private async Task LoadUsers()
         {
             try
@@ -158,9 +162,9 @@ namespace YourProjectNamespace
                 var query = db.Collection("users").OrderByDescending("createdAt");
 
                 // Apply filters
-                var searchTerm = txtSearch.Text.Trim().ToLower();
-                var statusFilter = ddlStatusFilter.SelectedValue;
-                var positionFilter = ddlPositionFilter.SelectedValue;
+                var searchTerm = txtUserSearch.Text.Trim().ToLower();
+                var statusFilter = ddlUserStatusFilter.SelectedValue;
+                var positionFilter = ddlUserPositionFilter.SelectedValue;
 
                 var snapshot = await query.GetSnapshotAsync();
                 var users = new List<UserData>();
@@ -205,42 +209,6 @@ namespace YourProjectNamespace
             {
                 System.Diagnostics.Debug.WriteLine($"LoadUsers error: {ex.Message}");
                 ShowErrorMessage("Failed to load users. Please try again.");
-            }
-        }
-
-        private async Task LoadStatistics()
-        {
-            try
-            {
-                var snapshot = await db.Collection("users").GetSnapshotAsync();
-
-                int pending = 0, approved = 0, rejected = 0, total = snapshot.Count;
-
-                foreach (var document in snapshot.Documents)
-                {
-                    var status = document.ContainsField("status") ? document.GetValue<string>("status") : "pending";
-                    switch (status)
-                    {
-                        case "pending":
-                            pending++;
-                            break;
-                        case "approved":
-                            approved++;
-                            break;
-                        case "rejected":
-                            rejected++;
-                            break;
-                    }
-                }
-
-                lblPendingCount.Text = pending.ToString();
-                lblApprovedCount.Text = approved.ToString();
-                lblRejectedCount.Text = rejected.ToString();
-                lblTotalCount.Text = total.ToString();
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"LoadStatistics error: {ex.Message}");
             }
         }
 
@@ -290,7 +258,7 @@ namespace YourProjectNamespace
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"ItemCommand error: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"User ItemCommand error: {ex.Message}");
                 ShowErrorMessage("Action failed. Please try again.");
             }
         }
@@ -403,6 +371,533 @@ namespace YourProjectNamespace
                 ShowErrorMessage($"Failed to reject user: {ex.Message}");
             }
         }
+
+        // User filter event handlers
+        protected async void txtUserSearch_TextChanged(object sender, EventArgs e)
+        {
+            await LoadUsers();
+        }
+
+        protected async void ddlUserStatusFilter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            await LoadUsers();
+        }
+
+        protected async void ddlUserPositionFilter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            await LoadUsers();
+        }
+
+        protected async void btnUserRefresh_Click(object sender, EventArgs e)
+        {
+            await LoadUsers();
+            await LoadStatistics();
+        }
+
+        #endregion
+
+        #region Report Management Methods
+
+        private async Task LoadReports()
+        {
+            try
+            {
+                // Start with the collection reference
+                CollectionReference reportsCollection = db.Collection("reports");
+                Query query;
+
+                // Apply sorting - create Query object instead of reassigning to CollectionReference
+                var sortBy = ddlReportSortBy.SelectedValue;
+                switch (sortBy)
+                {
+                    case "oldest":
+                        query = reportsCollection.OrderBy("reportedAt");
+                        break;
+                    case "priority":
+                        query = reportsCollection.OrderBy("priority").OrderByDescending("reportedAt");
+                        break;
+                    case "status":
+                        query = reportsCollection.OrderBy("status").OrderByDescending("reportedAt");
+                        break;
+                    default: // newest
+                        query = reportsCollection.OrderByDescending("reportedAt");
+                        break;
+                }
+
+                var snapshot = await query.GetSnapshotAsync();
+                var reports = new List<ReportData>();
+
+                foreach (var document in snapshot.Documents)
+                {
+                    var reportData = ConvertToReportData(document);
+
+                    // Apply filters
+                    if (!ReportPassesFilters(reportData))
+                        continue;
+
+                    reports.Add(reportData);
+                }
+
+                if (reports.Count > 0)
+                {
+                    rptReports.DataSource = reports;
+                    rptReports.DataBind();
+                    pnlNoReports.Visible = false;
+                }
+                else
+                {
+                    rptReports.DataSource = null;
+                    rptReports.DataBind();
+                    pnlNoReports.Visible = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"LoadReports error: {ex.Message}");
+                ShowErrorMessage("Failed to load reports. Please try again.");
+            }
+        }
+
+        private bool ReportPassesFilters(ReportData report)
+        {
+            // Search filter
+            var searchTerm = txtReportSearch.Text.Trim().ToLower();
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                var searchableText = $"{report.ReportedContent} {report.ReporterName} {report.ReportedAuthor} {report.GroupName} {report.ReasonText}".ToLower();
+                if (!searchableText.Contains(searchTerm))
+                    return false;
+            }
+
+            // Status filter
+            var statusFilter = ddlReportStatusFilter.SelectedValue;
+            if (!string.IsNullOrEmpty(statusFilter) && report.Status != statusFilter)
+                return false;
+
+            // Priority filter
+            var priorityFilter = ddlReportPriorityFilter.SelectedValue;
+            if (!string.IsNullOrEmpty(priorityFilter) && report.Priority != priorityFilter)
+                return false;
+
+            // Type filter
+            var typeFilter = ddlReportTypeFilter.SelectedValue;
+            if (!string.IsNullOrEmpty(typeFilter) && report.ReportedItemType != typeFilter)
+                return false;
+
+            return true;
+        }
+
+        private ReportData ConvertToReportData(DocumentSnapshot document)
+        {
+            var reportData = new ReportData
+            {
+                ReportId = document.Id,
+                ReporterId = GetFieldValue(document, "reporterId"),
+                ReporterName = GetFieldValue(document, "reporterName"),
+                ReportedItemId = GetFieldValue(document, "reportedItemId"),
+                ReportedItemType = GetFieldValue(document, "reportedItemType"),
+                ReportedContent = GetFieldValue(document, "reportedContent"),
+                ReportedAuthor = GetFieldValue(document, "reportedAuthor"),
+                ReportedAuthorId = GetFieldValue(document, "reportedAuthorId"),
+                GroupId = GetFieldValue(document, "groupId"),
+                GroupName = GetFieldValue(document, "groupName"),
+                Reason = GetFieldValue(document, "reason"),
+                ReasonText = GetFieldValue(document, "reasonText"),
+                Details = GetFieldValue(document, "details"),
+                Status = GetFieldValue(document, "status", "pending"),
+                Priority = GetFieldValue(document, "priority", "low"),
+                IsResolved = document.ContainsField("isResolved") ? document.GetValue<bool>("isResolved") : false,
+                ReportedAt = document.ContainsField("reportedAt") ? document.GetValue<Timestamp>("reportedAt").ToDateTime() : DateTime.UtcNow,
+                ReviewedBy = GetFieldValue(document, "reviewedBy"),
+                ReviewedAt = document.ContainsField("reviewedAt") && document.GetValue<Timestamp?>("reviewedAt") != null ?
+                             document.GetValue<Timestamp>("reviewedAt").ToDateTime() : (DateTime?)null,
+                AdminAction = GetFieldValue(document, "adminAction"),
+                AdminNotes = GetFieldValue(document, "adminNotes"),
+                ActionTaken = document.ContainsField("actionTaken") ? document.GetValue<bool>("actionTaken") : false,
+                ReportCount = document.ContainsField("reportCount") ? document.GetValue<int>("reportCount") : 1,
+                ReportedContentLength = document.ContainsField("reportedContentLength") ? document.GetValue<int>("reportedContentLength") : 0,
+                ParentPostId = GetFieldValue(document, "parentPostId"),
+                OriginalTimestamp = document.ContainsField("originalTimestamp") ? document.GetValue<Timestamp>("originalTimestamp").ToDateTime() : DateTime.UtcNow,
+                LastReportedAt = document.ContainsField("lastReportedAt") ? document.GetValue<Timestamp>("lastReportedAt").ToDateTime() : DateTime.UtcNow
+            };
+
+            return reportData;
+        }
+
+        protected async void rptReports_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            // This method is kept for compatibility but actions are now handled via JavaScript modal
+            // The actual processing happens in btnConfirmAction_Click
+        }
+
+        protected async void btnConfirmAction_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string reportId = hdnReportId.Value;
+                string actionType = hdnActionType.Value;
+                string itemType = hdnItemType.Value;
+                string itemId = hdnItemId.Value;
+                string adminNotes = txtAdminNotes.Text.Trim();
+
+                if (string.IsNullOrEmpty(reportId) || string.IsNullOrEmpty(actionType))
+                {
+                    ShowErrorMessage("Invalid action data. Please try again.");
+                    return;
+                }
+
+                // Get current admin user info
+                string adminUserId = Session["userId"]?.ToString() ?? "admin";
+                string adminUsername = Session["username"]?.ToString() ?? "Administrator";
+
+                await ProcessReportAction(reportId, actionType, itemType, itemId, adminUserId, adminUsername, adminNotes);
+
+                // Clear form
+                hdnReportId.Value = "";
+                hdnActionType.Value = "";
+                hdnItemType.Value = "";
+                hdnItemId.Value = "";
+                txtAdminNotes.Text = "";
+
+                // Close modal
+                ScriptManager.RegisterStartupScript(this, GetType(), "closeActionModal",
+                    @"var modal = bootstrap.Modal.getInstance(document.getElementById('actionModal')); 
+                      if (modal) modal.hide();", true);
+
+                await LoadReports();
+                await LoadStatistics();
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessage("Action failed: " + ex.Message);
+                System.Diagnostics.Debug.WriteLine($"btnConfirmAction_Click error: {ex}");
+            }
+        }
+
+        private async Task ProcessReportAction(string reportId, string actionType, string itemType, string itemId,
+                                            string adminUserId, string adminUsername, string adminNotes)
+        {
+            try
+            {
+                var reportRef = db.Collection("reports").Document(reportId);
+                var reportSnap = await reportRef.GetSnapshotAsync();
+
+                if (!reportSnap.Exists)
+                {
+                    ShowErrorMessage("Report not found.");
+                    return;
+                }
+
+                var reportData = reportSnap.ToDictionary();
+                string groupId = reportData.GetValueOrDefault("groupId", "").ToString();
+                string parentPostId = reportData.GetValueOrDefault("parentPostId", "").ToString();
+
+                bool contentDeleted = false;
+                string adminAction = "";
+
+                switch (actionType)
+                {
+                    case "resolve":
+                        adminAction = "Report resolved - Content kept";
+                        await UpdateReportStatus(reportRef, "resolved", true, adminUserId, adminUsername, adminAction, adminNotes);
+                        ShowSuccessMessage("Report resolved successfully. Content has been kept.");
+                        break;
+
+                    case "delete":
+                        contentDeleted = await DeleteReportedContent(itemType, itemId, groupId, parentPostId);
+                        if (contentDeleted)
+                        {
+                            adminAction = "Content deleted - Report resolved";
+                            await UpdateReportStatus(reportRef, "resolved", true, adminUserId, adminUsername, adminAction, adminNotes);
+                            ShowSuccessMessage("Content deleted and report resolved successfully.");
+                        }
+                        else
+                        {
+                            ShowErrorMessage("Failed to delete content. Please try again.");
+                            return;
+                        }
+                        break;
+
+                    case "dismiss":
+                        adminAction = "Report dismissed - No action required";
+                        await UpdateReportStatus(reportRef, "dismissed", true, adminUserId, adminUsername, adminAction, adminNotes);
+                        ShowSuccessMessage("Report dismissed successfully.");
+                        break;
+
+                    default:
+                        ShowErrorMessage("Invalid action type.");
+                        return;
+                }
+
+                // Log admin action
+                await LogAdminAction(reportId, actionType, adminUserId, adminUsername, contentDeleted);
+
+                // Notify relevant parties if needed
+                await NotifyReportActionTaken(reportData, adminAction, contentDeleted);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"ProcessReportAction error: {ex}");
+                throw;
+            }
+        }
+
+        private async Task<bool> DeleteReportedContent(string itemType, string itemId, string groupId, string parentPostId)
+        {
+            try
+            {
+                if (itemType == "post")
+                {
+                    var postRef = db.Collection("studyHubs").Document(groupId).Collection("posts").Document(itemId);
+                    var postSnap = await postRef.GetSnapshotAsync();
+
+                    if (postSnap.Exists)
+                    {
+                        // Delete post subcollections first
+                        await DeleteSubcollection(postRef.Collection("comments"));
+                        await DeleteSubcollection(postRef.Collection("attachments"));
+
+                        // Delete the post
+                        await postRef.DeleteAsync();
+                        return true;
+                    }
+                }
+                else if (itemType == "comment" && !string.IsNullOrEmpty(parentPostId))
+                {
+                    var commentRef = db.Collection("studyHubs").Document(groupId)
+                        .Collection("posts").Document(parentPostId)
+                        .Collection("comments").Document(itemId);
+
+                    var commentSnap = await commentRef.GetSnapshotAsync();
+                    if (commentSnap.Exists)
+                    {
+                        await commentRef.DeleteAsync();
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"DeleteReportedContent error: {ex}");
+                return false;
+            }
+        }
+
+        private async Task DeleteSubcollection(CollectionReference collectionRef)
+        {
+            try
+            {
+                var snapshot = await collectionRef.GetSnapshotAsync();
+                foreach (var doc in snapshot.Documents)
+                {
+                    await doc.Reference.DeleteAsync();
+                }
+            }
+            catch
+            {
+                // Log error but don't fail the main operation
+            }
+        }
+
+        private async Task UpdateReportStatus(DocumentReference reportRef, string status, bool isResolved,
+                                            string adminUserId, string adminUsername, string adminAction, string adminNotes)
+        {
+            var updates = new Dictionary<string, object>
+            {
+                { "status", status },
+                { "isResolved", isResolved },
+                { "reviewedBy", adminUsername },
+                { "reviewedAt", Timestamp.GetCurrentTimestamp() },
+                { "adminAction", adminAction },
+                { "adminNotes", adminNotes ?? "" },
+                { "actionTaken", true },
+                { "reviewerId", adminUserId }
+            };
+
+            await reportRef.UpdateAsync(updates);
+        }
+
+        private async Task LogAdminAction(string reportId, string actionType, string adminUserId, string adminUsername, bool contentDeleted)
+        {
+            try
+            {
+                var logRef = db.Collection("adminLogs").Document();
+                await logRef.SetAsync(new Dictionary<string, object>
+                {
+                    { "type", "report_action" },
+                    { "reportId", reportId },
+                    { "actionType", actionType },
+                    { "adminUserId", adminUserId },
+                    { "adminUsername", adminUsername },
+                    { "contentDeleted", contentDeleted },
+                    { "timestamp", Timestamp.GetCurrentTimestamp() },
+                    { "details", $"Admin {adminUsername} took action '{actionType}' on report {reportId}" }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"LogAdminAction error: {ex}");
+            }
+        }
+
+        private async Task NotifyReportActionTaken(Dictionary<string, object> reportData, string adminAction, bool contentDeleted)
+        {
+            try
+            {
+                // Notify the reporter about the action taken
+                string reporterId = reportData.GetValueOrDefault("reporterId", "").ToString();
+                if (!string.IsNullOrEmpty(reporterId))
+                {
+                    var notificationRef = db.Collection("users").Document(reporterId)
+                        .Collection("notifications").Document();
+
+                    string message = contentDeleted
+                        ? "Your report has been reviewed and the content has been removed."
+                        : "Your report has been reviewed. Thank you for helping keep our community safe.";
+
+                    await notificationRef.SetAsync(new Dictionary<string, object>
+                    {
+                        { "type", "report_resolved" },
+                        { "message", message },
+                        { "isRead", false },
+                        { "timestamp", Timestamp.GetCurrentTimestamp() }
+                    });
+                }
+
+                // Notify the content author if content was deleted
+                if (contentDeleted)
+                {
+                    string authorId = reportData.GetValueOrDefault("reportedAuthorId", "").ToString();
+                    if (!string.IsNullOrEmpty(authorId) && authorId != reporterId)
+                    {
+                        var notificationRef = db.Collection("users").Document(authorId)
+                            .Collection("notifications").Document();
+
+                        await notificationRef.SetAsync(new Dictionary<string, object>
+                        {
+                            { "type", "content_removed" },
+                            { "message", "One of your posts/comments was removed following a community report." },
+                            { "isRead", false },
+                            { "timestamp", Timestamp.GetCurrentTimestamp() }
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"NotifyReportActionTaken error: {ex}");
+            }
+        }
+
+        // Report filter event handlers
+        protected async void txtReportSearch_TextChanged(object sender, EventArgs e)
+        {
+            await LoadReports();
+        }
+
+        protected async void ddlReportStatusFilter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            await LoadReports();
+        }
+
+        protected async void ddlReportPriorityFilter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            await LoadReports();
+        }
+
+        protected async void ddlReportTypeFilter_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            await LoadReports();
+        }
+
+        protected async void ddlReportSortBy_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            await LoadReports();
+        }
+
+        protected async void btnReportRefresh_Click(object sender, EventArgs e)
+        {
+            await LoadReports();
+            await LoadStatistics();
+        }
+
+        #endregion
+
+        #region Statistics and Common Methods
+
+        private async Task LoadStatistics()
+        {
+            try
+            {
+                // Load user statistics
+                var userSnapshot = await db.Collection("users").GetSnapshotAsync();
+                int pendingUsers = 0, approvedUsers = 0, rejectedUsers = 0, totalUsers = userSnapshot.Count;
+
+                foreach (var document in userSnapshot.Documents)
+                {
+                    var status = document.ContainsField("status") ? document.GetValue<string>("status") : "pending";
+                    switch (status)
+                    {
+                        case "pending":
+                            pendingUsers++;
+                            break;
+                        case "approved":
+                            approvedUsers++;
+                            break;
+                        case "rejected":
+                            rejectedUsers++;
+                            break;
+                    }
+                }
+
+                lblPendingCount.Text = pendingUsers.ToString();
+                lblApprovedCount.Text = approvedUsers.ToString();
+                lblRejectedCount.Text = rejectedUsers.ToString();
+                lblTotalCount.Text = totalUsers.ToString();
+                lblNavPending.Text = pendingUsers.ToString();
+
+                // Load report statistics
+                var reportSnapshot = await db.Collection("reports").GetSnapshotAsync();
+                int pendingReports = 0, highPriorityReports = 0, resolvedReports = 0, totalReports = reportSnapshot.Count;
+
+                foreach (var document in reportSnapshot.Documents)
+                {
+                    var status = document.ContainsField("status") ? document.GetValue<string>("status") : "pending";
+                    var priority = document.ContainsField("priority") ? document.GetValue<string>("priority") : "low";
+                    var isResolved = document.ContainsField("isResolved") ? document.GetValue<bool>("isResolved") : false;
+
+                    if (status == "pending")
+                        pendingReports++;
+
+                    if (priority == "high")
+                        highPriorityReports++;
+
+                    if (isResolved || status == "resolved")
+                        resolvedReports++;
+                }
+
+                lblPendingReports.Text = pendingReports.ToString();
+                lblHighPriorityReports.Text = highPriorityReports.ToString();
+                lblResolvedReports.Text = resolvedReports.ToString();
+                lblTotalReports.Text = totalReports.ToString();
+                lblNavReports.Text = pendingReports.ToString();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"LoadStatistics error: {ex.Message}");
+            }
+        }
+
+        private string GetFieldValue(DocumentSnapshot document, string fieldName, string defaultValue = "")
+        {
+            return document.ContainsField(fieldName) ? document.GetValue<string>(fieldName) : defaultValue;
+        }
+
+        #endregion
+
+        #region Email Methods
 
         private async Task SendApprovalEmail(UserData userData)
         {
@@ -527,16 +1022,6 @@ The Admin Team
             margin: 15px 0;
             font-family: 'Courier New', monospace;
         }}
-        .cta-button {{ 
-            display: inline-block; 
-            background-color: #1cc88a; 
-            color: white; 
-            padding: 15px 30px; 
-            text-decoration: none; 
-            border-radius: 8px; 
-            font-weight: bold;
-            margin: 20px 0;
-        }}
         .footer {{ 
             background-color: #f8f9fc; 
             padding: 20px; 
@@ -571,20 +1056,6 @@ The Admin Team
                 <p><strong>Note:</strong> Use the password you created during registration.</p>
             </div>
             
-            <div style='text-align: center;'>
-                <a href='#' class='cta-button'>Login to Your Account</a>
-            </div>
-            
-            <div style='background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px 0;'>
-                <strong>🚀 What's Next?</strong>
-                <ul style='margin: 10px 0; padding-left: 20px;'>
-                    <li>Complete your profile information</li>
-                    <li>Explore the platform features</li>
-                    <li>Connect with other users</li>
-                    <li>Access exclusive content and resources</li>
-                </ul>
-            </div>
-            
             <p>If you have any questions or need assistance getting started, our support team is here to help.</p>
             
             <p>Welcome to the community!</p>
@@ -616,8 +1087,6 @@ The Admin Team
         .header {{ background: linear-gradient(135deg, #e74a3b 0%, #c73321 100%); color: white; padding: 30px 20px; text-align: center; }}
         .header h1 {{ margin: 0; font-size: 28px; }}
         .content {{ padding: 40px 30px; }}
-        .status-section {{ text-align: center; margin: 30px 0; }}
-        .status-icon {{ font-size: 64px; color: #e74a3b; margin-bottom: 20px; }}
         .reason-box {{ 
             background-color: #f8d7da; 
             border: 1px solid #f5c6cb; 
@@ -633,14 +1102,6 @@ The Admin Team
             border-left: 4px solid #e74a3b;
             font-style: italic;
         }}
-        .next-steps {{ 
-            background-color: #d1ecf1; 
-            border: 1px solid #bee5eb; 
-            border-radius: 8px; 
-            padding: 20px; 
-            margin: 25px 0;
-        }}
-        .next-steps h3 {{ margin-top: 0; color: #0c5460; }}
         .footer {{ 
             background-color: #f8f9fc; 
             padding: 20px; 
@@ -658,11 +1119,8 @@ The Admin Team
         </div>
         
         <div class='content'>
-            <div class='status-section'>
-                <div class='status-icon'>⚠️</div>
-                <h2>Hello {userData.FirstName},</h2>
-                <p style='font-size: 18px; color: #666;'>Thank you for your interest in joining our platform.</p>
-            </div>
+            <h2>Hello {userData.FirstName},</h2>
+            <p>Thank you for your interest in joining our platform.</p>
             
             <p>After careful review by our administrative team, we regret to inform you that your registration application has not been approved at this time.</p>
             
@@ -673,17 +1131,7 @@ The Admin Team
                 </div>
             </div>
             
-            <div class='next-steps'>
-                <h3>🔄 What You Can Do Next:</h3>
-                <ul style='margin: 10px 0; padding-left: 20px;'>
-                    <li><strong>Review the feedback:</strong> Consider the reason provided above</li>
-                    <li><strong>Make necessary changes:</strong> Address the concerns mentioned</li>
-                    <li><strong>Reapply:</strong> You're welcome to submit a new registration application</li>
-                    <li><strong>Contact support:</strong> Reach out if you need clarification</li>
-                </ul>
-            </div>
-            
-            <p>If you believe this decision was made in error or if you have questions about the feedback provided, please don't hesitate to contact our support team. We're here to help and provide guidance.</p>
+            <p>If you believe this decision was made in error or if you have questions about the feedback provided, please don't hesitate to contact our support team.</p>
             
             <p>We appreciate your understanding and interest in our platform.</p>
             
@@ -692,7 +1140,6 @@ The Admin Team
         
         <div class='footer'>
             <p>🤖 This is an automated email. Please do not reply to this message.</p>
-            <p>For support inquiries, please contact our support team directly.</p>
             <p>© 2024 Your Company Name. All rights reserved.</p>
         </div>
     </div>
@@ -700,30 +1147,10 @@ The Admin Team
 </html>";
         }
 
-        protected async void txtSearch_TextChanged(object sender, EventArgs e)
-        {
-            await LoadUsers();
-        }
-
-        protected async void ddlStatusFilter_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            await LoadUsers();
-        }
-
-        protected async void ddlPositionFilter_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            await LoadUsers();
-        }
-
-        protected async void btnRefresh_Click(object sender, EventArgs e)
-        {
-            await LoadUsers();
-            await LoadStatistics();
-        }
+        #endregion
 
         protected void btnLogout_Click(object sender, EventArgs e)
         {
-            // Implement logout logic
             Session.Clear();
             Response.Redirect("Login.aspx");
         }
@@ -743,7 +1170,7 @@ The Admin Team
         }
     }
 
-    // User data model
+    // Data models
     [Serializable]
     public class UserData
     {
@@ -761,5 +1188,37 @@ The Admin Team
         public string RejectionReason { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime LastUpdated { get; set; }
+    }
+
+    [Serializable]
+    public class ReportData
+    {
+        public string ReportId { get; set; }
+        public string ReporterId { get; set; }
+        public string ReporterName { get; set; }
+        public string ReportedItemId { get; set; }
+        public string ReportedItemType { get; set; }
+        public string ReportedContent { get; set; }
+        public string ReportedAuthor { get; set; }
+        public string ReportedAuthorId { get; set; }
+        public string GroupId { get; set; }
+        public string GroupName { get; set; }
+        public string Reason { get; set; }
+        public string ReasonText { get; set; }
+        public string Details { get; set; }
+        public string Status { get; set; }
+        public string Priority { get; set; }
+        public bool IsResolved { get; set; }
+        public DateTime ReportedAt { get; set; }
+        public string ReviewedBy { get; set; }
+        public DateTime? ReviewedAt { get; set; }
+        public string AdminAction { get; set; }
+        public string AdminNotes { get; set; }
+        public bool ActionTaken { get; set; }
+        public int ReportCount { get; set; }
+        public int ReportedContentLength { get; set; }
+        public string ParentPostId { get; set; }
+        public DateTime OriginalTimestamp { get; set; }
+        public DateTime LastReportedAt { get; set; }
     }
 }

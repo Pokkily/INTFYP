@@ -119,7 +119,8 @@
 
         .profile-stats {
             display: flex;
-            gap: 30px;
+            gap: 25px;
+            flex-wrap: wrap;
         }
 
         .stat-item {
@@ -164,6 +165,7 @@
             margin-bottom: 30px;
             overflow: hidden;
             border: 1px solid rgba(0,0,0,0.05);
+            flex-wrap: wrap;
         }
 
         .tab-button {
@@ -181,6 +183,7 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            min-width: 150px;
         }
 
         .tab-button.active {
@@ -345,14 +348,14 @@
             box-shadow: 0 10px 30px rgba(231, 76, 60, 0.4);
         }
 
-        .class-grid {
+        .class-grid, .feedback-grid, .book-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 25px;
             margin-top: 20px;
         }
 
-        .class-card {
+        .class-card, .feedback-card, .book-card {
             background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
             border-radius: 15px;
             padding: 25px;
@@ -362,7 +365,7 @@
             overflow: hidden;
         }
 
-        .class-card::before {
+        .class-card::before, .feedback-card::before, .book-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -372,120 +375,51 @@
             background: linear-gradient(135deg, #667eea, #764ba2);
         }
 
-        .class-card:hover {
+        .class-card:hover, .feedback-card:hover, .book-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 40px rgba(103, 126, 234, 0.2);
             border-color: rgba(103, 126, 234, 0.3);
         }
 
-        .class-name {
+        .class-name, .feedback-title, .book-title {
             font-size: 18px;
             font-weight: 700;
             color: #2c3e50;
             margin-bottom: 10px;
         }
 
-        .class-teacher {
+        .class-teacher, .feedback-date, .book-author {
             color: #667eea;
             font-weight: 600;
             margin-bottom: 15px;
         }
 
-        .class-meta {
+        .class-meta, .feedback-meta, .book-meta {
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-size: 14px;
             color: #6c757d;
-        }
-
-        .post-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            margin-top: 20px;
-        }
-
-        .post-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            border: 1px solid #e9ecef;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .post-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            border-color: rgba(103, 126, 234, 0.3);
-        }
-
-        .post-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
             margin-bottom: 15px;
         }
 
-        .post-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        .post-meta {
-            flex: 1;
-        }
-
-        .post-author {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        .post-time {
-            font-size: 13px;
-            color: #6c757d;
-        }
-
-        .post-content {
+        .feedback-content, .book-status {
             color: #495057;
             line-height: 1.6;
             margin-bottom: 15px;
-        }
-
-        .post-actions {
-            display: flex;
-            gap: 20px;
             font-size: 14px;
-            color: #6c757d;
         }
 
-        .post-action {
+        .card-actions {
             display: flex;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            transition: color 0.3s ease;
+            gap: 10px;
+            margin-top: 15px;
         }
 
-        .post-action:hover {
-            color: #667eea;
-        }
-
-        .post-action.liked {
-            color: #e74c3c;
-        }
-
-        .post-action.saved {
-            color: #f39c12;
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 12px;
+            border-radius: 20px;
         }
 
         .empty-state {
@@ -600,6 +534,7 @@
 
             .tab-button {
                 padding: 15px;
+                min-width: unset;
             }
 
             .tab-panel {
@@ -611,8 +546,7 @@
                 gap: 15px;
             }
 
-            .class-grid,
-            .post-grid {
+            .class-grid, .feedback-grid, .book-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -620,58 +554,6 @@
                 flex-wrap: wrap;
                 gap: 10px;
             }
-        }
-
-        /* Accessibility improvements */
-        .btn:focus,
-        .tab-button:focus,
-        .form-control:focus,
-        .filter-btn:focus {
-            outline: 3px solid rgba(103, 126, 234, 0.5);
-            outline-offset: 2px;
-        }
-
-        /* Alert styles for notifications */
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border: 1px solid transparent;
-            border-radius: 10px;
-            position: relative;
-        }
-
-        .alert-success {
-            color: #155724;
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-        }
-
-        .alert-danger {
-            color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-        }
-
-        .alert-warning {
-            color: #856404;
-            background-color: #fff3cd;
-            border-color: #ffeaa7;
-        }
-
-        .alert-info {
-            color: #0c5460;
-            background-color: #d1ecf1;
-            border-color: #bee5eb;
-        }
-
-        .btn-close {
-            position: absolute;
-            top: 8px;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
         }
     </style>
 
@@ -682,17 +564,17 @@
                 <div class="profile-header">
                     <div class="profile-header-content">
                         <div class="profile-image-container">
-                            <asp:Image ID="imgProfile" runat="server" CssClass="profile-image" 
+                            <asp:Image ID="imgProfile" runat="server" CssClass="profile-image"
                                 ImageUrl="Images/dprofile.jpg" AlternateText="Profile Picture" />
                             <div class="image-upload-overlay" onclick="document.getElementById('<%= fileProfilePicture.ClientID %>').click();">
                                 📷
                             </div>
-                            <asp:FileUpload ID="fileProfilePicture" runat="server" 
-                                style="display: none;" 
-                                accept="image/*" 
+                            <asp:FileUpload ID="fileProfilePicture" runat="server"
+                                Style="display: none;"
+                                accept="image/*"
                                 onchange="previewProfileImage(this);" />
                         </div>
-                        
+
                         <div class="profile-info">
                             <h1 class="profile-name">
                                 <asp:Literal ID="ltProfileName" runat="server" Text="Loading..." />
@@ -703,7 +585,7 @@
                             <div class="profile-position">
                                 <asp:Literal ID="ltPosition" runat="server" Text="Student" />
                             </div>
-                            
+
                             <div class="profile-stats">
                                 <div class="stat-item">
                                     <span class="stat-number">
@@ -729,12 +611,30 @@
                                     </span>
                                     <span class="stat-label">Saved</span>
                                 </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">
+                                        <asp:Literal ID="ltFeedbackCount" runat="server" Text="0" />
+                                    </span>
+                                    <span class="stat-label">Feedback</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">
+                                        <asp:Literal ID="ltRecommendedBooksCount" runat="server" Text="0" />
+                                    </span>
+                                    <span class="stat-label">Recommended</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-number">
+                                        <asp:Literal ID="ltFavoriteBooksCount" runat="server" Text="0" />
+                                    </span>
+                                    <span class="stat-label">Favorites</span>
+                                </div>
                             </div>
                         </div>
 
                         <div>
-                            <asp:Button ID="btnUploadPhoto" runat="server" Text="📷 Update Photo" 
-                                CssClass="edit-profile-btn" OnClick="btnUploadPhoto_Click" 
+                            <asp:Button ID="btnUploadPhoto" runat="server" Text="📷 Update Photo"
+                                CssClass="edit-profile-btn" OnClick="btnUploadPhoto_Click"
                                 Style="display: none;" />
                         </div>
                     </div>
@@ -754,6 +654,14 @@
                         <span class="tab-icon">📱</span>
                         <span>Activity</span>
                     </button>
+                    <button type="button" class="tab-button" onclick="showTab('feedback')">
+                        <span class="tab-icon">💬</span>
+                        <span>My Feedback</span>
+                    </button>
+                    <button type="button" class="tab-button" onclick="showTab('books')">
+                        <span class="tab-icon">📖</span>
+                        <span>My Books</span>
+                    </button>
                 </div>
 
                 <!-- Tab Content -->
@@ -767,7 +675,7 @@
 
                         <div class="form-section">
                             <h3 class="form-section-title">Basic Information</h3>
-                            
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">First Name</label>
@@ -819,12 +727,12 @@
 
                             <div class="form-group">
                                 <label class="form-label">Address</label>
-                                <asp:TextBox ID="txtAddress" runat="server" CssClass="form-control" 
+                                <asp:TextBox ID="txtAddress" runat="server" CssClass="form-control"
                                     TextMode="MultiLine" Rows="3" />
                             </div>
 
                             <div style="margin-top: 30px;">
-                                <asp:Button ID="btnUpdateProfile" runat="server" Text="💾 Save Changes" 
+                                <asp:Button ID="btnUpdateProfile" runat="server" Text="💾 Save Changes"
                                     CssClass="btn btn-primary" OnClick="btnUpdateProfile_Click" />
                                 <button type="button" class="btn btn-secondary" onclick="resetForm()">
                                     🔄 Reset
@@ -840,8 +748,8 @@
                             My Enrolled Classes
                         </div>
 
-                        <asp:Panel ID="pnlClassesLoading" runat="server" CssClass="loading" style="height: 200px;"></asp:Panel>
-                        
+                        <asp:Panel ID="pnlClassesLoading" runat="server" CssClass="loading" Style="height: 200px;"></asp:Panel>
+
                         <asp:Panel ID="pnlClasses" runat="server">
                             <div class="class-grid">
                                 <asp:Repeater ID="rptClasses" runat="server">
@@ -863,8 +771,140 @@
                                     <div class="empty-state-icon">📚</div>
                                     <h3 class="empty-state-title">No Classes Yet</h3>
                                     <p class="empty-state-text">You haven't enrolled in any classes yet. Start exploring!</p>
-                                    <a href="Class.aspx" class="btn btn-primary" style="margin-top: 20px;">
-                                        🔍 Browse Classes
+                                    <a href="Class.aspx" class="btn btn-primary" style="margin-top: 20px;">🔍 Browse Classes
+                                    </a>
+                                </div>
+                            </asp:Panel>
+                        </asp:Panel>
+                    </div>
+
+                    <!-- My Feedback Tab -->
+                    <div id="feedback" class="tab-panel">
+                        <div class="section-header">
+                            <span class="section-icon">💬</span>
+                            My Feedback Posts
+                        </div>
+
+                        <asp:Panel ID="pnlMyFeedback" runat="server">
+                            <div class="feedback-grid">
+                                <asp:Repeater ID="rptMyFeedback" runat="server" OnItemCommand="rptMyFeedback_ItemCommand">
+                                    <ItemTemplate>
+                                        <div class="feedback-card">
+                                            <div class="feedback-title">My Feedback</div>
+                                            <div class="feedback-date">📅 <%# Eval("createdAt") %></div>
+                                            <div class="feedback-content"><%# Eval("description") %></div>
+                                            <div class="feedback-meta">
+                                                <span>❤️ <%# Eval("likeCount") %> likes</span>
+                                                <span>💬 <%# Eval("commentCount") %> comments</span>
+                                            </div>
+                                            <div class="card-actions">
+                                                <a href="Feedback.aspx" class="btn btn-primary btn-sm">👁️ View</a>
+                                                <asp:Button ID="btnDeleteFeedback" runat="server"
+                                                    Text="🗑️ Delete"
+                                                    CssClass="btn btn-danger btn-sm"
+                                                    CommandName="DeleteFeedback"
+                                                    CommandArgument='<%# Eval("feedbackId") %>'
+                                                    OnClientClick="return confirm('Are you sure you want to delete this feedback?');" />
+                                            </div>
+                                        </div>
+                                    </ItemTemplate>
+                                </asp:Repeater>
+                            </div>
+
+                            <asp:Panel ID="pnlNoFeedback" runat="server" Visible="false">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">💬</div>
+                                    <h3 class="empty-state-title">No Feedback Yet</h3>
+                                    <p class="empty-state-text">You haven't posted any feedback yet. Share your thoughts!</p>
+                                    <a href="Feedback.aspx" class="btn btn-primary" style="margin-top: 20px;">✍️ Write Feedback
+                                    </a>
+                                </div>
+                            </asp:Panel>
+                        </asp:Panel>
+                    </div>
+
+                    <!-- My Books Tab -->
+                    <div id="books" class="tab-panel">
+                        <div class="section-header">
+                            <span class="section-icon">📖</span>
+                            My Book Collection
+                        </div>
+
+                        <asp:Panel ID="pnlMyBooks" runat="server">
+                            <!-- Book Collection Navigation -->
+                            <div class="book-nav-bar">
+                                <div class="book-nav-buttons">
+                                    <button type="button" class="book-nav-btn active" onclick="showBookSection('recommended')">
+                                        <span class="nav-icon">✅</span>
+                                        <span>Recommended Books</span>
+                                        <span class="nav-count">(<asp:Literal ID="ltRecommendedCount" runat="server" Text="0" />)</span>
+                                    </button>
+                                    <button type="button" class="book-nav-btn" onclick="showBookSection('favorites')">
+                                        <span class="nav-icon">⭐</span>
+                                        <span>Favorite Books</span>
+                                        <span class="nav-count">(<asp:Literal ID="ltFavoriteCount" runat="server" Text="0" />)</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Recommended Books Section -->
+                            <div id="recommendedBooksSection" class="book-section book-nav-content">
+                                <div class="book-grid">
+                                    <asp:Repeater ID="rptRecommendedBooks" runat="server">
+                                        <ItemTemplate>
+                                            <div class="book-card book-card-clickable recommended-book"
+                                                onclick="openBookPreview('<%# Eval("pdfUrl") %>')"
+                                                style="cursor: pointer;">
+                                                <div class="book-title"><%# Eval("title") %></div>
+                                                <div class="book-author">📝 <%# Eval("author") %></div>
+                                                <div class="book-status-badge">
+                                                    <span class="status-badge badge-recommended">✅ Recommended</span>
+                                                </div>
+                                            </div>
+                                        </ItemTemplate>
+                                    </asp:Repeater>
+                                </div>
+                                <asp:Panel ID="pnlNoRecommendedBooks" runat="server" Visible="false">
+                                    <div class="empty-section">
+                                        <div class="empty-section-icon">✅</div>
+                                        <p class="empty-section-title">No Recommended Books</p>
+                                        <p class="empty-section-text">You haven't recommended any books yet. Visit the library to start recommending!</p>
+                                    </div>
+                                </asp:Panel>
+                            </div>
+
+                            <!-- Favorite Books Section -->
+                            <div id="favoriteBooksSection" class="book-section book-nav-content" style="display: none;">
+                                <div class="book-grid">
+                                    <asp:Repeater ID="rptFavoriteBooks" runat="server">
+                                        <ItemTemplate>
+                                            <div class="book-card book-card-clickable favorite-book"
+                                                onclick="openBookPreview('<%# Eval("pdfUrl") %>')"
+                                                style="cursor: pointer;">
+                                                <div class="book-title"><%# Eval("title") %></div>
+                                                <div class="book-author">📝 <%# Eval("author") %></div>
+                                                <div class="book-status-badge">
+                                                    <span class="status-badge badge-favorited">⭐ Favorited</span>
+                                                </div>
+                                            </div>
+                                        </ItemTemplate>
+                                    </asp:Repeater>
+                                </div>
+                                <asp:Panel ID="pnlNoFavoriteBooks" runat="server" Visible="false">
+                                    <div class="empty-section">
+                                        <div class="empty-section-icon">⭐</div>
+                                        <p class="empty-section-title">No Favorite Books</p>
+                                        <p class="empty-section-text">You haven't favorited any books yet. Visit the library to add favorites!</p>
+                                    </div>
+                                </asp:Panel>
+                            </div>
+
+                            <asp:Panel ID="pnlNoBooks" runat="server" Visible="false">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">📖</div>
+                                    <h3 class="empty-state-title">No Book Interactions Yet</h3>
+                                    <p class="empty-state-text">You haven't recommended or favorited any books yet. Explore the library!</p>
+                                    <a href="Library.aspx" class="btn btn-primary" style="margin-top: 20px;">📚 Browse Library
                                     </a>
                                 </div>
                             </asp:Panel>
@@ -978,9 +1018,9 @@
                                                     <span class="action-icon">👁️</span>
                                                     View Post
                                                 </a>
-                                                <asp:LinkButton ID="btnUnsave" runat="server" 
+                                                <asp:LinkButton ID="btnUnsave" runat="server"
                                                     CommandArgument='<%# Eval("postId") + "|" + Eval("groupId") %>'
-                                                    OnClick="btnUnsavePost_Click" 
+                                                    OnClick="btnUnsavePost_Click"
                                                     CssClass="action-btn unsave-btn"
                                                     OnClientClick="return confirm('Remove this post from your saved items?');">
                                                     <span class="action-icon">🗑️</span>
@@ -1045,8 +1085,7 @@
                                     <div class="empty-state-icon">📱</div>
                                     <h3 class="empty-state-title">No Activity Yet</h3>
                                     <p class="empty-state-text">Start engaging with StudyHub posts to see your activity here!</p>
-                                    <a href="StudyHub.aspx" class="btn btn-primary" style="margin-top: 20px;">
-                                        🚀 Explore StudyHub
+                                    <a href="StudyHub.aspx" class="btn btn-primary" style="margin-top: 20px;">🚀 Explore StudyHub
                                     </a>
                                 </div>
                             </asp:Panel>
@@ -1081,32 +1120,47 @@
                 }
 
                 // Add active class to clicked button
-                event.target.closest('.tab-button').classList.add('active');
-
-                // Load tab content if needed
-                if (tabName === 'classes') {
-                    loadClasses();
-                } else if (tabName === 'activity') {
-                    loadActivity();
+                if (event && event.target) {
+                    const button = event.target.closest('.tab-button');
+                    if (button) {
+                        button.classList.add('active');
+                    }
                 }
 
                 // Prevent any form submission
-                event.preventDefault();
-                return false;
+                if (event) {
+                    event.preventDefault();
+                    return false;
+                }
             } catch (error) {
                 console.error('Error switching tabs:', error);
             }
         }
 
-        // Profile image preview
+        // Enhanced profile image preview
         function previewProfileImage(input) {
             if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showNotification('Please select a valid image file.', 'warning');
+                    return;
+                }
+                
+                // Validate file size (5MB max)
+                if (file.size > 5 * 1024 * 1024) {
+                    showNotification('Image file size should not exceed 5MB.', 'warning');
+                    return;
+                }
+                
                 var reader = new FileReader();
                 reader.onload = function (e) {
                     document.querySelector('.profile-image').src = e.target.result;
                     document.getElementById('<%= btnUploadPhoto.ClientID %>').style.display = 'inline-block';
+                    showNotification('Image selected. Click "Update Photo" to save.', 'info');
                 };
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsDataURL(file);
             }
         }
 
@@ -1116,7 +1170,9 @@
                 document.querySelectorAll('.filter-btn').forEach(btn => {
                     btn.classList.remove('active');
                 });
-                event.target.classList.add('active');
+                if (event && event.target) {
+                    event.target.classList.add('active');
+                }
 
                 // Show/hide activity items with animation
                 document.querySelectorAll('.activity-item').forEach(item => {
@@ -1140,8 +1196,10 @@
                     }
                 });
 
-                event.preventDefault();
-                return false;
+                if (event) {
+                    event.preventDefault();
+                    return false;
+                }
             } catch (error) {
                 console.error('Error filtering activity:', error);
             }
@@ -1150,31 +1208,57 @@
         // Form reset functionality
         function resetForm() {
             if (confirm('Are you sure you want to reset all changes?')) {
-                // This will be handled by server-side code
                 __doPostBack('<%= btnUpdateProfile.UniqueID %>', 'reset');
             }
             return false;
         }
 
-        // Load classes (placeholder for async loading)
-        function loadClasses() {
-            const panel = document.getElementById('pnlClassesLoading');
-            if (panel) {
-                panel.style.display = 'block';
-                // Simulate loading delay
-                setTimeout(() => {
-                    panel.style.display = 'none';
-                }, 1000);
+        // Book section navigation function
+        function showBookSection(sectionType) {
+            try {
+                // Update navigation buttons
+                document.querySelectorAll('.book-nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                if (event && event.target) {
+                    const button = event.target.closest('.book-nav-btn');
+                    if (button) {
+                        button.classList.add('active');
+                    }
+                }
+
+                // Hide all book sections
+                document.querySelectorAll('.book-nav-content').forEach(section => {
+                    section.style.display = 'none';
+                });
+
+                // Show selected section
+                if (sectionType === 'recommended') {
+                    document.getElementById('recommendedBooksSection').style.display = 'block';
+                } else if (sectionType === 'favorites') {
+                    document.getElementById('favoriteBooksSection').style.display = 'block';
+                }
+
+                if (event) {
+                    event.preventDefault();
+                    return false;
+                }
+            } catch (error) {
+                console.error('Error switching book sections:', error);
             }
         }
 
-        // Load activity (placeholder for async loading)
-        function loadActivity() {
-            // Activity loading logic can be implemented here
-            console.log('Loading user activity...');
+        // Book preview navigation function
+        function openBookPreview(pdfUrl) {
+            if (pdfUrl && pdfUrl !== '') {
+                var encodedUrl = encodeURIComponent(pdfUrl);
+                window.open('PreviewBook.aspx?pdfUrl=' + encodedUrl, '_blank');
+            } else {
+                showNotification('PDF not available for this book', 'warning');
+            }
         }
 
-        // Notification functions
+        // Enhanced notification functions
         function showNotification(message, type) {
             const notification = document.createElement('div');
             notification.className = `alert alert-${type} alert-dismissible fade show`;
@@ -1204,8 +1288,6 @@
                     });
                 });
             });
-
-            console.log('Profile page initialized');
         });
 
         // Keyboard navigation support
@@ -1223,6 +1305,14 @@
                     case '3':
                         e.preventDefault();
                         showTab('activity');
+                        break;
+                    case '4':
+                        e.preventDefault();
+                        showTab('feedback');
+                        break;
+                    case '5':
+                        e.preventDefault();
+                        showTab('books');
                         break;
                 }
             }

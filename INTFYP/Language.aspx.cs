@@ -12,9 +12,24 @@ namespace INTFYP
     {
         private static FirestoreDb db;
         private static readonly object dbLock = new object();
+        private string currentUserEmail;
+        private string currentUserName;
+        private string currentUserId;
 
         protected async void Page_Load(object sender, EventArgs e)
         {
+            // Check authentication first
+            currentUserEmail = Session["email"]?.ToString();
+            currentUserName = Session["username"]?.ToString() ?? "Anonymous";
+            currentUserId = Session["userId"]?.ToString();
+
+            if (string.IsNullOrEmpty(currentUserEmail) || string.IsNullOrEmpty(currentUserId))
+            {
+                Response.Redirect("Login.aspx", false);
+                Context.ApplicationInstance.CompleteRequest();
+                return;
+            }
+
             InitializeFirestore();
             if (!IsPostBack)
             {
@@ -30,9 +45,16 @@ namespace INTFYP
                 {
                     if (db == null)
                     {
-                        string path = Server.MapPath("~/serviceAccountKey.json");
-                        Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
-                        db = FirestoreDb.Create("intorannetto");
+                        try
+                        {
+                            string path = Server.MapPath("~/serviceAccountKey.json");
+                            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
+                            db = FirestoreDb.Create("intorannetto");
+                        }
+                        catch (Exception ex)
+                        {
+                            ShowErrorMessage("Error initializing database: " + ex.Message);
+                        }
                     }
                 }
             }
@@ -126,21 +148,6 @@ namespace INTFYP
                     questionCount += questionsSnapshot.Documents.Count;
                 }
 
-                // Method 2: Alternative if you store lessons as subcollection under language
-                // You can uncomment this if your structure is languages/{languageId}/lessons/{lessonId}
-                /*
-                CollectionReference lessonsSubcollection = db.Collection("languages").Document(languageId).Collection("lessons");
-                QuerySnapshot lessonsSnapshot = await lessonsSubcollection.GetSnapshotAsync();
-                lessonCount = lessonsSnapshot.Documents.Count;
-
-                foreach (DocumentSnapshot lessonDoc in lessonsSnapshot.Documents)
-                {
-                    CollectionReference questionsSubcollection = lessonDoc.Reference.Collection("questions");
-                    QuerySnapshot questionsSnapshot = await questionsSubcollection.GetSnapshotAsync();
-                    questionCount += questionsSnapshot.Documents.Count;
-                }
-                */
-
                 // Get student enrollment count
                 // Assuming you have a collection for user enrollments
                 Query studentsQuery = db.Collection("userLanguages").WhereEqualTo("LanguageId", languageId);
@@ -158,30 +165,73 @@ namespace INTFYP
 
         protected async void txtLanguageSearch_TextChanged(object sender, EventArgs e)
         {
+            // Check authentication before processing
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                Response.Redirect("Login.aspx", false);
+                Context.ApplicationInstance.CompleteRequest();
+                return;
+            }
+
             string searchTerm = txtLanguageSearch.Text.Trim();
             await LoadLanguages(searchTerm);
         }
 
-        protected void rptLanguages_ItemCommand(object source, RepeaterCommandEventArgs e)
+        protected async void rptLanguages_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
+            // Check authentication before processing
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                ShowErrorMessage("Please log in to select a language.");
+                return;
+            }
+
             if (e.CommandName == "SelectLanguage")
             {
                 string languageId = e.CommandArgument.ToString();
-                // Redirect to DisplayQuestion page with language ID
-                Response.Redirect($"DisplayQuestion.aspx?languageId={languageId}");
+
+                try
+                {
+                    // Auto-enroll user in the language when they select it
+                    await EnrollUserInLanguage(currentUserId, languageId);
+
+                    // Redirect to DisplayQuestion page with language ID
+                    Response.Redirect($"DisplayQuestion.aspx?languageId={languageId}", false);
+                    Context.ApplicationInstance.CompleteRequest();
+                }
+                catch (Exception ex)
+                {
+                    ShowErrorMessage("Error selecting language: " + ex.Message);
+                }
             }
+        }
+
+        protected void btnStudentReport_Click(object sender, EventArgs e)
+        {
+            // Check authentication before processing
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                ShowErrorMessage("Please log in to view reports.");
+                return;
+            }
+
+            // Redirect to StudentReports page
+            // Since this is the language selection page, we don't have a specific language ID
+            // The StudentReports page should handle showing all languages or allow language selection
+            Response.Redirect("StudentReports.aspx", false);
+            Context.ApplicationInstance.CompleteRequest();
         }
 
         private void ShowErrorMessage(string message)
         {
             ScriptManager.RegisterStartupScript(this, GetType(), "alert",
-                $"alert('{message}');", true);
+                $"alert('{message.Replace("'", "\\'")}');", true);
         }
 
         private void ShowSuccessMessage(string message)
         {
             ScriptManager.RegisterStartupScript(this, GetType(), "alert",
-                $"alert('{message}');", true);
+                $"alert('{message.Replace("'", "\\'")}');", true);
         }
 
         // Get a specific language by ID
@@ -244,6 +294,8 @@ namespace INTFYP
                         CompletedLessons = new List<string>(),
                         LastAccessed = Timestamp.GetCurrentTimestamp()
                     });
+
+                    System.Diagnostics.Debug.WriteLine($"User {userId} enrolled in language {languageId}");
                 }
             }
             catch (Exception ex)
@@ -348,14 +400,6 @@ namespace INTFYP
                 System.Diagnostics.Debug.WriteLine("Error getting popular languages: " + ex.Message);
                 return new List<object>();
             }
-        }
-        protected void btnStudentReport_Click(object sender, EventArgs e)
-        {
-            // Redirect to StudentReports page
-            // Since this is the language selection page, we don't have a specific language ID
-            // The StudentReports page should handle showing all languages or allow language selection
-            Response.Redirect("StudentReports.aspx", false);
-            Context.ApplicationInstance.CompleteRequest();
         }
     }
 }
