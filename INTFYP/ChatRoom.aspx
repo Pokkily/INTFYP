@@ -769,17 +769,8 @@
                     <button type="button" class="tab-btn" data-tab="create-room">Create</button>
                 </div>
 
-                <!-- My Rooms Tab -->
+                <!-- My Rooms Tab - REMOVED SEARCH SECTION -->
                 <div class="tab-content active" id="my-rooms-tab">
-                    <!-- Search My Rooms -->
-                    <div class="search-section">
-                        <div class="search-box">
-                            <asp:TextBox ID="txtSearchMyRooms" runat="server" CssClass="search-input" 
-                                       placeholder="Search my rooms..." />
-                            <span class="search-icon">🔍</span>
-                        </div>
-                    </div>
-
                     <!-- My Rooms List -->
                     <div class="rooms-list" id="myRoomsList">
                         <asp:Repeater ID="rptMyRooms" runat="server">
@@ -1091,10 +1082,18 @@
         let membersLoaded = false;
         let selectedFile = null;
 
-        // Modal Management
+        // Modal Management - FIXED TO LOAD MEMBERS
         function showManageModal() {
             console.log('Opening manage modal...');
-            document.getElementById('manageModal').style.display = 'block';
+            
+            // Load members before showing modal
+            __doPostBack('LoadMembers', '');
+            
+            // Show modal after a brief delay to allow member loading
+            setTimeout(() => {
+                document.getElementById('manageModal').style.display = 'block';
+            }, 500);
+            
             return false;
         }
 
@@ -1213,22 +1212,22 @@
             if (hfCurrentRoomId) {
                 hfCurrentRoomId.value = roomId;
             }
-            
+
             document.querySelectorAll('.room-item').forEach(item => {
                 item.classList.remove('active');
             });
-            
+
             const selectedRoom = document.querySelector(`[data-room-id="${roomId}"]`);
             if (selectedRoom) {
                 selectedRoom.classList.add('active');
             }
-            
+
             __doPostBack('LoadRoom', roomId);
         }
 
         function setupEventHandlers() {
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', function(e) {
+                btn.addEventListener('click', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
                     const tabName = this.getAttribute('data-tab');
@@ -1239,13 +1238,13 @@
                 });
             });
 
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 const roomItem = e.target.closest('.room-item');
                 if (roomItem && !isTabSwitching) {
                     const roomId = roomItem.getAttribute('data-room-id');
                     const roomName = roomItem.getAttribute('data-room-name');
                     const roomType = roomItem.getAttribute('data-room-type');
-                    
+
                     if (roomId) {
                         selectRoom(roomId, roomName, roomType);
                     }
