@@ -9,11 +9,8 @@
 
 namespace YourProjectNamespace
 {
-
-
     public partial class ChatRoom
     {
-
         /// <summary>
         /// lblMyRoomCount control.
         /// </summary>

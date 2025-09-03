@@ -16,23 +16,30 @@ namespace YourProjectNamespace
     {
         private static FirestoreDb db;
         private Dictionary<string, bool> commentBoxStates = new Dictionary<string, bool>();
+        private string currentUserEmail;
+        private string currentUserName;
+        private string currentUserId;
 
         protected async void Page_Load(object sender, EventArgs e)
         {
+            // Check authentication first
+            currentUserEmail = Session["email"]?.ToString();
+            currentUserName = Session["username"]?.ToString() ?? "Anonymous";
+            currentUserId = Session["userId"]?.ToString();
+
+            if (string.IsNullOrEmpty(currentUserEmail) || string.IsNullOrEmpty(currentUserId))
+            {
+                Response.Redirect("Login.aspx", false);
+                Context.ApplicationInstance.CompleteRequest();
+                return;
+            }
+
             if (!IsPostBack)
             {
                 InitializeFirestore();
-                string userId = Session["userId"] as string;
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    // Redirect to login page or show message
-                    Response.Redirect("~/Login.aspx");
-                    return;
-                }
 
                 // Set username for feedback form from session
-                txtFeedbackUsername.Text = Session["username"]?.ToString() ?? "";
+                txtFeedbackUsername.Text = currentUserName;
 
                 await LoadAllFeedbacks();
             }
@@ -40,142 +47,166 @@ namespace YourProjectNamespace
 
         private void InitializeFirestore()
         {
-            if (db == null)
+            try
             {
-                string path = Server.MapPath("~/serviceAccountKey.json");
-                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
-                db = FirestoreDb.Create("intorannetto");
+                if (db == null)
+                {
+                    string path = Server.MapPath("~/serviceAccountKey.json");
+                    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", path);
+                    db = FirestoreDb.Create("intorannetto");
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("Error initializing database: " + ex.Message, "text-danger");
             }
         }
 
         protected async void btnSubmit_Click(object sender, EventArgs e)
         {
-            lblMessage.Visible = true;
-
-            string userId = Session["userId"]?.ToString();
-            if (string.IsNullOrEmpty(userId))
+            // Double-check authentication
+            if (string.IsNullOrEmpty(currentUserId))
             {
-                lblMessage.CssClass = "text-danger";
-                lblMessage.Text = "Please login to submit feedback.";
+                ShowMessage("Please login to submit feedback.", "text-danger");
                 return;
             }
+
+            lblMessage.Visible = true;
 
             string description = txtDescription.Text.Trim();
             if (string.IsNullOrWhiteSpace(description))
             {
-                lblMessage.CssClass = "text-danger";
-                lblMessage.Text = "Please enter feedback description.";
+                ShowMessage("Please enter feedback description.", "text-danger");
                 return;
             }
 
-            string mediaUrl = await UploadFileIfAny();
-
-            var feedback = new
+            try
             {
-                userId,
-                username = Session["username"]?.ToString(),
-                email = Session["email"]?.ToString(),
-                description,
-                mediaUrl,
-                likes = new string[] { },
-                comments = new List<object>(),
-                createdAt = Timestamp.GetCurrentTimestamp()
-            };
+                string mediaUrl = await UploadFileIfAny();
 
-            await db.Collection("feedbacks").AddAsync(feedback);
+                var feedback = new
+                {
+                    userId = currentUserId,
+                    username = currentUserName,
+                    email = currentUserEmail,
+                    description,
+                    mediaUrl,
+                    likes = new string[] { },
+                    comments = new List<object>(),
+                    createdAt = Timestamp.GetCurrentTimestamp()
+                };
 
-            lblMessage.CssClass = "text-success";
-            lblMessage.Text = "Feedback submitted successfully!";
-            txtDescription.Text = "";
+                await db.Collection("feedbacks").AddAsync(feedback);
 
-            await LoadAllFeedbacks();
+                ShowMessage("Feedback submitted successfully!", "text-success");
+                txtDescription.Text = "";
+
+                await LoadAllFeedbacks();
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("Error submitting feedback: " + ex.Message, "text-danger");
+            }
         }
 
         private async Task<string> UploadFileIfAny()
         {
             if (!fileUpload.HasFile) return null;
 
-            var account = new Account(
-                System.Configuration.ConfigurationManager.AppSettings["CloudinaryCloudName"],
-                System.Configuration.ConfigurationManager.AppSettings["CloudinaryApiKey"],
-                System.Configuration.ConfigurationManager.AppSettings["CloudinaryApiSecret"]
-            );
-
-            var cloudinary = new Cloudinary(account);
-
-            using (var stream = fileUpload.PostedFile.InputStream)
+            try
             {
-                string ext = Path.GetExtension(fileUpload.FileName).ToLower();
+                var account = new Account(
+                    System.Configuration.ConfigurationManager.AppSettings["CloudinaryCloudName"],
+                    System.Configuration.ConfigurationManager.AppSettings["CloudinaryApiKey"],
+                    System.Configuration.ConfigurationManager.AppSettings["CloudinaryApiSecret"]
+                );
 
-                if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".gif")
+                var cloudinary = new Cloudinary(account);
+
+                using (var stream = fileUpload.PostedFile.InputStream)
                 {
-                    var uploadParams = new ImageUploadParams
+                    string ext = Path.GetExtension(fileUpload.FileName).ToLower();
+
+                    if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".gif")
                     {
-                        File = new FileDescription(fileUpload.FileName, stream),
-                        Folder = "feedback_images"
-                    };
-                    var uploadResult = cloudinary.Upload(uploadParams);
-                    return uploadResult.SecureUrl?.ToString();
-                }
-                else if (ext == ".mp4" || ext == ".mov" || ext == ".avi" || ext == ".webm")
-                {
-                    var uploadParams = new VideoUploadParams
+                        var uploadParams = new ImageUploadParams
+                        {
+                            File = new FileDescription(fileUpload.FileName, stream),
+                            Folder = "feedback_images"
+                        };
+                        var uploadResult = cloudinary.Upload(uploadParams);
+                        return uploadResult.SecureUrl?.ToString();
+                    }
+                    else if (ext == ".mp4" || ext == ".mov" || ext == ".avi" || ext == ".webm")
                     {
-                        File = new FileDescription(fileUpload.FileName, stream),
-                        Folder = "feedback_videos"
-                    };
-                    var uploadResult = cloudinary.Upload(uploadParams);
-                    return uploadResult.SecureUrl?.ToString();
+                        var uploadParams = new VideoUploadParams
+                        {
+                            File = new FileDescription(fileUpload.FileName, stream),
+                            Folder = "feedback_videos"
+                        };
+                        var uploadResult = cloudinary.Upload(uploadParams);
+                        return uploadResult.SecureUrl?.ToString();
+                    }
                 }
+
+                return null;
             }
-
-            return null;
+            catch (Exception ex)
+            {
+                ShowMessage("Error uploading file: " + ex.Message, "text-danger");
+                return null;
+            }
         }
 
         private async Task LoadAllFeedbacks()
         {
-            var feedbacks = new List<dynamic>();
-            string currentUserId = Session["userId"]?.ToString(); // Get current user ID
-
-            QuerySnapshot snapshot = await db.Collection("feedbacks").OrderByDescending("createdAt").GetSnapshotAsync();
-
-            foreach (var doc in snapshot.Documents)
+            try
             {
-                var data = doc.ToDictionary();
-                var likesList = data.ContainsKey("likes") ? (data["likes"] as IEnumerable<object>)?.ToList() : new List<object>();
+                var feedbacks = new List<dynamic>();
 
-                // Load comments for this feedback post
-                var commentsSnapshot = await db.Collection("feedbacks").Document(doc.Id).Collection("comments").OrderBy("createdAt").GetSnapshotAsync();
+                QuerySnapshot snapshot = await db.Collection("feedbacks").OrderByDescending("createdAt").GetSnapshotAsync();
 
-                var comments = commentsSnapshot.Documents.Select(c =>
+                foreach (var doc in snapshot.Documents)
                 {
-                    var cData = c.ToDictionary();
-                    return new
+                    var data = doc.ToDictionary();
+                    var likesList = data.ContainsKey("likes") ? (data["likes"] as IEnumerable<object>)?.ToList() : new List<object>();
+
+                    // Load comments for this feedback post
+                    var commentsSnapshot = await db.Collection("feedbacks").Document(doc.Id).Collection("comments").OrderBy("createdAt").GetSnapshotAsync();
+
+                    var comments = commentsSnapshot.Documents.Select(c =>
                     {
-                        username = cData.GetValueOrDefault("username", "Anonymous").ToString(),
-                        text = cData.GetValueOrDefault("text", "").ToString(),
-                        createdAt = cData.ContainsKey("createdAt") ? ((Timestamp)cData["createdAt"]).ToDateTime() : DateTime.Now
-                    };
-                }).ToList();
+                        var cData = c.ToDictionary();
+                        return new
+                        {
+                            username = cData.GetValueOrDefault("username", "Anonymous").ToString(),
+                            text = cData.GetValueOrDefault("text", "").ToString(),
+                            createdAt = cData.ContainsKey("createdAt") ? ((Timestamp)cData["createdAt"]).ToDateTime() : DateTime.Now
+                        };
+                    }).ToList();
 
-                feedbacks.Add(new
-                {
-                    PostId = doc.Id,
-                    Username = data["username"]?.ToString(),
-                    Description = data["description"]?.ToString(),
-                    MediaUrl = data.ContainsKey("mediaUrl") ? data["mediaUrl"]?.ToString() : null,
-                    Likes = likesList?.Count ?? 0,
-                    CreatedAt = data.ContainsKey("createdAt")
-                        ? ((Timestamp)data["createdAt"]).ToDateTime()
-                        : DateTime.Now,
-                    Comments = comments,
+                    feedbacks.Add(new
+                    {
+                        PostId = doc.Id,
+                        Username = data["username"]?.ToString(),
+                        Description = data["description"]?.ToString(),
+                        MediaUrl = data.ContainsKey("mediaUrl") ? data["mediaUrl"]?.ToString() : null,
+                        Likes = likesList?.Count ?? 0,
+                        CreatedAt = data.ContainsKey("createdAt")
+                            ? ((Timestamp)data["createdAt"]).ToDateTime()
+                            : DateTime.Now,
+                        Comments = comments,
+                        IsLiked = !string.IsNullOrEmpty(currentUserId) && likesList != null && likesList.Contains(currentUserId)
+                    });
+                }
 
-                    IsLiked = !string.IsNullOrEmpty(currentUserId) && likesList != null && likesList.Contains(currentUserId)
-                });
+                rptFeedback.DataSource = feedbacks;
+                rptFeedback.DataBind();
             }
-
-            rptFeedback.DataSource = feedbacks;
-            rptFeedback.DataBind();
+            catch (Exception ex)
+            {
+                ShowMessage("Error loading feedbacks: " + ex.Message, "text-danger");
+            }
         }
 
         protected void rptFeedback_ItemDataBound(object sender, RepeaterItemEventArgs e)
@@ -230,49 +261,58 @@ namespace YourProjectNamespace
 
         protected async void rptFeedback_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
+            // Check authentication before processing any command
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                ShowMessage("Please login to interact with feedback posts.", "text-warning");
+                return;
+            }
+
             if (e.CommandName == "Like")
             {
                 string postId = e.CommandArgument.ToString();
-                string userId = Session["userId"]?.ToString();
 
-                if (string.IsNullOrEmpty(userId)) return;
-
-                DocumentReference postRef = db.Collection("feedbacks").Document(postId);
-                DocumentSnapshot postSnap = await postRef.GetSnapshotAsync();
-
-                if (postSnap.Exists)
+                try
                 {
-                    var data = postSnap.ToDictionary();
-                    var likes = data.ContainsKey("likes") ? (data["likes"] as IEnumerable<object>)?.ToList() : new List<object>();
+                    DocumentReference postRef = db.Collection("feedbacks").Document(postId);
+                    DocumentSnapshot postSnap = await postRef.GetSnapshotAsync();
 
-                    if (likes == null)
-                        likes = new List<object>();
-
-                    if (likes.Contains(userId))
+                    if (postSnap.Exists)
                     {
-                        // Unlike
-                        likes.Remove(userId);
+                        var data = postSnap.ToDictionary();
+                        var likes = data.ContainsKey("likes") ? (data["likes"] as IEnumerable<object>)?.ToList() : new List<object>();
+
+                        if (likes == null)
+                            likes = new List<object>();
+
+                        if (likes.Contains(currentUserId))
+                        {
+                            // Unlike
+                            likes.Remove(currentUserId);
+                        }
+                        else
+                        {
+                            // Like
+                            likes.Add(currentUserId);
+                        }
+
+                        Dictionary<string, object> updates = new Dictionary<string, object>
+                        {
+                            { "likes", likes }
+                        };
+
+                        await postRef.UpdateAsync(updates);
+                        await LoadAllFeedbacks();
                     }
-                    else
-                    {
-                        // Like
-                        likes.Add(userId);
-                    }
-
-                    Dictionary<string, object> updates = new Dictionary<string, object>
-                    {
-                        { "likes", likes }
-                    };
-
-                    await postRef.UpdateAsync(updates);
-                    await LoadAllFeedbacks();
+                }
+                catch (Exception ex)
+                {
+                    ShowMessage("Error updating like: " + ex.Message, "text-danger");
                 }
             }
             else if (e.CommandName == "SubmitComment")
             {
                 string postId = e.CommandArgument.ToString();
-                string userId = Session["userId"]?.ToString();
-                string username = Session["username"]?.ToString() ?? "Anonymous";
 
                 // Try to find the modal comment controls first
                 var txtCommentInputDetail = (TextBox)e.Item.FindControl("txtCommentInputDetail");
@@ -283,16 +323,6 @@ namespace YourProjectNamespace
                 var lblCommentError = lblCommentErrorDetail ?? (Label)e.Item.FindControl("lblCommentError");
 
                 string commentText = txtCommentInput?.Text.Trim();
-
-                if (string.IsNullOrEmpty(userId))
-                {
-                    if (lblCommentError != null)
-                    {
-                        lblCommentError.Text = "Please login to comment";
-                        lblCommentError.Visible = true;
-                    }
-                    return;
-                }
 
                 if (string.IsNullOrWhiteSpace(commentText))
                 {
@@ -306,8 +336,8 @@ namespace YourProjectNamespace
 
                 var commentData = new Dictionary<string, object>
                 {
-                    { "userId", userId },
-                    { "username", username },
+                    { "userId", currentUserId },
+                    { "username", currentUserName },
                     { "text", commentText },
                     { "createdAt", Timestamp.GetCurrentTimestamp() }
                 };
@@ -344,6 +374,13 @@ namespace YourProjectNamespace
                     }
                 }
             }
+        }
+
+        private void ShowMessage(string message, string cssClass)
+        {
+            lblMessage.Text = message;
+            lblMessage.CssClass = cssClass;
+            lblMessage.Visible = true;
         }
     }
 

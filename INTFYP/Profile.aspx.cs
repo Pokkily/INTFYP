@@ -52,6 +52,8 @@ namespace YourProjectNamespace
                     await LoadUserStats();
                     await LoadUserClasses();
                     await LoadUserActivity();
+                    await LoadUserFeedback();
+                    await LoadUserBooks();
 
                     // Hide loading after everything is loaded
                     pnlClassesLoading.Visible = false;
@@ -60,10 +62,154 @@ namespace YourProjectNamespace
             catch (Exception ex)
             {
                 ShowMessage("Error loading profile: " + ex.Message, "danger");
-                System.Diagnostics.Debug.WriteLine($"Profile load error: {ex}");
-
                 // Hide loading on error
                 pnlClassesLoading.Visible = false;
+            }
+        }
+
+        private async Task LoadUserFeedback()
+        {
+            try
+            {
+                var feedbacks = new List<dynamic>();
+
+                // Get user's feedback posts
+                var feedbackSnapshot = await db.Collection("feedbacks")
+                    .WhereEqualTo("userId", currentUserId)
+                    .GetSnapshotAsync();
+
+                if (feedbackSnapshot != null && feedbackSnapshot.Count > 0)
+                {
+                    foreach (var feedbackDoc in feedbackSnapshot.Documents)
+                    {
+                        try
+                        {
+                            var feedbackData = feedbackDoc.ToDictionary();
+                            if (feedbackData == null) continue;
+
+                            // Safely extract description
+                            string description = "";
+                            if (feedbackData.ContainsKey("description") && feedbackData["description"] != null)
+                            {
+                                description = feedbackData["description"].ToString().Trim();
+                            }
+                            else if (feedbackData.ContainsKey("content") && feedbackData["content"] != null)
+                            {
+                                description = feedbackData["content"].ToString().Trim();
+                            }
+                            else if (feedbackData.ContainsKey("text") && feedbackData["text"] != null)
+                            {
+                                description = feedbackData["text"].ToString().Trim();
+                            }
+
+                            if (string.IsNullOrWhiteSpace(description)) continue;
+
+                            // Verify userId match
+                            string docUserId = GetSafeValue(feedbackData, "userId");
+                            if (docUserId != currentUserId) continue;
+
+                            // Get likes count
+                            var likes = 0;
+                            try
+                            {
+                                if (feedbackData.ContainsKey("likes") && feedbackData["likes"] != null)
+                                {
+                                    var likesArray = feedbackData["likes"] as List<object>;
+                                    likes = likesArray?.Count ?? 0;
+                                }
+                            }
+                            catch
+                            {
+                                likes = 0;
+                            }
+
+                            // Get comments count
+                            int commentCount = 0;
+                            try
+                            {
+                                var commentsSnapshot = await feedbackDoc.Reference.Collection("comments").GetSnapshotAsync();
+                                commentCount = commentsSnapshot?.Count ?? 0;
+                            }
+                            catch
+                            {
+                                commentCount = 0;
+                            }
+
+                            // Format created date
+                            string createdAt = "Unknown date";
+                            try
+                            {
+                                if (feedbackData.ContainsKey("createdAt") && feedbackData["createdAt"] != null)
+                                {
+                                    if (feedbackData["createdAt"] is Timestamp timestamp)
+                                    {
+                                        createdAt = timestamp.ToDateTime().ToString("MMM dd, yyyy 'at' h:mm tt");
+                                    }
+                                    else if (feedbackData["createdAt"] is DateTime dateTime)
+                                    {
+                                        createdAt = dateTime.ToString("MMM dd, yyyy 'at' h:mm tt");
+                                    }
+                                    else if (DateTime.TryParse(feedbackData["createdAt"].ToString(), out DateTime parsedDate))
+                                    {
+                                        createdAt = parsedDate.ToString("MMM dd, yyyy 'at' h:mm tt");
+                                    }
+                                }
+                                else if (feedbackData.ContainsKey("timestamp") && feedbackData["timestamp"] != null)
+                                {
+                                    if (feedbackData["timestamp"] is Timestamp timestamp2)
+                                    {
+                                        createdAt = timestamp2.ToDateTime().ToString("MMM dd, yyyy 'at' h:mm tt");
+                                    }
+                                }
+                            }
+                            catch
+                            {
+                                createdAt = "Recent";
+                            }
+
+                            var feedbackItem = new
+                            {
+                                feedbackId = feedbackDoc.Id,
+                                description = TruncateText(description, 150),
+                                fullDescription = description,
+                                createdAt = createdAt,
+                                likeCount = likes,
+                                commentCount = commentCount,
+                                mediaUrl = GetSafeValue(feedbackData, "mediaUrl"),
+                                hasMedia = !string.IsNullOrEmpty(GetSafeValue(feedbackData, "mediaUrl"))
+                            };
+
+                            feedbacks.Add(feedbackItem);
+                        }
+                        catch
+                        {
+                            // Skip this feedback item if there's an error
+                            continue;
+                        }
+                    }
+                }
+
+                // Sort by creation date if possible
+                try
+                {
+                    feedbacks = feedbacks.OrderByDescending(f => f.createdAt).ToList();
+                }
+                catch
+                {
+                    // Keep original order if sorting fails
+                }
+
+                // Bind data
+                rptMyFeedback.DataSource = feedbacks;
+                rptMyFeedback.DataBind();
+
+                // Set empty panel visibility
+                pnlNoFeedback.Visible = feedbacks.Count == 0;
+            }
+            catch (Exception ex)
+            {
+                pnlNoFeedback.Visible = true;
+                ShowMessage($"Error loading feedback: {ex.Message}", "danger");
             }
         }
 
@@ -134,7 +280,6 @@ namespace YourProjectNamespace
             catch (Exception ex)
             {
                 ShowMessage("Error loading user profile: " + ex.Message, "danger");
-                System.Diagnostics.Debug.WriteLine($"LoadUserProfile error: {ex}");
             }
         }
 
@@ -142,18 +287,19 @@ namespace YourProjectNamespace
         {
             try
             {
-                string userEmail = Session["email"]?.ToString(); // Don't lowercase here
+                string userEmail = Session["email"]?.ToString();
                 string userPosition = Session["position"]?.ToString()?.ToLower();
 
                 int classesCount = 0;
+                int feedbackCount = 0;
+                int recommendedBooksCount = 0;
+                int favoriteBooksCount = 0;
 
+                // Get classes count
                 if (!string.IsNullOrEmpty(userEmail))
                 {
                     if (userPosition == "teacher")
                     {
-                        System.Diagnostics.Debug.WriteLine($"📊 STATS: Counting classes for teacher: '{userEmail}'");
-
-                        // Use manual filtering instead of compound query (same fix as LoadUserClasses)
                         var allClassroomsSnapshot = await db.Collection("classrooms").GetSnapshotAsync();
 
                         if (allClassroomsSnapshot != null)
@@ -169,30 +315,23 @@ namespace YourProjectNamespace
                                         bool isArchived = classroomData.ContainsKey("isArchived") ?
                                             Convert.ToBoolean(classroomData["isArchived"]) : false;
 
-                                        // Manual filtering - count only non-archived classes created by this teacher
                                         if (createdBy == userEmail && !isArchived)
                                         {
                                             classesCount++;
-                                            System.Diagnostics.Debug.WriteLine($"📊 Counted class: {GetSafeValue(classroomData, "name")} (ID: {classroom.Id})");
                                         }
                                     }
                                 }
-                                catch (Exception ex)
+                                catch
                                 {
-                                    System.Diagnostics.Debug.WriteLine($"Error processing classroom for stats: {ex.Message}");
+                                    // Skip if error processing classroom
                                 }
                             }
                         }
-
-                        System.Diagnostics.Debug.WriteLine($"📊 Total teacher classes counted: {classesCount}");
                     }
                     else
                     {
-                        System.Diagnostics.Debug.WriteLine($"📊 STATS: Counting classes for student: '{userEmail}'");
-
-                        // For students: count accepted invitations to non-archived classes
                         var invitedSnapshot = await db.CollectionGroup("invitedStudents")
-                            .WhereEqualTo("email", userEmail) // Use original case
+                            .WhereEqualTo("email", userEmail)
                             .WhereEqualTo("status", "accepted")
                             .GetSnapshotAsync();
 
@@ -210,32 +349,77 @@ namespace YourProjectNamespace
                                         var classroomData = classroomDoc.ToDictionary();
                                         if (classroomData != null)
                                         {
-                                            // Only count if not archived
                                             bool isArchived = classroomData.ContainsKey("isArchived") &&
                                                             Convert.ToBoolean(classroomData["isArchived"]);
                                             if (!isArchived)
                                             {
                                                 classesCount++;
-                                                System.Diagnostics.Debug.WriteLine($"📊 Counted student class: {GetSafeValue(classroomData, "name")}");
                                             }
                                         }
                                     }
                                 }
-                                catch (Exception ex)
+                                catch
                                 {
-                                    System.Diagnostics.Debug.WriteLine($"Error checking class archive status for stats: {ex.Message}");
+                                    // Skip if error checking class archive status
                                 }
                             }
                         }
-
-                        System.Diagnostics.Debug.WriteLine($"📊 Total student classes counted: {classesCount}");
                     }
                 }
 
-                ltClassesCount.Text = classesCount.ToString();
-                System.Diagnostics.Debug.WriteLine($"📊 Classes count updated in UI: {classesCount}");
+                // Get feedback count
+                try
+                {
+                    var feedbackSnapshot = await db.Collection("feedbacks")
+                        .WhereEqualTo("userId", currentUserId)
+                        .GetSnapshotAsync();
+                    feedbackCount = feedbackSnapshot?.Count ?? 0;
+                }
+                catch
+                {
+                    feedbackCount = 0;
+                }
 
-                // Get posts count (posts created by user)
+                // Get book interactions count
+                var booksSnapshot = await db.Collection("books").GetSnapshotAsync();
+                if (booksSnapshot != null)
+                {
+                    foreach (var bookDoc in booksSnapshot.Documents)
+                    {
+                        try
+                        {
+                            var bookData = bookDoc.ToDictionary();
+                            if (bookData != null)
+                            {
+                                // Check if user recommended this book
+                                var recommendedBy = bookData.ContainsKey("RecommendedBy") && bookData["RecommendedBy"] != null
+                                    ? ((List<object>)bookData["RecommendedBy"]).Cast<string>().ToList()
+                                    : new List<string>();
+
+                                if (recommendedBy.Contains(currentUserId))
+                                {
+                                    recommendedBooksCount++;
+                                }
+
+                                // Check if user favorited this book
+                                var favoritedBy = bookData.ContainsKey("FavoritedBy") && bookData["FavoritedBy"] != null
+                                    ? ((List<object>)bookData["FavoritedBy"]).Cast<string>().ToList()
+                                    : new List<string>();
+
+                                if (favoritedBy.Contains(currentUserId))
+                                {
+                                    favoriteBooksCount++;
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            // Skip if error processing book
+                        }
+                    }
+                }
+
+                // Get posts count
                 var allGroupsSnapshot = await db.Collection("studyHubs").GetSnapshotAsync();
                 int postsCount = 0;
 
@@ -252,13 +436,12 @@ namespace YourProjectNamespace
                                 postsCount += postsSnapshot.Count;
                             }
                         }
-                        catch (Exception ex)
+                        catch
                         {
-                            System.Diagnostics.Debug.WriteLine($"Error getting posts for group {groupDoc.Id}: {ex.Message}");
+                            // Skip if error getting posts for group
                         }
                     }
                 }
-                ltPostsCount.Text = postsCount.ToString();
 
                 // Get total likes received
                 int totalLikes = 0;
@@ -294,15 +477,14 @@ namespace YourProjectNamespace
                                 }
                             }
                         }
-                        catch (Exception ex)
+                        catch
                         {
-                            System.Diagnostics.Debug.WriteLine($"Error getting likes for group {groupDoc.Id}: {ex.Message}");
+                            // Skip if error getting likes for group
                         }
                     }
                 }
-                ltLikesCount.Text = totalLikes.ToString();
 
-                // Get saved posts count by counting posts where user is in saves array
+                // Get saved posts count
                 int savedCount = 0;
                 if (allGroupsSnapshot != null)
                 {
@@ -317,24 +499,121 @@ namespace YourProjectNamespace
                                 savedCount += savedPostsSnapshot.Count;
                             }
                         }
-                        catch (Exception ex)
+                        catch
                         {
-                            System.Diagnostics.Debug.WriteLine($"Error getting saved posts for group {groupDoc.Id}: {ex.Message}");
+                            // Skip if error getting saved posts for group
                         }
                     }
                 }
-                ltSavedCount.Text = savedCount.ToString();
 
-                System.Diagnostics.Debug.WriteLine($"📊 Final stats - Classes: {classesCount}, Posts: {postsCount}, Likes: {totalLikes}, Saved: {savedCount}");
+                // Update all stats in UI
+                ltClassesCount.Text = classesCount.ToString();
+                ltPostsCount.Text = postsCount.ToString();
+                ltFeedbackCount.Text = feedbackCount.ToString();
+                ltRecommendedBooksCount.Text = recommendedBooksCount.ToString();
+                ltFavoriteBooksCount.Text = favoriteBooksCount.ToString();
+                ltLikesCount.Text = totalLikes.ToString();
+                ltSavedCount.Text = savedCount.ToString();
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"LoadUserStats error: {ex}");
                 // Set default values
                 ltClassesCount.Text = "0";
                 ltPostsCount.Text = "0";
+                ltFeedbackCount.Text = "0";
+                ltRecommendedBooksCount.Text = "0";
+                ltFavoriteBooksCount.Text = "0";
                 ltLikesCount.Text = "0";
                 ltSavedCount.Text = "0";
+            }
+        }
+
+        private async Task LoadUserBooks()
+        {
+            try
+            {
+                var recommendedBooks = new List<dynamic>();
+                var favoriteBooks = new List<dynamic>();
+
+                // Get all books and filter by user interactions
+                var booksSnapshot = await db.Collection("books").GetSnapshotAsync();
+
+                if (booksSnapshot != null)
+                {
+                    foreach (var bookDoc in booksSnapshot.Documents)
+                    {
+                        try
+                        {
+                            var bookData = bookDoc.ToDictionary();
+                            if (bookData == null) continue;
+
+                            // Check if user has any interaction with this book
+                            var recommendedBy = bookData.ContainsKey("RecommendedBy") && bookData["RecommendedBy"] != null
+                                ? ((List<object>)bookData["RecommendedBy"]).Cast<string>().ToList()
+                                : new List<string>();
+
+                            var favoritedBy = bookData.ContainsKey("FavoritedBy") && bookData["FavoritedBy"] != null
+                                ? ((List<object>)bookData["FavoritedBy"]).Cast<string>().ToList()
+                                : new List<string>();
+
+                            bool isRecommended = recommendedBy.Contains(currentUserId);
+                            bool isFavorited = favoritedBy.Contains(currentUserId);
+
+                            // Create book item with PDF URL
+                            var bookItem = new
+                            {
+                                bookId = bookDoc.Id,
+                                title = GetSafeValue(bookData, "Title", "Unknown Title"),
+                                author = GetSafeValue(bookData, "Author", "Unknown Author"),
+                                pdfUrl = GetSafeValue(bookData, "PdfUrl", "") // Include PDF URL for preview
+                            };
+
+                            // Add to appropriate lists based on user interaction
+                            if (isRecommended)
+                            {
+                                recommendedBooks.Add(bookItem);
+                            }
+                            if (isFavorited)
+                            {
+                                favoriteBooks.Add(bookItem);
+                            }
+                        }
+                        catch
+                        {
+                            // Skip if error processing book
+                        }
+                    }
+                }
+
+                // Sort both lists by title
+                recommendedBooks = recommendedBooks.OrderBy(b => b.title).ToList();
+                favoriteBooks = favoriteBooks.OrderBy(b => b.title).ToList();
+
+                // Bind data to separate repeaters
+                rptRecommendedBooks.DataSource = recommendedBooks;
+                rptRecommendedBooks.DataBind();
+
+                rptFavoriteBooks.DataSource = favoriteBooks;
+                rptFavoriteBooks.DataBind();
+
+                // Update navigation counts
+                ltRecommendedCount.Text = recommendedBooks.Count.ToString();
+                ltFavoriteCount.Text = favoriteBooks.Count.ToString();
+
+                // Handle empty states for each section
+                pnlNoRecommendedBooks.Visible = recommendedBooks.Count == 0;
+                pnlNoFavoriteBooks.Visible = favoriteBooks.Count == 0;
+                pnlNoBooks.Visible = recommendedBooks.Count == 0 && favoriteBooks.Count == 0;
+            }
+            catch
+            {
+                pnlNoRecommendedBooks.Visible = true;
+                pnlNoFavoriteBooks.Visible = true;
+                pnlNoBooks.Visible = true;
+
+                // Set default counts
+                ltRecommendedCount.Text = "0";
+                ltFavoriteCount.Text = "0";
             }
         }
 
@@ -344,24 +623,11 @@ namespace YourProjectNamespace
             {
                 var classes = new List<dynamic>();
 
-                // Get session data without any modifications first
                 string sessionEmail = Session["email"]?.ToString();
                 string sessionPosition = Session["position"]?.ToString();
-                string sessionUserId = Session["userId"]?.ToString();
-                string sessionUsername = Session["username"]?.ToString();
 
-                System.Diagnostics.Debug.WriteLine($"=== COMPLETE DEBUG SESSION INFO ===");
-                System.Diagnostics.Debug.WriteLine($"Session UserId: '{sessionUserId}'");
-                System.Diagnostics.Debug.WriteLine($"Session Email: '{sessionEmail}'");
-                System.Diagnostics.Debug.WriteLine($"Session Username: '{sessionUsername}'");
-                System.Diagnostics.Debug.WriteLine($"Session Position: '{sessionPosition}'");
-                System.Diagnostics.Debug.WriteLine($"Current UserId Field: '{currentUserId}'");
-                System.Diagnostics.Debug.WriteLine($"==========================================");
-
-                // Check if session data exists
                 if (string.IsNullOrEmpty(sessionEmail) || string.IsNullOrEmpty(sessionPosition))
                 {
-                    System.Diagnostics.Debug.WriteLine("❌ SESSION DATA MISSING - redirecting to login");
                     Response.Redirect("Login.aspx");
                     return;
                 }
@@ -370,58 +636,10 @@ namespace YourProjectNamespace
 
                 if (userPosition == "teacher")
                 {
-                    System.Diagnostics.Debug.WriteLine($"🧑‍🏫 TEACHER MODE - Looking for classes created by: '{sessionEmail}'");
-
-                    // First, let's see ALL classrooms in the database
-                    System.Diagnostics.Debug.WriteLine("=== DEBUGGING: ALL CLASSROOMS IN DATABASE ===");
                     var allClassroomsSnapshot = await db.Collection("classrooms").GetSnapshotAsync();
-                    System.Diagnostics.Debug.WriteLine($"Total classrooms found: {allClassroomsSnapshot?.Count ?? 0}");
 
                     if (allClassroomsSnapshot != null && allClassroomsSnapshot.Count > 0)
                     {
-                        int classIndex = 1;
-                        foreach (var classroom in allClassroomsSnapshot.Documents)
-                        {
-                            try
-                            {
-                                var classroomData = classroom.ToDictionary();
-                                if (classroomData != null)
-                                {
-                                    string createdBy = GetSafeValue(classroomData, "createdBy");
-                                    string name = GetSafeValue(classroomData, "name");
-                                    bool isArchived = classroomData.ContainsKey("isArchived") ? Convert.ToBoolean(classroomData["isArchived"]) : false;
-
-                                    System.Diagnostics.Debug.WriteLine($"Classroom #{classIndex}:");
-                                    System.Diagnostics.Debug.WriteLine($"  - ID: {classroom.Id}");
-                                    System.Diagnostics.Debug.WriteLine($"  - Name: '{name}'");
-                                    System.Diagnostics.Debug.WriteLine($"  - CreatedBy: '{createdBy}'");
-                                    System.Diagnostics.Debug.WriteLine($"  - IsArchived: {isArchived}");
-                                    System.Diagnostics.Debug.WriteLine($"  - Email Match (Exact): {createdBy == sessionEmail}");
-                                    System.Diagnostics.Debug.WriteLine($"  - Email Match (Case Insensitive): {string.Equals(createdBy, sessionEmail, StringComparison.OrdinalIgnoreCase)}");
-                                    System.Diagnostics.Debug.WriteLine($"  - Should Include: {createdBy == sessionEmail && !isArchived}");
-                                    System.Diagnostics.Debug.WriteLine("  ---");
-
-                                    classIndex++;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                System.Diagnostics.Debug.WriteLine($"Error reading classroom {classroom.Id}: {ex.Message}");
-                            }
-                        }
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("❌ NO CLASSROOMS FOUND IN DATABASE");
-                    }
-
-                    // Use manual filtering instead of compound query to avoid Firestore limitations
-                    System.Diagnostics.Debug.WriteLine("=== USING MANUAL FILTERING (more reliable) ===");
-
-                    List<DocumentSnapshot> matchingClassrooms = new List<DocumentSnapshot>();
-
-                    if (allClassroomsSnapshot != null)
-                    {
                         foreach (var classroom in allClassroomsSnapshot.Documents)
                         {
                             try
@@ -432,93 +650,57 @@ namespace YourProjectNamespace
                                     string createdBy = GetSafeValue(classroomData, "createdBy");
                                     bool isArchived = classroomData.ContainsKey("isArchived") ? Convert.ToBoolean(classroomData["isArchived"]) : false;
 
-                                    // Manual filtering
                                     if (createdBy == sessionEmail && !isArchived)
                                     {
-                                        matchingClassrooms.Add(classroom);
-                                        System.Diagnostics.Debug.WriteLine($"✅ Manual match found: {GetSafeValue(classroomData, "name")} (ID: {classroom.Id})");
-                                    }
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                System.Diagnostics.Debug.WriteLine($"Error filtering classroom {classroom.Id}: {ex.Message}");
-                            }
-                        }
-                    }
+                                        // Get student count
+                                        var invitedStudentsSnapshot = await classroom.Reference.Collection("invitedStudents")
+                                            .WhereEqualTo("status", "accepted")
+                                            .GetSnapshotAsync();
 
-                    System.Diagnostics.Debug.WriteLine($"📚 Manual filtering found {matchingClassrooms.Count} matching classes");
-
-                    // Process the manually filtered results
-                    if (matchingClassrooms.Count > 0)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"📚 Processing {matchingClassrooms.Count} teacher classes...");
-
-                        foreach (var classDoc in matchingClassrooms)
-                        {
-                            try
-                            {
-                                var classData = classDoc.ToDictionary();
-                                if (classData == null) continue;
-
-                                System.Diagnostics.Debug.WriteLine($"Processing class: {classDoc.Id} - {GetSafeValue(classData, "name")}");
-
-                                // Get student count
-                                var invitedStudentsSnapshot = await classDoc.Reference.Collection("invitedStudents")
-                                    .WhereEqualTo("status", "accepted")
-                                    .GetSnapshotAsync();
-
-                                string createdAtDate = "Unknown";
-                                if (classData.ContainsKey("createdAt") && classData["createdAt"] != null)
-                                {
-                                    try
-                                    {
-                                        if (classData["createdAt"] is Timestamp timestamp)
+                                        string createdAtDate = "Unknown";
+                                        if (classroomData.ContainsKey("createdAt") && classroomData["createdAt"] != null)
                                         {
-                                            createdAtDate = timestamp.ToDateTime().ToString("MMM dd, yyyy");
+                                            try
+                                            {
+                                                if (classroomData["createdAt"] is Timestamp timestamp)
+                                                {
+                                                    createdAtDate = timestamp.ToDateTime().ToString("MMM dd, yyyy");
+                                                }
+                                            }
+                                            catch
+                                            {
+                                                // Use default date if parsing fails
+                                            }
                                         }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        System.Diagnostics.Debug.WriteLine($"Error parsing createdAt: {ex.Message}");
+
+                                        var classItem = new
+                                        {
+                                            classId = classroom.Id,
+                                            className = GetSafeValue(classroomData, "name", "Unknown Class"),
+                                            teacherName = "You",
+                                            schedule = GetSafeValue(classroomData, "schedule", "Not specified"),
+                                            studentCount = invitedStudentsSnapshot?.Count ?? 0,
+                                            enrolledAt = createdAtDate
+                                        };
+
+                                        classes.Add(classItem);
                                     }
                                 }
-
-                                var classItem = new
-                                {
-                                    classId = classDoc.Id,
-                                    className = GetSafeValue(classData, "name", "Unknown Class"),
-                                    teacherName = "You",
-                                    schedule = GetSafeValue(classData, "schedule", "Not specified"),
-                                    studentCount = invitedStudentsSnapshot?.Count ?? 0,
-                                    enrolledAt = createdAtDate
-                                };
-
-                                classes.Add(classItem);
-                                System.Diagnostics.Debug.WriteLine($"✅ Added class: {classItem.className}");
                             }
-                            catch (Exception ex)
+                            catch
                             {
-                                System.Diagnostics.Debug.WriteLine($"❌ Error processing class {classDoc.Id}: {ex.Message}");
+                                // Skip if error processing class
                             }
                         }
-                    }
-                    else
-                    {
-                        System.Diagnostics.Debug.WriteLine("❌ No matching classrooms found with manual filtering");
                     }
                 }
                 else
                 {
-                    // Student logic with debugging
-                    System.Diagnostics.Debug.WriteLine($"👨‍🎓 STUDENT MODE - Looking for invitations for: '{sessionEmail}'");
-
+                    // Student logic
                     var invitedSnapshot = await db.CollectionGroup("invitedStudents")
                         .WhereEqualTo("email", sessionEmail)
                         .WhereEqualTo("status", "accepted")
                         .GetSnapshotAsync();
-
-                    System.Diagnostics.Debug.WriteLine($"Student invitations found: {invitedSnapshot?.Count ?? 0}");
 
                     if (invitedSnapshot != null && invitedSnapshot.Count > 0)
                     {
@@ -586,46 +768,28 @@ namespace YourProjectNamespace
                                     studentCount = studentsSnapshot?.Count ?? 0,
                                     enrolledAt = joinedAtDate
                                 });
-
-                                System.Diagnostics.Debug.WriteLine($"✅ Added student class: {GetSafeValue(classroomData, "name")}");
                             }
-                            catch (Exception ex)
+                            catch
                             {
-                                System.Diagnostics.Debug.WriteLine($"❌ Error processing student invitation {inviteDoc.Id}: {ex.Message}");
+                                // Skip if error processing student invitation
                             }
                         }
                     }
                 }
-
-                System.Diagnostics.Debug.WriteLine($"=== FINAL RESULTS ===");
-                System.Diagnostics.Debug.WriteLine($"Total classes to display: {classes.Count}");
 
                 // Bind data
                 rptClasses.DataSource = classes;
                 rptClasses.DataBind();
 
                 pnlNoClasses.Visible = classes.Count == 0;
-
-                if (classes.Count == 0)
-                {
-                    System.Diagnostics.Debug.WriteLine("❌ NO CLASSES WILL BE DISPLAYED");
-                    ShowMessage("No classes found. Check debug output for details.", "info");
-                }
-                else
-                {
-                    System.Diagnostics.Debug.WriteLine($"✅ {classes.Count} CLASSES WILL BE DISPLAYED");
-                }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"❌ CRITICAL ERROR in LoadUserClasses: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
                 ShowMessage($"Error loading classes: {ex.Message}", "danger");
                 pnlNoClasses.Visible = true;
             }
         }
 
-        // Helper method to get user's full name from email
         private async Task<string> GetUserFullName(string email)
         {
             try
@@ -653,14 +817,12 @@ namespace YourProjectNamespace
                 }
                 return email;
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Error in GetUserFullName: {ex.Message}");
                 return email;
             }
         }
 
-        // Simplified single method to load all user activity from post documents
         private async Task LoadUserActivity()
         {
             try
@@ -757,9 +919,9 @@ namespace YourProjectNamespace
                                 }
                             }
                         }
-                        catch (Exception ex)
+                        catch
                         {
-                            System.Diagnostics.Debug.WriteLine($"Error loading posts for group {groupDoc.Id}: {ex.Message}");
+                            // Skip if error loading posts for group
                         }
                     }
                 }
@@ -782,17 +944,13 @@ namespace YourProjectNamespace
                 // Check if we have any activity data
                 bool hasActivity = likedPosts.Count > 0 || savedPosts.Count > 0 || sharedPosts.Count > 0;
                 pnlNoActivity.Visible = !hasActivity;
-
-                System.Diagnostics.Debug.WriteLine($"Activity loaded - Liked: {likedPosts.Count}, Saved: {savedPosts.Count}, Shared: {sharedPosts.Count}");
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"LoadUserActivity error: {ex}");
                 pnlNoActivity.Visible = true;
             }
         }
 
-        // Helper method to check if user ID is in an array field
         private bool IsUserInArray(Dictionary<string, object> postData, string arrayFieldName, string userId)
         {
             try
@@ -805,14 +963,12 @@ namespace YourProjectNamespace
 
                 return array.Cast<string>().Contains(userId);
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Error checking user in array {arrayFieldName}: {ex.Message}");
                 return false;
             }
         }
 
-        // Helper method to get count of items in an array field
         private int GetArrayCount(Dictionary<string, object> postData, string arrayFieldName)
         {
             try
@@ -823,14 +979,36 @@ namespace YourProjectNamespace
                 var array = postData[arrayFieldName] as List<object>;
                 return array?.Count ?? 0;
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Error getting array count for {arrayFieldName}: {ex.Message}");
                 return 0;
             }
         }
 
-        // Updated btnUpdateProfile_Click method with comprehensive validation
+        protected async void rptMyFeedback_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            try
+            {
+                if (e.CommandName == "DeleteFeedback")
+                {
+                    string feedbackId = e.CommandArgument.ToString();
+
+                    // Delete the feedback document
+                    await db.Collection("feedbacks").Document(feedbackId).DeleteAsync();
+
+                    ShowMessage("Feedback deleted successfully!", "success");
+
+                    // Reload the user's feedback and stats
+                    await LoadUserFeedback();
+                    await LoadUserStats();
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("Error deleting feedback: " + ex.Message, "danger");
+            }
+        }
+
         protected async void btnUpdateProfile_Click(object sender, EventArgs e)
         {
             try
@@ -871,99 +1049,17 @@ namespace YourProjectNamespace
                     }
                 }
 
-                // Validate email uniqueness (if email field becomes editable in the future)
-                string email = txtEmail.Text.Trim().ToLower();
-                if (!string.IsNullOrEmpty(email))
-                {
-                    // Basic email format validation
-                    if (!IsValidEmail(email))
-                    {
-                        ShowMessage("Please enter a valid email address.", "warning");
-                        return;
-                    }
-
-                    // Check email uniqueness
-                    bool isEmailValid = await ValidateFieldUniqueness("email_lower", email);
-                    if (!isEmailValid)
-                    {
-                        ShowMessage("This email address is already registered by another user.", "danger");
-                        return;
-                    }
-                }
-
-                // Validate username uniqueness (if username field becomes editable in the future)
-                string username = txtUsername.Text.Trim();
-                if (!string.IsNullOrEmpty(username))
-                {
-                    // Basic username format validation
-                    if (username.Length < 3 || username.Length > 20)
-                    {
-                        ShowMessage("Username must be between 3 and 20 characters long.", "warning");
-                        return;
-                    }
-
-                    if (!System.Text.RegularExpressions.Regex.IsMatch(username, @"^[a-zA-Z0-9_]+$"))
-                    {
-                        ShowMessage("Username can only contain letters, numbers, and underscores.", "warning");
-                        return;
-                    }
-
-                    // Check username uniqueness
-                    bool isUsernameValid = await ValidateFieldUniqueness("username", username);
-                    if (!isUsernameValid)
-                    {
-                        ShowMessage("This username is already taken. Please choose a different username.", "danger");
-                        return;
-                    }
-                }
-
-                // Validate birthdate if provided
-                if (!string.IsNullOrEmpty(txtBirthdate.Text))
-                {
-                    if (DateTime.TryParse(txtBirthdate.Text, out DateTime birthDate))
-                    {
-                        if (birthDate > DateTime.Now)
-                        {
-                            ShowMessage("Birthdate cannot be in the future.", "warning");
-                            return;
-                        }
-
-                        if (birthDate < DateTime.Now.AddYears(-120))
-                        {
-                            ShowMessage("Please enter a valid birthdate.", "warning");
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        ShowMessage("Please enter a valid birthdate.", "warning");
-                        return;
-                    }
-                }
-
                 // Update user profile
                 var updateData = new Dictionary<string, object>
-        {
-            { "firstName", txtFirstName.Text.Trim() },
-            { "lastName", txtLastName.Text.Trim() },
-            { "phone", phone },
-            { "gender", ddlGender.SelectedValue },
-            { "birthdate", txtBirthdate.Text.Trim() },
-            { "address", txtAddress.Text.Trim() },
-            { "lastUpdated", Timestamp.GetCurrentTimestamp() }
-        };
-
-                // Add email and username to update if they were modified and are not read-only
-                if (!txtEmail.ReadOnly && !string.IsNullOrEmpty(email))
                 {
-                    updateData["email"] = txtEmail.Text.Trim();
-                    updateData["email_lower"] = email;
-                }
-
-                if (!txtUsername.ReadOnly && !string.IsNullOrEmpty(username))
-                {
-                    updateData["username"] = username;
-                }
+                    { "firstName", txtFirstName.Text.Trim() },
+                    { "lastName", txtLastName.Text.Trim() },
+                    { "phone", phone },
+                    { "gender", ddlGender.SelectedValue },
+                    { "birthdate", txtBirthdate.Text.Trim() },
+                    { "address", txtAddress.Text.Trim() },
+                    { "lastUpdated", Timestamp.GetCurrentTimestamp() }
+                };
 
                 var userRef = db.Collection("users").Document(currentUserId);
                 await userRef.UpdateAsync(updateData);
@@ -971,28 +1067,21 @@ namespace YourProjectNamespace
                 // Update profile header display
                 ltProfileName.Text = $"{txtFirstName.Text.Trim()} {txtLastName.Text.Trim()}";
 
-                // Update username display if it was changed
-                if (!txtUsername.ReadOnly)
-                {
-                    ltUsername.Text = username;
-                }
-
                 ShowMessage("Profile updated successfully!", "success");
             }
             catch (Exception ex)
             {
                 ShowMessage("Error updating profile: " + ex.Message, "danger");
-                System.Diagnostics.Debug.WriteLine($"Profile update error: {ex}");
             }
         }
+
         private async Task<bool> ValidateFieldUniqueness(string fieldName, string fieldValue)
         {
             try
             {
                 if (string.IsNullOrEmpty(fieldValue))
-                    return true; // Empty values are allowed (not checking uniqueness for empty values)
+                    return true;
 
-                // Get the current user's data to compare
                 var currentUserRef = db.Collection("users").Document(currentUserId);
                 var currentUserSnap = await currentUserRef.GetSnapshotAsync();
 
@@ -1001,48 +1090,27 @@ namespace YourProjectNamespace
                     var currentUserData = currentUserSnap.ToDictionary();
                     string currentValue = GetSafeValue(currentUserData, fieldName);
 
-                    // If the value hasn't changed, it's valid
                     if (string.Equals(currentValue, fieldValue, StringComparison.OrdinalIgnoreCase))
                     {
                         return true;
                     }
                 }
 
-                // Check if any other user has this field value
                 var query = db.Collection("users").WhereEqualTo(fieldName, fieldValue);
                 var snapshot = await query.GetSnapshotAsync();
 
                 if (snapshot != null && snapshot.Count > 0)
                 {
-                    // Check if any of the found documents is not the current user
                     foreach (var doc in snapshot.Documents)
                     {
                         if (doc.Id != currentUserId)
                         {
-                            return false; // Found another user with the same field value
+                            return false;
                         }
                     }
                 }
 
-                return true; // No other user has this field value
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error validating field uniqueness for {fieldName}: {ex}");
-                return false; // Return false on error to be safe
-            }
-        }
-
-        // Helper method to validate email format
-        private bool IsValidEmail(string email)
-        {
-            try
-            {
-                var emailRegex = new System.Text.RegularExpressions.Regex(
-                    @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
-                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-
-                return emailRegex.IsMatch(email);
+                return true;
             }
             catch
             {
@@ -1050,153 +1118,6 @@ namespace YourProjectNamespace
             }
         }
 
-        // Enhanced validation method for comprehensive field validation
-        private async Task<Dictionary<string, string>> ValidateAllFields()
-        {
-            var errors = new Dictionary<string, string>();
-
-            try
-            {
-                // Required field validation
-                if (string.IsNullOrWhiteSpace(txtFirstName.Text))
-                    errors.Add("firstName", "First name is required.");
-
-                if (string.IsNullOrWhiteSpace(txtLastName.Text))
-                    errors.Add("lastName", "Last name is required.");
-
-                // Phone validation
-                string phone = txtPhone.Text.Trim();
-                if (!string.IsNullOrEmpty(phone))
-                {
-                    if (phone.Length < 6 || !phone.All(char.IsDigit))
-                        errors.Add("phone", "Phone number must be at least 6 digits and contain only numbers.");
-                    else if (!await ValidateFieldUniqueness("phone", phone))
-                        errors.Add("phone", "This phone number is already registered by another user.");
-                }
-
-                // Email validation (if editable)
-                if (!txtEmail.ReadOnly)
-                {
-                    string email = txtEmail.Text.Trim().ToLower();
-                    if (!string.IsNullOrEmpty(email))
-                    {
-                        if (!IsValidEmail(email))
-                            errors.Add("email", "Please enter a valid email address.");
-                        else if (!await ValidateFieldUniqueness("email_lower", email))
-                            errors.Add("email", "This email address is already registered by another user.");
-                    }
-                }
-
-                // Username validation (if editable)
-                if (!txtUsername.ReadOnly)
-                {
-                    string username = txtUsername.Text.Trim();
-                    if (!string.IsNullOrEmpty(username))
-                    {
-                        if (username.Length < 3 || username.Length > 20)
-                            errors.Add("username", "Username must be between 3 and 20 characters long.");
-                        else if (!System.Text.RegularExpressions.Regex.IsMatch(username, @"^[a-zA-Z0-9_]+$"))
-                            errors.Add("username", "Username can only contain letters, numbers, and underscores.");
-                        else if (!await ValidateFieldUniqueness("username", username))
-                            errors.Add("username", "This username is already taken. Please choose a different username.");
-                    }
-                }
-
-                // Birthdate validation
-                if (!string.IsNullOrEmpty(txtBirthdate.Text))
-                {
-                    if (DateTime.TryParse(txtBirthdate.Text, out DateTime birthDate))
-                    {
-                        if (birthDate > DateTime.Now)
-                            errors.Add("birthdate", "Birthdate cannot be in the future.");
-                        else if (birthDate < DateTime.Now.AddYears(-120))
-                            errors.Add("birthdate", "Please enter a valid birthdate.");
-                    }
-                    else
-                    {
-                        errors.Add("birthdate", "Please enter a valid birthdate.");
-                    }
-                }
-
-                return errors;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Error in ValidateAllFields: {ex}");
-                errors.Add("general", "An error occurred during validation. Please try again.");
-                return errors;
-            }
-        }
-
-        // Alternative update method using comprehensive validation
-        protected async void btnUpdateProfileWithValidation_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                // Check if this is a reset request
-                string eventArgument = Request["__EVENTARGUMENT"];
-                if (eventArgument == "reset")
-                {
-                    await LoadUserProfile();
-                    ShowMessage("Form has been reset to original values.", "info");
-                    return;
-                }
-
-                // Perform comprehensive validation
-                var validationErrors = await ValidateAllFields();
-
-                if (validationErrors.Count > 0)
-                {
-                    // Display all validation errors
-                    string errorMessage = "Please correct the following errors:\n" +
-                        string.Join("\n", validationErrors.Values);
-                    ShowMessage(errorMessage, "danger");
-                    return;
-                }
-
-                // If all validations pass, proceed with update
-                var updateData = new Dictionary<string, object>
-        {
-            { "firstName", txtFirstName.Text.Trim() },
-            { "lastName", txtLastName.Text.Trim() },
-            { "phone", txtPhone.Text.Trim() },
-            { "gender", ddlGender.SelectedValue },
-            { "birthdate", txtBirthdate.Text.Trim() },
-            { "address", txtAddress.Text.Trim() },
-            { "lastUpdated", Timestamp.GetCurrentTimestamp() }
-        };
-
-                // Add email and username if they're editable
-                if (!txtEmail.ReadOnly)
-                {
-                    string email = txtEmail.Text.Trim();
-                    updateData["email"] = email;
-                    updateData["email_lower"] = email.ToLower();
-                }
-
-                if (!txtUsername.ReadOnly)
-                {
-                    updateData["username"] = txtUsername.Text.Trim();
-                }
-
-                var userRef = db.Collection("users").Document(currentUserId);
-                await userRef.UpdateAsync(updateData);
-
-                // Update UI displays
-                ltProfileName.Text = $"{txtFirstName.Text.Trim()} {txtLastName.Text.Trim()}";
-                if (!txtUsername.ReadOnly)
-                {
-                    ltUsername.Text = txtUsername.Text.Trim();
-                }
-
-                ShowMessage("Profile updated successfully!", "success");
-            }
-            catch (Exception ex)
-            {
-                ShowMessage("Error updating profile: " + ex.Message, "danger");
-                System.Diagnostics.Debug.WriteLine($"Profile update error: {ex}");
-            }
-        }
         protected async void btnUploadPhoto_Click(object sender, EventArgs e)
         {
             try
@@ -1209,30 +1130,25 @@ namespace YourProjectNamespace
 
                 var file = fileProfilePicture.PostedFile;
 
-                // Validate file type
                 if (!file.ContentType.StartsWith("image/"))
                 {
                     ShowMessage("Please select a valid image file.", "warning");
                     return;
                 }
 
-                // Validate file size (max 5MB)
                 if (file.ContentLength > 5 * 1024 * 1024)
                 {
                     ShowMessage("Image file size should not exceed 5MB.", "warning");
                     return;
                 }
 
-                // Upload to Cloudinary
                 string imageUrl = await UploadImageToCloudinary(file);
 
                 if (!string.IsNullOrEmpty(imageUrl))
                 {
-                    // Update user profile image URL in Firestore
                     var userRef = db.Collection("users").Document(currentUserId);
                     await userRef.UpdateAsync("profileImageUrl", imageUrl);
 
-                    // Update UI
                     imgProfile.ImageUrl = imageUrl;
 
                     ShowMessage("Profile picture updated successfully!", "success");
@@ -1245,7 +1161,6 @@ namespace YourProjectNamespace
             catch (Exception ex)
             {
                 ShowMessage("Error uploading profile picture: " + ex.Message, "danger");
-                System.Diagnostics.Debug.WriteLine($"Profile picture upload error: {ex}");
             }
         }
 
@@ -1259,7 +1174,6 @@ namespace YourProjectNamespace
 
                 if (string.IsNullOrEmpty(cloudName) || string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(apiSecret))
                 {
-                    System.Diagnostics.Debug.WriteLine("Cloudinary configuration is missing");
                     return "";
                 }
 
@@ -1283,18 +1197,15 @@ namespace YourProjectNamespace
                 }
                 else
                 {
-                    System.Diagnostics.Debug.WriteLine($"Cloudinary upload failed: {uploadResult.Error?.Message}");
                     return "";
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Cloudinary upload error: {ex}");
                 return "";
             }
         }
 
-        // Handle unsaving posts by updating the post's saves array
         protected async void btnUnsavePost_Click(object sender, EventArgs e)
         {
             try
@@ -1311,18 +1222,16 @@ namespace YourProjectNamespace
                 string groupId = args[1];
 
                 await UnsavePost(postId, groupId);
-                await LoadUserActivity(); // Refresh the activity display
+                await LoadUserActivity();
 
                 ShowMessage("Post removed from saved items.", "success");
             }
             catch (Exception ex)
             {
                 ShowMessage("Error removing post from saved items: " + ex.Message, "danger");
-                System.Diagnostics.Debug.WriteLine($"Unsave post error: {ex}");
             }
         }
 
-        // Simplified unsave method that directly modifies the post's saves array
         private async Task UnsavePost(string postId, string groupId)
         {
             try
@@ -1336,7 +1245,6 @@ namespace YourProjectNamespace
                 var postData = postSnap.ToDictionary();
                 if (postData == null) return;
 
-                // Get current saves array
                 var saves = new List<string>();
                 if (postData.ContainsKey("saves") && postData["saves"] != null)
                 {
@@ -1347,22 +1255,18 @@ namespace YourProjectNamespace
                     }
                 }
 
-                // Remove current user from saves array if present
                 if (saves.Contains(currentUserId))
                 {
                     saves.Remove(currentUserId);
                     await postRef.UpdateAsync("saves", saves);
-                    System.Diagnostics.Debug.WriteLine($"User {currentUserId} removed from saves of post {postId}");
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                System.Diagnostics.Debug.WriteLine($"Error unsaving post: {ex}");
                 throw;
             }
         }
 
-        // Helper method for dictionary access
         private string GetSafeValue(Dictionary<string, object> dictionary, string key, string defaultValue = "")
         {
             if (dictionary == null || !dictionary.ContainsKey(key) || dictionary[key] == null)
@@ -1389,7 +1293,6 @@ namespace YourProjectNamespace
             ScriptManager.RegisterStartupScript(this, GetType(), "showMessage", script, true);
         }
 
-        // Method to check if we have activity data
         protected bool HasActivityData()
         {
             try
@@ -1418,16 +1321,7 @@ namespace YourProjectNamespace
         protected override void OnPreRender(EventArgs e)
         {
             base.OnPreRender(e);
-
-            // Set visibility of no activity panel based on data
             pnlNoActivity.Visible = !HasActivityData();
-
-            // Add any additional client-side scripts needed
-            string script = @"
-                console.log('Profile page loaded successfully');
-            ";
-
-            ScriptManager.RegisterStartupScript(this, GetType(), "profilePageReady", script, true);
         }
     }
 }
