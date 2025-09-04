@@ -1082,18 +1082,54 @@
         let membersLoaded = false;
         let selectedFile = null;
 
+        // NEW: Initialize tab from hidden field value
+        function initializeTabFromHiddenField() {
+            const hfActiveTab = document.getElementById('<%= hfActiveTab.ClientID %>');
+            if (hfActiveTab && hfActiveTab.value) {
+                const activeTabValue = hfActiveTab.value;
+                console.log('Initializing tab from hidden field:', activeTabValue);
+
+                // Set the current active tab
+                currentActiveTab = activeTabValue;
+
+                // Update the UI to show the correct tab
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+
+                const targetBtn = document.querySelector(`[data-tab="${activeTabValue}"]`);
+                if (targetBtn) {
+                    targetBtn.classList.add('active');
+                }
+
+                const targetContent = document.getElementById(activeTabValue + '-tab');
+                if (targetContent) {
+                    targetContent.classList.add('active');
+                }
+
+                console.log('Tab initialized to:', activeTabValue);
+            } else {
+                console.log('No active tab value found, defaulting to my-rooms');
+                // Default to my-rooms if no value is set
+                currentActiveTab = 'my-rooms';
+            }
+        }
+
         // Modal Management - FIXED TO LOAD MEMBERS
         function showManageModal() {
             console.log('Opening manage modal...');
-            
+
             // Load members before showing modal
             __doPostBack('LoadMembers', '');
-            
+
             // Show modal after a brief delay to allow member loading
             setTimeout(() => {
                 document.getElementById('manageModal').style.display = 'block';
             }, 500);
-            
+
             return false;
         }
 
@@ -1102,7 +1138,7 @@
         }
 
         // Close modal when clicking outside
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modal = document.getElementById('manageModal');
             if (event.target == modal) {
                 closeManageModal();
@@ -1168,7 +1204,7 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // Tab switching
+        // Tab switching - UPDATED to sync with hidden field
         function switchTab(tabName) {
             if (isTabSwitching) return false;
             isTabSwitching = true;
@@ -1176,9 +1212,11 @@
             console.log('Switching to tab:', tabName);
             currentActiveTab = tabName;
 
+            // Update hidden field to maintain state
             const hfActiveTab = document.getElementById('<%= hfActiveTab.ClientID %>');
             if (hfActiveTab) {
                 hfActiveTab.value = tabName;
+                console.log('Updated hidden field to:', tabName);
             }
 
             document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1226,6 +1264,7 @@
         }
 
         function setupEventHandlers() {
+            // Tab button click handlers
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', function (e) {
                     e.preventDefault();
@@ -1238,6 +1277,7 @@
                 });
             });
 
+            // Room item click handlers
             document.addEventListener('click', function (e) {
                 const roomItem = e.target.closest('.room-item');
                 if (roomItem && !isTabSwitching) {
@@ -1250,12 +1290,34 @@
                     }
                 }
             });
+
+            console.log('Event handlers setup complete');
         }
 
-        // Main initialization
+        // Main initialization - UPDATED to initialize tab from hidden field
         document.addEventListener('DOMContentLoaded', function () {
             console.log('Chat page loaded, initializing...');
+
+            // First setup event handlers
             setupEventHandlers();
+
+            // Then initialize the correct tab from the hidden field
+            // Add a small delay to ensure all elements are ready
+            setTimeout(() => {
+                initializeTabFromHiddenField();
+            }, 100);
+
+            console.log('Initialization complete');
+        });
+
+        // ADDITIONAL: Handle browser back/forward navigation to maintain tab state
+        window.addEventListener('pageshow', function (event) {
+            if (event.persisted) {
+                // Page was loaded from cache, reinitialize tab state
+                setTimeout(() => {
+                    initializeTabFromHiddenField();
+                }, 50);
+            }
         });
     </script>
 </asp:Content>

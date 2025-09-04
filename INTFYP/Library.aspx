@@ -701,6 +701,9 @@
         }
     </style>
 
+    <!-- Hidden field to store the book ID of the clicked button -->
+    <asp:HiddenField ID="hdnScrollToBook" runat="server" />
+
     <div class="library-page">
         <div class="library-container">
             <div class="page-header">
@@ -779,7 +782,7 @@
                                     <div class="books-grid">
                                 </HeaderTemplate>
                                 <ItemTemplate>
-                                    <div class="book-card" style="--card-index: <%# Container.ItemIndex %>;">
+                                    <div class="book-card" id="book-card-<%# Eval("DocumentId") %>" style="--card-index: <%# Container.ItemIndex %>;">
                                         <div class="book-icon"></div>
                                         
                                         <a href='<%# "PreviewBook.aspx?pdfUrl=" + HttpUtility.UrlEncode(Eval("PdfUrl").ToString()) %>' 
@@ -800,13 +803,13 @@
                                                 CommandName="Recommend"
                                                 CommandArgument='<%# Eval("DocumentId") %>'
                                                 CssClass='<%# "book-action-btn btn-recommend" + (Convert.ToBoolean(Eval("IsRecommended")) ? " active" : "") %>'
-                                                OnClientClick="addClickEffect(this); return true;" />
+                                                OnClientClick='<%# "return storeScrollPosition(\"" + Eval("DocumentId") + "\");" %>' />
                                             <asp:Button ID="btnFavorite" runat="server"
                                                 Text="⭐"
                                                 CommandName="Favorite"
                                                 CommandArgument='<%# Eval("DocumentId") %>'
                                                 CssClass='<%# "book-action-btn btn-favorite" + (Convert.ToBoolean(Eval("IsFavorited")) ? " active" : "") %>'
-                                                OnClientClick="addClickEffect(this); return true;" />
+                                                OnClientClick='<%# "return storeScrollPosition(\"" + Eval("DocumentId") + "\");" %>' />
                                         </div>
                                     </div>
                                 </ItemTemplate>
@@ -826,7 +829,7 @@
                                     <div class="books-grid">
                                 </HeaderTemplate>
                                 <ItemTemplate>
-                                    <div class="book-card" style="--card-index: <%# Container.ItemIndex %>;">
+                                    <div class="book-card" id="book-card-<%# Eval("DocumentId") %>" style="--card-index: <%# Container.ItemIndex %>;">
                                         <div class="book-icon"></div>
                                         
                                         <a href='<%# "PreviewBook.aspx?pdfUrl=" + HttpUtility.UrlEncode(Eval("PdfUrl").ToString()) %>' 
@@ -847,13 +850,13 @@
                                                 CommandName="Recommend"
                                                 CommandArgument='<%# Eval("DocumentId") %>'
                                                 CssClass='<%# "book-action-btn btn-recommend" + (Convert.ToBoolean(Eval("IsRecommended")) ? " active" : "") %>'
-                                                OnClientClick="addClickEffect(this); return true;" />
+                                                OnClientClick='<%# "return storeScrollPosition(\"" + Eval("DocumentId") + "\");" %>' />
                                             <asp:Button ID="btnFavorite" runat="server"
                                                 Text="⭐"
                                                 CommandName="Favorite"
                                                 CommandArgument='<%# Eval("DocumentId") %>'
                                                 CssClass='<%# "book-action-btn btn-favorite" + (Convert.ToBoolean(Eval("IsFavorited")) ? " active" : "") %>'
-                                                OnClientClick="addClickEffect(this); return true;" />
+                                                OnClientClick='<%# "return storeScrollPosition(\"" + Eval("DocumentId") + "\");" %>' />
                                         </div>
                                     </div>
                                 </ItemTemplate>
@@ -873,7 +876,7 @@
                                     <div class="books-grid">
                                 </HeaderTemplate>
                                 <ItemTemplate>
-                                    <div class="book-card" style="--card-index: <%# Container.ItemIndex %>;">
+                                    <div class="book-card" id="book-card-<%# Eval("DocumentId") %>" style="--card-index: <%# Container.ItemIndex %>;">
                                         <div class="book-icon"></div>
                                         
                                         <a href='<%# "PreviewBook.aspx?pdfUrl=" + HttpUtility.UrlEncode(Eval("PdfUrl").ToString()) %>' 
@@ -894,13 +897,13 @@
                                                 CommandName="Recommend"
                                                 CommandArgument='<%# Eval("DocumentId") %>'
                                                 CssClass='<%# "book-action-btn btn-recommend" + (Convert.ToBoolean(Eval("IsRecommended")) ? " active" : "") %>'
-                                                OnClientClick="addClickEffect(this); return true;" />
+                                                OnClientClick='<%# "return storeScrollPosition(\"" + Eval("DocumentId") + "\");" %>' />
                                             <asp:Button ID="btnFavorite" runat="server"
                                                 Text="⭐"
                                                 CommandName="Favorite"
                                                 CommandArgument='<%# Eval("DocumentId") %>'
                                                 CssClass='<%# "book-action-btn btn-favorite" + (Convert.ToBoolean(Eval("IsFavorited")) ? " active" : "") %>'
-                                                OnClientClick="addClickEffect(this); return true;" />
+                                                OnClientClick='<%# "return storeScrollPosition(\"" + Eval("DocumentId") + "\");" %>' />
                                         </div>
                                     </div>
                                 </ItemTemplate>
@@ -920,7 +923,7 @@
                                     <div class="books-grid">
                                 </HeaderTemplate>
                                 <ItemTemplate>
-                                    <div class="book-card" style="--card-index: <%# Container.ItemIndex %>;">
+                                    <div class="book-card" id="book-card-<%# Eval("DocumentId") %>" style="--card-index: <%# Container.ItemIndex %>;">
                                         <div class="book-icon"></div>
                                         
                                         <a href='<%# "PreviewBook.aspx?pdfUrl=" + HttpUtility.UrlEncode(Eval("PdfUrl").ToString()) %>' 
@@ -941,13 +944,13 @@
                                                 CommandName="Recommend"
                                                 CommandArgument='<%# Eval("DocumentId") %>'
                                                 CssClass='<%# "book-action-btn btn-recommend" + (Convert.ToBoolean(Eval("IsRecommended")) ? " active" : "") %>'
-                                                OnClientClick="addClickEffect(this); return true;" />
+                                                OnClientClick='<%# "return storeScrollPosition(\"" + Eval("DocumentId") + "\");" %>' />
                                             <asp:Button ID="btnFavorite" runat="server"
                                                 Text="⭐"
                                                 CommandName="Favorite"
                                                 CommandArgument='<%# Eval("DocumentId") %>'
                                                 CssClass='<%# "book-action-btn btn-favorite" + (Convert.ToBoolean(Eval("IsFavorited")) ? " active" : "") %>'
-                                                OnClientClick="addClickEffect(this); return true;" />
+                                                OnClientClick='<%# "return storeScrollPosition(\"" + Eval("DocumentId") + "\");" %>' />
                                         </div>
                                     </div>
                                 </ItemTemplate>
@@ -964,19 +967,60 @@
     </div>
 
     <script>
-        // Ensure this runs after page loads to avoid conflicts
+        // Function to store which book was clicked before postback
+        function storeScrollPosition(bookId) {
+            console.log('Storing scroll position for book:', bookId);
+            
+            // Store the book ID in the hidden field
+            document.getElementById('<%= hdnScrollToBook.ClientID %>').value = bookId;
+            
+            // Allow the postback to continue
+            return true;
+        }
+
+        // Function to scroll to the stored book after page reload
+        function scrollToStoredBook() {
+            var hiddenField = document.getElementById('<%= hdnScrollToBook.ClientID %>');
+            if (hiddenField && hiddenField.value) {
+                var bookId = hiddenField.value;
+                var bookCard = document.getElementById('book-card-' + bookId);
+                
+                if (bookCard) {
+                    console.log('Scrolling to book:', bookId);
+                    
+                    // Smooth scroll to the book card
+                    bookCard.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                        inline: 'nearest'
+                    });
+                    
+                    // Add a temporary highlight effect
+                    bookCard.style.boxShadow = '0 0 20px rgba(103, 126, 234, 0.5)';
+                    setTimeout(function() {
+                        bookCard.style.boxShadow = '';
+                    }, 2000);
+                    
+                    // Clear the hidden field
+                    hiddenField.value = '';
+                }
+            }
+        }
+
+        // Run when page loads
         document.addEventListener('DOMContentLoaded', function () {
             console.log('Library page loaded');
-
-            // Override any Bootstrap button event handlers
-            var buttons = document.querySelectorAll('.book-action-btn');
-            buttons.forEach(function (btn) {
-                // Remove any existing event listeners
-                var newBtn = btn.cloneNode(true);
-                btn.parentNode.replaceChild(newBtn, btn);
-            });
+            
+            // Small delay to ensure all elements are rendered
+            setTimeout(scrollToStoredBook, 100);
         });
 
+        // Alternative - also try when window loads (backup)
+        window.addEventListener('load', function() {
+            setTimeout(scrollToStoredBook, 200);
+        });
+
+        // Legacy function for compatibility
         function addClickEffect(button) {
             console.log('Button clicked:', button.id);
 
@@ -988,7 +1032,6 @@
                 button.classList.remove('clicked');
             }, 600);
 
-            // Return true to allow postback
             return true;
         }
 
