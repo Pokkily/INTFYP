@@ -20,7 +20,7 @@ namespace YourProjectNamespace
         private string currentUserName;
         private string currentUserId;
 
-        protected async void Page_Load(object sender, EventArgs e)
+        protected async void Page_Load(object sender, EventArgs pageLoadArgs)
         {
             // Check authentication first
             currentUserEmail = Session["email"]?.ToString();
@@ -62,7 +62,7 @@ namespace YourProjectNamespace
             }
         }
 
-        protected async void btnSubmit_Click(object sender, EventArgs e)
+        protected async void btnSubmit_Click(object sender, EventArgs btnArgs)
         {
             // Clear any previous messages
             lblMessage.Visible = false;
@@ -147,7 +147,7 @@ namespace YourProjectNamespace
             if (validationErrors.Count > 0)
             {
                 lblMessage.Text = "<strong>Please correct the following errors:</strong><br/>" +
-                                 string.Join("<br/>", validationErrors.Select(e => "• " + e));
+                                 string.Join("<br/>", validationErrors.Select(error => "• " + error));
                 lblMessage.CssClass = "alert alert-danger";
                 lblMessage.Visible = true;
                 return;
@@ -291,9 +291,9 @@ namespace YourProjectNamespace
                     // Load comments for this feedback post
                     var commentsSnapshot = await db.Collection("feedbacks").Document(doc.Id).Collection("comments").OrderBy("createdAt").GetSnapshotAsync();
 
-                    var comments = commentsSnapshot.Documents.Select(c =>
+                    var comments = commentsSnapshot.Documents.Select(commentDoc =>
                     {
-                        var cData = c.ToDictionary();
+                        var cData = commentDoc.ToDictionary();
                         return new
                         {
                             username = cData.GetValueOrDefault("username", "Anonymous").ToString(),
@@ -326,15 +326,15 @@ namespace YourProjectNamespace
             }
         }
 
-        protected void rptFeedback_ItemDataBound(object sender, RepeaterItemEventArgs e)
+        protected void rptFeedback_ItemDataBound(object sender, RepeaterItemEventArgs itemArgs)
         {
-            if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem)
+            if (itemArgs.Item.ItemType == ListItemType.Item || itemArgs.Item.ItemType == ListItemType.AlternatingItem)
             {
-                var feedback = (dynamic)e.Item.DataItem;
+                var feedback = (dynamic)itemArgs.Item.DataItem;
 
                 // Handle the modal comments repeater
-                var rptCommentsDetail = (Repeater)e.Item.FindControl("rptCommentsDetail");
-                var noCommentsDetailDiv = (HtmlGenericControl)e.Item.FindControl("noCommentsDetailDiv");
+                var rptCommentsDetail = (Repeater)itemArgs.Item.FindControl("rptCommentsDetail");
+                var noCommentsDetailDiv = (HtmlGenericControl)itemArgs.Item.FindControl("noCommentsDetailDiv");
 
                 if (rptCommentsDetail != null)
                 {
@@ -354,8 +354,8 @@ namespace YourProjectNamespace
                 }
 
                 // Also handle regular comments repeater if it exists
-                var rptComments = (Repeater)e.Item.FindControl("rptComments");
-                var noCommentsDiv = (HtmlGenericControl)e.Item.FindControl("noCommentsDiv");
+                var rptComments = (Repeater)itemArgs.Item.FindControl("rptComments");
+                var noCommentsDiv = (HtmlGenericControl)itemArgs.Item.FindControl("noCommentsDiv");
 
                 if (rptComments != null)
                 {
@@ -376,7 +376,7 @@ namespace YourProjectNamespace
             }
         }
 
-        protected async void rptFeedback_ItemCommand(object source, RepeaterCommandEventArgs e)
+        protected async void rptFeedback_ItemCommand(object source, RepeaterCommandEventArgs cmdArgs)
         {
             // Check authentication before processing any command
             if (string.IsNullOrEmpty(currentUserId))
@@ -385,9 +385,9 @@ namespace YourProjectNamespace
                 return;
             }
 
-            if (e.CommandName == "Like")
+            if (cmdArgs.CommandName == "Like")
             {
-                string postId = e.CommandArgument.ToString();
+                string postId = cmdArgs.CommandArgument.ToString();
 
                 try
                 {
@@ -427,17 +427,17 @@ namespace YourProjectNamespace
                     ShowMessage("Error updating like: " + ex.Message, "alert alert-danger");
                 }
             }
-            else if (e.CommandName == "SubmitComment")
+            else if (cmdArgs.CommandName == "SubmitComment")
             {
-                string postId = e.CommandArgument.ToString();
+                string postId = cmdArgs.CommandArgument.ToString();
 
                 // Try to find the modal comment controls first
-                var txtCommentInputDetail = (TextBox)e.Item.FindControl("txtCommentInputDetail");
-                var lblCommentErrorDetail = (Label)e.Item.FindControl("lblCommentErrorDetail");
+                var txtCommentInputDetail = (TextBox)cmdArgs.Item.FindControl("txtCommentInputDetail");
+                var lblCommentErrorDetail = (Label)cmdArgs.Item.FindControl("lblCommentErrorDetail");
 
                 // If modal controls not found, try regular controls (fallback)
-                var txtCommentInput = txtCommentInputDetail ?? (TextBox)e.Item.FindControl("txtCommentInput");
-                var lblCommentError = lblCommentErrorDetail ?? (Label)e.Item.FindControl("lblCommentError");
+                var txtCommentInput = txtCommentInputDetail ?? (TextBox)cmdArgs.Item.FindControl("txtCommentInput");
+                var lblCommentError = lblCommentErrorDetail ?? (Label)cmdArgs.Item.FindControl("lblCommentError");
 
                 string commentText = txtCommentInput?.Text.Trim();
 
@@ -536,15 +536,15 @@ namespace YourProjectNamespace
         }
 
         // Add page methods for better error handling
-        protected override void OnError(EventArgs e)
+        protected override void OnError(EventArgs errorArgs)
         {
             Exception ex = Server.GetLastError();
             ShowMessage("An unexpected error occurred: " + ex.Message, "alert alert-danger");
             Server.ClearError();
-            base.OnError(e);
+            base.OnError(errorArgs);
         }
 
-        protected override void OnPreRender(EventArgs e)
+        protected override void OnPreRender(EventArgs preRenderArgs)
         {
             // Ensure validation scripts are registered
             if (Page.IsPostBack)
@@ -558,7 +558,7 @@ namespace YourProjectNamespace
                         }
                     </script>");
             }
-            base.OnPreRender(e);
+            base.OnPreRender(preRenderArgs);
         }
     }
 
