@@ -38,7 +38,8 @@ namespace YourProjectNamespace
         {
             if (Session["userId"] == null || Session["username"] == null)
             {
-                Response.Redirect("Login.aspx");
+                Response.Redirect("Login.aspx", false);
+                Context.ApplicationInstance.CompleteRequest();
                 return;
             }
 
@@ -49,7 +50,8 @@ namespace YourProjectNamespace
 
             if (string.IsNullOrEmpty(groupId))
             {
-                Response.Redirect("StudyHub.aspx");
+                Response.Redirect("StudyHub.aspx", false);
+                Context.ApplicationInstance.CompleteRequest();
                 return;
             }
 
@@ -106,7 +108,8 @@ namespace YourProjectNamespace
                 DocumentSnapshot groupSnap = await db.Collection("studyHubs").Document(groupId).GetSnapshotAsync();
                 if (!groupSnap.Exists)
                 {
-                    Response.Redirect("StudyHub.aspx");
+                    Response.Redirect("StudyHub.aspx", false);
+                    Context.ApplicationInstance.CompleteRequest();
                     return;
                 }
 
@@ -118,7 +121,8 @@ namespace YourProjectNamespace
                 if (!membersList.Contains(currentUserId))
                 {
                     ShowMessage("You are not a member of this group.", "warning");
-                    Response.Redirect("StudyHub.aspx");
+                    Response.Redirect("StudyHub.aspx", false);
+                    Context.ApplicationInstance.CompleteRequest();
                     return;
                 }
 

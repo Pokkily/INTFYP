@@ -140,11 +140,18 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s ease;
+            min-width: 140px;
         }
 
         .btn-filter:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-filter:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .charts-section {
@@ -380,6 +387,18 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Debug info panel */
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #666;
+        }
+
         @media (max-width: 1024px) {
             .charts-section {
                 grid-template-columns: 1fr;
@@ -473,7 +492,7 @@
             <div class="filters-row">
                 <div class="filter-group">
                     <label class="filter-label">Select Quiz</label>
-                    <asp:DropDownList ID="ddlQuizCode" runat="server" CssClass="filter-control">
+                    <asp:DropDownList ID="ddlQuizCode" runat="server" CssClass="filter-control" EnableViewState="true">
                         <asp:ListItem Text="All Quizzes" Value="" />
                     </asp:DropDownList>
                 </div>
@@ -593,6 +612,7 @@
             <asp:Panel ID="pnlNoData" runat="server" CssClass="no-data" Visible="false">
                 <h3>No quiz attempts found</h3>
                 <p>Try selecting a different quiz or check back later when users have taken quizzes.</p>
+                <small>Make sure quiz attempts are being saved to the <code>quiz_attempts</code> collection with proper quiz reference fields.</small>
             </asp:Panel>
         </div>
     </div>
@@ -616,8 +636,13 @@
 
         function initializeCharts() {
             // Get chart data from hidden fields (populated by code-behind)
-            var scoreData = JSON.parse(document.getElementById('<%= hdnScoreData.ClientID %>').value || '[]');
-            var gradeData = JSON.parse(document.getElementById('<%= hdnGradeData.ClientID %>').value || '{}');
+            var scoreDataField = document.getElementById('<%= hdnScoreData.ClientID %>');
+            var gradeDataField = document.getElementById('<%= hdnGradeData.ClientID %>');
+            
+            var scoreData = scoreDataField ? JSON.parse(scoreDataField.value || '[]') : [];
+            var gradeData = gradeDataField ? JSON.parse(gradeDataField.value || '{}') : {};
+
+            console.log('Chart data loaded:', { scoreData, gradeData });
 
             // Score Distribution Chart
             var scoreCtx = document.getElementById('scoreChart').getContext('2d');
@@ -755,22 +780,52 @@
             });
         }
 
-        // Add loading animation for buttons
+        // Fixed button handling - don't interfere with server postback
         document.addEventListener('DOMContentLoaded', function () {
-            var buttons = document.querySelectorAll('.btn-filter, .export-btn');
-            buttons.forEach(function (button) {
-                button.addEventListener('click', function () {
-                    var originalText = this.innerHTML;
-                    this.innerHTML = '<span class="loading-spinner"></span> Loading...';
-                    this.disabled = true;
+            var filterButton = document.querySelector('.btn-filter');
+            var exportButton = document.querySelector('.export-btn');
+            
+            if (filterButton) {
+                filterButton.addEventListener('click', function (e) {
+                    // Don't prevent default - allow the server-side click to proceed
+                    var dropdown = document.querySelector('#<%= ddlQuizCode.ClientID %>');
+                    console.log('Filter button clicked');
+                    console.log('Selected quiz:', dropdown ? dropdown.value : 'Dropdown not found');
+                    console.log('Dropdown options count:', dropdown ? dropdown.options.length : 'N/A');
 
-                    // Re-enable after a delay (in case of no postback)
+                    // Add loading state but don't prevent postback
+                    var originalText = this.innerHTML;
+                    var self = this;
+
                     setTimeout(function () {
-                        button.innerHTML = originalText;
-                        button.disabled = false;
-                    }, 3000);
+                        self.innerHTML = '<span class="loading-spinner"></span> Loading...';
+                        self.disabled = true;
+                    }, 10);
+
+                    // Reset after reasonable timeout
+                    setTimeout(function () {
+                        self.innerHTML = originalText;
+                        self.disabled = false;
+                    }, 10000);
                 });
-            });
+            }
+
+            if (exportButton) {
+                exportButton.addEventListener('click', function () {
+                    var originalText = this.innerHTML;
+                    var self = this;
+
+                    setTimeout(function () {
+                        self.innerHTML = '<span class="loading-spinner"></span> Exporting...';
+                        self.disabled = true;
+                    }, 10);
+
+                    setTimeout(function () {
+                        self.innerHTML = originalText;
+                        self.disabled = false;
+                    }, 5000);
+                });
+            }
         });
     </script>
 

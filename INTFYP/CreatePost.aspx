@@ -65,12 +65,58 @@
             color: white;
         }
 
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+            margin-left: 10px;
+        }
+
+        .btn-remove {
+            background-color: #dc3545;
+            color: white;
+            font-size: 12px;
+            padding: 4px 8px;
+            margin-left: 10px;
+        }
+
         .success-summary {
             margin-top: 20px;
             padding: 12px;
             background-color: #e6f4ea;
             border-left: 4px solid #28a745;
             border-radius: 6px;
+        }
+
+        .file-preview {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            margin-bottom: 5px;
+            background-color: white;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+        }
+
+        .file-info {
+            flex-grow: 1;
+        }
+
+        .file-info a {
+            text-decoration: none;
+            color: #007bff;
+        }
+
+        .file-info a:hover {
+            text-decoration: underline;
         }
     </style>
 
@@ -118,20 +164,25 @@
                 <asp:HiddenField ID="hfUploadedFiles" runat="server" />
 
                 <asp:PlaceHolder ID="phAttachedFiles" runat="server" Visible="false">
-                    <div class="file-preview" style="margin-top: 10px;">
-                        <asp:Repeater ID="rptAttachedFiles" runat="server">
+                    <div class="file-preview">
+                        <h4>Attached Files:</h4>
+                        <asp:Repeater ID="rptAttachedFiles" runat="server" OnItemCommand="rptAttachedFiles_ItemCommand">
                             <ItemTemplate>
                                 <div class="file-item">
-                                    <a href='<%# Eval("Url") %>' target="_blank"><%# Eval("Name") %></a>
+                                    <div class="file-info">
+                                        <a href='<%# Eval("Url") %>' target="_blank"><%# Eval("Name") %></a>
+                                    </div>
+                                    <asp:Button ID="btnRemoveFile" runat="server" Text="Remove" 
+                                        CssClass="btn btn-remove" 
+                                        CommandName="RemoveFile" 
+                                        CommandArgument='<%# Container.ItemIndex %>' 
+                                        OnClientClick="return confirm('Are you sure you want to remove this file?');" />
                                 </div>
                             </ItemTemplate>
                         </asp:Repeater>
                     </div>
                 </asp:PlaceHolder>
             </div>
-
-
-
         </div>
 
         <div class="form-group">

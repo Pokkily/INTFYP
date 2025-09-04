@@ -340,6 +340,7 @@
     <Content Include="Library.aspx" />
     <Content Include="ManageClassroom.aspx" />
     <Content Include="Profile.aspx" />
+    <Content Include="ProfileOthers.aspx" />
     <Content Include="Quiz.aspx" />
     <Content Include="QuizAnalytics.aspx" />
     <Content Include="QuizDetail.aspx" />
@@ -565,6 +566,13 @@
     </Compile>
     <Compile Include="Profile.aspx.designer.cs">
       <DependentUpon>Profile.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ProfileOthers.aspx.cs">
+      <DependentUpon>ProfileOthers.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ProfileOthers.aspx.designer.cs">
+      <DependentUpon>ProfileOthers.aspx</DependentUpon>
     </Compile>
     <Compile Include="QuizAnalytics.aspx.cs">
       <DependentUpon>QuizAnalytics.aspx</DependentUpon>

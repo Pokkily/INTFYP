@@ -32,7 +32,20 @@ namespace YourProjectNamespace
                 currentView = viewType;
 
             if (!IsPostBack)
+            {
+                // Initialize dropdowns
+                InitializeFilters();
                 await LoadGroups();
+            }
+        }
+
+        private void InitializeFilters()
+        {
+            // Ensure dropdown maintains its state
+            if (!string.IsNullOrEmpty(ddlSubject.SelectedValue))
+            {
+                ddlSubject.SelectedValue = ddlSubject.SelectedValue;
+            }
         }
 
         protected async Task LoadGroups()
@@ -52,36 +65,15 @@ namespace YourProjectNamespace
                 {
                     // Load all public groups
                     Query groupQuery = db.Collection("studyHubs");
-
-                    // Apply search filter
-                    if (!string.IsNullOrEmpty(txtSearch.Text))
-                    {
-                        // Note: Firestore doesn't support full-text search, so we'll filter after retrieval
-                    }
-
-                    // Apply subject filter
-                    if (!string.IsNullOrEmpty(ddlSubject.SelectedValue))
-                    {
-                        groupQuery = groupQuery.WhereEqualTo("subject", ddlSubject.SelectedValue);
-                    }
-
                     QuerySnapshot groupSnapshot = await groupQuery.GetSnapshotAsync();
                     groups = await ProcessGroupSnapshots(groupSnapshot, false);
-
-                    // Apply client-side search filter if needed
-                    if (!string.IsNullOrEmpty(txtSearch.Text))
-                    {
-                        string searchTerm = txtSearch.Text.ToLower();
-                        groups = groups.Where(g =>
-                            g.groupName.ToString().ToLower().Contains(searchTerm) ||
-                            g.description.ToString().ToLower().Contains(searchTerm) ||
-                            g.hosterName.ToString().ToLower().Contains(searchTerm)
-                        ).ToList();
-                    }
-
-                    // Apply sorting
-                    groups = ApplySorting(groups);
                 }
+
+                // Apply filters (removed sorting)
+                groups = ApplyFilters(groups);
+
+                // Default ordering by creation date (newest first)
+                groups = groups.OrderByDescending(g => g.createdAt).ToList();
 
                 rptGroups.DataSource = groups;
                 rptGroups.DataBind();
@@ -90,9 +82,49 @@ namespace YourProjectNamespace
             }
             catch (Exception ex)
             {
-                // Log error
                 ShowMessage("Error loading groups: " + ex.Message, "danger");
             }
+        }
+
+        private List<dynamic> ApplyFilters(List<dynamic> groups)
+        {
+            var filteredGroups = groups;
+
+            // Apply search filter
+            if (!string.IsNullOrEmpty(txtSearch.Text.Trim()))
+            {
+                string searchTerm = txtSearch.Text.Trim().ToLower();
+                filteredGroups = filteredGroups.Where(g =>
+                {
+                    string groupName = g.groupName?.ToString()?.ToLower() ?? "";
+                    string description = g.description?.ToString()?.ToLower() ?? "";
+                    string hosterName = g.hosterName?.ToString()?.ToLower() ?? "";
+                    string subject = g.subject?.ToString()?.ToLower() ?? "";
+
+                    return groupName.Contains(searchTerm) ||
+                           description.Contains(searchTerm) ||
+                           hosterName.Contains(searchTerm) ||
+                           subject.Contains(searchTerm);
+                }).ToList();
+            }
+
+            // Apply subject filter
+            if (!string.IsNullOrEmpty(ddlSubject.SelectedValue))
+            {
+                filteredGroups = filteredGroups.Where(g =>
+                {
+                    string groupSubject = g.subject?.ToString() ?? "";
+                    return groupSubject.Equals(ddlSubject.SelectedValue, StringComparison.OrdinalIgnoreCase);
+                }).ToList();
+            }
+
+            // For discover view, exclude groups user is already a member of
+            if (currentView == "discover")
+            {
+                filteredGroups = filteredGroups.Where(g => !(bool)g.isMember).ToList();
+            }
+
+            return filteredGroups;
         }
 
         private async Task<List<dynamic>> ProcessGroupSnapshots(QuerySnapshot groupSnapshot, bool memberOnly)
@@ -113,28 +145,32 @@ namespace YourProjectNamespace
                 // Check if current user is a member
                 bool isMember = membersList.Contains(currentUserId);
 
-                // Skip if viewing discover and user is already a member (optional)
-                if (currentView == "discover" && memberOnly && isMember)
-                    continue;
-
                 // Get post count
                 int postCount = await GetPostCount(doc.Id);
 
                 // Get last activity
                 string lastActivity = await GetLastActivity(doc.Id);
 
-                // Determine if group is active (has activity in last 7 days)
+                // Determine if group is active
                 bool isActive = await IsGroupActive(doc.Id);
+
+                // Get safe values with null checking
+                string groupName = GetSafeString(data, "groupName");
+                string hosterName = GetSafeString(data, "hosterName");
+                string description = GetSafeString(data, "description");
+                string subject = GetSafeString(data, "subject");
+                string groupImage = GetSafeString(data, "groupImage", "Images/default-group.jpg");
+                int capacity = GetSafeInt(data, "capacity", 10);
 
                 groups.Add(new
                 {
                     groupId = doc.Id,
-                    groupName = data.GetValueOrDefault("groupName", "").ToString(),
-                    hosterName = data.GetValueOrDefault("hosterName", "").ToString(),
-                    capacity = data.GetValueOrDefault("capacity", "0").ToString(),
-                    description = data.GetValueOrDefault("description", "").ToString(),
-                    subject = data.GetValueOrDefault("subject", "").ToString(),
-                    groupImage = data.GetValueOrDefault("groupImage", "Images/default-group.jpg").ToString(),
+                    groupName = groupName,
+                    hosterName = hosterName,
+                    capacity = capacity,
+                    description = description,
+                    subject = subject,
+                    groupImage = groupImage,
                     memberCount = memberCount,
                     postCount = postCount,
                     lastActivity = lastActivity,
@@ -145,6 +181,20 @@ namespace YourProjectNamespace
             }
 
             return groups;
+        }
+
+        private string GetSafeString(Dictionary<string, object> data, string key, string defaultValue = "")
+        {
+            return data.ContainsKey(key) && data[key] != null ? data[key].ToString() : defaultValue;
+        }
+
+        private int GetSafeInt(Dictionary<string, object> data, string key, int defaultValue = 0)
+        {
+            if (data.ContainsKey(key) && data[key] != null && int.TryParse(data[key].ToString(), out int result))
+            {
+                return result;
+            }
+            return defaultValue;
         }
 
         private async Task<int> GetPostCount(string groupId)
@@ -176,17 +226,12 @@ namespace YourProjectNamespace
                         var timestamp = (Timestamp)lastPost["timestamp"];
                         var timeAgo = DateTime.Now - timestamp.ToDateTime();
 
-                        if (timeAgo.TotalDays > 7)
-                            return $"{(int)timeAgo.TotalDays} days ago";
-                        else if (timeAgo.TotalDays > 1)
-                            return $"{(int)timeAgo.TotalDays} days ago";
-                        else if (timeAgo.TotalHours > 1)
-                            return $"{(int)timeAgo.TotalHours} hours ago";
-                        else
-                            return "Recently";
+                        if (timeAgo.TotalDays > 7) return $"{(int)timeAgo.TotalDays} days ago";
+                        if (timeAgo.TotalDays > 1) return $"{(int)timeAgo.TotalDays} days ago";
+                        if (timeAgo.TotalHours > 1) return $"{(int)timeAgo.TotalHours} hours ago";
+                        return "Recently";
                     }
                 }
-
                 return "No recent activity";
             }
             catch
@@ -202,29 +247,11 @@ namespace YourProjectNamespace
                 var weekAgo = Timestamp.FromDateTime(DateTime.UtcNow.AddDays(-7));
                 var recentPostsSnapshot = await db.Collection("studyHubs").Document(groupId)
                     .Collection("posts").WhereGreaterThan("timestamp", weekAgo).GetSnapshotAsync();
-
                 return recentPostsSnapshot.Count > 0;
             }
             catch
             {
                 return false;
-            }
-        }
-
-        private List<dynamic> ApplySorting(List<dynamic> groups)
-        {
-            switch (ddlSortBy.SelectedValue)
-            {
-                case "newest":
-                    return groups.OrderByDescending(g => g.createdAt).ToList();
-                case "oldest":
-                    return groups.OrderBy(g => g.createdAt).ToList();
-                case "popular":
-                    return groups.OrderByDescending(g => g.memberCount).ThenByDescending(g => g.postCount).ToList();
-                case "alphabetical":
-                    return groups.OrderBy(g => g.groupName).ToList();
-                default:
-                    return groups.OrderByDescending(g => g.createdAt).ToList();
             }
         }
 
@@ -258,11 +285,6 @@ namespace YourProjectNamespace
             await LoadGroups();
         }
 
-        protected async void ddlSortBy_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            await LoadGroups();
-        }
-
         protected async void rptGroups_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             if (e.CommandName == "JoinGroup")
@@ -270,8 +292,6 @@ namespace YourProjectNamespace
                 try
                 {
                     string groupId = e.CommandArgument.ToString();
-
-                    // Get current group data
                     DocumentSnapshot groupSnap = await db.Collection("studyHubs").Document(groupId).GetSnapshotAsync();
                     if (!groupSnap.Exists)
                     {
@@ -283,26 +303,21 @@ namespace YourProjectNamespace
                     var members = groupData.ContainsKey("members") ? (List<object>)groupData["members"] : new List<object>();
                     var membersList = members.Cast<string>().ToList();
 
-                    // Check if user is already a member
                     if (membersList.Contains(currentUserId))
                     {
                         ShowMessage("You are already a member of this group.", "warning");
                         return;
                     }
 
-                    // Check capacity
-                    int capacity = int.Parse(groupData.GetValueOrDefault("capacity", "0").ToString());
+                    int capacity = GetSafeInt(groupData, "capacity", 10);
                     if (membersList.Count >= capacity)
                     {
                         ShowMessage("This group is full.", "warning");
                         return;
                     }
 
-                    // Add user to group
                     membersList.Add(currentUserId);
                     await db.Collection("studyHubs").Document(groupId).UpdateAsync("members", membersList);
-
-                    // Create join activity log
                     await LogGroupActivity(groupId, "user_joined", $"{Session["username"]} joined the group");
 
                     ShowMessage("Successfully joined the group!", "success");
@@ -331,7 +346,7 @@ namespace YourProjectNamespace
             }
             catch
             {
-                // Log error but don't fail the main operation
+                // Silent catch to not interrupt main operation
             }
         }
 
@@ -347,9 +362,7 @@ namespace YourProjectNamespace
                                    '{message}' +
                                    '<button type=""button"" class=""btn-close"" data-bs-dismiss=""alert""></button>' +
                                    '</div>';
-                    
                     $('body').prepend(alertHtml);
-                    
                     setTimeout(function() {{
                         $('.alert').fadeOut();
                     }}, 5000);
