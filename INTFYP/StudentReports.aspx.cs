@@ -136,14 +136,27 @@ namespace INTFYP
                 {
                     var progressData = languageProgressSnap.ToDictionary();
 
-                    // Load overall statistics from user progress
+                    // Load basic statistics from user progress (except average score)
                     lblTotalAttempts.Text = progressData.ContainsKey("totalAttempts") ? progressData["totalAttempts"].ToString() : "0";
                     lblCompletedLessons.Text = progressData.ContainsKey("completedLessons") ? progressData["completedLessons"].ToString() : "0";
-                    lblAverageScore.Text = progressData.ContainsKey("averageScore") ? Math.Round(Convert.ToDouble(progressData["averageScore"]), 1).ToString() : "0";
                     lblCurrentStreak.Text = progressData.ContainsKey("currentStreak") ? progressData["currentStreak"].ToString() : "0";
 
                     double totalMinutes = progressData.ContainsKey("totalTimeSpent") ? Convert.ToDouble(progressData["totalTimeSpent"]) : 0;
                     lblTotalTime.Text = Math.Round(totalMinutes, 1).ToString();
+
+                    // Calculate average score dynamically from all attempts
+                    var allAttempts = await GetAllAttemptsForLanguage(languageId);
+                    if (allAttempts.Any())
+                    {
+                        double averageScore = allAttempts.Average(a => a.Score);
+                        lblAverageScore.Text = Math.Round(averageScore, 1).ToString();
+                        System.Diagnostics.Debug.WriteLine($"📊 Calculated average score: {Math.Round(averageScore, 1)}% from {allAttempts.Count} attempts");
+                    }
+                    else
+                    {
+                        lblAverageScore.Text = "0";
+                        System.Diagnostics.Debug.WriteLine("📊 No attempts found, average score set to 0");
+                    }
 
                     // Load topic progress from user progress structure
                     await LoadTopicProgress(languageId);
@@ -165,6 +178,52 @@ namespace INTFYP
                 System.Diagnostics.Debug.WriteLine($"Error loading student progress: {ex.Message}");
                 ShowErrorMessage("Error loading progress data.");
             }
+        }
+
+        // Helper method to get all attempts for average score calculation
+        private async System.Threading.Tasks.Task<List<AttemptData>> GetAllAttemptsForLanguage(string languageId)
+        {
+            var allAttempts = new List<AttemptData>();
+
+            try
+            {
+                // Get all topics for this language from user progress
+                CollectionReference topicsRef = db.Collection("users")
+                    .Document(currentUserId)
+                    .Collection("progress")
+                    .Document(languageId)
+                    .Collection("topics");
+
+                QuerySnapshot topicsSnapshot = await topicsRef.GetSnapshotAsync();
+
+                foreach (DocumentSnapshot topicDoc in topicsSnapshot.Documents)
+                {
+                    CollectionReference lessonsRef = topicDoc.Reference.Collection("lessons");
+                    QuerySnapshot lessonsSnapshot = await lessonsRef.GetSnapshotAsync();
+
+                    foreach (DocumentSnapshot lessonDoc in lessonsSnapshot.Documents)
+                    {
+                        CollectionReference attemptsRef = lessonDoc.Reference.Collection("attempts");
+                        QuerySnapshot attemptsSnapshot = await attemptsRef.GetSnapshotAsync();
+
+                        foreach (DocumentSnapshot attemptDoc in attemptsSnapshot.Documents)
+                        {
+                            var attemptData = attemptDoc.ToDictionary();
+                            int score = attemptData.ContainsKey("score") ? Convert.ToInt32(attemptData["score"]) : 0;
+
+                            allAttempts.Add(new AttemptData { Score = score });
+                        }
+                    }
+                }
+
+                System.Diagnostics.Debug.WriteLine($"🔢 Retrieved {allAttempts.Count} attempts for average calculation");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Error getting attempts for average: {ex.Message}");
+            }
+
+            return allAttempts;
         }
 
         private async System.Threading.Tasks.Task LoadTopicProgress(string languageId)
@@ -189,24 +248,101 @@ namespace INTFYP
                     int lessonsInTopic = topicData.ContainsKey("lessonsInTopic") ? Convert.ToInt32(topicData["lessonsInTopic"]) : 0;
                     int completedLessons = topicData.ContainsKey("completedLessons") ? Convert.ToInt32(topicData["completedLessons"]) : 0;
 
+                    // Check actual lesson scores to determine true completion status
+                    var lessonScores = await GetLessonScoresForTopic(topicDoc.Reference);
+                    int lessonsWithPerfectScore = lessonScores.Count(score => score >= 100);
+
                     double progress = lessonsInTopic > 0 ? Math.Round((double)completedLessons / lessonsInTopic * 100, 1) : 0;
+
+                    // Topic is only complete if ALL lessons are attempted AND ALL have 100% score
+                    bool isComplete = (completedLessons >= lessonsInTopic && lessonsWithPerfectScore >= lessonsInTopic && lessonsInTopic > 0);
+
+                    string statusText;
+                    string statusClass;
+
+                    if (isComplete)
+                    {
+                        statusText = "Complete";
+                        statusClass = "complete";
+                    }
+                    else if (completedLessons >= lessonsInTopic && lessonsInTopic > 0)
+                    {
+                        // All lessons attempted but not all have 100%
+                        statusText = "Needs Review";
+                        statusClass = "needs-review";
+                    }
+                    else
+                    {
+                        // Still in progress
+                        statusText = $"{progress}%";
+                        statusClass = "in-progress";
+                    }
 
                     topicProgressList.Add(new
                     {
                         TopicName = topicName,
                         TotalLessons = lessonsInTopic,
                         CompletedLessons = completedLessons,
-                        Progress = progress
+                        LessonsWithPerfectScore = lessonsWithPerfectScore,
+                        Progress = progress,
+                        IsComplete = isComplete,
+                        StatusText = statusText,
+                        StatusClass = statusClass
                     });
+
+                    System.Diagnostics.Debug.WriteLine($"📚 Topic '{topicName}': {completedLessons}/{lessonsInTopic} lessons, {lessonsWithPerfectScore} with 100% ({statusText})");
                 }
 
-                rptTopicProgress.DataSource = topicProgressList;
+                rptTopicProgress.DataSource = topicProgressList.OrderByDescending(t => ((dynamic)t).Progress).ToList();
                 rptTopicProgress.DataBind();
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading topic progress: {ex.Message}");
             }
+        }
+
+        // Helper method to get the best scores for all lessons in a topic
+        private async System.Threading.Tasks.Task<List<int>> GetLessonScoresForTopic(DocumentReference topicRef)
+        {
+            var lessonScores = new List<int>();
+
+            try
+            {
+                CollectionReference lessonsRef = topicRef.Collection("lessons");
+                QuerySnapshot lessonsSnapshot = await lessonsRef.GetSnapshotAsync();
+
+                foreach (DocumentSnapshot lessonDoc in lessonsSnapshot.Documents)
+                {
+                    // Get all attempts for this lesson
+                    CollectionReference attemptsRef = lessonDoc.Reference.Collection("attempts");
+                    QuerySnapshot attemptsSnapshot = await attemptsRef.GetSnapshotAsync();
+
+                    int bestScore = 0;
+                    foreach (DocumentSnapshot attemptDoc in attemptsSnapshot.Documents)
+                    {
+                        var attemptData = attemptDoc.ToDictionary();
+                        int score = attemptData.ContainsKey("score") ? Convert.ToInt32(attemptData["score"]) : 0;
+
+                        if (score > bestScore)
+                        {
+                            bestScore = score;
+                        }
+                    }
+
+                    // Only add to list if there was at least one attempt
+                    if (attemptsSnapshot.Documents.Count > 0)
+                    {
+                        lessonScores.Add(bestScore);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"❌ Error getting lesson scores: {ex.Message}");
+            }
+
+            return lessonScores;
         }
 
         private async System.Threading.Tasks.Task LoadRecentActivityAndChartData(string languageId)
@@ -278,6 +414,8 @@ namespace INTFYP
                                 AttemptNumber = attemptNumber,
                                 CompletedAt = completedAt,
                                 CompletedAtFormatted = completedAt.ToString("MMM dd, yyyy HH:mm"),
+                                ScoreText = $"{score}%",
+                                ScoreClass = GetScoreClass(score),
                                 // Add sorting keys
                                 SortKey = completedAt.Ticks
                             });
@@ -315,6 +453,8 @@ namespace INTFYP
                     LessonName = a.LessonName,
                     TopicName = a.TopicName,
                     Score = a.Score,
+                    ScoreText = a.ScoreText,
+                    ScoreClass = a.ScoreClass,
                     CompletedAt = a.CompletedAtFormatted
                 }).ToList();
 
@@ -364,6 +504,16 @@ namespace INTFYP
             }
         }
 
+        // Helper method to get CSS class based on score
+        private string GetScoreClass(int score)
+        {
+            if (score >= 90) return "score-excellent";
+            if (score >= 80) return "score-good";
+            if (score >= 70) return "score-average";
+            if (score >= 60) return "score-below-average";
+            return "score-poor";
+        }
+
         protected void btnBackToLanguages_Click(object sender, EventArgs e)
         {
             Response.Redirect("Language.aspx");
@@ -374,5 +524,11 @@ namespace INTFYP
             ScriptManager.RegisterStartupScript(this, GetType(), "alert",
                 $"alert('{message}');", true);
         }
+    }
+
+    // Helper class for attempt data
+    public class AttemptData
+    {
+        public int Score { get; set; }
     }
 }
