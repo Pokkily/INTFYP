@@ -294,13 +294,62 @@ namespace YourProjectNamespace
                     var comments = commentsSnapshot.Documents.Select(commentDoc =>
                     {
                         var cData = commentDoc.ToDictionary();
+
+                        // Properly handle comment timestamp with timezone conversion
+                        DateTime commentCreatedAt = DateTime.UtcNow;
+                        if (cData.ContainsKey("createdAt") && cData["createdAt"] != null)
+                        {
+                            try
+                            {
+                                var timestamp = ((Timestamp)cData["createdAt"]).ToDateTime();
+                                if (timestamp.Kind == DateTimeKind.Unspecified)
+                                {
+                                    timestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Utc);
+                                }
+                                commentCreatedAt = timestamp.ToLocalTime();
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Error converting comment timestamp: {ex.Message}");
+                                commentCreatedAt = DateTime.Now;
+                            }
+                        }
+                        else
+                        {
+                            commentCreatedAt = DateTime.Now;
+                        }
+
                         return new
                         {
                             username = cData.GetValueOrDefault("username", "Anonymous").ToString(),
                             text = cData.GetValueOrDefault("text", "").ToString(),
-                            createdAt = cData.ContainsKey("createdAt") ? ((Timestamp)cData["createdAt"]).ToDateTime() : DateTime.Now
+                            createdAt = commentCreatedAt
                         };
                     }).ToList();
+
+                    // Properly handle feedback timestamp with timezone conversion
+                    DateTime feedbackCreatedAt = DateTime.UtcNow;
+                    if (data.ContainsKey("createdAt") && data["createdAt"] != null)
+                    {
+                        try
+                        {
+                            var timestamp = ((Timestamp)data["createdAt"]).ToDateTime();
+                            if (timestamp.Kind == DateTimeKind.Unspecified)
+                            {
+                                timestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Utc);
+                            }
+                            feedbackCreatedAt = timestamp.ToLocalTime();
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error converting feedback timestamp: {ex.Message}");
+                            feedbackCreatedAt = DateTime.Now;
+                        }
+                    }
+                    else
+                    {
+                        feedbackCreatedAt = DateTime.Now;
+                    }
 
                     feedbacks.Add(new
                     {
@@ -309,9 +358,7 @@ namespace YourProjectNamespace
                         Description = data["description"]?.ToString(),
                         MediaUrl = data.ContainsKey("mediaUrl") ? data["mediaUrl"]?.ToString() : null,
                         Likes = likesList?.Count ?? 0,
-                        CreatedAt = data.ContainsKey("createdAt")
-                            ? ((Timestamp)data["createdAt"]).ToDateTime()
-                            : DateTime.Now,
+                        CreatedAt = feedbackCreatedAt, // Now properly converted to local time
                         Comments = comments,
                         IsLiked = !string.IsNullOrEmpty(currentUserId) && likesList != null && likesList.Contains(currentUserId)
                     });
@@ -559,6 +606,34 @@ namespace YourProjectNamespace
                     </script>");
             }
             base.OnPreRender(preRenderArgs);
+        }
+
+        // Helper methods for time formatting (similar to ChatRoom)
+        protected string FormatRelativeTime(DateTime timestamp)
+        {
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            var timeSpan = DateTime.Now - localTime;
+
+            if (timeSpan.Days > 0)
+                return $"{timeSpan.Days}d ago";
+            else if (timeSpan.Hours > 0)
+                return $"{timeSpan.Hours}h ago";
+            else if (timeSpan.Minutes > 0)
+                return $"{timeSpan.Minutes}m ago";
+            else
+                return "Just now";
+        }
+
+        protected string FormatMessageTime(DateTime timestamp)
+        {
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            return localTime.ToString("HH:mm");
+        }
+
+        protected string FormatFullDateTime(DateTime timestamp)
+        {
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            return localTime.ToString("dd MMM yyyy hh:mm tt");
         }
     }
 

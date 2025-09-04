@@ -874,7 +874,7 @@
                                 <div class="feedback-content">
                                     <div class="feedback-header">
                                         <div class="feedback-username"><%# Eval("Username") %></div>
-                                        <div class="feedback-date"><%# Eval("CreatedAt", "{0:dd MMM yyyy hh:mm tt}") %></div>
+                                        <div class="feedback-date"><%# FormatFullDateTime((DateTime)Eval("CreatedAt")) %></div>
                                     </div>
                                     
                                     <p class="feedback-description"><%# Eval("Description") %></p>
@@ -920,7 +920,7 @@
                                                     <!-- Header -->
                                                     <div class="detail-header">
                                                         <h4><%# Eval("Username") %></h4>
-                                                        <div class="detail-date"><%# Eval("CreatedAt", "{0:dd MMM yyyy hh:mm tt}") %></div>
+                                                        <div class="detail-date"><%# FormatFullDateTime((DateTime)Eval("CreatedAt")) %></div>
                                                     </div>
                                                     
                                                     <!-- Description -->
@@ -976,7 +976,7 @@
                                                                             </div>
                                                                             <small class="fw-bold"><%# Eval("username") %></small>
                                                                         </div>
-                                                                        <small class="text-muted"><%# Eval("createdAt", "{0:dd MMM yyyy hh:mm tt}") %></small>
+                                                                        <small class="text-muted"><%# FormatFullDateTime((DateTime)Eval("createdAt")) %></small>
                                                                     </div>
                                                                     <p class="mb-0 ps-5"><%# Eval("text") %></p>
                                                                 </div>

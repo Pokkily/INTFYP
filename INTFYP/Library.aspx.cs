@@ -73,6 +73,9 @@ namespace INTFYP
                     book.IsFavorited = book.FavoritedBy.Contains(CurrentUserId);
 
                     allBooks.Add(book);
+
+                    // Add debugging to see what dates we're getting
+                    System.Diagnostics.Debug.WriteLine($"Book: {book.Title}, CreatedAt: {book.CreatedAt}, DateAdded: {book.DateAdded}, GetCreationDate: {book.GetCreationDate()}");
                 }
 
                 // Check if we have any books
@@ -86,9 +89,29 @@ namespace INTFYP
                 pnlNoBooks.Visible = false;
                 pnlBookSections.Visible = true;
 
-                // Load Newest Books (15 items) - If you don't have DateAdded, this will be random 15
-                var newestBooks = allBooks.OrderByDescending(b => b.DateAdded ?? DateTime.MinValue).Take(15).ToList();
-                if (newestBooks.Count == 0) newestBooks = allBooks.Take(15).ToList(); // Fallback if no dates
+                // FIXED: Load Newest Books using the proper creation date
+                var newestBooks = allBooks
+                    .Where(b => b.GetCreationDate() != DateTime.MinValue) // Only include books with valid dates
+                    .OrderByDescending(b => b.GetCreationDate())
+                    .Take(15)
+                    .ToList();
+
+                // If no books have dates, fall back to all books (sorted by document ID which contains timestamp)
+                if (newestBooks.Count == 0)
+                {
+                    newestBooks = allBooks.Take(15).ToList();
+                    System.Diagnostics.Debug.WriteLine("No books with valid dates found, using fallback");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Found {newestBooks.Count} newest books with valid dates");
+                    // Debug output for newest books
+                    foreach (var book in newestBooks.Take(5))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Newest: {book.Title} - {book.GetCreationDate()}");
+                    }
+                }
+
                 RepNewest.DataSource = newestBooks;
                 RepNewest.DataBind();
 
@@ -147,6 +170,12 @@ namespace INTFYP
                 // If no filters applied, show all sections
                 if (string.IsNullOrEmpty(keyword) && string.IsNullOrEmpty(selectedCategory))
                 {
+                    // Reset visibility of all sections
+                    pnlNewest.Visible = true;
+                    pnlMostRecommended.Visible = true;
+                    pnlAlphabetical.Visible = true;
+                    pnlSearchResults.Visible = false;
+
                     await LoadBookSections();
                     return;
                 }
@@ -333,7 +362,25 @@ namespace INTFYP
             [FirestoreProperty] public List<string> RecommendedBy { get; set; }
             [FirestoreProperty] public List<string> FavoritedBy { get; set; }
             [FirestoreProperty] public string PdfUrl { get; set; }
+
+            // Handle both field names for backward compatibility
             [FirestoreProperty] public DateTime? DateAdded { get; set; }
+            [FirestoreProperty] public Timestamp? CreatedAt { get; set; }
+
+            // Helper method to get the actual creation date from either field
+            public DateTime GetCreationDate()
+            {
+                // First try CreatedAt (from AddBook page)
+                if (CreatedAt.HasValue)
+                    return CreatedAt.Value.ToDateTime();
+
+                // Then try DateAdded (legacy/other sources)
+                if (DateAdded.HasValue)
+                    return DateAdded.Value;
+
+                // Default to minimum date if neither exists
+                return DateTime.MinValue;
+            }
 
             public string DocumentId { get; set; }
             public bool IsRecommended { get; set; }
