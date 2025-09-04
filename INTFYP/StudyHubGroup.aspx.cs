@@ -194,17 +194,7 @@ namespace YourProjectNamespace
         }
 
         
-        private string GetTimeUntilExpiry(DateTime expiryDate)
-        {
-            var timeSpan = expiryDate - DateTime.UtcNow;
-            if (timeSpan.TotalDays < 0)
-                return "Expired";
-            if (timeSpan.TotalDays < 1)
-                return "Expires today";
-            if (timeSpan.TotalDays < 2)
-                return "Expires tomorrow";
-            return $"Expires in {(int)timeSpan.TotalDays} days";
-        }
+        
 
         // EMAIL INVITATION METHODS
 
