@@ -1,6 +1,4 @@
-﻿<%@ Page Title="Chat Room" Language="C#" MasterPageFile="~/Site.master" 
-    AutoEventWireup="true" CodeBehind="ChatRoom.aspx.cs" 
-    Inherits="YourProjectNamespace.ChatRoom" Async="true" %>
+﻿<%@ Page Title="Chat Room" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true" CodeBehind="ChatRoom.aspx.cs"  Inherits="YourProjectNamespace.ChatRoom" Async="true" %>
 
 <asp:Content ID="ChatContent" ContentPlaceHolderID="MainContent" runat="server">
     <style>
@@ -769,9 +767,8 @@
                     <button type="button" class="tab-btn" data-tab="create-room">Create</button>
                 </div>
 
-                <!-- My Rooms Tab - REMOVED SEARCH SECTION -->
+                <!-- My Rooms Tab -->
                 <div class="tab-content active" id="my-rooms-tab">
-                    <!-- My Rooms List -->
                     <div class="rooms-list" id="myRoomsList">
                         <asp:Repeater ID="rptMyRooms" runat="server">
                             <ItemTemplate>
@@ -796,7 +793,6 @@
 
                 <!-- Private Chat Tab -->
                 <div class="tab-content" id="private-chat-tab">
-                    <!-- Start New Chat Section -->
                     <div class="start-chat-section">
                         <h4 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 16px;">Start New Private Chat</h4>
                         
@@ -810,7 +806,6 @@
                             </div>
                         </div>
 
-                        <!-- User Search Results -->
                         <asp:Panel ID="pnlUserSearchResults" runat="server" Visible="false">
                             <asp:Repeater ID="rptUserSearchResults" runat="server" OnItemCommand="rptUserSearchResults_ItemCommand">
                                 <ItemTemplate>
@@ -845,7 +840,6 @@
                         <asp:Label ID="lblSearchStatus" runat="server" CssClass="status-message" />
                     </div>
 
-                    <!-- Private Chats List -->
                     <div class="rooms-list" id="privateChatsList">
                         <asp:Repeater ID="rptPrivateChats" runat="server">
                             <ItemTemplate>
@@ -888,7 +882,6 @@
 
             <!-- Main Chat Area -->
             <div class="main-chat glass-card">
-                <!-- No Room Selected State -->
                 <asp:Panel ID="pnlNoRoom" runat="server" CssClass="empty-state" Visible="true">
                     <h3>Welcome to Chat Rooms</h3>
                     <p>Select a room from the sidebar to start chatting, or create/start new chats</p>
@@ -898,12 +891,11 @@
                         <p>• Create group rooms and invite others</p>
                         <p>• Share files and images in your conversations</p>
                         <p>• Switch between multiple conversations</p>
+                        <p>• Refresh the page to see new messages</p>
                     </div>
                 </asp:Panel>
 
-                <!-- Chat Interface -->
                 <asp:Panel ID="pnlChatInterface" runat="server" Visible="false" style="display: flex; flex-direction: column; height: 100%;">
-                    <!-- Chat Header -->
                     <div class="chat-header">
                         <div>
                             <h2 class="chat-title">
@@ -914,14 +906,12 @@
                             </div>
                         </div>
                         <div class="room-controls">
-                            <!-- Management button -->
                             <asp:Panel ID="pnlManageButton" runat="server" Visible="false">
                                 <button type="button" class="manage-btn" onclick="showManageModal(); return false;">
                                     Manage
                                 </button>
                             </asp:Panel>
                             
-                            <!-- Leave button (hidden for private chats) -->
                             <asp:Button ID="btnLeaveRoom" runat="server" Text="Leave Chat" 
                                       CssClass="leave-btn" OnClick="btnLeaveRoom_Click" 
                                       OnClientClick="return confirm('Are you sure you want to leave this chat?');" 
@@ -929,12 +919,10 @@
                         </div>
                     </div>
 
-                    <!-- Messages Container -->
                     <div class="messages-container" id="messagesContainer">
                         <asp:Repeater ID="rptMessages" runat="server">
                             <ItemTemplate>
                                 <div class="message <%# GetMessageClass(Eval("SenderId").ToString(), Eval("Type").ToString()) %> <%# Eval("IsDeleted").ToString().ToLower() == "true" ? "deleted" : "" %>">
-                                    <!-- Message avatar with profile pictures -->
                                     <div class="message-avatar">
                                         <asp:Image ID="imgMessageAvatar" runat="server" 
                                                  ImageUrl='<%# GetUserProfilePicture(Eval("SenderId").ToString()) %>'
@@ -947,7 +935,6 @@
                                     </div>
                                     
                                     <div class="message-content">
-                                        <!-- Message actions (delete button) for own messages only -->
                                         <%# Eval("SenderId").ToString() == GetCurrentUserEmail() && Eval("IsDeleted").ToString().ToLower() != "true" ? 
                                             "<div class=\"message-actions\">" +
                                             "<button type=\"button\" class=\"message-delete-btn\" onclick=\"deleteMessage('" + Eval("Id") + "'); return false;\" title=\"Delete message\">×</button>" +
@@ -958,12 +945,10 @@
                                             <span class="message-time"><%# Eval("FormattedTime") %></span>
                                         </div>
                                         
-                                        <!-- Text Content -->
                                         <%# Eval("IsDeleted").ToString().ToLower() == "true" ? 
                                             "<div class='message-text'>This message was deleted</div>" : 
                                             (!string.IsNullOrEmpty(Eval("Content").ToString()) ? "<div class='message-text'>" + Eval("Content") + "</div>" : "") %>
                                         
-                                        <!-- File Content (only show if not deleted) -->
                                         <%# Eval("IsDeleted").ToString().ToLower() != "true" && !string.IsNullOrEmpty(Eval("FileUrl").ToString()) ? 
                                             GetFileContent(Eval("FileUrl").ToString(), Eval("FileName").ToString(), Eval("FileType").ToString()) : "" %>
                                     </div>
@@ -972,34 +957,38 @@
                         </asp:Repeater>
                     </div>
 
-                    <!-- Message Input -->
                     <div class="message-input-area">
-                        <div class="input-group">
-                            <asp:TextBox ID="txtMessage" runat="server" CssClass="message-input" 
-                                       placeholder="Type your message..." TextMode="MultiLine" Rows="1" />
-                            
-                            <!-- File Upload Button with + icon -->
-                            <div class="file-upload-btn" title="Attach file">
-                                +
-                                <asp:FileUpload ID="fileUpload" runat="server" accept=".pdf,.png,.jpg,.jpeg,.gif" 
-                                              onchange="handleFileSelect(this)" style="position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer;" />
-                            </div>
-                            
-                            <asp:Button ID="btnSend" runat="server" CssClass="send-btn" Text="➤" OnClick="btnSend_Click" />
-                        </div>
-                        
-                        <!-- File Upload Status -->
-                        <div id="fileUploadStatus" style="margin-top: 10px; display: none;">
-                            <div style="background: rgba(255, 255, 255, 0.9); padding: 10px; border-radius: 10px; border: 1px solid rgba(103, 126, 234, 0.2);">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <div style="flex: 1;">
-                                        <div id="fileName" style="font-weight: 500; font-size: 13px;"></div>
-                                        <div id="fileSize" style="font-size: 11px; color: #7f8c8d;"></div>
+                        <asp:UpdatePanel ID="upMessageInput" runat="server" UpdateMode="Conditional">
+                            <ContentTemplate>
+                                <div class="input-group">
+                                    <asp:TextBox ID="txtMessage" runat="server" CssClass="message-input" 
+                                               placeholder="Type your message..." TextMode="MultiLine" Rows="1" />
+                                    
+                                    <div class="file-upload-btn" title="Attach file">
+                                        +
+                                        <asp:FileUpload ID="fileUpload" runat="server" accept=".pdf,.png,.jpg,.jpeg,.gif" 
+                                                      onchange="handleFileSelect(this)" style="position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer;" />
                                     </div>
-                                    <button type="button" onclick="clearFileUpload()" style="background: #ff6b6b; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer;">×</button>
+                                    
+                                    <asp:Button ID="btnSend" runat="server" CssClass="send-btn" Text="➤" OnClick="btnSend_Click" />
                                 </div>
-                            </div>
-                        </div>
+                                
+                                <div id="fileUploadStatus" style="margin-top: 10px; display: none;">
+                                    <div style="background: rgba(255, 255, 255, 0.9); padding: 10px; border-radius: 10px; border: 1px solid rgba(103, 126, 234, 0.2);">
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <div style="flex: 1;">
+                                                <div id="fileName" style="font-weight: 500; font-size: 13px;"></div>
+                                                <div id="fileSize" style="font-size: 11px; color: #7f8c8d;"></div>
+                                            </div>
+                                            <button type="button" onclick="clearFileUpload()" style="background: #ff6b6b; color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer;">×</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </ContentTemplate>
+                            <Triggers>
+                                <asp:PostBackTrigger ControlID="btnSend" />
+                            </Triggers>
+                        </asp:UpdatePanel>
                     </div>
                 </asp:Panel>
             </div>
@@ -1013,7 +1002,6 @@
                     <span class="close" onclick="closeManageModal()">&times;</span>
                 </div>
                 <div class="modal-body">
-                    <!-- Invite Section -->
                     <div style="margin-bottom: 25px;">
                         <h4>Invite Members</h4>
                         <div class="form-group">
@@ -1028,7 +1016,6 @@
                         <asp:Label ID="lblInviteStatus" runat="server" CssClass="status-message" />
                     </div>
 
-                    <!-- Members List -->
                     <div>
                         <h4>Current Members</h4>
                         <div class="member-list">
@@ -1036,7 +1023,6 @@
                                 <ItemTemplate>
                                     <div class="member-item">
                                         <div class="member-details">
-                                            <!-- Member avatar with profile pictures -->
                                             <div class="member-avatar">
                                                 <asp:Image ID="imgMemberAvatar" runat="server" 
                                                          ImageUrl='<%# GetUserProfilePicture(Eval("Email").ToString()) %>'
@@ -1077,22 +1063,19 @@
     <asp:HiddenField ID="hfIsOwner" runat="server" />
 
     <script type="text/javascript">
+        // Basic functionality without auto-refresh
         let currentActiveTab = 'my-rooms';
         let isTabSwitching = false;
-        let membersLoaded = false;
         let selectedFile = null;
 
-        // NEW: Initialize tab from hidden field value
         function initializeTabFromHiddenField() {
             const hfActiveTab = document.getElementById('<%= hfActiveTab.ClientID %>');
             if (hfActiveTab && hfActiveTab.value) {
                 const activeTabValue = hfActiveTab.value;
                 console.log('Initializing tab from hidden field:', activeTabValue);
 
-                // Set the current active tab
                 currentActiveTab = activeTabValue;
 
-                // Update the UI to show the correct tab
                 document.querySelectorAll('.tab-btn').forEach(btn => {
                     btn.classList.remove('active');
                 });
@@ -1113,19 +1096,14 @@
                 console.log('Tab initialized to:', activeTabValue);
             } else {
                 console.log('No active tab value found, defaulting to my-rooms');
-                // Default to my-rooms if no value is set
                 currentActiveTab = 'my-rooms';
             }
         }
 
-        // Modal Management - FIXED TO LOAD MEMBERS
         function showManageModal() {
             console.log('Opening manage modal...');
-
-            // Load members before showing modal
             __doPostBack('LoadMembers', '');
 
-            // Show modal after a brief delay to allow member loading
             setTimeout(() => {
                 document.getElementById('manageModal').style.display = 'block';
             }, 500);
@@ -1137,7 +1115,6 @@
             document.getElementById('manageModal').style.display = 'none';
         }
 
-        // Close modal when clicking outside
         window.onclick = function (event) {
             const modal = document.getElementById('manageModal');
             if (event.target == modal) {
@@ -1145,7 +1122,6 @@
             }
         }
 
-        // Message deletion function
         function deleteMessage(messageId) {
             if (confirm('Are you sure you want to delete this message?')) {
                 console.log('Deleting message:', messageId);
@@ -1154,12 +1130,10 @@
             return false;
         }
 
-        // File upload functions
         function handleFileSelect(input) {
             const file = input.files[0];
             if (!file) return;
 
-            // Validate file type
             const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/gif', 'image/jpg'];
             if (!allowedTypes.includes(file.type)) {
                 alert('Only PDF and image files (PNG, JPG, JPEG, GIF) are allowed.');
@@ -1167,8 +1141,7 @@
                 return;
             }
 
-            // Validate file size (4MB limit)
-            const maxSize = 4 * 1024 * 1024; // 4MB
+            const maxSize = 4 * 1024 * 1024;
             if (file.size > maxSize) {
                 alert('File size exceeds 4MB limit. Please select a smaller file.');
                 input.value = '';
@@ -1204,7 +1177,6 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
-        // Tab switching - UPDATED to sync with hidden field
         function switchTab(tabName) {
             if (isTabSwitching) return false;
             isTabSwitching = true;
@@ -1212,7 +1184,6 @@
             console.log('Switching to tab:', tabName);
             currentActiveTab = tabName;
 
-            // Update hidden field to maintain state
             const hfActiveTab = document.getElementById('<%= hfActiveTab.ClientID %>');
             if (hfActiveTab) {
                 hfActiveTab.value = tabName;
@@ -1264,7 +1235,6 @@
         }
 
         function setupEventHandlers() {
-            // Tab button click handlers
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', function (e) {
                     e.preventDefault();
@@ -1277,7 +1247,6 @@
                 });
             });
 
-            // Room item click handlers
             document.addEventListener('click', function (e) {
                 const roomItem = e.target.closest('.room-item');
                 if (roomItem && !isTabSwitching) {
@@ -1294,15 +1263,12 @@
             console.log('Event handlers setup complete');
         }
 
-        // Main initialization - UPDATED to initialize tab from hidden field
+        // DOM ready initialization
         document.addEventListener('DOMContentLoaded', function () {
             console.log('Chat page loaded, initializing...');
 
-            // First setup event handlers
             setupEventHandlers();
 
-            // Then initialize the correct tab from the hidden field
-            // Add a small delay to ensure all elements are ready
             setTimeout(() => {
                 initializeTabFromHiddenField();
             }, 100);
@@ -1310,10 +1276,9 @@
             console.log('Initialization complete');
         });
 
-        // ADDITIONAL: Handle browser back/forward navigation to maintain tab state
         window.addEventListener('pageshow', function (event) {
             if (event.persisted) {
-                // Page was loaded from cache, reinitialize tab state
+                console.log('Page restored from cache');
                 setTimeout(() => {
                     initializeTabFromHiddenField();
                 }, 50);

@@ -240,10 +240,7 @@
                 <span class="tech-badge">JavaScript</span>
                 <span class="tech-badge">HTML5</span>
                 <span class="tech-badge">CSS3</span>
-                <span class="tech-badge">Microsoft SQL Server</span>
-                <span class="tech-badge">Entity Framework</span>
-                <span class="tech-badge">Bootstrap</span>
-                <span class="tech-badge">jQuery</span>
+                <span class="tech-badge">Firestore</span>
             </div>
         </div>
         

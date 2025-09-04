@@ -110,12 +110,12 @@
             box-shadow: 0 4px 15px rgba(103, 126, 234, 0.3);
         }
 
-        .nav-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(103, 126, 234, 0.4);
-            color: white;
-            text-decoration: none;
-        }
+            .nav-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(103, 126, 234, 0.4);
+                color: white;
+                text-decoration: none;
+            }
 
         .language-selector {
             background: rgba(255, 255, 255, 0.9);
@@ -148,6 +148,43 @@
                 gap: 15px;
             }
         }
+
+        .complete {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .needs-review {
+            color: #ffc107;
+            font-weight: bold;
+            background: #fff3cd;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .in-progress {
+            color: #6c757d;
+        }
+
+        .score-excellent {
+            color: #28a745;
+        }
+
+        .score-good {
+            color: #20c997;
+        }
+
+        .score-average {
+            color: #ffc107;
+        }
+
+        .score-below-average {
+            color: #fd7e14;
+        }
+
+        .score-poor {
+            color: #dc3545;
+        }
     </style>
 
     <div class="reports-page">
@@ -159,8 +196,8 @@
 
             <!-- Back Button -->
             <div class="mb-4">
-                <asp:Button ID="btnBackToLanguages" runat="server" 
-                    Text="⬅️ Back to Languages" 
+                <asp:Button ID="btnBackToLanguages" runat="server"
+                    Text="⬅️ Back to Languages"
                     CssClass="nav-button"
                     OnClick="btnBackToLanguages_Click" />
             </div>
@@ -171,7 +208,7 @@
                     🌍 Select Language
                 </div>
                 <div class="card-body">
-                    <asp:DropDownList ID="ddlLanguages" runat="server" 
+                    <asp:DropDownList ID="ddlLanguages" runat="server"
                         CssClass="language-selector"
                         AutoPostBack="true"
                         OnSelectedIndexChanged="ddlLanguages_SelectedIndexChanged">
@@ -302,12 +339,12 @@
 
     <!-- Chart.js for graphs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    
+
     <!-- Hidden field for chart data -->
     <asp:HiddenField ID="hfChartData" runat="server" />
-    
+
     <script type="text/javascript">
-        window.onload = function() {
+        window.onload = function () {
             var chartDataElement = document.getElementById('<%= hfChartData.ClientID %>');
             if (chartDataElement && chartDataElement.value) {
                 var chartData = JSON.parse(chartDataElement.value);

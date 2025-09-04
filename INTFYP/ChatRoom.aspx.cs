@@ -21,7 +21,6 @@ namespace YourProjectNamespace
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // Check if request was too large for file uploads
             if (Request.ContentLength > (4 * 1024 * 1024))
             {
                 ShowMessage("File size exceeds 4 MB limit. Please select a smaller file.", "text-danger");
@@ -71,6 +70,8 @@ namespace YourProjectNamespace
             }
             else
             {
+                System.Diagnostics.Debug.WriteLine("PostBack detected");
+
                 HandlePostBackEvents();
 
                 if (!string.IsNullOrEmpty(hfCurrentRoomId.Value))
@@ -91,10 +92,8 @@ namespace YourProjectNamespace
                     ShowSearchMessage("Private chat started successfully!", "text-success");
                     break;
                 case "message-sent":
-                    // No message needed for message sent
                     break;
                 case "file-sent":
-                    // No message needed for file sent
                     break;
                 case "room-left":
                     ShowMessage("You left the chat successfully", "text-success");
@@ -109,7 +108,6 @@ namespace YourProjectNamespace
                     ShowMessage("Group was deleted", "text-success");
                     break;
                 case "message-deleted":
-                    // No message needed for message deletion
                     break;
             }
         }
@@ -118,6 +116,8 @@ namespace YourProjectNamespace
         {
             string eventTarget = Request["__EVENTTARGET"];
             string eventArgument = Request["__EVENTARGUMENT"];
+
+            System.Diagnostics.Debug.WriteLine($"PostBack Event - Target: {eventTarget}, Argument: {eventArgument}");
 
             switch (eventTarget)
             {
@@ -136,7 +136,6 @@ namespace YourProjectNamespace
 
                 case "LoadMembers":
                     LoadMembersAsync();
-                    // Register script to show modal after members are loaded
                     ClientScript.RegisterStartupScript(this.GetType(), "showModalAfterLoad",
                         "setTimeout(() => { document.getElementById('manageModal').style.display = 'block'; }, 100);", true);
                     break;
@@ -144,11 +143,14 @@ namespace YourProjectNamespace
                 case "DeleteMessage":
                     if (!string.IsNullOrEmpty(eventArgument))
                     {
-                        DeleteMessageAsync(eventArgument);
+                        Page.RegisterAsyncTask(new PageAsyncTask(async () => {
+                            await DeleteMessageAsync(eventArgument);
+                        }));
                     }
                     break;
 
                 default:
+                    System.Diagnostics.Debug.WriteLine($"Unhandled PostBack Event: {eventTarget}");
                     break;
             }
         }
@@ -167,13 +169,11 @@ namespace YourProjectNamespace
             }
         }
 
-        // NEW: Get user profile picture method
         protected string GetUserProfilePicture(string userEmail)
         {
             if (string.IsNullOrEmpty(userEmail))
                 return "";
 
-            // Check cache first
             if (userProfilePictures.ContainsKey(userEmail))
             {
                 return userProfilePictures[userEmail];
@@ -181,8 +181,6 @@ namespace YourProjectNamespace
 
             try
             {
-                // Get from Firestore - this will be called synchronously from markup
-                // For better performance, consider caching these during page load
                 var task = Task.Run(async () =>
                 {
                     try
@@ -208,7 +206,6 @@ namespace YourProjectNamespace
 
                 string profileUrl = task.Result;
 
-                // Cache the result
                 if (!userProfilePictures.ContainsKey(userEmail))
                 {
                     userProfilePictures[userEmail] = profileUrl;
@@ -222,7 +219,6 @@ namespace YourProjectNamespace
             }
         }
 
-        // IMPROVED: User search with both email and username support (case-insensitive)
         protected async void btnSearchUser_Click(object sender, EventArgs e)
         {
             string originalSearchTerm = txtUserSearch.Text.Trim();
@@ -246,7 +242,6 @@ namespace YourProjectNamespace
             {
                 var userResults = new List<UserSearchResult>();
 
-                // Search by email first (emails are typically lowercase)
                 var emailSnapshot = await db.Collection("users")
                     .WhereEqualTo("email", searchTermLower)
                     .GetSnapshotAsync();
@@ -276,13 +271,10 @@ namespace YourProjectNamespace
                 }
                 else
                 {
-                    // If not found by email, search by username with multiple case variations
-                    // Try exact match first
                     var usernameSnapshot = await db.Collection("users")
                         .WhereEqualTo("username", originalSearchTerm)
                         .GetSnapshotAsync();
 
-                    // If exact match fails, try lowercase
                     if (usernameSnapshot.Count == 0)
                     {
                         usernameSnapshot = await db.Collection("users")
@@ -290,7 +282,6 @@ namespace YourProjectNamespace
                             .GetSnapshotAsync();
                     }
 
-                    // If lowercase fails, try with first letter capitalized
                     if (usernameSnapshot.Count == 0 && originalSearchTerm.Length > 0)
                     {
                         string capitalizedSearch = char.ToUpper(originalSearchTerm[0]) + originalSearchTerm.Substring(1).ToLower();
@@ -299,7 +290,6 @@ namespace YourProjectNamespace
                             .GetSnapshotAsync();
                     }
 
-                    // If still no match, try all uppercase
                     if (usernameSnapshot.Count == 0)
                     {
                         usernameSnapshot = await db.Collection("users")
@@ -307,11 +297,10 @@ namespace YourProjectNamespace
                             .GetSnapshotAsync();
                     }
 
-                    // As a last resort, get all users and search case-insensitively (less efficient but more thorough)
                     if (usernameSnapshot.Count == 0)
                     {
                         var allUsersSnapshot = await db.Collection("users")
-                            .Limit(1000)  // Limit to avoid too much data
+                            .Limit(1000)
                             .GetSnapshotAsync();
 
                         foreach (var doc in allUsersSnapshot.Documents)
@@ -332,7 +321,6 @@ namespace YourProjectNamespace
                                     fullName = dbUsername;
                                 }
 
-                                // Check if it's not the current user
                                 if (email.ToLower() != currentUserEmail.ToLower())
                                 {
                                     userResults.Add(new UserSearchResult
@@ -341,14 +329,13 @@ namespace YourProjectNamespace
                                         Name = fullName,
                                         Username = dbUsername
                                     });
-                                    break; // Found one match, that's enough
+                                    break;
                                 }
                             }
                         }
                     }
                     else if (usernameSnapshot.Count > 0)
                     {
-                        // Process the found user from direct username search
                         var userDoc = usernameSnapshot.Documents[0];
                         var userData = userDoc.ToDictionary();
 
@@ -363,7 +350,6 @@ namespace YourProjectNamespace
                             fullName = username;
                         }
 
-                        // Check if it's not the current user
                         if (email.ToLower() != currentUserEmail.ToLower())
                         {
                             userResults.Add(new UserSearchResult
@@ -403,7 +389,6 @@ namespace YourProjectNamespace
             }
         }
 
-        // IMPROVED: Invite user with both email and username support
         protected async void btnInviteUser_Click(object sender, EventArgs e)
         {
             string inviteInput = txtInviteEmail.Text.Trim().ToLower();
@@ -438,12 +423,10 @@ namespace YourProjectNamespace
                     return;
                 }
 
-                // First try to find user by email
                 var userSnapshot = await db.Collection("users")
                     .WhereEqualTo("email", inviteInput)
                     .GetSnapshotAsync();
 
-                // If not found by email, try username
                 if (userSnapshot.Count == 0)
                 {
                     userSnapshot = await db.Collection("users")
@@ -510,8 +493,7 @@ namespace YourProjectNamespace
             }
         }
 
-        // Delete message method
-        private async void DeleteMessageAsync(string messageId)
+        private async Task DeleteMessageAsync(string messageId)
         {
             string roomId = hfCurrentRoomId.Value;
             if (string.IsNullOrEmpty(roomId) || string.IsNullOrEmpty(messageId))
@@ -533,14 +515,12 @@ namespace YourProjectNamespace
                 var messageData = messageSnapshot.ToDictionary();
                 string senderId = GetSafeValue(messageData, "senderId", "");
 
-                // Verify that the current user is the sender of the message
                 if (senderId != currentUserEmail)
                 {
                     ShowMessage("You can only delete your own messages", "text-danger");
                     return;
                 }
 
-                // Soft delete - mark as deleted instead of actually removing
                 await messageRef.UpdateAsync(new Dictionary<string, object>
                 {
                     { "isDeleted", true },
@@ -548,12 +528,10 @@ namespace YourProjectNamespace
                     { "deletedBy", currentUserEmail }
                 });
 
-                // Update room last activity
                 await db.Collection("chatRooms").Document(roomId)
                     .UpdateAsync("lastActivity", FieldValue.ServerTimestamp);
 
-                // Redirect to reload messages and prevent duplicate postback
-                Response.Redirect($"ChatRoom.aspx?room={roomId}&tab={hfActiveTab.Value}&action=message-deleted");
+                await LoadMessagesAsync(roomId, true);
             }
             catch (Exception ex)
             {
@@ -561,8 +539,7 @@ namespace YourProjectNamespace
             }
         }
 
-        // File upload to Cloudinary method
-        private async System.Threading.Tasks.Task<FileUploadResult> UploadFileToCloudinary(FileUpload fileUpload)
+        private async Task<FileUploadResult> UploadFileToCloudinary(FileUpload fileUpload)
         {
             var account = new Account(
                 ConfigurationManager.AppSettings["CloudinaryCloudName"],
@@ -579,7 +556,6 @@ namespace YourProjectNamespace
 
                 if (isImage)
                 {
-                    // Upload as image
                     var uploadParams = new ImageUploadParams
                     {
                         File = new FileDescription(fileUpload.FileName, stream),
@@ -603,7 +579,6 @@ namespace YourProjectNamespace
                 }
                 else
                 {
-                    // Upload as raw file (PDF)
                     var uploadParams = new RawUploadParams
                     {
                         File = new FileDescription(fileUpload.FileName, stream),
@@ -627,15 +602,13 @@ namespace YourProjectNamespace
             }
         }
 
-        // Validate uploaded file
         private bool ValidateUploadedFile(FileUpload fileUpload)
         {
             if (!fileUpload.HasFile)
             {
-                return true; // No file is OK, just send text message
+                return true;
             }
 
-            // Check file extension
             string fileExtension = Path.GetExtension(fileUpload.FileName).ToLower();
             string[] allowedExtensions = { ".pdf", ".png", ".jpg", ".jpeg", ".gif" };
 
@@ -645,15 +618,13 @@ namespace YourProjectNamespace
                 return false;
             }
 
-            // Check file size (4 MB limit)
-            const int maxFileSize = 4 * 1024 * 1024; // 4 MB in bytes
+            const int maxFileSize = 4 * 1024 * 1024;
             if (fileUpload.PostedFile.ContentLength > maxFileSize)
             {
                 ShowMessage("File size exceeds 4 MB limit. Please select a smaller file.", "text-danger");
                 return false;
             }
 
-            // Check MIME type for additional security
             string[] allowedMimeTypes = { "application/pdf", "image/png", "image/jpeg", "image/gif", "image/jpg" };
             if (!allowedMimeTypes.Contains(fileUpload.PostedFile.ContentType))
             {
@@ -664,7 +635,6 @@ namespace YourProjectNamespace
             return true;
         }
 
-        // Send message with file support
         protected async void btnSend_Click(object sender, EventArgs e)
         {
             string message = txtMessage.Text.Trim();
@@ -675,13 +645,11 @@ namespace YourProjectNamespace
                 return;
             }
 
-            // Must have either text message or file
             if (string.IsNullOrEmpty(message) && !fileUpload.HasFile)
             {
                 return;
             }
 
-            // Validate uploaded file if present
             if (!ValidateUploadedFile(fileUpload))
             {
                 return;
@@ -691,7 +659,6 @@ namespace YourProjectNamespace
             {
                 var roomRef = db.Collection("chatRooms").Document(roomId);
 
-                // Prepare message data
                 var messageData = new Dictionary<string, object>
                 {
                     { "senderId", currentUserEmail },
@@ -703,7 +670,6 @@ namespace YourProjectNamespace
                     { "isDeleted", false }
                 };
 
-                // Handle file upload if present
                 if (fileUpload.HasFile)
                 {
                     var fileResult = await UploadFileToCloudinary(fileUpload);
@@ -712,22 +678,21 @@ namespace YourProjectNamespace
                     messageData["fileName"] = fileResult.FileName;
                     messageData["fileType"] = fileResult.FileType;
                     messageData["fileSize"] = fileResult.FileSize;
-                    messageData["type"] = "file"; // Change type to file if file is attached
+                    messageData["type"] = "file";
                 }
 
-                // Add message to Firestore
                 await roomRef.Collection("messages").AddAsync(messageData);
-
-                // Update room last activity
                 await roomRef.UpdateAsync("lastActivity", FieldValue.ServerTimestamp);
-
-                // Update user's last seen
                 await roomRef.Collection("members").Document(currentUserEmail)
                     .UpdateAsync("lastSeen", FieldValue.ServerTimestamp);
 
-                // Redirect to prevent form resubmission
+                // Clear form to prevent resubmission
+                txtMessage.Text = "";
+
+                // Prevent form resubmission by redirecting
                 string action = fileUpload.HasFile ? "file-sent" : "message-sent";
                 Response.Redirect($"ChatRoom.aspx?room={roomId}&tab={hfActiveTab.Value}&action={action}");
+
             }
             catch (Exception ex)
             {
@@ -735,7 +700,6 @@ namespace YourProjectNamespace
             }
         }
 
-        // Helper method to render file content in messages
         protected string GetFileContent(string fileUrl, string fileName, string fileType)
         {
             if (string.IsNullOrEmpty(fileUrl)) return "";
@@ -766,7 +730,6 @@ namespace YourProjectNamespace
             return "";
         }
 
-        // Format file size helper
         private string FormatFileSize(long bytes)
         {
             if (bytes == 0) return "0 Bytes";
@@ -809,10 +772,21 @@ namespace YourProjectNamespace
                                     .GetSnapshotAsync();
 
                                 string lastActivity = "No recent activity";
-                                if (roomData.ContainsKey("lastActivity"))
+                                if (roomData.ContainsKey("lastActivity") && roomData["lastActivity"] != null)
                                 {
-                                    var timestamp = ((Timestamp)roomData["lastActivity"]).ToDateTime();
-                                    lastActivity = FormatRelativeTime(timestamp);
+                                    try
+                                    {
+                                        var timestamp = ((Timestamp)roomData["lastActivity"]).ToDateTime();
+                                        if (timestamp.Kind == DateTimeKind.Unspecified)
+                                        {
+                                            timestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Utc);
+                                        }
+                                        lastActivity = FormatRelativeTime(timestamp);
+                                    }
+                                    catch
+                                    {
+                                        lastActivity = "No recent activity";
+                                    }
                                 }
 
                                 rooms.Add(new ChatRoomInfo
@@ -835,7 +809,9 @@ namespace YourProjectNamespace
                     }
                 }
 
-                rptMyRooms.DataSource = rooms.OrderByDescending(r => r.LastActivity).ToList();
+                var sortedRooms = rooms.OrderByDescending(r => r.LastActivity).ToList();
+
+                rptMyRooms.DataSource = sortedRooms;
                 rptMyRooms.DataBind();
 
                 lblMyRoomCount.Text = rooms.Count.ToString();
@@ -907,10 +883,21 @@ namespace YourProjectNamespace
                                 if (!string.IsNullOrEmpty(otherParticipantEmail))
                                 {
                                     string lastActivity = "No recent activity";
-                                    if (roomData.ContainsKey("lastActivity"))
+                                    if (roomData.ContainsKey("lastActivity") && roomData["lastActivity"] != null)
                                     {
-                                        var timestamp = ((Timestamp)roomData["lastActivity"]).ToDateTime();
-                                        lastActivity = FormatRelativeTime(timestamp);
+                                        try
+                                        {
+                                            var timestamp = ((Timestamp)roomData["lastActivity"]).ToDateTime();
+                                            if (timestamp.Kind == DateTimeKind.Unspecified)
+                                            {
+                                                timestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Utc);
+                                            }
+                                            lastActivity = FormatRelativeTime(timestamp);
+                                        }
+                                        catch
+                                        {
+                                            lastActivity = "No recent activity";
+                                        }
                                     }
 
                                     privateChats.Add(new ChatRoomInfo
@@ -1093,7 +1080,6 @@ namespace YourProjectNamespace
             }
         }
 
-        // FIXED: Load members method with better error handling
         private async void LoadMembersAsync()
         {
             string roomId = hfCurrentRoomId.Value;
@@ -1141,7 +1127,6 @@ namespace YourProjectNamespace
                     });
                 }
 
-                // Sort members: admins first, then by name
                 var sortedMembers = members.OrderBy(m => m.Role == "admin" ? 0 : 1).ThenBy(m => m.Name).ToList();
 
                 rptMembers.DataSource = sortedMembers;
@@ -1303,7 +1288,7 @@ namespace YourProjectNamespace
                 pnlNoRoom.Visible = false;
                 pnlChatInterface.Visible = true;
 
-                await LoadMessagesAsync(roomId);
+                await LoadMessagesAsync(roomId, true);
             }
             catch (Exception ex)
             {
@@ -1311,7 +1296,7 @@ namespace YourProjectNamespace
             }
         }
 
-        private async Task LoadMessagesAsync(string roomId)
+        private async Task LoadMessagesAsync(string roomId, bool autoScroll = true)
         {
             try
             {
@@ -1330,10 +1315,24 @@ namespace YourProjectNamespace
                     string messageType = GetSafeValue(data, "type", "text");
                     if (messageType == "system") continue;
 
-                    DateTime timestamp = DateTime.Now;
+                    DateTime timestamp = DateTime.UtcNow;
                     if (data.ContainsKey("timestamp") && data["timestamp"] != null)
                     {
-                        timestamp = ((Timestamp)data["timestamp"]).ToDateTime();
+                        try
+                        {
+                            var firestoreTimestamp = (Timestamp)data["timestamp"];
+                            timestamp = firestoreTimestamp.ToDateTime();
+
+                            if (timestamp.Kind == DateTimeKind.Unspecified)
+                            {
+                                timestamp = DateTime.SpecifyKind(timestamp, DateTimeKind.Utc);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            System.Diagnostics.Debug.WriteLine($"Error converting timestamp: {ex.Message}");
+                            timestamp = DateTime.UtcNow;
+                        }
                     }
 
                     bool isDeleted = false;
@@ -1358,15 +1357,24 @@ namespace YourProjectNamespace
                     });
                 }
 
-                rptMessages.DataSource = messages;
+                var sortedMessages = messages.OrderBy(m => m.Timestamp).ToList();
+
+                rptMessages.DataSource = sortedMessages;
                 rptMessages.DataBind();
 
-                ClientScript.RegisterStartupScript(this.GetType(), "scrollToBottom",
-                    "setTimeout(() => { const container = document.getElementById('messagesContainer'); if(container) container.scrollTop = container.scrollHeight; }, 200);", true);
+                if (autoScroll)
+                {
+                    ClientScript.RegisterStartupScript(this.GetType(), "scrollToBottom",
+                        "setTimeout(() => { const container = document.getElementById('messagesContainer'); if(container) container.scrollTop = container.scrollHeight; }, 200);", true);
+                }
             }
             catch (Exception ex)
             {
-                ShowMessage("Error loading messages: " + ex.Message, "text-danger");
+                if (autoScroll)
+                {
+                    ShowMessage("Error loading messages: " + ex.Message, "text-danger");
+                }
+                System.Diagnostics.Debug.WriteLine($"Error loading messages: {ex.Message}");
             }
         }
 
@@ -1434,7 +1442,8 @@ namespace YourProjectNamespace
 
         private string FormatRelativeTime(DateTime timestamp)
         {
-            var timeSpan = DateTime.UtcNow - timestamp;
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            var timeSpan = DateTime.Now - localTime;
 
             if (timeSpan.Days > 0)
                 return $"{timeSpan.Days}d ago";
@@ -1448,7 +1457,8 @@ namespace YourProjectNamespace
 
         private string FormatMessageTime(DateTime timestamp)
         {
-            return timestamp.ToString("HH:mm");
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            return localTime.ToString("HH:mm");
         }
 
         private void ShowMessage(string message, string cssClass)
