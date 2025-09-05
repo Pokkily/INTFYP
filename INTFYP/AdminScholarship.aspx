@@ -25,7 +25,6 @@
             font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
 
-        /* Navigation Bar Styles */
         .admin-navbar {
             background-color: var(--dark-color);
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -62,7 +61,6 @@
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
         }
 
-        /* Badge styles for navigation */
         .nav-badge {
             background-color: var(--danger-color);
             color: white;
@@ -72,7 +70,6 @@
             margin-left: 0.5rem;
         }
 
-        /* Admin header */
         .admin-header {
             background: linear-gradient(135deg, var(--primary-color) 0%, #3a5bc7 100%);
             color: white;
@@ -99,7 +96,6 @@
             margin-bottom: 0.5rem;
         }
         
-        /* Scholarship Application Card - Based on your design */
         .scholarship-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -280,7 +276,6 @@
             box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
         }
 
-        /* Supporting Documents Section */
         .documents-section {
             background: rgba(248, 249, 250, 0.8);
             border-radius: 10px;
@@ -360,7 +355,6 @@
             border-radius: 12px 12px 0 0;
         }
 
-        /* Animations */
         @keyframes slideInFromLeft {
             from {
                 opacity: 0;
@@ -372,7 +366,6 @@
             }
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .applicant-info {
                 grid-template-columns: 1fr;
@@ -402,7 +395,6 @@
 <body>
     <form id="form1" runat="server">
         
-        <!-- Navigation Bar -->
         <nav class="navbar navbar-expand-lg admin-navbar">
             <div class="container-fluid">
                 <a class="navbar-brand" href="#">
@@ -442,7 +434,6 @@
                 </div>
             </div>
         </nav>
-        <!-- End Navigation Bar -->
 
         <div class="admin-header">
             <div class="container">
@@ -458,7 +449,6 @@
         <div class="container mt-4">
             <asp:Label ID="lblMessage" runat="server" CssClass="alert d-none" Visible="false"></asp:Label>
 
-            <!-- Statistics Cards -->
             <div class="row mb-4">
                 <div class="col-md-3">
                     <div class="stats-card text-center">
@@ -494,7 +484,6 @@
                 </div>
             </div>
 
-            <!-- Filter Section -->
             <div class="filter-section">
                 <div class="row align-items-center">
                     <div class="col-md-4">
@@ -530,7 +519,6 @@
                 </div>
             </div>
 
-            <!-- Scholarship Applications List -->
             <div class="row">
                 <div class="col-12">
                     <asp:Repeater ID="rptApplications" runat="server" OnItemCommand="rptApplications_ItemCommand">
@@ -583,7 +571,6 @@
                                             Convert.ToDateTime(Eval("GraduationDate")).ToString("MMM dd, yyyy") + "</div></div>" : "" %>
                                     </div>
                                     
-                                    <!-- Supporting Documents Section -->
                                     <div class="documents-section">
                                         <div class="documents-title">Supporting Documents</div>
                                         <div class="document-links">
@@ -638,7 +625,6 @@
             </div>
         </div>
 
-        <!-- Rejection Modal -->
         <div class="modal fade rejection-modal" id="rejectModal" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -684,12 +670,10 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Update the navigation badge with pending count
         function updateNavBadge() {
             const pendingCount = document.querySelector('#lblPendingCount').innerText;
             document.querySelector('#lblNavScholarship').innerText = pendingCount;
             
-            // Hide badge if no pending applications
             const badge = document.querySelector('#scholarshipBadge');
             if (pendingCount === '0') {
                 badge.style.display = 'none';
@@ -698,7 +682,6 @@
             }
         }
 
-        // Call on page load
         window.addEventListener('load', updateNavBadge);
 
         function showRejectModal(applicationId, applicantName) {
@@ -711,7 +694,6 @@
             modal.show();
         }
 
-        // Auto-hide alerts after 5 seconds
         window.addEventListener('load', function () {
             const alerts = document.querySelectorAll('.alert:not(.d-none)');
             alerts.forEach(function (alert) {
@@ -724,7 +706,6 @@
                 }, 5000);
             });
 
-            // Enhanced hover effects for scholarship cards
             const cards = document.querySelectorAll('.scholarship-card');
             cards.forEach((card, index) => {
                 card.style.animationDelay = `${index * 0.1}s`;
@@ -740,7 +721,6 @@
                 });
             });
 
-            // Document link hover effects
             const docLinks = document.querySelectorAll('.document-link');
             docLinks.forEach(link => {
                 link.addEventListener('mouseenter', function () {

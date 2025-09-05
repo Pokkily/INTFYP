@@ -2,7 +2,6 @@
 
 <asp:Content ID="AddLanguageContent" ContentPlaceHolderID="TeacherMainContent" runat="server">
     <style>
-        /* Modern Design System Implementation */
         .add-language-page {
             padding: 40px 20px;
             font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -164,7 +163,6 @@
             color: white;
         }
 
-        /* Language Card Styles */
         .language-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -226,7 +224,6 @@
             font-size: 14px;
         }
 
-        /* Language Details Section */
         .language-details {
             padding: 20px 25px;
         }
@@ -250,9 +247,6 @@
             font-size: 16px;
         }
 
-
-
-        /* Edit Section */
         .edit-section {
             background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
             backdrop-filter: blur(5px);
@@ -268,14 +262,12 @@
             margin-bottom: 15px;
         }
 
-        /* Action Buttons */
         .action-buttons {
             display: grid;
             gap: 10px;
             margin-top: 15px;
         }
 
-        /* Form Grid */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -287,7 +279,6 @@
             position: relative;
         }
 
-        /* Alert Messages */
         .alert-message {
             background: rgba(86, 171, 47, 0.1);
             border: 1px solid rgba(86, 171, 47, 0.3);
@@ -307,7 +298,6 @@
             color: #721c24;
         }
 
-        /* Empty State */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -323,14 +313,12 @@
             opacity: 0.5;
         }
 
-        /* Grid Layout for Language Cards */
         .languages-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
             gap: 25px;
         }
 
-        /* Animations */
         @keyframes slideInFromTop {
             from {
                 opacity: 0;
@@ -374,7 +362,6 @@
             50% { background-position: 100% 50%; }
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .languages-grid {
                 grid-template-columns: 1fr;
@@ -397,7 +384,6 @@
             }
         }
 
-        /* Utility Classes */
         .mb-0 { margin-bottom: 0; }
         .mb-1 { margin-bottom: 5px; }
         .mb-2 { margin-bottom: 10px; }
@@ -421,7 +407,6 @@
                 <p class="page-subtitle">Create and manage international language learning programs</p>
             </div>
 
-            <!-- Alert Messages -->
             <asp:Panel ID="pnlAlert" runat="server" Visible="false">
                 <div class="alert-message" id="alertDiv" runat="server">
                     <i class="fas fa-info-circle"></i>
@@ -429,7 +414,6 @@
                 </div>
             </asp:Panel>
 
-            <!-- Add Language Form -->
             <div class="glass-card">
                 <div class="card-header">
                     <i class="fas fa-plus-circle"></i>
@@ -482,7 +466,6 @@
                 </div>
             </div>
 
-            <!-- Language Courses Section -->
             <div class="glass-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
@@ -597,9 +580,7 @@
     </div>
 
     <script>
-        // Modern JavaScript enhancements
         document.addEventListener('DOMContentLoaded', function () {
-            // Auto-hide alerts
             setTimeout(function () {
                 var alert = document.querySelector('.alert-message');
                 if (alert) {
@@ -612,7 +593,6 @@
                 }
             }, 5000);
 
-            // Apply staggered animations to language cards
             const cards = document.querySelectorAll('.language-card');
             cards.forEach((card, index) => {
                 card.style.animationDelay = `${index * 0.1}s`;
@@ -628,7 +608,6 @@
                 });
             });
 
-            // Form input focus effects
             const inputs = document.querySelectorAll('.form-control');
             inputs.forEach(input => {
                 input.addEventListener('focus', function () {
@@ -642,7 +621,6 @@
                 });
             });
 
-            // Add smooth scroll behavior
             document.documentElement.style.scrollBehavior = 'smooth';
         });
     </script>

@@ -190,7 +190,6 @@
         .score-average { background-color: #fff3cd; color: #856404; }
         .score-poor { background-color: #f8d7da; color: #721c24; }
 
-        /* Charts Row - Ensure Equal Sizing */
         .charts-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -239,7 +238,6 @@
                 <p style="color: rgba(255,255,255,0.8); font-size: 16px;">Monitor student performance across all languages</p>
             </div>
 
-            <!-- Back Button -->
             <div class="mb-4">
                 <asp:Button ID="btnBackToLanguages" runat="server" 
                     Text="⬅️ Back to Languages" 
@@ -247,7 +245,6 @@
                     OnClick="btnBackToLanguages_Click" />
             </div>
 
-            <!-- Filters Section -->
             <div class="filters-section">
                 <div class="filter-group">
                     <label>Language</label>
@@ -281,7 +278,6 @@
                 </div>
             </div>
 
-            <!-- Overall Statistics -->
             <div class="card">
                 <div class="card-header">
                     📊 Overall Performance Metrics
@@ -328,7 +324,6 @@
                 </div>
             </div>
 
-            <!-- Charts Row with Equal Sizing -->
             <div class="charts-row">
                 <div class="chart-card">
                     <div class="card-header">
@@ -352,7 +347,6 @@
                 </div>
             </div>
 
-            <!-- Language Performance -->
             <div class="card">
                 <div class="card-header">
                     🌍 Language Performance Summary
@@ -395,7 +389,6 @@
                 </div>
             </div>
 
-            <!-- Recent Student Activity -->
             <div class="card">
                 <div class="card-header">
                     🕒 Recent Student Activity
@@ -440,7 +433,6 @@
                 </div>
             </div>
 
-            <!-- No Data Message -->
             <asp:Panel ID="pnlNoData" runat="server" Visible="false">
                 <div class="card">
                     <div class="card-body" style="text-align: center; padding: 60px;">
@@ -453,23 +445,19 @@
         </div>
     </div>
 
-    <!-- Chart.js for graphs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     
-    <!-- Hidden fields for chart data -->
     <asp:HiddenField ID="hfScoreDistributionData" runat="server" />
     <asp:HiddenField ID="hfDailyActivityData" runat="server" />
     
     <script type="text/javascript">
         window.onload = function() {
-            // Score Distribution Chart
             var scoreDataElement = document.getElementById('<%= hfScoreDistributionData.ClientID %>');
             if (scoreDataElement && scoreDataElement.value) {
                 var scoreData = JSON.parse(scoreDataElement.value);
                 createScoreDistributionChart(scoreData);
             }
 
-            // Daily Activity Chart
             var activityDataElement = document.getElementById('<%= hfDailyActivityData.ClientID %>');
             if (activityDataElement && activityDataElement.value) {
                 var activityData = JSON.parse(activityDataElement.value);
@@ -487,11 +475,11 @@
                         datasets: [{
                             data: data,
                             backgroundColor: [
-                                '#28a745', // Excellent
-                                '#17a2b8', // Good
-                                '#ffc107', // Average
-                                '#fd7e14', // Below average
-                                '#dc3545'  // Poor
+                                '#28a745',
+                                '#17a2b8',
+                                '#ffc107',
+                                '#fd7e14',
+                                '#dc3545' 
                             ],
                             borderWidth: 2,
                             borderColor: '#fff'

@@ -686,10 +686,8 @@ namespace YourProjectNamespace
                 await roomRef.Collection("members").Document(currentUserEmail)
                     .UpdateAsync("lastSeen", FieldValue.ServerTimestamp);
 
-                // Clear form to prevent resubmission
                 txtMessage.Text = "";
 
-                // Prevent form resubmission by redirecting
                 string action = fileUpload.HasFile ? "file-sent" : "message-sent";
                 Response.Redirect($"ChatRoom.aspx?room={roomId}&tab={hfActiveTab.Value}&action={action}");
 
@@ -1398,7 +1396,6 @@ namespace YourProjectNamespace
             }
         }
 
-        // HELPER METHODS
         protected string GetMessageClass(string senderId, string messageType)
         {
             return senderId == currentUserEmail ? "own" : "";
@@ -1479,7 +1476,6 @@ namespace YourProjectNamespace
             lblInviteStatus.CssClass = $"status-message show {cssClass}";
         }
 
-        // DATA CLASSES
         public class ChatRoomInfo
         {
             public string Id { get; set; }

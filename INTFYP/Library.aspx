@@ -6,7 +6,6 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Enhanced Library Page with Classes Design Formula */
         
         .library-page {
             padding: 40px 20px;
@@ -17,7 +16,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated background elements */
         .library-page::before {
             content: '';
             position: fixed;
@@ -97,7 +95,6 @@
             margin: 0;
         }
 
-        /* Sidebar Card */
         .sidebar-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -160,7 +157,6 @@
             font-size: 24px;
         }
 
-        /* Search Input */
         .search-input {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(5px);
@@ -180,7 +176,6 @@
             background: rgba(255, 255, 255, 1);
         }
 
-        /* Category Filter Dropdown */
         .category-filter {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(5px);
@@ -215,7 +210,6 @@
             font-size: 16px;
         }
 
-        /* Navigation Buttons */
         .nav-button {
             display: flex;
             align-items: center;
@@ -279,7 +273,6 @@
             background: linear-gradient(135deg, #44a08d 0%, #4ecdc4 100%);
         }
 
-        /* Section Headers */
         .section-header {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -332,12 +325,10 @@
             }
         }
 
-        /* Book Sections */
         .book-section {
             margin-bottom: 40px;
         }
 
-        /* Books Grid */
         .books-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -452,7 +443,6 @@
             text-overflow: ellipsis;
         }
 
-        /* Category and Tag badges */
         .book-badges {
             display: flex;
             flex-wrap: wrap;
@@ -491,7 +481,6 @@
             flex-wrap: wrap;
         }
 
-        /* IMPORTANT: Override Bootstrap button styles to prevent conflicts */
         .book-action-btn {
             padding: 7px 12px !important; 
             border-radius: 18px !important; 
@@ -509,7 +498,6 @@
             flex: 1 !important;
             justify-content: center !important;
             min-width: 75px !important;
-            /* Override Bootstrap defaults */
             font-family: inherit !important;
             line-height: 1 !important;
             text-align: center !important;
@@ -540,7 +528,6 @@
             transform: translateY(-2px) !important;
         }
 
-        /* DEFAULT STATES for buttons */
         .btn-recommend {
             background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%) !important;
             color: #2c3e50 !important;
@@ -552,7 +539,6 @@
             box-shadow: 0 8px 25px rgba(216, 181, 240, 0.4) !important;
         }
 
-        /* ACTIVE STATE - When user has recommended the book */
         .btn-recommend.active {
             background: linear-gradient(135deg, #d8b5f0 0%, #c9a9e0 100%) !important;
             box-shadow: 0 8px 25px rgba(216, 181, 240, 0.5) !important;
@@ -575,7 +561,6 @@
             box-shadow: 0 8px 25px rgba(156, 175, 136, 0.4) !important;
         }
 
-        /* ACTIVE STATE - When user has favorited the book */
         .btn-favorite.active {
             background: linear-gradient(135deg, #9caf88 0%, #8a9c78 100%) !important;
             box-shadow: 0 8px 25px rgba(156, 175, 136, 0.5) !important;
@@ -587,7 +572,6 @@
             box-shadow: 0 10px 30px rgba(156, 175, 136, 0.6) !important;
         }
 
-        /* Temporary click animation for both buttons */
         .btn-recommend.clicked,
         .btn-favorite.clicked {
             animation: buttonPulse 0.6s ease-out !important;
@@ -599,7 +583,6 @@
             100% { transform: scale(1); }
         }
 
-        /* No Books Message */
         .no-books {
             text-align: center;
             padding: 40px 30px;
@@ -647,7 +630,6 @@
             margin: 0;
         }
 
-        /* Responsive design */
         @media (max-width: 768px) {
             .library-page {
                 padding: 20px 15px;
@@ -690,7 +672,6 @@
             }
         }
 
-        /* Loading states */
         .book-card.loading {
             opacity: 0;
             animation: cardLoad 0.6s ease-out forwards;
@@ -701,7 +682,6 @@
         }
     </style>
 
-    <!-- Hidden field to store the book ID of the clicked button -->
     <asp:HiddenField ID="hdnScrollToBook" runat="server" />
 
     <div class="library-page">
@@ -712,7 +692,6 @@
             </div>
 
             <div class="row">
-                <!-- Sidebar -->
                 <div class="col-md-3 mb-4">
                     <div class="sidebar-card">
                         <h5 class="sidebar-title">Search Books</h5>
@@ -760,19 +739,15 @@
                     </div>
                 </div>
 
-                <!-- Main Content -->
                 <div class="col-md-9">
-                    <!-- No Books Panel -->
                     <asp:Panel ID="pnlNoBooks" runat="server" Visible="false" CssClass="no-books">
                         <div class="no-books-icon">📚</div>
                         <h3>No Books Found</h3>
                         <p>Try adjusting your search criteria or browse all books!</p>
                     </asp:Panel>
 
-                    <!-- Book Sections Panel -->
                     <asp:Panel ID="pnlBookSections" runat="server">
                         
-                        <!-- Search Results Section (Only visible during search/filter) -->
                         <asp:Panel ID="pnlSearchResults" runat="server" Visible="false" CssClass="book-section">
                             <div class="section-header section-search">
                                 <h3 class="section-title">Search Results</h3>
@@ -819,7 +794,6 @@
                             </asp:Repeater>
                         </asp:Panel>
 
-                        <!-- Newest Books Section -->
                         <asp:Panel ID="pnlNewest" runat="server" CssClass="book-section">
                             <div class="section-header section-newest">
                                 <h3 class="section-title">Newest Books</h3>
@@ -866,7 +840,6 @@
                             </asp:Repeater>
                         </asp:Panel>
 
-                        <!-- Most Recommended Books Section -->
                         <asp:Panel ID="pnlMostRecommended" runat="server" CssClass="book-section">
                             <div class="section-header section-recommended">
                                 <h3 class="section-title">Most Recommended</h3>
@@ -913,7 +886,6 @@
                             </asp:Repeater>
                         </asp:Panel>
 
-                        <!-- Alphabetical Books Section -->
                         <asp:Panel ID="pnlAlphabetical" runat="server" CssClass="book-section">
                             <div class="section-header section-alphabetical">
                                 <h3 class="section-title">All Books (A-Z)</h3>
@@ -967,18 +939,14 @@
     </div>
 
     <script>
-        // Function to store which book was clicked before postback
         function storeScrollPosition(bookId) {
             console.log('Storing scroll position for book:', bookId);
             
-            // Store the book ID in the hidden field
             document.getElementById('<%= hdnScrollToBook.ClientID %>').value = bookId;
             
-            // Allow the postback to continue
             return true;
         }
 
-        // Function to scroll to the stored book after page reload
         function scrollToStoredBook() {
             var hiddenField = document.getElementById('<%= hdnScrollToBook.ClientID %>');
             if (hiddenField && hiddenField.value) {
@@ -988,46 +956,37 @@
                 if (bookCard) {
                     console.log('Scrolling to book:', bookId);
                     
-                    // Smooth scroll to the book card
                     bookCard.scrollIntoView({
                         behavior: 'smooth',
                         block: 'center',
                         inline: 'nearest'
                     });
                     
-                    // Add a temporary highlight effect
                     bookCard.style.boxShadow = '0 0 20px rgba(103, 126, 234, 0.5)';
                     setTimeout(function() {
                         bookCard.style.boxShadow = '';
                     }, 2000);
                     
-                    // Clear the hidden field
                     hiddenField.value = '';
                 }
             }
         }
 
-        // Run when page loads
         document.addEventListener('DOMContentLoaded', function () {
             console.log('Library page loaded');
             
-            // Small delay to ensure all elements are rendered
             setTimeout(scrollToStoredBook, 100);
         });
 
-        // Alternative - also try when window loads (backup)
         window.addEventListener('load', function() {
             setTimeout(scrollToStoredBook, 200);
         });
 
-        // Legacy function for compatibility
         function addClickEffect(button) {
             console.log('Button clicked:', button.id);
 
-            // Add clicked class for animation
             button.classList.add('clicked');
 
-            // Remove the class after animation completes
             setTimeout(function () {
                 button.classList.remove('clicked');
             }, 600);
@@ -1035,12 +994,10 @@
             return true;
         }
 
-        // Prevent Bootstrap from interfering with form submission
         $(document).ready(function () {
             $('.book-action-btn').off('click.bs.button');
         });
     </script>
 
-    <!-- Font Awesome for additional icons if needed -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 </asp:Content>

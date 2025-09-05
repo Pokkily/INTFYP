@@ -1,7 +1,7 @@
 ﻿<%@ Page Async="true" Title="Add Book" Language="C#" MasterPageFile="~/TeacherSite.master" AutoEventWireup="true" CodeFile="AddBook.aspx.cs" Inherits="INTFYP.AddBook" %>
+
 <asp:Content ID="AddBookContent" ContentPlaceHolderID="TeacherMainContent" runat="server">
     <style>
-        /* Modern Design System Implementation */
         .add-book-page {
             padding: 40px 20px;
             font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -275,7 +275,6 @@
             gap: 15px;
         }
 
-        /* Grid System */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -287,7 +286,6 @@
             position: relative;
         }
 
-        /* Search Bar Styles */
         .search-container {
             position: relative;
             flex-grow: 1;
@@ -354,7 +352,6 @@
             transform: scale(1.1);
         }
 
-        /* Book Count Display Styles */
         .book-count-container {
             display: flex;
             align-items: center;
@@ -395,7 +392,6 @@
             color: #5a6fd8 !important;
         }
 
-        /* Animations */
         @keyframes slideInFromTop {
             from {
                 opacity: 0;
@@ -440,7 +436,6 @@
             }
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -482,7 +477,6 @@
                 font-size: 12px;
             }
             
-            /* Stack search and count vertically on mobile */
             .d-flex.justify-content-between.align-items-center.mb-4 {
                 flex-direction: column;
                 align-items: stretch;
@@ -494,7 +488,6 @@
             }
         }
 
-        /* Utility Classes */
         .mb-0 { margin-bottom: 0; }
         .mb-1 { margin-bottom: 5px; }
         .mb-2 { margin-bottom: 10px; }
@@ -518,7 +511,6 @@
                 <p class="page-subtitle">Upload and manage educational resources for students</p>
             </div>
 
-            <!-- Add Book Form -->
             <div class="glass-card">
                 <div class="card-header">
                     <i class="fas fa-plus-circle"></i>
@@ -531,13 +523,13 @@
                                 <i class="fas fa-book me-1"></i>
                                 Title
                             </label>
-                            <asp:TextBox ID="txtTitle" runat="server" CssClass="form-control" 
-                                       placeholder="e.g., Advanced Physics Textbook" />
-                            <asp:RequiredFieldValidator ID="rfvTitle" runat="server" 
-                                ControlToValidate="txtTitle" 
-                                ErrorMessage="Title is required" 
-                                CssClass="text-danger" 
-                                Display="Dynamic" 
+                            <asp:TextBox ID="txtTitle" runat="server" CssClass="form-control"
+                                placeholder="e.g., Advanced Physics Textbook" />
+                            <asp:RequiredFieldValidator ID="rfvTitle" runat="server"
+                                ControlToValidate="txtTitle"
+                                ErrorMessage="Title is required"
+                                CssClass="text-danger"
+                                Display="Dynamic"
                                 ValidationGroup="AddBookGroup" />
                         </div>
                         <div class="form-group">
@@ -545,13 +537,13 @@
                                 <i class="fas fa-user-edit me-1"></i>
                                 Author
                             </label>
-                            <asp:TextBox ID="txtAuthor" runat="server" CssClass="form-control" 
-                                       placeholder="e.g., Dr. John Smith" />
-                            <asp:RequiredFieldValidator ID="rfvAuthor" runat="server" 
-                                ControlToValidate="txtAuthor" 
-                                ErrorMessage="Author is required" 
-                                CssClass="text-danger" 
-                                Display="Dynamic" 
+                            <asp:TextBox ID="txtAuthor" runat="server" CssClass="form-control"
+                                placeholder="e.g., Dr. John Smith" />
+                            <asp:RequiredFieldValidator ID="rfvAuthor" runat="server"
+                                ControlToValidate="txtAuthor"
+                                ErrorMessage="Author is required"
+                                CssClass="text-danger"
+                                Display="Dynamic"
                                 ValidationGroup="AddBookGroup" />
                         </div>
                         <div class="form-group">
@@ -583,11 +575,11 @@
                                 <asp:ListItem Value="Business & Economics" Text="Business & Economics" />
                                 <asp:ListItem Value="Reference" Text="Reference" />
                             </asp:DropDownList>
-                            <asp:RequiredFieldValidator ID="rfvCategory" runat="server" 
-                                ControlToValidate="ddlCategory" 
-                                ErrorMessage="Please select a category" 
-                                CssClass="text-danger" 
-                                Display="Dynamic" 
+                            <asp:RequiredFieldValidator ID="rfvCategory" runat="server"
+                                ControlToValidate="ddlCategory"
+                                ErrorMessage="Please select a category"
+                                CssClass="text-danger"
+                                Display="Dynamic"
                                 ValidationGroup="AddBookGroup" />
                         </div>
                         <div class="form-group">
@@ -595,8 +587,8 @@
                                 <i class="fas fa-tags me-1"></i>
                                 Tag
                             </label>
-                            <asp:TextBox ID="txtTag" runat="server" CssClass="form-control" 
-                                       placeholder="e.g., Advanced, Beginner, Recommended" />
+                            <asp:TextBox ID="txtTag" runat="server" CssClass="form-control"
+                                placeholder="e.g., Advanced, Beginner, Recommended" />
                         </div>
                         <div class="form-group">
                             <label class="form-label">
@@ -608,18 +600,17 @@
                                 <i class="fas fa-info-circle"></i>
                                 Maximum file size: 4 MB. Only PDF files are allowed.
                             </div>
-                            <asp:RequiredFieldValidator ID="rfvPdf" runat="server" 
-                                ControlToValidate="filePdf" 
-                                ErrorMessage="PDF file is required" 
-                                CssClass="text-danger" 
-                                Display="Dynamic" 
+                            <asp:RequiredFieldValidator ID="rfvPdf" runat="server"
+                                ControlToValidate="filePdf"
+                                ErrorMessage="PDF file is required"
+                                CssClass="text-danger"
+                                Display="Dynamic"
                                 ValidationGroup="AddBookGroup" />
                         </div>
                     </div>
-                    
+
                     <div class="d-flex justify-content-between align-items-center mt-4">
                         <div class="button-group">
-                            <!-- Status Message Panel (left side of button) -->
                             <asp:Panel ID="pnlStatus" runat="server" Visible="false">
                                 <div class="status-message">
                                     <i class="fas fa-check-circle me-2"></i>
@@ -627,35 +618,32 @@
                                 </div>
                             </asp:Panel>
                         </div>
-                        
-                        <asp:Button ID="btnSubmit" runat="server" Text="✨ Add Material" 
-                                  CssClass="primary-button" OnClick="btnSubmit_Click" 
-                                  ValidationGroup="AddBookGroup" />
+
+                        <asp:Button ID="btnSubmit" runat="server" Text="✨ Add Material"
+                            CssClass="primary-button" OnClick="btnSubmit_Click"
+                            ValidationGroup="AddBookGroup" />
                     </div>
                 </div>
             </div>
 
-            <!-- Book List Section -->
             <div class="glass-card">
                 <div class="card-header">
                     <i class="fas fa-library"></i>
                     Your Learning Materials
                 </div>
                 <div class="card-body">
-                    <!-- Search Bar with Book Count -->
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <div class="search-container me-3">
                             <div class="search-input-group">
                                 <i class="fas fa-search search-icon"></i>
-                                <asp:TextBox ID="txtSearch" runat="server" CssClass="search-input" 
-                                           placeholder="Search books by title, author, or category..." 
-                                           AutoPostBack="true" OnTextChanged="txtSearch_TextChanged" />
-                                <asp:Button ID="btnClearSearch" runat="server" Text="×" CssClass="clear-search-btn" 
-                                          OnClick="btnClearSearch_Click" ToolTip="Clear search" />
+                                <asp:TextBox ID="txtSearch" runat="server" CssClass="search-input"
+                                    placeholder="Search books by title, author, or category..."
+                                    AutoPostBack="true" OnTextChanged="txtSearch_TextChanged" />
+                                <asp:Button ID="btnClearSearch" runat="server" Text="×" CssClass="clear-search-btn"
+                                    OnClick="btnClearSearch_Click" ToolTip="Clear search" />
                             </div>
                         </div>
-                        
-                        <!-- Book Count Display -->
+
                         <div class="book-count-container">
                             <div class="book-count-badge">
                                 <i class="fas fa-books me-1"></i>
@@ -663,9 +651,9 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <asp:Label ID="lblBookStatus" runat="server" Text="" />
-                    
+
                     <asp:Repeater ID="rptBooks" runat="server" OnItemCommand="rptBooks_ItemCommand">
                         <ItemTemplate>
                             <div class="book-card">
@@ -676,15 +664,15 @@
                                         <span class="book-category"><%# Eval("Category") %></span>
                                         <%# !string.IsNullOrEmpty(Eval("Tag")?.ToString()) ? "<span class='book-tag'>#" + Eval("Tag") + "</span>" : "" %>
                                     </div>
-                                    <button class="secondary-button" type="button" 
-                                            data-bs-toggle="collapse" 
-                                            data-bs-target="#book<%# Container.ItemIndex %>" 
-                                            aria-expanded="false" 
-                                            aria-controls="book<%# Container.ItemIndex %>">
-                                        <i class="fas fa-cog"></i> Manage
+                                    <button class="secondary-button" type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#book<%# Container.ItemIndex %>"
+                                        aria-expanded="false"
+                                        aria-controls="book<%# Container.ItemIndex %>">
+                                        <i class="fas fa-cog"></i>Manage
                                     </button>
                                 </div>
-                                
+
                                 <div class="collapse" id="book<%# Container.ItemIndex %>">
                                     <div class="card-body">
                                         <div class="row">
@@ -697,13 +685,13 @@
                                                     <div class="form-grid">
                                                         <div class="form-group">
                                                             <label class="form-label">Title</label>
-                                                            <asp:TextBox ID="txtEditTitle" runat="server" CssClass="form-control" 
-                                                                       Text='<%# Eval("Title") %>' />
+                                                            <asp:TextBox ID="txtEditTitle" runat="server" CssClass="form-control"
+                                                                Text='<%# Eval("Title") %>' />
                                                         </div>
                                                         <div class="form-group">
                                                             <label class="form-label">Author</label>
-                                                            <asp:TextBox ID="txtEditAuthor" runat="server" CssClass="form-control" 
-                                                                       Text='<%# Eval("Author") %>' />
+                                                            <asp:TextBox ID="txtEditAuthor" runat="server" CssClass="form-control"
+                                                                Text='<%# Eval("Author") %>' />
                                                         </div>
                                                         <div class="form-group">
                                                             <label class="form-label">Category</label>
@@ -734,8 +722,8 @@
                                                         </div>
                                                         <div class="form-group">
                                                             <label class="form-label">Tag</label>
-                                                            <asp:TextBox ID="txtEditTag" runat="server" CssClass="form-control" 
-                                                                       Text='<%# Eval("Tag") %>' />
+                                                            <asp:TextBox ID="txtEditTag" runat="server" CssClass="form-control"
+                                                                Text='<%# Eval("Tag") %>' />
                                                         </div>
                                                         <div class="form-group">
                                                             <label class="form-label">Replace PDF (Optional)</label>
@@ -748,7 +736,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="col-md-4">
                                                 <div class="edit-section">
                                                     <h6 class="mb-3">
@@ -761,23 +749,23 @@
                                                             View PDF
                                                         </a>
                                                     </asp:Panel>
-                                                    
+
                                                     <div class="action-buttons">
-                                                        <asp:LinkButton ID="btnUpdate" runat="server" 
-                                                                      CssClass="success-button" 
-                                                                      CommandName="Update" 
-                                                                      CommandArgument='<%# Eval("Id") %>'
-                                                                      CausesValidation="false"
-                                                                      OnClientClick="return confirm('Update this book?');">
+                                                        <asp:LinkButton ID="btnUpdate" runat="server"
+                                                            CssClass="success-button"
+                                                            CommandName="Update"
+                                                            CommandArgument='<%# Eval("Id") %>'
+                                                            CausesValidation="false"
+                                                            OnClientClick="return confirm('Update this book?');">
                                                             <i class="fas fa-save"></i> Update
                                                         </asp:LinkButton>
-                                                        
-                                                        <asp:LinkButton ID="btnDelete" runat="server" 
-                                                                      CssClass="danger-button" 
-                                                                      CommandName="Delete" 
-                                                                      CommandArgument='<%# Eval("Id") %>'
-                                                                      CausesValidation="false"
-                                                                      OnClientClick="return confirm('Are you sure you want to delete this book? This action cannot be undone.');">
+
+                                                        <asp:LinkButton ID="btnDelete" runat="server"
+                                                            CssClass="danger-button"
+                                                            CommandName="Delete"
+                                                            CommandArgument='<%# Eval("Id") %>'
+                                                            CausesValidation="false"
+                                                            OnClientClick="return confirm('Are you sure you want to delete this book? This action cannot be undone.');">
                                                             <i class="fas fa-trash"></i> Delete
                                                         </asp:LinkButton>
                                                     </div>
@@ -789,12 +777,15 @@
                             </div>
                         </ItemTemplate>
                     </asp:Repeater>
-                    
+
                     <asp:Panel ID="pnlNoBooks" runat="server" Visible="false" CssClass="no-data-panel">
                         <i class="fas fa-book-open"></i>
                         <asp:Panel ID="pnlNoSearchResults" runat="server" Visible="false">
                             <h4>No Books Found</h4>
-                            <p>No books match your search criteria. Try different keywords or <asp:LinkButton ID="lnkClearSearch" runat="server" Text="clear the search" OnClick="btnClearSearch_Click" CausesValidation="false" CssClass="text-primary" />.</p>
+                            <p>
+                                No books match your search criteria. Try different keywords or
+                                <asp:LinkButton ID="lnkClearSearch" runat="server" Text="clear the search" OnClick="btnClearSearch_Click" CausesValidation="false" CssClass="text-primary" />.
+                            </p>
                         </asp:Panel>
                         <asp:Panel ID="pnlNoBooksAtAll" runat="server" Visible="true">
                             <h4>No Learning Materials Found</h4>
@@ -807,9 +798,7 @@
     </div>
 
     <script>
-        // Modern JavaScript enhancements
         document.addEventListener('DOMContentLoaded', function () {
-            // Auto-hide status messages
             setTimeout(function () {
                 var statusMessages = document.querySelectorAll('.status-message');
                 statusMessages.forEach(function (message) {
@@ -822,7 +811,6 @@
                 });
             }, 5000);
 
-            // Enhanced hover effects for cards
             const cards = document.querySelectorAll('.book-card');
             cards.forEach((card, index) => {
                 card.style.animationDelay = `${index * 0.1}s`;
@@ -838,7 +826,6 @@
                 });
             });
 
-            // Form input focus effects
             const inputs = document.querySelectorAll('.form-control');
             inputs.forEach(input => {
                 input.addEventListener('focus', function () {
@@ -852,20 +839,17 @@
                 });
             });
 
-            // PDF file validation - UPDATED FOR 4MB
             const pdfInputs = document.querySelectorAll('input[type="file"]');
             pdfInputs.forEach(input => {
                 input.addEventListener('change', function () {
                     const file = this.files[0];
                     if (file) {
-                        // Check file type
                         if (file.type !== 'application/pdf') {
                             alert('Please select a PDF file only.');
                             this.value = '';
                             return;
                         }
 
-                        // Check file size (4 MB = 4 * 1024 * 1024 bytes)
                         const maxSize = 4 * 1024 * 1024;
                         if (file.size > maxSize) {
                             alert('File size exceeds 4 MB limit. Please select a smaller file.');

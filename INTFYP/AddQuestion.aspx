@@ -1,12 +1,10 @@
 ﻿<%@ Page Async="true" Title="Add Question" Language="C#" MasterPageFile="~/TeacherSite.master" AutoEventWireup="true" CodeFile="AddQuestion.aspx.cs" Inherits="KoreanApp.AddQuestion" %>
 
 <asp:Content ID="AddQuestionContent" ContentPlaceHolderID="TeacherMainContent" runat="server">
-    <!-- Hidden Fields for Form State -->
     <asp:HiddenField ID="hfEditingQuestionId" runat="server" />
     <asp:HiddenField ID="hfEditingLessonId" runat="server" />
     
     <style>
-        /* Modern Design System Implementation */
         .add-question-page {
             padding: 40px 20px;
             font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -168,7 +166,6 @@
             color: white;
         }
 
-        /* Question Type Container */
         .question-type-container {
             background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
             backdrop-filter: blur(5px);
@@ -223,7 +220,6 @@
             left: 100%;
         }
 
-        /* Question Option Styles */
         .question-option {
             background: rgba(255, 255, 255, 0.9);
             padding: 20px;
@@ -238,7 +234,6 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
 
-        /* Upload Area */
         .upload-area {
             border: 2px dashed rgba(103, 126, 234, 0.3);
             padding: 30px;
@@ -260,7 +255,6 @@
             margin-bottom: 10px;
         }
 
-        /* Existing Questions/Lessons */
         .existing-item {
             background: rgba(255, 255, 255, 0.9);
             border-radius: 15px;
@@ -277,7 +271,6 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
 
-        /* Counter Badge */
         .counter-badge {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -289,7 +282,6 @@
             box-shadow: 0 4px 15px rgba(103, 126, 234, 0.3);
         }
 
-        /* Section Header */
         .section-header {
             background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
             backdrop-filter: blur(5px);
@@ -299,7 +291,6 @@
             border-left: 4px solid #667eea;
         }
 
-        /* Form Grid */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -311,7 +302,6 @@
             position: relative;
         }
 
-        /* Alert Messages */
         .alert-message {
             background: rgba(86, 171, 47, 0.1);
             border: 1px solid rgba(86, 171, 47, 0.3);
@@ -328,7 +318,6 @@
             color: #721c24;
         }
 
-        /* Animations */
         @keyframes slideInFromTop {
             from {
                 opacity: 0;
@@ -362,7 +351,6 @@
             }
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .radio-group {
                 grid-template-columns: 1fr;
@@ -379,7 +367,6 @@
             }
         }
 
-        /* Utility Classes */
         .mb-0 { margin-bottom: 0; }
         .mb-1 { margin-bottom: 5px; }
         .mb-2 { margin-bottom: 10px; }
@@ -404,10 +391,8 @@
                 <p class="page-subtitle">Create engaging lessons with multimedia questions</p>
             </div>
 
-            <!-- Message Display -->
             <asp:Label ID="lblMessage" runat="server" CssClass="alert-message" Visible="false" />
 
-            <!-- Language Selection -->
             <div class="glass-card">
                 <div class="card-header">
                     <i class="fas fa-globe"></i>
@@ -426,7 +411,6 @@
                 </div>
             </div>
 
-            <!-- Topics Section -->
             <asp:Panel ID="panelTopics" runat="server" Visible="false">
                 <div class="glass-card">
                     <div class="card-header">
@@ -444,7 +428,6 @@
                             </asp:DropDownList>
                         </div>
 
-                        <!-- New Topic Panel -->
                         <asp:Panel ID="panelNewTopic" runat="server" Visible="false">
                             <div class="section-header">
                                 <h5 class="mb-2">
@@ -468,9 +451,7 @@
                 </div>
             </asp:Panel>
 
-            <!-- Lessons Section -->
             <asp:Panel ID="panelLessons" runat="server" Visible="false">
-                <!-- Existing Lessons Display -->
                 <div class="glass-card">
                     <div class="card-header">
                         <i class="fas fa-book"></i>
@@ -510,7 +491,6 @@
                     </div>
                 </div>
 
-                <!-- Add/Edit Lesson Form -->
                 <div class="glass-card">
                     <div class="card-header">
                         <i class="fas fa-plus-circle"></i>
@@ -546,9 +526,7 @@
                 </div>
             </asp:Panel>
 
-            <!-- Question Form -->
             <asp:Panel ID="panelQuestionForm" runat="server" Visible="false">
-                <!-- Existing Questions Display -->
                 <div class="glass-card">
                     <div class="card-header">
                         <i class="fas fa-list-ul"></i>
@@ -583,14 +561,12 @@
                     </div>
                 </div>
 
-                <!-- Add/Edit Question Form -->
                 <div class="glass-card">
                     <div class="card-header">
                         <i class="fas fa-question-circle"></i>
                         <asp:Label ID="lblFormTitle" runat="server" Text="Add New Question" />
                     </div>
                     <div class="card-body">
-                        <!-- Question Text -->
                         <div class="form-group mb-4">
                             <label for="txtQuestionText" class="form-label">
                                 <i class="fas fa-comment-alt me-1"></i>
@@ -600,7 +576,6 @@
                                 placeholder="Enter your question here..." TextMode="MultiLine" Rows="3"></asp:TextBox>
                         </div>
 
-                        <!-- Question Type Selection -->
                         <div class="question-type-container">
                             <h5 class="mb-3">
                                 <i class="fas fa-cogs me-2"></i>
@@ -625,7 +600,6 @@
                             </div>
                         </div>
 
-                        <!-- Image Question Panel -->
                         <asp:Panel ID="panelImageQuestion" runat="server" Visible="false">
                             <div class="question-option">
                                 <h6 class="mb-3">
@@ -641,7 +615,6 @@
                             </div>
                         </asp:Panel>
 
-                        <!-- Audio Question Panel -->
                         <asp:Panel ID="panelAudioQuestion" runat="server" Visible="false">
                             <div class="question-option">
                                 <h6 class="mb-3">
@@ -657,7 +630,6 @@
                             </div>
                         </asp:Panel>
 
-                        <!-- Text Options Panel -->
                         <asp:Panel ID="panelTextOptions" runat="server" Visible="false">
                             <div class="question-option">
                                 <h6 class="mb-3">
@@ -692,7 +664,6 @@
                             </div>
                         </asp:Panel>
 
-                        <!-- Save/Cancel Buttons -->
                         <div class="d-flex justify-content-end mt-4 gap-2">
                             <asp:Button ID="btnCancelEdit" runat="server" Text="❌ Cancel Edit" 
                                 CssClass="secondary-button" OnClick="btnCancelEdit_Click" Visible="false" />
@@ -706,9 +677,7 @@
     </div>
 
     <script>
-        // Modern JavaScript enhancements
         document.addEventListener('DOMContentLoaded', function () {
-            // Auto-hide alert messages
             setTimeout(function () {
                 var alert = document.querySelector('.alert-message');
                 if (alert) {
@@ -721,7 +690,6 @@
                 }
             }, 5000);
 
-            // Enhanced radio button interactions
             const radioItems = document.querySelectorAll('.radio-item');
             radioItems.forEach(item => {
                 item.addEventListener('click', function() {
@@ -733,13 +701,11 @@
                 });
             });
 
-            // Staggered animations for existing items
             const existingItems = document.querySelectorAll('.existing-item');
             existingItems.forEach((item, index) => {
                 item.style.animationDelay = `${index * 0.1}s`;
             });
 
-            // Form input focus effects
             const inputs = document.querySelectorAll('.form-control, .form-select');
             inputs.forEach(input => {
                 input.addEventListener('focus', function () {
@@ -751,7 +717,6 @@
                 });
             });
 
-            // Upload area drag and drop effects
             const uploadAreas = document.querySelectorAll('.upload-area');
             uploadAreas.forEach(area => {
                 area.addEventListener('dragover', function(e) {

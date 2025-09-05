@@ -2,7 +2,6 @@
 
 <asp:Content ID="AddScholarshipContent" ContentPlaceHolderID="TeacherMainContent" runat="server">
     <style>
-        /* Modern Design System Implementation */
         .add-scholarship-page {
             padding: 40px 20px;
             font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -82,12 +81,12 @@
             resize: vertical;
         }
 
-        .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(103, 126, 234, 0.3);
-            outline: none;
-            transform: scale(1.02);
-        }
+            .form-control:focus {
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(103, 126, 234, 0.3);
+                outline: none;
+                transform: scale(1.02);
+            }
 
         .primary-button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -103,12 +102,12 @@
             text-decoration: none;
         }
 
-        .primary-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(103, 126, 234, 0.4);
-            color: white;
-            text-decoration: none;
-        }
+            .primary-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(103, 126, 234, 0.4);
+                color: white;
+                text-decoration: none;
+            }
 
         .success-button {
             background: linear-gradient(45deg, #56ab2f, #a8e6cf);
@@ -122,11 +121,11 @@
             text-decoration: none;
         }
 
-        .success-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(86, 171, 47, 0.3);
-            color: white;
-        }
+            .success-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(86, 171, 47, 0.3);
+                color: white;
+            }
 
         .danger-button {
             background: linear-gradient(45deg, #ff6b6b, #ee5a52);
@@ -140,13 +139,12 @@
             text-decoration: none;
         }
 
-        .danger-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
-            color: white;
-        }
+            .danger-button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+                color: white;
+            }
 
-        /* Scholarship Card Styles with Collapsible Design */
         .scholarship-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -160,22 +158,27 @@
             position: relative;
         }
 
-        .scholarship-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea, #764ba2, #ff6b6b, #4ecdc4);
-            background-size: 400% 100%;
-            animation: gradientShift 3s ease infinite;
-            pointer-events: none;
-        }
+            .scholarship-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, #667eea, #764ba2, #ff6b6b, #4ecdc4);
+                background-size: 400% 100%;
+                animation: gradientShift 3s ease infinite;
+                pointer-events: none;
+            }
 
         @keyframes gradientShift {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
         }
 
         .scholarship-card:hover {
@@ -203,7 +206,6 @@
             flex: 1;
         }
 
-        /* Toggle Button (similar to Scholarship page) */
         .toggle-button {
             padding: 10px 18px;
             border-radius: 20px;
@@ -222,23 +224,22 @@
             text-align: center;
         }
 
-        .toggle-button:hover {
-            background: rgba(103, 126, 234, 0.2);
-            transform: translateY(-1px);
-            border-color: #764ba2;
-        }
+            .toggle-button:hover {
+                background: rgba(103, 126, 234, 0.2);
+                transform: translateY(-1px);
+                border-color: #764ba2;
+            }
 
-        .toggle-button:active {
-            transform: translateY(0);
-        }
+            .toggle-button:active {
+                transform: translateY(0);
+            }
 
-        .toggle-button.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-            color: white !important;
-            border-color: transparent !important;
-        }
+            .toggle-button.active {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+                color: white !important;
+                border-color: transparent !important;
+            }
 
-        /* Custom Collapse Implementation */
         .scholarship-details {
             max-height: 0;
             overflow: hidden;
@@ -246,10 +247,10 @@
             padding: 0 20px;
         }
 
-        .scholarship-details.show {
-            max-height: 2000px;
-            padding: 20px;
-        }
+            .scholarship-details.show {
+                max-height: 2000px;
+                padding: 20px;
+            }
 
         .scholarship-section {
             margin-bottom: 20px;
@@ -260,10 +261,10 @@
             transition: all 0.2s ease;
         }
 
-        .scholarship-section:hover {
-            background: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
+            .scholarship-section:hover {
+                background: rgba(255, 255, 255, 0.8);
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            }
 
         .section-title {
             font-weight: 600;
@@ -282,17 +283,16 @@
             line-height: 1.5;
         }
 
-        .section-content a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
+            .section-content a {
+                color: #667eea;
+                text-decoration: none;
+                font-weight: 500;
+            }
 
-        .section-content a:hover {
-            text-decoration: underline;
-        }
+                .section-content a:hover {
+                    text-decoration: underline;
+                }
 
-        /* Edit Section */
         .edit-section {
             background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
             backdrop-filter: blur(5px);
@@ -302,16 +302,15 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .edit-section h5 {
-            color: #2c3e50;
-            font-weight: 600;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+            .edit-section h5 {
+                color: #2c3e50;
+                font-weight: 600;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
 
-        /* Action Buttons */
         .action-buttons {
             display: flex;
             gap: 10px;
@@ -319,7 +318,6 @@
             flex-wrap: wrap;
         }
 
-        /* Form Grid */
         .form-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -331,7 +329,6 @@
             position: relative;
         }
 
-        /* Status Messages */
         .status-message {
             background: rgba(86, 171, 47, 0.1);
             border: 1px solid rgba(86, 171, 47, 0.3);
@@ -345,7 +342,6 @@
             gap: 10px;
         }
 
-        /* No Data State */
         .no-scholarships {
             text-align: center;
             padding: 60px 20px;
@@ -355,19 +351,28 @@
             backdrop-filter: blur(5px);
         }
 
-        .no-scholarships i {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            opacity: 0.5;
+            .no-scholarships i {
+                font-size: 4rem;
+                margin-bottom: 20px;
+                opacity: 0.5;
+            }
+
+        .icon-requirement {
+            color: #ff6b6b;
         }
 
-        /* Icon Styles */
-        .icon-requirement { color: #ff6b6b; }
-        .icon-terms { color: #4ecdc4; }
-        .icon-courses { color: #45b7d1; }
-        .icon-link { color: #96ceb4; }
+        .icon-terms {
+            color: #4ecdc4;
+        }
 
-        /* Summary Preview (shown when collapsed) */
+        .icon-courses {
+            color: #45b7d1;
+        }
+
+        .icon-link {
+            color: #96ceb4;
+        }
+
         .scholarship-preview {
             padding: 15px 20px;
             background: rgba(255, 255, 255, 0.3);
@@ -378,12 +383,12 @@
             font-style: italic;
         }
 
-        /* Animations */
         @keyframes slideInFromTop {
             from {
                 opacity: 0;
                 transform: translateY(-50px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -395,6 +400,7 @@
                 opacity: 0;
                 transform: translateY(50px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -406,35 +412,42 @@
                 opacity: 0;
                 transform: translateX(-50px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
             }
         }
 
-        /* Button Effects */
         .toggle-button.clicked {
             animation: buttonPulse 0.2s ease-out;
         }
 
         @keyframes buttonPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(0.95); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(0.95);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .scholarship-header {
                 flex-direction: column;
                 gap: 15px;
                 text-align: center;
             }
-            
+
             .action-buttons {
                 flex-direction: column;
             }
-            
+
             .form-grid {
                 gap: 15px;
             }
@@ -449,20 +462,57 @@
             }
         }
 
-        /* Utility Classes */
-        .mb-0 { margin-bottom: 0; }
-        .mb-1 { margin-bottom: 5px; }
-        .mb-2 { margin-bottom: 10px; }
-        .mb-3 { margin-bottom: 15px; }
-        .mb-4 { margin-bottom: 20px; }
-        .mt-3 { margin-top: 15px; }
-        .mt-4 { margin-top: 20px; }
-        .d-flex { display: flex; }
-        .justify-content-end { justify-content: flex-end; }
-        .justify-content-between { justify-content: space-between; }
-        .align-items-center { align-items: center; }
-        .text-center { text-align: center; }
-        .gap-2 { gap: 10px; }
+        .mb-0 {
+            margin-bottom: 0;
+        }
+
+        .mb-1 {
+            margin-bottom: 5px;
+        }
+
+        .mb-2 {
+            margin-bottom: 10px;
+        }
+
+        .mb-3 {
+            margin-bottom: 15px;
+        }
+
+        .mb-4 {
+            margin-bottom: 20px;
+        }
+
+        .mt-3 {
+            margin-top: 15px;
+        }
+
+        .mt-4 {
+            margin-top: 20px;
+        }
+
+        .d-flex {
+            display: flex;
+        }
+
+        .justify-content-end {
+            justify-content: flex-end;
+        }
+
+        .justify-content-between {
+            justify-content: space-between;
+        }
+
+        .align-items-center {
+            align-items: center;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .gap-2 {
+            gap: 10px;
+        }
     </style>
 
     <div class="add-scholarship-page">
@@ -472,7 +522,6 @@
                 <p class="page-subtitle">Create and manage scholarship opportunities for students</p>
             </div>
 
-            <!-- Status Message -->
             <asp:Panel ID="pnlStatus" runat="server" Visible="false">
                 <div class="status-message">
                     <i class="fas fa-check-circle"></i>
@@ -480,7 +529,6 @@
                 </div>
             </asp:Panel>
 
-            <!-- Add Scholarship Form -->
             <div class="glass-card">
                 <div class="card-header">
                     <i class="fas fa-plus-circle"></i>
@@ -493,8 +541,8 @@
                                 <i class="fas fa-graduation-cap me-1"></i>
                                 Scholarship Title
                             </label>
-                            <asp:TextBox ID="txtTitle" runat="server" CssClass="form-control" 
-                                       placeholder="e.g., International Excellence Scholarship 2024" />
+                            <asp:TextBox ID="txtTitle" runat="server" CssClass="form-control"
+                                placeholder="e.g., International Excellence Scholarship 2024" />
                         </div>
 
                         <div class="form-group">
@@ -502,9 +550,9 @@
                                 <i class="fas fa-clipboard-check me-1 icon-requirement"></i>
                                 Requirements
                             </label>
-                            <asp:TextBox ID="txtRequirement" runat="server" TextMode="MultiLine" Rows="8" 
-                                       CssClass="form-control" 
-                                       placeholder="Enter detailed scholarship requirements...
+                            <asp:TextBox ID="txtRequirement" runat="server" TextMode="MultiLine" Rows="8"
+                                CssClass="form-control"
+                                placeholder="Enter detailed scholarship requirements...
 
 Example:
 • Minimum GPA of 3.5
@@ -518,9 +566,9 @@ Example:
                                 <i class="fas fa-file-contract me-1 icon-terms"></i>
                                 Terms & Conditions
                             </label>
-                            <asp:TextBox ID="txtTerms" runat="server" TextMode="MultiLine" Rows="8" 
-                                       CssClass="form-control" 
-                                       placeholder="Enter terms and conditions...
+                            <asp:TextBox ID="txtTerms" runat="server" TextMode="MultiLine" Rows="8"
+                                CssClass="form-control"
+                                placeholder="Enter terms and conditions...
 
 Example:
 • Scholarship amount: $5,000 per year
@@ -534,9 +582,9 @@ Example:
                                 <i class="fas fa-book me-1 icon-courses"></i>
                                 Eligible Study Courses
                             </label>
-                            <asp:TextBox ID="txtCourses" runat="server" TextMode="MultiLine" Rows="6" 
-                                       CssClass="form-control" 
-                                       placeholder="List eligible study courses and programs...
+                            <asp:TextBox ID="txtCourses" runat="server" TextMode="MultiLine" Rows="6"
+                                CssClass="form-control"
+                                placeholder="List eligible study courses and programs...
 
 Example:
 • Computer Science
@@ -551,19 +599,18 @@ Example:
                                 <i class="fas fa-external-link-alt me-1 icon-link"></i>
                                 Scholarship Website URL
                             </label>
-                            <asp:TextBox ID="txtLink" runat="server" CssClass="form-control" 
-                                       placeholder="https://university.edu/scholarships/international-excellence" />
+                            <asp:TextBox ID="txtLink" runat="server" CssClass="form-control"
+                                placeholder="https://university.edu/scholarships/international-excellence" />
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-end mt-4">
-                        <asp:Button ID="btnSubmit" runat="server" Text="✨ Save Scholarship" 
-                                  CssClass="primary-button" OnClick="btnSubmit_Click" />
+                        <asp:Button ID="btnSubmit" runat="server" Text="✨ Save Scholarship"
+                            CssClass="primary-button" OnClick="btnSubmit_Click" />
                     </div>
                 </div>
             </div>
 
-            <!-- Scholarship List Section with Collapsible Cards -->
             <div class="glass-card">
                 <div class="card-header">
                     <i class="fas fa-list-ul"></i>
@@ -571,7 +618,7 @@ Example:
                 </div>
                 <div class="card-body">
                     <asp:Label ID="lblListStatus" runat="server" Text="" />
-                    
+
                     <asp:Repeater ID="rptScholarships" runat="server" OnItemCommand="rptScholarships_ItemCommand">
                         <ItemTemplate>
                             <div class="scholarship-card" style="--card-index: <%# Container.ItemIndex %>;">
@@ -580,18 +627,16 @@ Example:
                                         <i class="fas fa-award"></i>
                                         <%# Eval("Title") %>
                                     </h4>
-                                    <button class="toggle-button" type="button" 
-                                            onclick="toggleScholarshipDetails(this, 'scholarship-details-<%# Container.ItemIndex %>')">
+                                    <button class="toggle-button" type="button"
+                                        onclick="toggleScholarshipDetails(this, 'scholarship-details-<%# Container.ItemIndex %>')">
                                         View Details
                                     </button>
                                 </div>
-                                
-                                <!-- Preview when collapsed -->
+
                                 <div class="scholarship-preview">
                                     Click "View Details" to see requirements, terms, eligible courses, and management options
                                 </div>
-                                
-                                <!-- Collapsible Details -->
+
                                 <div class="scholarship-details" id="scholarship-details-<%# Container.ItemIndex %>">
                                     <div class="scholarship-section">
                                         <div class="section-title">
@@ -600,7 +645,7 @@ Example:
                                         </div>
                                         <div class="section-content"><%# Eval("Requirement") %></div>
                                     </div>
-                                    
+
                                     <div class="scholarship-section">
                                         <div class="section-title">
                                             <i class="fas fa-file-contract icon-terms"></i>
@@ -608,7 +653,7 @@ Example:
                                         </div>
                                         <div class="section-content"><%# Eval("Terms") %></div>
                                     </div>
-                                    
+
                                     <div class="scholarship-section">
                                         <div class="section-title">
                                             <i class="fas fa-book icon-courses"></i>
@@ -616,7 +661,7 @@ Example:
                                         </div>
                                         <div class="section-content"><%# Eval("Courses") %></div>
                                     </div>
-                                    
+
                                     <div class="scholarship-section">
                                         <div class="section-title">
                                             <i class="fas fa-external-link-alt icon-link"></i>
@@ -626,8 +671,7 @@ Example:
                                             <a href='<%# Eval("Link") %>' target="_blank"><%# Eval("Link") %></a>
                                         </div>
                                     </div>
-                                    
-                                    <!-- Management Section -->
+
                                     <div class="edit-section">
                                         <h5>
                                             <i class="fas fa-edit"></i>
@@ -636,49 +680,49 @@ Example:
                                         <div class="form-grid">
                                             <div class="form-group">
                                                 <label class="form-label">Title</label>
-                                                <asp:TextBox ID="txtEditTitle" runat="server" CssClass="form-control" 
-                                                           Text='<%# Eval("Title") %>' />
+                                                <asp:TextBox ID="txtEditTitle" runat="server" CssClass="form-control"
+                                                    Text='<%# Eval("Title") %>' />
                                             </div>
-                                            
+
                                             <div class="form-group">
                                                 <label class="form-label">Requirements</label>
-                                                <asp:TextBox ID="txtEditRequirement" runat="server" TextMode="MultiLine" Rows="6" 
-                                                           CssClass="form-control" Text='<%# Eval("Requirement") %>' />
+                                                <asp:TextBox ID="txtEditRequirement" runat="server" TextMode="MultiLine" Rows="6"
+                                                    CssClass="form-control" Text='<%# Eval("Requirement") %>' />
                                             </div>
-                                            
+
                                             <div class="form-group">
                                                 <label class="form-label">Terms & Conditions</label>
-                                                <asp:TextBox ID="txtEditTerms" runat="server" TextMode="MultiLine" Rows="6" 
-                                                           CssClass="form-control" Text='<%# Eval("Terms") %>' />
+                                                <asp:TextBox ID="txtEditTerms" runat="server" TextMode="MultiLine" Rows="6"
+                                                    CssClass="form-control" Text='<%# Eval("Terms") %>' />
                                             </div>
-                                            
+
                                             <div class="form-group">
                                                 <label class="form-label">Eligible Courses</label>
-                                                <asp:TextBox ID="txtEditCourses" runat="server" TextMode="MultiLine" Rows="4" 
-                                                           CssClass="form-control" Text='<%# Eval("Courses") %>' />
+                                                <asp:TextBox ID="txtEditCourses" runat="server" TextMode="MultiLine" Rows="4"
+                                                    CssClass="form-control" Text='<%# Eval("Courses") %>' />
                                             </div>
-                                            
+
                                             <div class="form-group">
                                                 <label class="form-label">Website Link</label>
-                                                <asp:TextBox ID="txtEditLink" runat="server" CssClass="form-control" 
-                                                           Text='<%# Eval("Link") %>' />
+                                                <asp:TextBox ID="txtEditLink" runat="server" CssClass="form-control"
+                                                    Text='<%# Eval("Link") %>' />
                                             </div>
                                         </div>
-                                        
+
                                         <div class="action-buttons">
-                                            <asp:LinkButton ID="btnUpdate" runat="server" 
-                                                          CssClass="success-button" 
-                                                          CommandName="Update" 
-                                                          CommandArgument='<%# Eval("Id") %>'
-                                                          OnClientClick="return confirm('Update this scholarship?');">
+                                            <asp:LinkButton ID="btnUpdate" runat="server"
+                                                CssClass="success-button"
+                                                CommandName="Update"
+                                                CommandArgument='<%# Eval("Id") %>'
+                                                OnClientClick="return confirm('Update this scholarship?');">
                                                 <i class="fas fa-save"></i> Update
                                             </asp:LinkButton>
-                                            
-                                            <asp:LinkButton ID="btnDelete" runat="server" 
-                                                          CssClass="danger-button" 
-                                                          CommandName="Delete" 
-                                                          CommandArgument='<%# Eval("Id") %>'
-                                                          OnClientClick="return confirm('Are you sure you want to delete this scholarship?');">
+
+                                            <asp:LinkButton ID="btnDelete" runat="server"
+                                                CssClass="danger-button"
+                                                CommandName="Delete"
+                                                CommandArgument='<%# Eval("Id") %>'
+                                                OnClientClick="return confirm('Are you sure you want to delete this scholarship?');">
                                                 <i class="fas fa-trash"></i> Delete
                                             </asp:LinkButton>
                                         </div>
@@ -687,7 +731,7 @@ Example:
                             </div>
                         </ItemTemplate>
                     </asp:Repeater>
-                    
+
                     <asp:Panel ID="pnlNoScholarships" runat="server" Visible="false" CssClass="no-scholarships">
                         <i class="fas fa-graduation-cap"></i>
                         <h4>No Scholarship Opportunities Found</h4>
@@ -699,9 +743,7 @@ Example:
     </div>
 
     <script>
-        // Modern JavaScript enhancements with collapsible functionality
         document.addEventListener('DOMContentLoaded', function () {
-            // Auto-hide status messages
             setTimeout(function () {
                 var statusPanel = document.querySelector('.status-message');
                 if (statusPanel) {
@@ -714,7 +756,6 @@ Example:
                 }
             }, 5000);
 
-            // Enhanced hover effects for scholarship cards
             const cards = document.querySelectorAll('.scholarship-card');
             cards.forEach((card, index) => {
                 card.style.animationDelay = `${index * 0.1}s`;
@@ -730,7 +771,6 @@ Example:
                 });
             });
 
-            // Form input focus effects
             const inputs = document.querySelectorAll('.form-control');
             inputs.forEach(input => {
                 input.addEventListener('focus', function () {
@@ -744,7 +784,6 @@ Example:
                 });
             });
 
-            // Auto-resize textareas
             const textareas = document.querySelectorAll('textarea');
             textareas.forEach(textarea => {
                 textarea.addEventListener('input', function () {
@@ -753,41 +792,33 @@ Example:
                 });
             });
 
-            // Add smooth scrolling
             document.documentElement.style.scrollBehavior = 'smooth';
         });
 
-        // Toggle function for scholarship details (similar to Scholarship page)
         function toggleScholarshipDetails(button, detailsId) {
             console.log('Toggle clicked for:', detailsId);
 
-            // Add visual feedback
             button.classList.add('clicked');
             setTimeout(() => {
                 button.classList.remove('clicked');
             }, 200);
 
-            // Get the details element
             const detailsElement = document.getElementById(detailsId);
             const previewElement = button.closest('.scholarship-card').querySelector('.scholarship-preview');
 
-            // Check if currently open
             if (detailsElement.classList.contains('show')) {
-                // Close it
                 detailsElement.classList.remove('show');
                 button.textContent = 'View Details';
                 button.classList.remove('active');
                 previewElement.style.display = 'block';
                 console.log('Closing details');
             } else {
-                // Open it
                 detailsElement.classList.add('show');
                 button.textContent = 'Hide Details';
                 button.classList.add('active');
                 previewElement.style.display = 'none';
                 console.log('Opening details');
 
-                // Smooth scroll to the card
                 setTimeout(() => {
                     const card = button.closest('.scholarship-card');
                     card.scrollIntoView({

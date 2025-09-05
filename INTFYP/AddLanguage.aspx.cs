@@ -14,7 +14,6 @@ namespace INTFYP
         private static FirestoreDb db;
         private static readonly object dbLock = new object();
 
-        // Data Model
         [FirestoreData]
         public class Language
         {
@@ -89,19 +88,17 @@ namespace INTFYP
                     Code = txtLanguageCode.Text.Trim().ToUpper(),
                     Description = txtDescription.Text.Trim(),
                     Flag = txtFlag.Text.Trim(),
-                    Difficulty = "Beginner", // Default value
+                    Difficulty = "Beginner", 
                     CreatedDate = DateTime.UtcNow,
                     IsActive = true
                 };
 
-                // Check if language already exists
                 if (await LanguageExists(language.Code))
                 {
                     ShowAlert($"A language with code '{language.Code}' already exists!", "error");
                     return;
                 }
 
-                // Add to Firestore
                 DocumentReference docRef = db.Collection("languages").Document(language.Id);
                 await docRef.SetAsync(language);
 
@@ -202,7 +199,6 @@ namespace INTFYP
 
             try
             {
-                // Get all active languages
                 CollectionReference languagesRef = db.Collection("languages");
                 Query query = languagesRef.WhereEqualTo("IsActive", true);
                 QuerySnapshot snapshot = await query.GetSnapshotAsync();
@@ -251,7 +247,6 @@ namespace INTFYP
         {
             try
             {
-                // Find the controls in the repeater item
                 RepeaterItem item = (RepeaterItem)e.Item;
                 TextBox txtEditName = (TextBox)item.FindControl("txtEditLanguageName");
                 TextBox txtEditCode = (TextBox)item.FindControl("txtEditLanguageCode");
@@ -260,7 +255,6 @@ namespace INTFYP
 
                 if (txtEditName != null && txtEditCode != null)
                 {
-                    // Validate the input
                     if (string.IsNullOrWhiteSpace(txtEditName.Text))
                     {
                         ShowAlert("Please enter a language name.", "error");
@@ -273,7 +267,6 @@ namespace INTFYP
                         return;
                     }
 
-                    // Check if the new language code already exists (excluding current language)
                     string newCode = txtEditCode.Text.Trim().ToUpper();
                     if (await LanguageCodeExistsExcluding(newCode, languageId))
                     {
@@ -281,7 +274,6 @@ namespace INTFYP
                         return;
                     }
 
-                    // Update language in Firestore
                     DocumentReference languageRef = db.Collection("languages").Document(languageId);
 
                     await languageRef.UpdateAsync(new Dictionary<string, object>
@@ -312,7 +304,6 @@ namespace INTFYP
 
                 QuerySnapshot snapshot = await query.GetSnapshotAsync();
 
-                // Check if any document exists with this code that's not the current language
                 return snapshot.Documents.Any(doc => doc.Id != excludeLanguageId);
             }
             catch
@@ -325,12 +316,10 @@ namespace INTFYP
         {
             try
             {
-                // First, get the language name for the success message
                 DocumentReference languageRef = db.Collection("languages").Document(languageId);
                 DocumentSnapshot languageDoc = await languageRef.GetSnapshotAsync();
                 string languageName = languageDoc.Exists ? languageDoc.GetValue<string>("Name") : "Unknown";
 
-                // Soft delete the language (mark as inactive instead of hard delete)
                 await languageRef.UpdateAsync(new Dictionary<string, object>
                 {
                     { "IsActive", false }
@@ -465,17 +454,14 @@ namespace INTFYP
             {
                 var stats = new Dictionary<string, int>();
 
-                // Get total active languages
                 Query activeQuery = db.Collection("languages").WhereEqualTo("IsActive", true);
                 QuerySnapshot activeSnapshot = await activeQuery.GetSnapshotAsync();
                 stats["ActiveLanguages"] = activeSnapshot.Documents.Count;
 
-                // Get total inactive languages
                 Query inactiveQuery = db.Collection("languages").WhereEqualTo("IsActive", false);
                 QuerySnapshot inactiveSnapshot = await inactiveQuery.GetSnapshotAsync();
                 stats["InactiveLanguages"] = inactiveSnapshot.Documents.Count;
 
-                // Get languages by difficulty
                 var difficulties = new[] { "Beginner", "Intermediate", "Advanced", "Expert" };
                 foreach (var difficulty in difficulties)
                 {

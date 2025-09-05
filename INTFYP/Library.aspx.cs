@@ -16,7 +16,6 @@ namespace INTFYP
 
         protected async void Page_Load(object sender, EventArgs e)
         {
-            // Check authentication first
             currentUserEmail = Session["email"]?.ToString();
             currentUserName = Session["username"]?.ToString() ?? "Anonymous";
 
@@ -68,17 +67,14 @@ namespace INTFYP
 
                     book.DocumentId = doc.Id;
 
-                    // Set the state based on whether current user has liked/favorited
                     book.IsRecommended = book.RecommendedBy.Contains(CurrentUserId);
                     book.IsFavorited = book.FavoritedBy.Contains(CurrentUserId);
 
                     allBooks.Add(book);
 
-                    // Add debugging to see what dates we're getting
                     System.Diagnostics.Debug.WriteLine($"Book: {book.Title}, CreatedAt: {book.CreatedAt}, DateAdded: {book.DateAdded}, GetCreationDate: {book.GetCreationDate()}");
                 }
 
-                // Check if we have any books
                 if (allBooks.Count == 0)
                 {
                     pnlNoBooks.Visible = true;
@@ -89,14 +85,12 @@ namespace INTFYP
                 pnlNoBooks.Visible = false;
                 pnlBookSections.Visible = true;
 
-                // FIXED: Load Newest Books using the proper creation date
                 var newestBooks = allBooks
-                    .Where(b => b.GetCreationDate() != DateTime.MinValue) // Only include books with valid dates
+                    .Where(b => b.GetCreationDate() != DateTime.MinValue)
                     .OrderByDescending(b => b.GetCreationDate())
                     .Take(15)
                     .ToList();
 
-                // If no books have dates, fall back to all books (sorted by document ID which contains timestamp)
                 if (newestBooks.Count == 0)
                 {
                     newestBooks = allBooks.Take(15).ToList();
@@ -105,7 +99,6 @@ namespace INTFYP
                 else
                 {
                     System.Diagnostics.Debug.WriteLine($"Found {newestBooks.Count} newest books with valid dates");
-                    // Debug output for newest books
                     foreach (var book in newestBooks.Take(5))
                     {
                         System.Diagnostics.Debug.WriteLine($"Newest: {book.Title} - {book.GetCreationDate()}");
@@ -115,12 +108,10 @@ namespace INTFYP
                 RepNewest.DataSource = newestBooks;
                 RepNewest.DataBind();
 
-                // Load Most Recommended Books (15 items)
                 var mostRecommended = allBooks.OrderByDescending(b => b.Recommendations ?? 0).Take(15).ToList();
                 RepMostRecommended.DataSource = mostRecommended;
                 RepMostRecommended.DataBind();
 
-                // Load All Books Alphabetically
                 var alphabetical = allBooks.OrderBy(b => b.Title ?? "").ToList();
                 RepAlphabetical.DataSource = alphabetical;
                 RepAlphabetical.DataBind();
@@ -131,10 +122,8 @@ namespace INTFYP
             }
         }
 
-        // COMBINED search functionality - now searches across all sections
         protected async void txtBookSearch_TextChanged(object sender, EventArgs e)
         {
-            // Check authentication before processing
             if (string.IsNullOrEmpty(CurrentUserId))
             {
                 Response.Redirect("Login.aspx", false);
@@ -145,10 +134,8 @@ namespace INTFYP
             await ApplyFilters();
         }
 
-        // Category filter functionality
         protected async void ddlCategoryFilter_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // Check authentication before processing
             if (string.IsNullOrEmpty(CurrentUserId))
             {
                 Response.Redirect("Login.aspx", false);
@@ -159,7 +146,6 @@ namespace INTFYP
             await ApplyFilters();
         }
 
-        // Combined method to apply both search and category filter
         private async System.Threading.Tasks.Task ApplyFilters()
         {
             try
@@ -167,10 +153,8 @@ namespace INTFYP
                 string keyword = txtBookSearch.Text.ToLower().Trim();
                 string selectedCategory = ddlCategoryFilter.SelectedValue;
 
-                // If no filters applied, show all sections
                 if (string.IsNullOrEmpty(keyword) && string.IsNullOrEmpty(selectedCategory))
                 {
-                    // Reset visibility of all sections
                     pnlNewest.Visible = true;
                     pnlMostRecommended.Visible = true;
                     pnlAlphabetical.Visible = true;
@@ -192,14 +176,12 @@ namespace INTFYP
                     if (book.FavoritedBy == null) book.FavoritedBy = new List<string>();
                     if (book.Recommendations == null) book.Recommendations = 0;
 
-                    // Set the state based on whether current user has liked/favorited
                     book.IsRecommended = book.RecommendedBy.Contains(CurrentUserId);
                     book.IsFavorited = book.FavoritedBy.Contains(CurrentUserId);
 
                     bool matchesSearch = true;
                     bool matchesCategory = true;
 
-                    // Apply search filter (if search term exists)
                     if (!string.IsNullOrEmpty(keyword))
                     {
                         matchesSearch =
@@ -209,20 +191,17 @@ namespace INTFYP
                             (book.Tag?.ToLower().Contains(keyword) ?? false);
                     }
 
-                    // Apply category filter (if category is selected)
                     if (!string.IsNullOrEmpty(selectedCategory))
                     {
                         matchesCategory = string.Equals(book.Category, selectedCategory, StringComparison.OrdinalIgnoreCase);
                     }
 
-                    // Book must match both search and category filters
                     if (matchesSearch && matchesCategory)
                     {
                         results.Add(book);
                     }
                 }
 
-                // When filtering, show results in a single section, hide others
                 if (results.Count == 0)
                 {
                     pnlNoBooks.Visible = true;
@@ -233,10 +212,8 @@ namespace INTFYP
                     pnlNoBooks.Visible = false;
                     pnlBookSections.Visible = true;
 
-                    // Show filtered results in the "search results" section
                     results = results.OrderByDescending(b => b.Recommendations ?? 0).ToList();
 
-                    // Hide all sections and show only filtered results
                     pnlNewest.Visible = false;
                     pnlMostRecommended.Visible = false;
                     pnlAlphabetical.Visible = false;
@@ -254,7 +231,6 @@ namespace INTFYP
 
         protected async void Repeater_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
-            // Check authentication before processing
             if (string.IsNullOrEmpty(CurrentUserId))
             {
                 ShowMessage("Please log in to interact with books.", "text-warning");
@@ -326,15 +302,12 @@ namespace INTFYP
                     await bookRef.UpdateAsync(bookUpdates);
                 }
 
-                // Reload based on current filter state
                 if (!string.IsNullOrEmpty(txtBookSearch.Text.Trim()) || !string.IsNullOrEmpty(ddlCategoryFilter.SelectedValue))
                 {
-                    // If there are active filters, reapply them
                     await ApplyFilters();
                 }
                 else
                 {
-                    // If no filters active, load all sections
                     await LoadBookSections();
                 }
             }
@@ -346,8 +319,6 @@ namespace INTFYP
 
         private void ShowMessage(string message, string cssClass)
         {
-            // You'll need to add a label control to show messages
-            // For example: lblMessage.Text = message; lblMessage.CssClass = cssClass; lblMessage.Visible = true;
             System.Diagnostics.Debug.WriteLine($"Message: {message} ({cssClass})");
         }
 
@@ -362,23 +333,17 @@ namespace INTFYP
             [FirestoreProperty] public List<string> RecommendedBy { get; set; }
             [FirestoreProperty] public List<string> FavoritedBy { get; set; }
             [FirestoreProperty] public string PdfUrl { get; set; }
-
-            // Handle both field names for backward compatibility
             [FirestoreProperty] public DateTime? DateAdded { get; set; }
             [FirestoreProperty] public Timestamp? CreatedAt { get; set; }
 
-            // Helper method to get the actual creation date from either field
             public DateTime GetCreationDate()
             {
-                // First try CreatedAt (from AddBook page)
                 if (CreatedAt.HasValue)
                     return CreatedAt.Value.ToDateTime();
 
-                // Then try DateAdded (legacy/other sources)
                 if (DateAdded.HasValue)
                     return DateAdded.Value;
 
-                // Default to minimum date if neither exists
                 return DateTime.MinValue;
             }
 

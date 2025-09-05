@@ -6,7 +6,6 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Enhanced Scholarship Page with Library Design Formula - WORKING TOGGLE VERSION */
         
         .scholarship-page {
             padding: 40px 20px;
@@ -17,7 +16,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated background elements */
         .scholarship-page::before {
             content: '';
             position: fixed;
@@ -100,7 +98,6 @@
             margin: 0 0 25px 0;
         }
 
-        /* UPDATED: Scholarship App Button - Matching Submit Feedback Button Design */
         .scholarship-app-button {
             background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%) !important;
             color: white !important;
@@ -154,7 +151,6 @@
             font-size: 18px;
         }
 
-        /* Clicked animation for visual feedback */
         .scholarship-app-button.clicked {
             animation: buttonPulse 0.6s ease-out !important;
         }
@@ -165,7 +161,6 @@
             100% { transform: scale(1); }
         }
 
-        /* Scholarship Cards */
         .scholarship-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -250,7 +245,6 @@
             flex-shrink: 0;
         }
 
-        /* WORKING TOGGLE BUTTON */
         .toggle-button {
             padding: 10px 18px;
             border-radius: 20px;
@@ -279,7 +273,6 @@
             transform: translateY(0);
         }
 
-        /* ACTIVE STATE for opened details */
         .toggle-button.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
             color: white !important;
@@ -293,7 +286,6 @@
             z-index: 2;
         }
 
-        /* CUSTOM COLLAPSE IMPLEMENTATION */
         .scholarship-details {
             max-height: 0;
             overflow: hidden;
@@ -302,7 +294,7 @@
         }
 
         .scholarship-details.show {
-            max-height: 2000px; /* Large enough to accommodate content */
+            max-height: 2000px;
             padding: 25px;
         }
 
@@ -359,7 +351,6 @@
             margin-bottom: 0;
         }
 
-        /* Apply Button */
         .apply-button {
             display: flex;
             align-items: center;
@@ -419,7 +410,6 @@
             margin-left: 5px;
         }
 
-        /* No Scholarships Message */
         .no-scholarships {
             text-align: center;
             padding: 60px 40px;
@@ -468,7 +458,6 @@
             margin: 0;
         }
 
-        /* Responsive design */
         @media (max-width: 768px) {
             .scholarship-page {
                 padding: 20px 15px;
@@ -546,7 +535,6 @@
             }
         }
 
-        /* Enhanced text formatting */
         .section-content ul {
             padding-left: 20px;
             margin-bottom: 10px;
@@ -560,7 +548,6 @@
             color: #2c3e50;
         }
 
-        /* Button click effects */
         .toggle-button.clicked,
         .apply-button.clicked {
             animation: buttonPulse 0.2s ease-out;
@@ -580,7 +567,6 @@
                 <h2 class="page-title">Scholarship Application</h2>
                 <p class="page-subtitle">Review your submitted results and apply for available scholarships</p>
                 
-                <!-- UPDATED: Scholarship Application Button with Teal Design -->
                 <a href="scholarshipApp.aspx" class="scholarship-app-button" onclick="handleScholarshipAppClick(event)">
                     <span class="icon">📝</span>
                     <span>Apply School Scholarship</span>
@@ -633,7 +619,6 @@
                         </ItemTemplate>
                     </asp:Repeater>
 
-                    <!-- No Scholarships Message (if needed) -->
                     <asp:Panel ID="pnlNoScholarships" runat="server" Visible="false" CssClass="no-scholarships">
                         <div class="no-scholarships-icon">🎓</div>
                         <h3>No Scholarships Available</h3>
@@ -644,17 +629,14 @@
         </div>
     </div>
 
-    <!-- Include Required Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 
-    <!-- WORKING JAVASCRIPT - NO BOOTSTRAP CONFLICTS -->
     <script type="text/javascript">
         $(document).ready(function () {
             console.log('Enhanced Scholarship page loaded - WORKING TOGGLE VERSION with teal button');
 
-            // Hover effects for cards
             $('.scholarship-card').hover(
                 function () {
                     $(this).css({
@@ -672,40 +654,32 @@
                 }
             );
 
-            // Add entrance animation delay
             $('.scholarship-card').each(function (index) {
                 $(this).css('animation-delay', (index * 0.15) + 's');
             });
         });
 
-        // SIMPLE WORKING TOGGLE FUNCTION
         function toggleDetails(button, detailsId) {
             console.log('Toggle clicked for:', detailsId);
 
-            // Add visual feedback
             $(button).addClass('clicked');
             setTimeout(() => {
                 $(button).removeClass('clicked');
             }, 200);
 
-            // Get the details element
             const detailsElement = document.getElementById(detailsId);
 
-            // Check if currently open
             if (detailsElement.classList.contains('show')) {
-                // Close it
                 detailsElement.classList.remove('show');
                 button.textContent = 'View Details';
                 button.classList.remove('active');
                 console.log('Closing details');
             } else {
-                // Open it
                 detailsElement.classList.add('show');
                 button.textContent = 'Hide Details';
                 button.classList.add('active');
                 console.log('Opening details');
 
-                // Smooth scroll to the card
                 setTimeout(() => {
                     const card = button.closest('.scholarship-card');
                     card.scrollIntoView({
@@ -719,32 +693,26 @@
 
         function handleApplyClick(event) {
             console.log('Apply button clicked successfully!');
-            // Add visual feedback
             $(event.target).addClass('clicked');
             setTimeout(() => {
                 $(event.target).removeClass('clicked');
             }, 200);
         }
 
-        // UPDATED: Enhanced Scholarship App Button Click with Animation
         function handleScholarshipAppClick(event) {
             console.log('Scholarship App button clicked successfully!');
 
-            // Add clicked class for animation (matching feedback button behavior)
             const button = event.target.closest('.scholarship-app-button');
             button.classList.add('clicked');
 
-            // Remove clicked animation class after animation completes
             setTimeout(() => {
                 button.classList.remove('clicked');
             }, 600);
         }
 
-        // Function for smooth animations on page load
         function pageLoad() {
             console.log('Scholarship PageLoad fired');
 
-            // Re-initialize any JavaScript if needed after postback
             setTimeout(function () {
                 $('.scholarship-card').each(function (index) {
                     $(this).css('animation-delay', (index * 0.15) + 's');
@@ -753,6 +721,5 @@
         }
     </script>
 
-    <!-- Font Awesome for additional icons if needed -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 </asp:Content>

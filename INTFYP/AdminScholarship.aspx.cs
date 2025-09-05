@@ -17,7 +17,6 @@ namespace YourProjectNamespace
         private static FirestoreDb db;
         private static readonly object dbLock = new object();
 
-        // SendGrid configuration
         private static readonly string SendGridApiKey = GetConfigValue("SendGridApiKey");
         private static readonly string SendGridFromEmail = GetConfigValue("SendGridFromEmail");
         private static readonly string SendGridFromName = GetConfigValue("SendGridFromName");
@@ -36,7 +35,6 @@ namespace YourProjectNamespace
         {
             try
             {
-                // Check if user is admin (implement your admin authentication logic here)
                 if (!IsAdminAuthenticated())
                 {
                     Response.Redirect("Login.aspx", false);
@@ -91,8 +89,6 @@ namespace YourProjectNamespace
 
                 return isLoggedIn && isAdmin;
 
-                // For testing purposes, uncomment this line to bypass authentication
-                // return true;
             }
             catch (Exception ex)
             {
@@ -144,7 +140,6 @@ namespace YourProjectNamespace
             {
                 var query = db.Collection("scholarship_applications");
 
-                // Apply filters
                 var searchTerm = txtSearch.Text.Trim().ToLower();
                 var statusFilter = ddlStatusFilter.SelectedValue;
                 var levelFilter = ddlLevelFilter.SelectedValue;
@@ -156,7 +151,6 @@ namespace YourProjectNamespace
                 {
                     var applicationData = ConvertToApplicationData(document);
 
-                    // Apply search filter
                     if (!string.IsNullOrEmpty(searchTerm))
                     {
                         var searchableText = $"{applicationData.FullName} {applicationData.Email} {applicationData.Institution} {applicationData.FieldOfStudy}".ToLower();
@@ -164,18 +158,15 @@ namespace YourProjectNamespace
                             continue;
                     }
 
-                    // Apply status filter
                     if (!string.IsNullOrEmpty(statusFilter) && applicationData.Status != statusFilter)
                         continue;
 
-                    // Apply level filter
                     if (!string.IsNullOrEmpty(levelFilter) && applicationData.AcademicLevel != levelFilter)
                         continue;
 
                     applications.Add(applicationData);
                 }
 
-                // Sort by CreatedAt descending (newest first)
                 applications = applications.OrderByDescending(a => a.CreatedAt).ToList();
 
                 if (applications.Count > 0)
@@ -320,7 +311,6 @@ namespace YourProjectNamespace
         {
             try
             {
-                // Get application data
                 var applicationDoc = await db.Collection("scholarship_applications").Document(applicationId).GetSnapshotAsync();
                 if (!applicationDoc.Exists)
                 {
@@ -330,7 +320,6 @@ namespace YourProjectNamespace
 
                 var applicationData = ConvertToApplicationData(applicationDoc);
 
-                // Update application status
                 var updates = new Dictionary<string, object>
                 {
                     {"Status", "Approved"},
@@ -338,7 +327,6 @@ namespace YourProjectNamespace
                     {"UpdatedAt", Timestamp.GetCurrentTimestamp()}
                 };
 
-                // Remove rejection reason if it exists
                 if (applicationDoc.ContainsField("RejectionReason"))
                 {
                     updates.Add("RejectionReason", FieldValue.Delete);
@@ -346,7 +334,6 @@ namespace YourProjectNamespace
 
                 await db.Collection("scholarship_applications").Document(applicationId).UpdateAsync(updates);
 
-                // Send approval email
                 await SendApprovalEmail(applicationData);
 
                 ShowSuccessMessage($"Scholarship application for {applicationData.FullName} has been approved successfully!");
@@ -368,7 +355,6 @@ namespace YourProjectNamespace
                 var applicationId = hiddenApplicationIdToReject.Value;
                 var rejectionReason = "";
 
-                // Build rejection reason from dropdown and text
                 if (!string.IsNullOrEmpty(ddlRejectionReason.SelectedValue))
                 {
                     rejectionReason = ddlRejectionReason.SelectedValue;
@@ -401,7 +387,6 @@ namespace YourProjectNamespace
         {
             try
             {
-                // Get application data
                 var applicationDoc = await db.Collection("scholarship_applications").Document(applicationId).GetSnapshotAsync();
                 if (!applicationDoc.Exists)
                 {
@@ -411,7 +396,6 @@ namespace YourProjectNamespace
 
                 var applicationData = ConvertToApplicationData(applicationDoc);
 
-                // Update application status
                 var updates = new Dictionary<string, object>
                 {
                     {"Status", "Rejected"},
@@ -422,7 +406,6 @@ namespace YourProjectNamespace
 
                 await db.Collection("scholarship_applications").Document(applicationId).UpdateAsync(updates);
 
-                // Send rejection email
                 await SendRejectionEmail(applicationData, rejectionReason);
 
                 ShowSuccessMessage($"Scholarship application for {applicationData.FullName} has been rejected.");
@@ -704,7 +687,6 @@ The Scholarship Committee
 
         protected void btnLogout_Click(object sender, EventArgs e)
         {
-            // Clear session and redirect to login
             Session.Clear();
             Response.Redirect("Login.aspx");
         }
@@ -724,7 +706,6 @@ The Scholarship Committee
         }
     }
 
-    // Scholarship Application data model
     [Serializable]
     public class ScholarshipApplicationData
     {

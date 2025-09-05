@@ -17,7 +17,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated background elements */
         .language-page::before {
             content: '';
             position: fixed;
@@ -97,7 +96,6 @@
             margin: 0;
         }
 
-        /* Sidebar Card */
         .sidebar-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -160,7 +158,6 @@
             font-size: 24px;
         }
 
-        /* Search Input */
         .search-input {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(5px);
@@ -180,7 +177,6 @@
             background: rgba(255, 255, 255, 1);
         }
 
-        /* Navigation Buttons */
         .nav-button {
             display: flex;
             align-items: center;
@@ -244,7 +240,6 @@
             background: linear-gradient(135deg, #44a08d 0%, #4ecdc4 100%);
         }
 
-        /* Main Content Card */
         .main-content-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -289,7 +284,6 @@
             font-size: 22px;
         }
 
-        /* Language Cards Grid */
         .languages-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -405,7 +399,6 @@
             margin-bottom: 0;
         }
 
-        /* No Languages Message */
         .no-languages {
             text-align: center;
             padding: 40px 30px;
@@ -453,7 +446,6 @@
             margin: 0;
         }
 
-        /* Responsive design */
         @media (max-width: 768px) {
             .language-page {
                 padding: 20px 15px;
@@ -499,7 +491,6 @@
             }
         }
 
-        /* Loading states */
         .language-card.loading {
             opacity: 0;
             animation: cardLoad 0.6s ease-out forwards;
@@ -518,7 +509,6 @@
             </div>
 
             <div class="row">
-                <!-- Sidebar -->
                 <div class="col-md-3 mb-4">
                     <div class="sidebar-card">
                         <h5 class="sidebar-title">Search Languages</h5>
@@ -528,7 +518,6 @@
                             placeholder="Search by language name..." AutoPostBack="true"
                             OnTextChanged="txtLanguageSearch_TextChanged" />
         
-                        <!-- Student Report Button -->
                         <div class="d-grid">
                             <asp:Button ID="btnStudentReport" runat="server" 
                                 Text="📊 Student Reports" 
@@ -538,7 +527,6 @@
                     </div>
                 </div>
 
-                <!-- Main Content -->
                 <div class="col-md-9">
                     <div class="main-content-card">
                         <div class="content-header">
@@ -578,6 +566,5 @@
         </div>
     </div>
 
-    <!-- Font Awesome for additional icons if needed -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 </asp:Content>

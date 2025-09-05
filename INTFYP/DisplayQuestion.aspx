@@ -6,7 +6,6 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Enhanced Questions Page with Library Design System */
         
         .questions-page {
             padding: 40px 20px;
@@ -17,7 +16,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated background elements */
         .questions-page::before {
             content: '';
             position: fixed;
@@ -136,7 +134,6 @@
             font-size: 14px;
         }
 
-        /* Sidebar Card */
         .sidebar-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -199,7 +196,6 @@
             font-size: 24px;
         }
 
-        /* Filter Dropdown */
         .filter-dropdown {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(5px);
@@ -219,7 +215,6 @@
             background: rgba(255, 255, 255, 1);
         }
 
-        /* Navigation Buttons */
         .nav-button {
             display: flex;
             align-items: center;
@@ -283,7 +278,6 @@
             background: linear-gradient(135deg, #44a08d 0%, #4ecdc4 100%);
         }
 
-        /* Main Content Card */
         .main-content-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -328,7 +322,6 @@
             font-size: 22px;
         }
 
-        /* Questions Grid */
         .questions-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -557,7 +550,6 @@
             box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
         }
 
-        /* No Questions Message */
         .no-questions {
             text-align: center;
             padding: 40px 30px;
@@ -605,7 +597,6 @@
             margin: 0;
         }
 
-        /* Statistics Cards */
         .stats-row {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -641,7 +632,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Responsive design */
         @media (max-width: 768px) {
             .questions-page {
                 padding: 20px 15px;
@@ -692,7 +682,6 @@
             }
         }
 
-        /* Loading states */
         .question-card.loading {
             opacity: 0;
             animation: cardLoad 0.6s ease-out forwards;
@@ -712,7 +701,6 @@
                 <p class="page-subtitle">Practice and Learn</p>
             </div>
 
-            <!-- Language Info Header -->
             <div class="language-info">
                 <div class="language-flag-large">
                     <asp:Label ID="lblLanguageFlag" runat="server" Text="🌍" />
@@ -723,7 +711,6 @@
                 </div>
             </div>
 
-            <!-- Statistics Row -->
             <div class="stats-row">
                 <div class="stat-card" style="--stat-index: 0;">
                     <span class="stat-number">
@@ -740,7 +727,6 @@
             </div>
 
             <div class="row">
-                <!-- Sidebar -->
                 <div class="col-md-3 mb-4">
                     <div class="sidebar-card">
                         <h5 class="sidebar-title">Course Navigation</h5>
@@ -770,7 +756,6 @@
                     </div>
                 </div>
 
-                <!-- Main Content -->
                 <div class="col-md-9">
                     <div class="main-content-card">
                         <div class="content-header">
@@ -784,7 +769,6 @@
                         <p>Add topics and lessons to get started with this language!</p>
                     </asp:Panel>
 
-                    <!-- Topics and Lessons Display -->
                     <asp:Repeater ID="rptTopics" runat="server" OnItemDataBound="rptTopics_ItemDataBound">
                         <ItemTemplate>
                             <div class="card mb-3 shadow-sm" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 18px;">
@@ -800,7 +784,6 @@
                                 </div>
                                 <div class="collapse" id="<%# Eval("CollapseId") %>">
                                     <div class="card-body" style="padding: 20px;">
-                                        <!-- Lessons Repeater -->
                                         <asp:Repeater ID="rptLessons" runat="server" OnItemCommand="rptLessons_ItemCommand">
                                             <ItemTemplate>
                                                 <div class="card mb-2 shadow-sm" style="background: rgba(255, 255, 255, 0.9); border: 1px solid rgba(103, 126, 234, 0.1); border-radius: 12px;">
@@ -834,6 +817,5 @@
         </div>
     </div>
 
-    <!-- Font Awesome for additional icons if needed -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 </asp:Content>

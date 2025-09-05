@@ -6,7 +6,6 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Design System Variables */
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             --glass-bg: rgba(255, 255, 255, 0.95);
@@ -23,7 +22,6 @@
             --border-radius-sm: 8px;
         }
 
-        /* Page Background with Library Style */
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
@@ -31,7 +29,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated background elements */
         body::before {
             content: '';
             position: fixed;
@@ -54,7 +51,6 @@
             75% { transform: translate(-10px, 10px) rotate(0.5deg); }
         }
 
-        /* Glass Morphism Effects */
         .glass-card {
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
@@ -89,7 +85,6 @@
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
         }
 
-        /* Page Header */
         .page-header {
             background: var(--primary-gradient);
             color: rgba(255, 255, 255, 0.9);
@@ -126,7 +121,6 @@
             to { width: 60px; }
         }
 
-        /* Animations */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
@@ -174,7 +168,6 @@
             box-shadow: 0 8px 20px rgba(103, 126, 234, 0.4);
         }
 
-        /* Teal Submit Button */
         .btn-submit-teal {
             background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%) !important;
             color: white !important;
@@ -213,14 +206,12 @@
             color: white !important;
         }
 
-        /* Submit Button Container */
         .submit-button-container {
             text-align: center;
             margin-bottom: var(--spacing-lg);
             animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Enhanced Feedback Card Styles */
         .feedback-card {
             height: 100%;
             display: flex;
@@ -289,7 +280,6 @@
             margin-top: auto;
         }
 
-        /* Library-Style Like Button - Card Version */
         .btn-like {
             padding: 0.35rem 0.75rem !important;
             border-radius: 18px !important;
@@ -365,7 +355,6 @@
             100% { transform: scale(1); }
         }
 
-        /* Detail Modal Like Button - Same size as post comment button */
         .btn-like-detail {
             padding: 10px 20px !important;
             border-radius: 25px !important;
@@ -440,7 +429,6 @@
             white-space: nowrap;
         }
 
-        /* Enhanced Card Detail Modal Styles */
         .card-detail-modal .modal-dialog {
             max-width: 95vw;
             width: 95vw;
@@ -455,7 +443,6 @@
             background: rgba(0, 0, 0, 0.9);
         }
 
-        /* Dark backdrop for better focus */
         .card-detail-modal .modal-backdrop {
             background-color: rgba(0, 0, 0, 0.9) !important;
         }
@@ -543,7 +530,6 @@
             backdrop-filter: blur(10px);
         }
 
-        /* Comment input section styles */
         .comment-input {
             margin-bottom: 1.5rem;
             background: rgba(255, 255, 255, 0.8);
@@ -704,7 +690,6 @@
             background: linear-gradient(135deg, #764ba2, #667eea);
         }
 
-        /* Image Zoom Modal */
         .image-zoom-modal .modal-dialog {
             max-width: 90vw;
             width: 90vw;
@@ -749,7 +734,6 @@
             opacity: 1;
         }
 
-        /* Validation Styles */
         .form-control.is-invalid {
             border-color: #dc3545 !important;
             box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
@@ -770,7 +754,6 @@
             font-weight: bold;
         }
 
-        /* Fix for modal backdrop issues */
         .modal-backdrop {
             z-index: 1040 !important;
         }
@@ -784,7 +767,6 @@
             padding-right: 0 !important;
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .card-detail-modal .modal-dialog {
                 max-width: 95vw;
@@ -832,10 +814,8 @@
         }
     </style>
 
-    <!-- Hidden field to store the post ID of the clicked like button -->
     <asp:HiddenField ID="hdnScrollToPost" runat="server" />
 
-    <!-- Header with Gradient Background -->
     <section class="page-header text-center">
         <div class="container">
             <h1 class="display-5 fw-bold">Student Feedback</h1>
@@ -844,14 +824,12 @@
     </section>
 
     <div class="container mb-5">
-        <!-- Submit Button - Full Width Centered -->
         <div class="submit-button-container">
             <button type="button" class="btn btn-submit-teal px-5 py-2" data-bs-toggle="modal" data-bs-target="#feedbackModal" style="font-size: 1.1rem;">
                 Submit Feedback
             </button>
         </div>
 
-        <!-- Feedback Cards - Now Full Width -->
         <div class="row">
             <div class="col-12">
                 <asp:Repeater ID="rptFeedback" runat="server" OnItemCommand="rptFeedback_ItemCommand" OnItemDataBound="rptFeedback_ItemDataBound">
@@ -865,12 +843,10 @@
                                  style='animation-delay: calc(<%# Container.ItemIndex %> * 0.1s)'
                                  data-post-id='<%# Eval("PostId") %>'
                                  onclick="openCardDetail('<%# Eval("PostId") %>')">
-                                <!-- Image Section -->
                                 <div class="feedback-image-container">
                                     <img src='<%# Eval("MediaUrl") %>' alt="Feedback media" class="feedback-image" />
                                 </div>
                                 
-                                <!-- Content Section -->
                                 <div class="feedback-content">
                                     <div class="feedback-header">
                                         <div class="feedback-username"><%# Eval("Username") %></div>
@@ -880,7 +856,6 @@
                                     <p class="feedback-description"><%# Eval("Description") %></p>
                                     
                                     <div class="feedback-actions" onclick="event.stopPropagation();">
-                                        <!-- Like Button with Library Style and Scroll Position Memory -->
                                         <asp:Button ID="btnLike" runat="server"
                                             Text='<%# "❤️ " + Eval("Likes") %>'
                                             CommandName="Like"
@@ -888,7 +863,6 @@
                                             CssClass='<%# "btn-like" + (Convert.ToBoolean(Eval("IsLiked")) ? " active" : "") %>'
                                             OnClientClick='<%# "return storeScrollPosition(\"" + Eval("PostId") + "\");" %>' />
 
-                                        <!-- Comment Button -->
                                         <button type="button"
                                             class="btn btn-sm btn-outline-secondary"
                                             onclick="openCardDetail('<%# Eval("PostId") %>')">
@@ -898,7 +872,6 @@
                                 </div>
                             </div>
 
-                            <!-- Enhanced Card Detail Modal -->
                             <div class="modal fade card-detail-modal" id='<%# "cardDetailModal" + Eval("PostId") %>' tabindex="-1" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
                                 <div class="modal-dialog modal-dialog-centered">
                                     <div class="modal-content">
@@ -910,25 +883,20 @@
                                         </div>
                                         <div class="modal-body p-0">
                                             <div class="card-detail-content">
-                                                <!-- Image Section - Left Column (Now clickable) -->
                                                 <div class="card-detail-image" onclick="openImageZoom('<%# Eval("MediaUrl") %>')">
                                                     <img src='<%# Eval("MediaUrl") %>' alt="Feedback media" />
                                                 </div>
                                                 
-                                                <!-- Info Section - Middle Column -->
                                                 <div class="card-detail-info">
-                                                    <!-- Header -->
                                                     <div class="detail-header">
                                                         <h4><%# Eval("Username") %></h4>
                                                         <div class="detail-date"><%# FormatFullDateTime((DateTime)Eval("CreatedAt")) %></div>
                                                     </div>
                                                     
-                                                    <!-- Description -->
                                                     <div class="detail-description">
                                                         <%# Eval("Description") %>
                                                     </div>
                                                     
-                                                    <!-- Actions Section - Simplified without box -->
                                                     <div class="detail-actions">
                                                         <asp:Button ID="btnLikeDetail" runat="server"
                                                             Text='<%# "❤️ " + Eval("Likes") %>'
@@ -938,7 +906,6 @@
                                                             OnClientClick='<%# "return storeScrollPosition(\"" + Eval("PostId") + "\");" %>' />
                                                     </div>
                                                     
-                                                    <!-- Comment Input Section - In Middle Column -->
                                                     <div class="comment-input">
                                                         <label class="form-label fw-bold mb-2">Add Comment</label>
                                                         <asp:TextBox ID="txtCommentInputDetail" runat="server" 
@@ -957,13 +924,11 @@
                                                     </div>
                                                 </div>
                                                 
-                                                <!-- Comments List Section - Right Column -->
                                                 <div class="card-detail-comments">
                                                     <h6 class="comments-header">
                                                         Comments (<%# ((System.Collections.ICollection)Eval("Comments")).Count %>)
                                                     </h6>
                                                     
-                                                    <!-- Comments List Only -->
                                                     <div class="comments-list">
                                                         <asp:Repeater ID="rptCommentsDetail" runat="server">
                                                             <ItemTemplate>
@@ -983,7 +948,6 @@
                                                             </ItemTemplate>
                                                         </asp:Repeater>
 
-                                                        <!-- No Comments Message -->
                                                         <div id="noCommentsDetailDiv" runat="server" style="display:none;" class="text-center text-muted py-4">
                                                             <i class="fas fa-comment-slash fa-2x mb-3 opacity-50"></i>
                                                             <p class="mb-0">No comments yet. Be the first to comment!</p>
@@ -1005,7 +969,6 @@
         </div>
     </div>
 
-    <!-- Image Zoom Modal -->
     <div class="modal fade image-zoom-modal" id="imageZoomModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -1017,7 +980,6 @@
         </div>
     </div>
 
-    <!-- Updated Feedback Modal with Required Field Validation -->
     <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -1028,7 +990,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Validation Summary -->
                     <asp:ValidationSummary ID="ValidationSummary1" runat="server" 
                         CssClass="alert alert-danger" 
                         HeaderText="Please correct the following errors:"
@@ -1038,7 +999,6 @@
                     
                     <asp:Label ID="lblMessage" runat="server" Visible="false" CssClass="text-danger" />
 
-                    <!-- Username Field -->
                     <div class="mb-3">
                         <label class="form-label fw-bold">Username <span class="text-danger">*</span></label>
                         <asp:TextBox ID="txtFeedbackUsername" runat="server" CssClass="form-control" ReadOnly="true" />
@@ -1051,7 +1011,6 @@
                             ValidationGroup="FeedbackValidation" />
                     </div>
 
-                    <!-- Description Field -->
                     <div class="mb-3">
                         <label for="txtDescription" class="form-label fw-bold">Description <span class="text-danger">*</span></label>
                         <asp:TextBox ID="txtDescription" runat="server" 
@@ -1070,7 +1029,6 @@
                         <div class="form-text">Maximum 1000 characters</div>
                     </div>
 
-                    <!-- File Upload Field -->
                     <div class="mb-3">
                         <label for="fileUpload" class="form-label fw-bold">Upload Image/Video <span class="text-danger">*</span></label>
                         <asp:FileUpload ID="fileUpload" runat="server" CssClass="form-control" />
@@ -1097,21 +1055,17 @@
         </div>
     </div>
 
-    <!-- Include Required Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
 
     <script type="text/javascript">
-        // Client-side validation function
         function validateFeedbackForm() {
             var isValid = true;
             var errorMessages = [];
 
-            // Clear previous error styling
             clearValidationErrors();
 
-            // Validate Username
             var username = document.getElementById('<%= txtFeedbackUsername.ClientID %>').value.trim();
             if (username === '') {
                 isValid = false;
@@ -1119,7 +1073,6 @@
                 addFieldError('<%= txtFeedbackUsername.ClientID %>');
             }
 
-            // Validate Description
             var description = document.getElementById('<%= txtDescription.ClientID %>').value.trim();
             if (description === '') {
                 isValid = false;
@@ -1131,16 +1084,14 @@
                 addFieldError('<%= txtDescription.ClientID %>');
             }
 
-            // Validate File Upload
             var fileUpload = document.getElementById('<%= fileUpload.ClientID %>');
             if (fileUpload.files.length === 0) {
                 isValid = false;
                 errorMessages.push('Please select a file to upload');
                 addFieldError('<%= fileUpload.ClientID %>');
             } else {
-                // Validate file size and type
                 var file = fileUpload.files[0];
-                var maxSize = 10 * 1024 * 1024; // 10MB
+                var maxSize = 10 * 1024 * 1024;
                 var allowedTypes = ['.jpg', '.jpeg', '.png', '.gif', '.mp4', '.avi'];
                 
                 if (file.size > maxSize) {
@@ -1158,11 +1109,9 @@
                 }
             }
 
-            // Show error summary if validation failed
             if (!isValid) {
                 showValidationSummary(errorMessages);
                 
-                // Focus on first invalid field
                 var firstErrorField = document.querySelector('.form-control.is-invalid');
                 if (firstErrorField) {
                     firstErrorField.focus();
@@ -1172,7 +1121,6 @@
             return isValid;
         }
 
-        // Helper function to add error styling to fields
         function addFieldError(fieldId) {
             var field = document.getElementById(fieldId);
             if (field) {
@@ -1181,55 +1129,43 @@
             }
         }
 
-        // Helper function to clear validation errors
         function clearValidationErrors() {
-            // Remove error styling from all form controls
             document.querySelectorAll('.form-control').forEach(function(field) {
                 field.classList.remove('is-invalid');
                 field.style.borderColor = '';
             });
             
-            // Hide validation summary
             var validationSummary = document.querySelector('.validation-summary-custom');
             if (validationSummary) {
                 validationSummary.remove();
             }
         }
 
-        // Helper function to show validation summary
         function showValidationSummary(errorMessages) {
-            // Remove existing summary
             var existingSummary = document.querySelector('.validation-summary-custom');
             if (existingSummary) {
                 existingSummary.remove();
             }
 
-            // Create new summary
             var summary = document.createElement('div');
             summary.className = 'alert alert-danger validation-summary-custom';
             summary.innerHTML = '<strong>Please correct the following errors:</strong><ul>' + 
                 errorMessages.map(msg => '<li>' + msg + '</li>').join('') + '</ul>';
 
-            // Insert at the beginning of modal body
             var modalBody = document.querySelector('#feedbackModal .modal-body');
             modalBody.insertBefore(summary, modalBody.firstChild);
 
-            // Scroll to top of modal
             modalBody.scrollTop = 0;
         }
 
-        // Function to store which feedback post was liked before postback
         function storeScrollPosition(postId) {
             console.log('Storing scroll position for post:', postId);
             
-            // Store the post ID in the hidden field
             document.getElementById('<%= hdnScrollToPost.ClientID %>').value = postId;
             
-            // Allow the postback to continue
             return true;
         }
 
-        // Function to scroll to the stored feedback card after page reload
         function scrollToStoredPost() {
             var hiddenField = document.getElementById('<%= hdnScrollToPost.ClientID %>');
             if (hiddenField && hiddenField.value) {
@@ -1239,14 +1175,12 @@
                 if (feedbackCard) {
                     console.log('Scrolling to feedback post:', postId);
 
-                    // Smooth scroll to the feedback card
                     feedbackCard.scrollIntoView({
                         behavior: 'smooth',
                         block: 'center',
                         inline: 'nearest'
                     });
 
-                    // Add a temporary highlight effect
                     feedbackCard.style.boxShadow = '0 0 25px rgba(103, 126, 234, 0.6)';
                     feedbackCard.style.transform = 'translateY(-5px) scale(1.02)';
 
@@ -1255,22 +1189,18 @@
                         feedbackCard.style.transform = '';
                     }, 2000);
 
-                    // Clear the hidden field
                     hiddenField.value = '';
                 }
             }
         }
 
-        // Simplified modal tracking
         let modalInstances = new Map();
 
         $(document).ready(function () {
             console.log('Enhanced Feedback page loaded with validation and scroll position memory');
 
-            // Small delay to ensure all elements are rendered, then scroll to stored post
             setTimeout(scrollToStoredPost, 100);
 
-            // Real-time validation feedback
             $('#<%= txtDescription.ClientID %>').on('input', function() {
                 var length = $(this).val().length;
                 var remaining = 1000 - length;
@@ -1285,20 +1215,16 @@
                 }
             });
 
-            // Clear validation on field focus
             $('.form-control').on('focus', function() {
                 $(this).removeClass('is-invalid').css('border-color', '');
             });
 
-            // Reset form when modal is hidden
             $('#feedbackModal').on('hidden.bs.modal', function() {
                 clearValidationErrors();
-                // Clear form fields (optional)
                 $('#<%= txtDescription.ClientID %>').val('');
                 $('#<%= fileUpload.ClientID %>').val('');
             });
 
-            // Add hover effects to all glass cards
             const cards = document.querySelectorAll('.glass-card');
             cards.forEach(card => {
                 card.addEventListener('mouseenter', () => {
@@ -1315,18 +1241,14 @@
                 });
             });
 
-            // Setup minimal event listeners
             setupMinimalEventListeners();
         });
 
-        // Alternative - also try when window loads (backup)
         window.addEventListener('load', function () {
             setTimeout(scrollToStoredPost, 200);
         });
 
-        // COMPLETELY REWRITTEN: Simple image zoom function
         function openImageZoom(imageSrc) {
-            // Stop event propagation
             if (event) {
                 event.stopPropagation();
                 event.preventDefault();
@@ -1339,7 +1261,6 @@
 
             const modalElement = document.getElementById('imageZoomModal');
 
-            // Get or create modal instance
             let imageZoomModal = bootstrap.Modal.getInstance(modalElement);
             if (!imageZoomModal) {
                 imageZoomModal = new bootstrap.Modal(modalElement, {
@@ -1352,9 +1273,7 @@
             imageZoomModal.show();
         }
 
-        // MINIMAL event listener setup - let Bootstrap handle its own lifecycle
         function setupMinimalEventListeners() {
-            // Only track modal instances for reference, don't interfere with Bootstrap lifecycle
             $(document).on('show.bs.modal', '.modal', function (e) {
                 console.log('Modal showing:', this.id);
                 const modalId = this.id;
@@ -1367,7 +1286,6 @@
             $(document).on('shown.bs.modal', '.modal', function (e) {
                 console.log('Modal shown:', this.id);
 
-                // Auto-focus on comment input if available (but not for image zoom)
                 if (this.id !== 'imageZoomModal') {
                     $(this).find('textarea[id*="txtCommentInputDetail"]').focus();
                 }
@@ -1377,7 +1295,6 @@
                 console.log('Modal hiding:', this.id);
                 const modalId = this.id;
 
-                // Clear comment inputs and errors (but not for image zoom)
                 if (modalId !== 'imageZoomModal') {
                     $(this).find('textarea[id*="txtCommentInputDetail"]').val('');
                     $(this).find('[id*="lblCommentErrorDetail"]').hide();
@@ -1388,30 +1305,24 @@
                 console.log('Modal hidden:', this.id);
                 const modalId = this.id;
 
-                // Remove from our tracking
                 if (modalInstances.has(modalId)) {
                     modalInstances.delete(modalId);
                 }
 
-                // NO AUTOMATIC CLEANUP - let Bootstrap handle its own lifecycle
             });
 
-            // Handle ESC key naturally - let Bootstrap handle it
             $(document).on('keydown', function (e) {
                 if (e.key === 'Escape') {
-                    // Let Bootstrap handle ESC naturally
                     console.log('ESC pressed - letting Bootstrap handle modal closure');
                 }
             });
         }
 
-        // SIMPLIFIED: Only close card detail modals, never interfere with image zoom
         function openCardDetail(postId) {
             const modalId = 'cardDetailModal' + postId;
             console.log('Opening card detail modal:', modalId);
 
             try {
-                // Close other CARD DETAIL modals only - never touch image zoom
                 $('.card-detail-modal.show').each(function () {
                     const existingModal = bootstrap.Modal.getInstance(this);
                     if (existingModal && this.id !== modalId) {
@@ -1419,7 +1330,6 @@
                     }
                 });
 
-                // Open the requested modal
                 const modalElement = document.getElementById(modalId);
                 if (modalElement) {
                     let modal = bootstrap.Modal.getInstance(modalElement);
@@ -1440,12 +1350,9 @@
             }
         }
 
-        // Enhanced click effect for like buttons
         function addClickEffect(button) {
-            // Add clicked class for animation
             button.classList.add('clicked');
 
-            // Create a temporary ripple effect
             const ripple = document.createElement('span');
             ripple.className = 'ripple-effect';
             ripple.style.cssText = `
@@ -1464,7 +1371,6 @@
 
             button.appendChild(ripple);
 
-            // Remove effects after animation
             setTimeout(function () {
                 button.classList.remove('clicked');
                 if (ripple.parentNode) {
@@ -1473,7 +1379,6 @@
             }, 600);
         }
 
-        // Add ripple effect keyframes dynamically
         const style = document.createElement('style');
         style.textContent = `
             @keyframes ripple {
@@ -1485,17 +1390,13 @@
         `;
         document.head.appendChild(style);
 
-        // Simplified page load function
         function pageLoad() {
             console.log('PageLoad fired - re-initializing scroll memory and event listeners');
 
-            // Re-check for stored scroll position after postback
             setTimeout(scrollToStoredPost, 100);
 
-            // Re-setup minimal event listeners
             setupMinimalEventListeners();
 
-            // Re-initialize hover effects
             const cards = document.querySelectorAll('.glass-card');
             cards.forEach(card => {
                 card.addEventListener('mouseenter', () => {
@@ -1513,12 +1414,10 @@
             });
         }
 
-        // Prevent modal from closing when clicking on action buttons
         $(document).on('click', '.feedback-actions', function (e) {
             e.stopPropagation();
         });
 
-        // Handle card click vs button click
         $(document).on('click', '.feedback-card', function (e) {
             if (!$(e.target).closest('.feedback-actions, button, input, textarea').length) {
                 const postId = $(this).data('post-id');
@@ -1528,12 +1427,10 @@
             }
         });
 
-        // Only emergency cleanup for genuinely orphaned backdrops
         setInterval(function () {
             const visibleModals = $('.modal.show').length;
             const backdrops = $('.modal-backdrop').length;
 
-            // Only cleanup if there are backdrops but no visible modals
             if (backdrops > 0 && visibleModals === 0) {
                 console.log('Emergency cleanup: found orphaned backdrops with no visible modals');
                 $('.modal-backdrop').remove();
@@ -1542,6 +1439,6 @@
                     'padding-right': ''
                 });
             }
-        }, 10000); // Check every 10 seconds instead of 5
+        }, 10000);
     </script>
 </asp:Content>

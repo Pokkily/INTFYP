@@ -41,7 +41,6 @@ namespace INTFYP
         {
             try
             {
-                // Save scholarship data to Firestore
                 DocumentReference docRef = await db.Collection("scholarships").AddAsync(new
                 {
                     Title = txtTitle.Text.Trim(),
@@ -55,14 +54,12 @@ namespace INTFYP
                 lblStatus.Text = $"✅ Scholarship saved successfully!";
                 lblStatus.ForeColor = System.Drawing.Color.Green;
 
-                // Clear form
                 txtTitle.Text = "";
                 txtRequirement.Text = "";
                 txtTerms.Text = "";
                 txtCourses.Text = "";
                 txtLink.Text = "";
 
-                // Reload scholarships
                 await LoadScholarships();
             }
             catch (Exception ex)
@@ -130,7 +127,6 @@ namespace INTFYP
 
         private async System.Threading.Tasks.Task UpdateScholarship(RepeaterCommandEventArgs e, string scholarshipId)
         {
-            // Find controls in the repeater item
             TextBox txtEditTitle = (TextBox)e.Item.FindControl("txtEditTitle");
             TextBox txtEditRequirement = (TextBox)e.Item.FindControl("txtEditRequirement");
             TextBox txtEditTerms = (TextBox)e.Item.FindControl("txtEditTerms");
@@ -153,7 +149,6 @@ namespace INTFYP
             lblListStatus.ForeColor = System.Drawing.Color.Green;
             lblListStatus.Text = "✅ Scholarship updated successfully!";
 
-            // Reload scholarships
             await LoadScholarships();
         }
 
@@ -165,7 +160,6 @@ namespace INTFYP
             lblListStatus.ForeColor = System.Drawing.Color.Green;
             lblListStatus.Text = "✅ Scholarship deleted successfully!";
 
-            // Reload scholarships
             await LoadScholarships();
         }
     }

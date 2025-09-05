@@ -17,7 +17,6 @@ namespace KoreanApp
         Cloudinary cloudinary;
         static readonly object dbLock = new object();
 
-        // Use ViewState to persist selected lesson ID across postbacks
         public string SelectedLessonId
         {
             get { return ViewState["SelectedLessonId"] as string ?? ""; }
@@ -36,7 +35,6 @@ namespace KoreanApp
 
         private void InitializeServices()
         {
-            // Initialize Firestore
             if (db == null)
             {
                 lock (dbLock)
@@ -50,7 +48,6 @@ namespace KoreanApp
                 }
             }
 
-            // Initialize Cloudinary
             Account account = new Account(
                 ConfigurationManager.AppSettings["CloudinaryCloudName"],
                 ConfigurationManager.AppSettings["CloudinaryApiKey"],
@@ -72,9 +69,8 @@ namespace KoreanApp
                 foreach (DocumentSnapshot document in snapshot.Documents)
                 {
                     string documentId = document.Id;
-                    string languageName = documentId; // Default fallback
+                    string languageName = documentId;
 
-                    // Get the language name from the "Name" field
                     if (document.ContainsField("Name"))
                     {
                         languageName = document.GetValue<string>("Name");
@@ -95,24 +91,20 @@ namespace KoreanApp
             panelLessons.Visible = false;
             panelQuestionForm.Visible = false;
 
-            // Set default question type
             rbTextQuestion.Checked = true;
             ToggleQuestionInputs();
 
-            // Reset question form state
             hfEditingQuestionId.Value = "";
             lblFormTitle.Text = "Add New Question";
             btnSaveQuestion.Text = "Save Question";
             btnCancelEdit.Visible = false;
 
-            // Reset lesson form state
             hfEditingLessonId.Value = "";
             lblLessonFormTitle.Text = "Create New Lesson";
             btnSaveLesson.Text = "Create Lesson";
             btnCancelLessonEdit.Visible = false;
             ClearLessonForm();
 
-            // Clear selected lesson
             SelectedLessonId = "";
         }
 
@@ -131,7 +123,7 @@ namespace KoreanApp
                 panelTopics.Visible = true;
                 panelLessons.Visible = false;
                 panelQuestionForm.Visible = false;
-                SelectedLessonId = ""; // Clear selected lesson when language changes
+                SelectedLessonId = "";
             }
             else
             {
@@ -173,7 +165,7 @@ namespace KoreanApp
                 panelNewTopic.Visible = true;
                 panelLessons.Visible = false;
                 panelQuestionForm.Visible = false;
-                SelectedLessonId = ""; // Clear selected lesson when topic changes
+                SelectedLessonId = "";
             }
             else if (!string.IsNullOrEmpty(ddlTopic.SelectedValue))
             {
@@ -181,7 +173,7 @@ namespace KoreanApp
                 await LoadLessons(ddlLanguage.SelectedValue, ddlTopic.SelectedValue);
                 panelLessons.Visible = true;
                 panelQuestionForm.Visible = false;
-                SelectedLessonId = ""; // Clear selected lesson when topic changes
+                SelectedLessonId = "";
             }
             else
             {
@@ -217,10 +209,8 @@ namespace KoreanApp
 
                 await topicRef.SetAsync(topicData);
 
-                // Refresh topics dropdown
                 await LoadTopics(ddlLanguage.SelectedValue);
 
-                // Select the newly created topic
                 ddlTopic.SelectedValue = topicName;
                 await LoadLessons(ddlLanguage.SelectedValue, topicName);
 
@@ -236,7 +226,6 @@ namespace KoreanApp
             }
         }
 
-        // LESSON MANAGEMENT METHODS
 
         private async Task LoadLessons(string language, string topic)
         {
@@ -250,7 +239,6 @@ namespace KoreanApp
                 CollectionReference lessonsRef = topicRef.Collection("lessons");
                 QuerySnapshot snapshot = await lessonsRef.OrderBy("createdAt").GetSnapshotAsync();
 
-                // Convert documents to a list for the repeater
                 var lessonsList = new List<object>();
                 foreach (DocumentSnapshot doc in snapshot.Documents)
                 {
@@ -270,7 +258,6 @@ namespace KoreanApp
 
                 lblLessonCount.Text = $"Current Lessons: {snapshot.Count}";
 
-                // Clear any previous lesson selection
                 ClearLessonForm();
                 SelectedLessonId = "";
             }
@@ -312,7 +299,6 @@ namespace KoreanApp
 
                 if (string.IsNullOrEmpty(hfEditingLessonId.Value))
                 {
-                    // Creating new lesson
                     lessonData["createdAt"] = Timestamp.GetCurrentTimestamp();
 
                     DocumentReference lessonRef = lessonsRef.Document(lessonName);
@@ -322,7 +308,6 @@ namespace KoreanApp
                 }
                 else
                 {
-                    // Updating existing lesson
                     lessonData["updatedAt"] = Timestamp.GetCurrentTimestamp();
 
                     DocumentReference lessonRef = lessonsRef.Document(hfEditingLessonId.Value);
@@ -332,7 +317,6 @@ namespace KoreanApp
                     ShowMessage("Lesson updated successfully!", "alert alert-success");
                 }
 
-                // Clear form and reload lessons
                 ClearLessonForm();
                 await LoadLessons(ddlLanguage.SelectedValue, ddlTopic.SelectedValue);
             }
@@ -349,10 +333,8 @@ namespace KoreanApp
 
             try
             {
-                // Set the selected lesson using ViewState property
                 SelectedLessonId = lessonId;
 
-                // Show the question form
                 panelQuestionForm.Visible = true;
                 await LoadExistingQuestions();
 
@@ -394,13 +376,11 @@ namespace KoreanApp
 
                 if (lessonDoc.Exists)
                 {
-                    // Set editing mode
                     hfEditingLessonId.Value = lessonId;
                     lblLessonFormTitle.Text = "Edit Lesson";
                     btnSaveLesson.Text = "Update Lesson";
                     btnCancelLessonEdit.Visible = true;
 
-                    // Load lesson data into form
                     txtLessonName.Text = lessonDoc.ContainsField("name") ? lessonDoc.GetValue<string>("name") : lessonId;
                     txtLessonDescription.Text = lessonDoc.ContainsField("description") ? lessonDoc.GetValue<string>("description") : "";
 
@@ -448,29 +428,23 @@ namespace KoreanApp
                     .Collection("lessons")
                     .Document(lessonId);
 
-                // First, delete all questions in this lesson
                 CollectionReference questionsRef = lessonRef.Collection("questions");
                 QuerySnapshot questionsSnapshot = await questionsRef.GetSnapshotAsync();
 
-                // Delete all questions
                 foreach (DocumentSnapshot questionDoc in questionsSnapshot.Documents)
                 {
                     await questionDoc.Reference.DeleteAsync();
                 }
 
-                // Then delete the lesson itself
                 await lessonRef.DeleteAsync();
 
-                // Reload lessons
                 await LoadLessons(ddlLanguage.SelectedValue, ddlTopic.SelectedValue);
 
-                // Cancel edit if we're editing the deleted lesson
                 if (hfEditingLessonId.Value == lessonId)
                 {
                     CancelLessonEdit();
                 }
 
-                // Hide question form if this lesson was selected
                 if (SelectedLessonId == lessonId)
                 {
                     panelQuestionForm.Visible = false;
@@ -485,13 +459,10 @@ namespace KoreanApp
             }
         }
 
-        // QUESTION MANAGEMENT METHODS
-
         private async Task LoadExistingQuestions()
         {
             try
             {
-                // Add validation
                 if (string.IsNullOrEmpty(ddlLanguage.SelectedValue))
                 {
                     ShowMessage("Please select a language first.", "alert alert-warning");
@@ -520,7 +491,6 @@ namespace KoreanApp
                 CollectionReference questionsRef = lessonRef.Collection("questions");
                 QuerySnapshot snapshot = await questionsRef.OrderBy("order").GetSnapshotAsync();
 
-                // Convert documents to a list manually to avoid LINQ compatibility issues
                 var questionsList = new List<object>();
                 foreach (DocumentSnapshot doc in snapshot.Documents)
                 {
@@ -551,7 +521,6 @@ namespace KoreanApp
 
         private void ToggleQuestionInputs()
         {
-            // Reset all panels
             panelImageQuestion.Visible = false;
             panelAudioQuestion.Visible = false;
             panelTextOptions.Visible = false;
@@ -586,7 +555,6 @@ namespace KoreanApp
         {
             try
             {
-                // Validate all required inputs
                 if (string.IsNullOrWhiteSpace(txtQuestionText.Text))
                 {
                     ShowMessage("Please enter question text.", "alert alert-warning");
@@ -611,7 +579,6 @@ namespace KoreanApp
                     return;
                 }
 
-                // Validate text options if it's a text-based question
                 if (rbTextQuestion.Checked || rbImageQuestion.Checked || rbAudioQuestion.Checked)
                 {
                     if (string.IsNullOrWhiteSpace(txtOption1.Text) ||
@@ -630,7 +597,6 @@ namespace KoreanApp
                     { "createdBy", Session["teacherId"]?.ToString() ?? "unknown" }
                 };
 
-                // Determine question type and handle accordingly
                 if (rbTextQuestion.Checked)
                 {
                     questionData["questionType"] = "text";
@@ -643,7 +609,6 @@ namespace KoreanApp
                     questionData["options"] = new[] { txtOption1.Text.Trim(), txtOption2.Text.Trim(), txtOption3.Text.Trim() };
                     questionData["answer"] = txtCorrectAnswer.Text.Trim();
 
-                    // Handle image upload
                     if (fuQuestionImage.HasFile)
                     {
                         try
@@ -660,7 +625,6 @@ namespace KoreanApp
                     }
                     else if (string.IsNullOrEmpty(hfEditingQuestionId.Value))
                     {
-                        // For new image questions, require an image
                         ShowMessage("Please select an image file for image questions.", "alert alert-warning");
                         return;
                     }
@@ -671,7 +635,6 @@ namespace KoreanApp
                     questionData["options"] = new[] { txtOption1.Text.Trim(), txtOption2.Text.Trim(), txtOption3.Text.Trim() };
                     questionData["answer"] = txtCorrectAnswer.Text.Trim();
 
-                    // Handle audio upload
                     if (fuQuestionAudio.HasFile)
                     {
                         try
@@ -688,7 +651,6 @@ namespace KoreanApp
                     }
                     else if (string.IsNullOrEmpty(hfEditingQuestionId.Value))
                     {
-                        // For new audio questions, require an audio file
                         ShowMessage("Please select an audio file for audio questions.", "alert alert-warning");
                         return;
                     }
@@ -704,21 +666,17 @@ namespace KoreanApp
 
                 if (string.IsNullOrEmpty(hfEditingQuestionId.Value))
                 {
-                    // Adding new question
                     questionData["createdAt"] = Timestamp.GetCurrentTimestamp();
 
-                    // Get next question order
                     QuerySnapshot existingQuestions = await questionsRef.GetSnapshotAsync();
                     questionData["order"] = existingQuestions.Count + 1;
 
-                    // Save to Firestore
                     await questionsRef.AddAsync(questionData);
 
                     ShowMessage("Question saved successfully!", "alert alert-success");
                 }
                 else
                 {
-                    // Updating existing question
                     questionData["updatedAt"] = Timestamp.GetCurrentTimestamp();
 
                     DocumentReference questionRef = questionsRef.Document(hfEditingQuestionId.Value);
@@ -728,7 +686,6 @@ namespace KoreanApp
                     ShowMessage("Question updated successfully!", "alert alert-success");
                 }
 
-                // Clear form and reload questions
                 ClearQuestionForm();
                 await LoadExistingQuestions();
             }
@@ -753,7 +710,6 @@ namespace KoreanApp
                 {
                     UploadResult uploadResult = null;
 
-                    // Use different upload methods based on resource type
                     if (resourceType == "image")
                     {
                         var uploadParams = new ImageUploadParams()
@@ -776,7 +732,6 @@ namespace KoreanApp
                     }
                     else
                     {
-                        // Fallback to raw upload for other file types
                         var uploadParams = new RawUploadParams()
                         {
                             File = new FileDescription(fileUpload.FileName, stream),
@@ -786,7 +741,6 @@ namespace KoreanApp
                         uploadResult = await cloudinary.UploadAsync(uploadParams);
                     }
 
-                    // Check if upload was successful
                     if (uploadResult == null)
                     {
                         throw new Exception("Upload failed - no result returned from Cloudinary.");
@@ -821,14 +775,12 @@ namespace KoreanApp
             txtOption3.Text = "";
             txtCorrectAnswer.Text = "";
 
-            // Reset to default question type
             rbTextQuestion.Checked = true;
             rbImageQuestion.Checked = false;
             rbAudioQuestion.Checked = false;
 
             ToggleQuestionInputs();
 
-            // Note: FileUpload controls cannot be cleared programmatically for security reasons
         }
 
         protected async void btnEditQuestion_Click(object sender, EventArgs e)
@@ -869,18 +821,15 @@ namespace KoreanApp
 
                 if (questionDoc.Exists)
                 {
-                    // Set editing mode
                     hfEditingQuestionId.Value = questionId;
                     lblFormTitle.Text = "Edit Question";
                     btnSaveQuestion.Text = "Update Question";
                     btnCancelEdit.Visible = true;
 
-                    // Load question data into form
                     txtQuestionText.Text = questionDoc.GetValue<string>("text");
 
                     string questionType = questionDoc.GetValue<string>("questionType");
 
-                    // Set question type
                     switch (questionType)
                     {
                         case "text":
@@ -897,7 +846,6 @@ namespace KoreanApp
                             break;
                     }
 
-                    // Load options and answer for text-based questions
                     if (questionType == "text" || questionType == "image" || questionType == "audio")
                     {
                         var options = questionDoc.GetValue<string[]>("options");
@@ -952,7 +900,6 @@ namespace KoreanApp
 
                 await LoadExistingQuestions();
 
-                // Cancel edit if we're editing the deleted question
                 if (hfEditingQuestionId.Value == questionId)
                 {
                     CancelEdit();

@@ -48,7 +48,6 @@ namespace INTFYP
                 book.IsRecommended = book.RecommendedBy.Contains(CurrentUserId);
                 book.IsFavorited = book.FavoritedBy.Contains(CurrentUserId);
 
-                // Only add books that are favorited by the current user
                 if (book.IsFavorited)
                 {
                     bookList.Add(book);
@@ -57,7 +56,6 @@ namespace INTFYP
 
             bookList = bookList.OrderByDescending(b => b.Recommendations).ToList();
 
-            // Show "No Books" panel if no favorite books found
             if (bookList.Count == 0)
             {
                 pnlNoBooks.Visible = true;
@@ -72,8 +70,6 @@ namespace INTFYP
             Repeater1.DataBind();
         }
 
-        // COMBINED search functionality - searches by title, author, AND category in ONE search bar
-        // Only shows results from user's favorite books
         protected async void txtBookSearch_TextChanged(object sender, EventArgs e)
         {
             string keyword = txtBookSearch.Text.ToLower().Trim();
@@ -83,7 +79,6 @@ namespace INTFYP
 
             if (string.IsNullOrEmpty(keyword))
             {
-                // If search is empty, load all favorite books
                 await LoadBooks();
                 return;
             }
@@ -100,10 +95,8 @@ namespace INTFYP
                 book.IsRecommended = book.RecommendedBy.Contains(CurrentUserId);
                 book.IsFavorited = book.FavoritedBy.Contains(CurrentUserId);
 
-                // Only process books that are favorited by the current user
                 if (book.IsFavorited)
                 {
-                    // COMBINED SEARCH: Search across title, author, AND category
                     bool matchesSearch =
                         (book.Title?.ToLower().Contains(keyword) ?? false) ||
                         (book.Author?.ToLower().Contains(keyword) ?? false) ||
@@ -116,10 +109,8 @@ namespace INTFYP
                 }
             }
 
-            // Order by recommendations (most recommended first)
             results = results.OrderByDescending(b => b.Recommendations ?? 0).ToList();
 
-            // Show appropriate content based on results
             if (results.Count == 0)
             {
                 pnlNoBooks.Visible = true;
@@ -191,15 +182,12 @@ namespace INTFYP
                 await bookRef.UpdateAsync(bookUpdates);
             }
 
-            // Reload based on current search state (same as Library page)
             if (!string.IsNullOrEmpty(txtBookSearch.Text.Trim()))
             {
-                // If there's a search term, rerun the search
                 txtBookSearch_TextChanged(txtBookSearch, EventArgs.Empty);
             }
             else
             {
-                // If no search term, load all favorite books
                 await LoadBooks();
             }
         }

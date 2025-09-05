@@ -194,7 +194,6 @@
                 <p style="color: rgba(255,255,255,0.8); font-size: 16px;">Track your language learning journey</p>
             </div>
 
-            <!-- Back Button -->
             <div class="mb-4">
                 <asp:Button ID="btnBackToLanguages" runat="server"
                     Text="⬅️ Back to Languages"
@@ -202,7 +201,6 @@
                     OnClick="btnBackToLanguages_Click" />
             </div>
 
-            <!-- Language Selection -->
             <div class="card">
                 <div class="card-header">
                     🌍 Select Language
@@ -217,7 +215,6 @@
                 </div>
             </div>
 
-            <!-- Overall Statistics -->
             <asp:Panel ID="pnlStats" runat="server" Visible="false">
                 <div class="card">
                     <div class="card-header">
@@ -259,7 +256,6 @@
                     </div>
                 </div>
 
-                <!-- Progress Chart -->
                 <div class="card">
                     <div class="card-header">
                         📊 Score Progress Over Time
@@ -271,7 +267,6 @@
                     </div>
                 </div>
 
-                <!-- Topic Progress -->
                 <div class="card">
                     <div class="card-header">
                         📚 Topic Progress
@@ -296,7 +291,6 @@
                     </div>
                 </div>
 
-                <!-- Recent Activity -->
                 <div class="card">
                     <div class="card-header">
                         🕒 Recent Activity
@@ -324,7 +318,6 @@
                 </div>
             </asp:Panel>
 
-            <!-- No Data Message -->
             <asp:Panel ID="pnlNoData" runat="server" Visible="false">
                 <div class="card">
                     <div class="card-body" style="text-align: center; padding: 60px;">
@@ -337,10 +330,8 @@
         </div>
     </div>
 
-    <!-- Chart.js for graphs -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
-    <!-- Hidden field for chart data -->
     <asp:HiddenField ID="hfChartData" runat="server" />
 
     <script type="text/javascript">

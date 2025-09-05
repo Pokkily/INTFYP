@@ -17,7 +17,7 @@ namespace YourNamespace
 
             if (!IsPostBack)
             {
-                LoadScholarships(); // Load scholarships from Firestore
+                LoadScholarships();
             }
         }
 
@@ -63,7 +63,6 @@ namespace YourNamespace
                 rptScholarships.DataSource = scholarshipList;
                 rptScholarships.DataBind();
 
-                // Debug
                 Console.WriteLine("Scholarships loaded: " + scholarshipList.Count);
             }
             catch (Exception ex)

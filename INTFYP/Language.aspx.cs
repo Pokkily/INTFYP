@@ -18,7 +18,6 @@ namespace INTFYP
 
         protected async void Page_Load(object sender, EventArgs e)
         {
-            // Check authentication first
             currentUserEmail = Session["email"]?.ToString();
             currentUserName = Session["username"]?.ToString() ?? "Anonymous";
             currentUserId = Session["userId"]?.ToString();
@@ -64,7 +63,6 @@ namespace INTFYP
         {
             try
             {
-                // Get all languages from the "languages" collection
                 Query languagesQuery = db.Collection("languages").OrderBy("Name");
                 QuerySnapshot snapshot = await languagesQuery.GetSnapshotAsync();
 
@@ -74,13 +72,11 @@ namespace INTFYP
                 {
                     var data = document.ToDictionary();
 
-                    // Extract language data - adjust field names based on how you save in AddLanguage.aspx.cs
                     string languageName = data.ContainsKey("Name") ? data["Name"].ToString() : "";
                     string languageCode = data.ContainsKey("Code") ? data["Code"].ToString() : "";
                     string languageFlag = data.ContainsKey("Flag") ? data["Flag"].ToString() : "🌍";
                     string languageDescription = data.ContainsKey("Description") ? data["Description"].ToString() : "";
 
-                    // Apply search filter
                     if (!string.IsNullOrEmpty(searchTerm) &&
                         !languageName.ToLower().Contains(searchTerm.ToLower()) &&
                         !languageCode.ToLower().Contains(searchTerm.ToLower()))
@@ -88,7 +84,6 @@ namespace INTFYP
                         continue;
                     }
 
-                    // Get statistics for this language
                     var stats = await GetLanguageStatistics(document.Id);
 
                     languages.Add(new
@@ -135,12 +130,10 @@ namespace INTFYP
                 int questionCount = 0;
                 int studentCount = 0;
 
-                // Method 1: If you store lessons with LanguageId field
                 Query lessonsQuery = db.Collection("lessons").WhereEqualTo("LanguageId", languageId);
                 QuerySnapshot lessonsSnapshot = await lessonsQuery.GetSnapshotAsync();
                 lessonCount = lessonsSnapshot.Documents.Count;
 
-                // Count questions across all lessons for this language
                 foreach (DocumentSnapshot lessonDoc in lessonsSnapshot.Documents)
                 {
                     Query questionsQuery = db.Collection("questions").WhereEqualTo("LessonId", lessonDoc.Id);
@@ -148,8 +141,6 @@ namespace INTFYP
                     questionCount += questionsSnapshot.Documents.Count;
                 }
 
-                // Get student enrollment count
-                // Assuming you have a collection for user enrollments
                 Query studentsQuery = db.Collection("userLanguages").WhereEqualTo("LanguageId", languageId);
                 QuerySnapshot studentsSnapshot = await studentsQuery.GetSnapshotAsync();
                 studentCount = studentsSnapshot.Documents.Count;
@@ -165,7 +156,6 @@ namespace INTFYP
 
         protected async void txtLanguageSearch_TextChanged(object sender, EventArgs e)
         {
-            // Check authentication before processing
             if (string.IsNullOrEmpty(currentUserId))
             {
                 Response.Redirect("Login.aspx", false);
@@ -179,7 +169,6 @@ namespace INTFYP
 
         protected async void rptLanguages_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
-            // Check authentication before processing
             if (string.IsNullOrEmpty(currentUserId))
             {
                 ShowErrorMessage("Please log in to select a language.");
@@ -192,10 +181,8 @@ namespace INTFYP
 
                 try
                 {
-                    // Auto-enroll user in the language when they select it
                     await EnrollUserInLanguage(currentUserId, languageId);
 
-                    // Redirect to DisplayQuestion page with language ID
                     Response.Redirect($"DisplayQuestion.aspx?languageId={languageId}", false);
                     Context.ApplicationInstance.CompleteRequest();
                 }
@@ -208,16 +195,12 @@ namespace INTFYP
 
         protected void btnStudentReport_Click(object sender, EventArgs e)
         {
-            // Check authentication before processing
             if (string.IsNullOrEmpty(currentUserId))
             {
                 ShowErrorMessage("Please log in to view reports.");
                 return;
             }
 
-            // Redirect to StudentReports page
-            // Since this is the language selection page, we don't have a specific language ID
-            // The StudentReports page should handle showing all languages or allow language selection
             Response.Redirect("StudentReports.aspx", false);
             Context.ApplicationInstance.CompleteRequest();
         }
@@ -234,7 +217,6 @@ namespace INTFYP
                 $"alert('{message.Replace("'", "\\'")}');", true);
         }
 
-        // Get a specific language by ID
         public async System.Threading.Tasks.Task<object> GetLanguageById(string languageId)
         {
             try
@@ -271,12 +253,10 @@ namespace INTFYP
             }
         }
 
-        // Helper method to enroll user in language
         public async System.Threading.Tasks.Task EnrollUserInLanguage(string userId, string languageId)
         {
             try
             {
-                // Check if user is already enrolled
                 Query checkQuery = db.Collection("userLanguages")
                     .WhereEqualTo("UserId", userId)
                     .WhereEqualTo("LanguageId", languageId);
@@ -284,7 +264,6 @@ namespace INTFYP
 
                 if (checkSnapshot.Documents.Count == 0)
                 {
-                    // Enroll user
                     await db.Collection("userLanguages").AddAsync(new
                     {
                         UserId = userId,
@@ -305,7 +284,6 @@ namespace INTFYP
             }
         }
 
-        // Method to check if user is enrolled in a language
         public async System.Threading.Tasks.Task<bool> IsUserEnrolledInLanguage(string userId, string languageId)
         {
             try
@@ -324,7 +302,6 @@ namespace INTFYP
             }
         }
 
-        // Method to get user's enrolled languages
         public async System.Threading.Tasks.Task<List<object>> GetUserLanguages(string userId)
         {
             try
@@ -341,7 +318,6 @@ namespace INTFYP
                     var userLangData = userLangDoc.ToDictionary();
                     string languageId = userLangData["LanguageId"].ToString();
 
-                    // Get language details
                     var languageDetails = await GetLanguageById(languageId);
                     if (languageDetails != null)
                     {
@@ -358,12 +334,10 @@ namespace INTFYP
             }
         }
 
-        // Method to get popular languages (most enrolled)
         public async System.Threading.Tasks.Task<List<object>> GetPopularLanguages(int topCount = 6)
         {
             try
             {
-                // Get all languages
                 Query languagesQuery = db.Collection("languages").OrderBy("Name");
                 QuerySnapshot snapshot = await languagesQuery.GetSnapshotAsync();
 
@@ -387,7 +361,6 @@ namespace INTFYP
                     });
                 }
 
-                // Sort by student count and take top languages
                 var sortedLanguages = languagesWithStats
                     .OrderByDescending(l => l.StudentCount)
                     .Take(topCount)

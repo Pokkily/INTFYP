@@ -6,7 +6,6 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Enhanced Citation Generator Page with Library Design Formula */
         
         .library-page {
             padding: 40px 20px;
@@ -17,7 +16,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated background elements */
         .library-page::before {
             content: '';
             position: fixed;
@@ -97,7 +95,6 @@
             margin: 0;
         }
 
-        /* Navigation Bar */
         .nav-bar {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -206,7 +203,6 @@
             background: linear-gradient(135deg, #44a08d 0%, #4ecdc4 100%);
         }
 
-        /* Form Container */
         .form-container {
             max-width: 700px;
             margin: 0 auto;
@@ -323,7 +319,6 @@
             resize: vertical;
         }
 
-        /* Style Buttons */
         .style-buttons {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -381,7 +376,6 @@
             box-shadow: 0 12px 30px rgba(103, 126, 234, 0.4);
         }
 
-        /* Action Buttons */
         .action-buttons {
             display: flex;
             gap: 15px;
@@ -444,7 +438,6 @@
             box-shadow: 0 12px 35px rgba(78, 205, 196, 0.4);
         }
 
-        /* Success Message */
         .success-message {
             background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
             color: white;
@@ -469,7 +462,6 @@
             }
         }
 
-        /* Responsive design */
         @media (max-width: 768px) {
             .library-page {
                 padding: 20px 15px;
@@ -517,7 +509,6 @@
             }
         }
 
-        /* Hide default select */
         #citationStyle {
             display: none !important;
         }
@@ -530,7 +521,6 @@
                 <p class="page-subtitle">Create perfect citations in multiple styles</p>
             </div>
 
-            <!-- Navigation Bar -->
             <div class="nav-bar">
                 <div class="nav-buttons">
                     <button type="button" class="nav-button nav-button-primary" onclick="location.href='Library.aspx';">
@@ -542,7 +532,6 @@
                 </div>
             </div>
 
-            <!-- Citation Form -->
             <div class="form-container">
                 <div class="form-header">
                     <h3 class="form-title">Generate Citation</h3>
@@ -625,7 +614,6 @@
 
                 $('#citationOutput').val(citation);
 
-                // Add generation effect
                 $('#citationOutput').css('transform', 'scale(0.98)');
                 setTimeout(() => {
                     $('#citationOutput').css('transform', 'scale(1)');
@@ -643,7 +631,6 @@
                 }
             });
 
-            // Add input focus effects
             $('input, textarea').on('focus', function () {
                 $(this).parent().css('transform', 'translateY(-2px)');
             }).on('blur', function () {
@@ -652,6 +639,5 @@
         });
     </script>
 
-    <!-- Font Awesome for additional icons if needed -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 </asp:Content>

@@ -6,7 +6,6 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Enhanced PreviewBook Page with Library Design Formula */
         
         .library-page {
             padding: 40px 20px;
@@ -17,7 +16,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated background elements */
         .library-page::before {
             content: '';
             position: fixed;
@@ -97,7 +95,6 @@
             margin: 0;
         }
 
-        /* Navigation Bar */
         .nav-bar {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -219,7 +216,6 @@
             background: linear-gradient(135deg, #ee5a52 0%, #ff6b6b 100%);
         }
 
-        /* PDF Preview Container */
         .pdf-preview-container {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -284,7 +280,6 @@
             margin: 0;
         }
 
-        /* PDF Viewer Styles */
         .pdf-viewer {
             width: 100%;
             min-height: 500px;
@@ -312,7 +307,6 @@
             border-radius: 13px;
         }
 
-        /* Loading Animation */
         .pdf-loading {
             display: flex;
             flex-direction: column;
@@ -348,7 +342,6 @@
             opacity: 0.7;
         }
 
-        /* Error State */
         .pdf-error {
             text-align: center;
             padding: 40px;
@@ -375,7 +368,6 @@
             opacity: 0.8;
         }
 
-        /* Controls */
         .pdf-controls {
             display: flex;
             justify-content: center;
@@ -444,7 +436,6 @@
             background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
         }
 
-        /* Responsive design */
         @media (max-width: 768px) {
             .library-page {
                 padding: 20px 15px;
@@ -502,7 +493,6 @@
             }
         }
 
-        /* Accessibility improvements */
         @media (prefers-reduced-motion: reduce) {
             * {
                 animation-duration: 0.01ms !important;
@@ -511,7 +501,6 @@
             }
         }
 
-        /* Print styles */
         @media print {
             .nav-bar,
             .pdf-controls,
@@ -533,13 +522,11 @@
 
     <div class="library-page">
         <div class="library-container">
-            <!-- Page Header -->
             <div class="page-header">
                 <h2 class="page-title">Book Preview</h2>
                 <p class="page-subtitle">Review and Read Your Selected Material</p>
             </div>
 
-            <!-- Navigation Bar -->
             <div class="nav-bar">
                 <div class="nav-buttons">
                     <button type="button" class="nav-button nav-button-primary" onclick="history.back();">
@@ -554,25 +541,21 @@
                 </div>
             </div>
 
-            <!-- PDF Preview Container -->
             <div class="pdf-preview-container">
                 <div class="pdf-header">
                     <h3 class="pdf-title">Document Viewer</h3>
                     <p class="pdf-subtitle">Use the controls below to interact with the document</p>
                 </div>
 
-                <!-- PDF Viewer Area -->
                 <div class="pdf-viewer" id="pdfViewer">
                     <asp:Literal ID="litPdfPreview" runat="server" Mode="PassThrough" />
                     
-                    <!-- Fallback loading state -->
                     <div class="pdf-loading" id="loadingState" style="display: none;">
                         <div class="loading-spinner"></div>
                         <div class="loading-text">Loading Document...</div>
                         <div class="loading-subtitle">Please wait while we prepare your document</div>
                     </div>
 
-                    <!-- Fallback error state -->
                     <div class="pdf-error" id="errorState" style="display: none;">
                         <div class="error-icon">⚠️</div>
                         <div class="error-title">Unable to Load Document</div>
@@ -580,7 +563,6 @@
                     </div>
                 </div>
 
-                <!-- PDF Controls -->
                 <div class="pdf-controls">
                     <button type="button" class="control-button btn-download" onclick="downloadPDF();">
                         📥 Download
@@ -594,14 +576,11 @@
     </div>
 
     <script>
-        // Enhanced PDF viewer functionality
         document.addEventListener('DOMContentLoaded', function () {
-            // Check if PDF loaded successfully
             const pdfViewer = document.getElementById('pdfViewer');
             const loadingState = document.getElementById('loadingState');
             const errorState = document.getElementById('errorState');
 
-            // Show loading initially if PDF is being loaded
             const pdfContent = pdfViewer.querySelector('iframe, embed, object');
             if (pdfContent) {
                 pdfContent.onload = function () {
@@ -614,7 +593,6 @@
                 };
             }
 
-            // Add smooth transitions
             pdfViewer.style.opacity = '0';
             setTimeout(() => {
                 pdfViewer.style.transition = 'opacity 0.5s ease';
@@ -622,11 +600,9 @@
             }, 100);
         });
 
-        // Download PDF function
         function downloadPDF() {
             const pdfViewer = document.querySelector('#pdfViewer iframe, #pdfViewer embed, #pdfViewer object');
             if (pdfViewer && pdfViewer.src) {
-                // Create a temporary link to download
                 const link = document.createElement('a');
                 link.href = pdfViewer.src;
                 link.download = 'document.pdf';
@@ -639,7 +615,6 @@
             }
         }
 
-        // Fullscreen toggle function
         function toggleFullscreen() {
             const pdfViewer = document.getElementById('pdfViewer');
 
@@ -659,7 +634,6 @@
             }
         }
 
-        // Handle fullscreen change events
         document.addEventListener('fullscreenchange', function () {
             const pdfViewer = document.getElementById('pdfViewer');
             const fullscreenBtn = document.querySelector('.btn-fullscreen');
@@ -675,30 +649,24 @@
             }
         });
 
-        // Add keyboard shortcuts
         document.addEventListener('keydown', function (e) {
-            // F11 or F for fullscreen
             if (e.key === 'F11' || (e.key === 'f' && e.ctrlKey)) {
                 e.preventDefault();
                 toggleFullscreen();
             }
 
-            // Ctrl+D for download
             if (e.key === 'd' && e.ctrlKey) {
                 e.preventDefault();
                 downloadPDF();
             }
 
-            // Escape to go back
             if (e.key === 'Escape' && !document.fullscreenElement) {
                 history.back();
             }
         });
 
-        // Add smooth scrolling for better UX
         document.querySelectorAll('.nav-button').forEach(button => {
             button.addEventListener('click', function (e) {
-                // Add a subtle click animation
                 this.style.transform = 'translateY(-2px) scale(0.95)';
                 setTimeout(() => {
                     this.style.transform = '';
@@ -707,7 +675,6 @@
         });
     </script>
 
-    <!-- Font Awesome for additional icons if needed -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
 </asp:Content>

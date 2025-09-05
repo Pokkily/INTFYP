@@ -134,9 +134,10 @@
         }
 
         .stat-label {
-            font-size: 14px;
-            opacity: 0.8;
-        }
+    font-size: 14px;
+    opacity: 1;    
+    color: #000;  
+}
 
         .edit-profile-btn {
             background: rgba(255, 255, 255, 0.2);
@@ -155,6 +156,150 @@
             border-color: rgba(255, 255, 255, 0.5);
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Privacy Settings Styles */
+        .privacy-section {
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4f1d4 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(40, 167, 69, 0.1);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.1);
+        }
+
+        .privacy-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #155724;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .privacy-toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #c3e6cb;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .privacy-toggle-container:hover {
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
+        }
+
+        .privacy-info {
+            flex: 1;
+        }
+
+        .privacy-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .privacy-description {
+            font-size: 14px;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+
+        .privacy-toggle {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #28a745;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .toggle-slider:focus {
+            box-shadow: 0 0 1px #28a745;
+        }
+
+        .privacy-status {
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .status-public {
+            background: rgba(40, 167, 69, 0.1);
+            color: #28a745;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+
+        .status-private {
+            background: rgba(255, 193, 7, 0.1);
+            color: #856404;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .privacy-explanation {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .privacy-explanation ul {
+            margin-bottom: 0;
+            padding-left: 20px;
+        }
+
+        .privacy-explanation li {
+            margin-bottom: 5px;
         }
 
         .profile-tabs {
@@ -348,6 +493,7 @@
             box-shadow: 0 10px 30px rgba(231, 76, 60, 0.4);
         }
 
+        /* Rest of the existing CSS styles for classes, feedback, books, activity, etc. */
         .class-grid, .feedback-grid, .book-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -498,6 +644,224 @@
             100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
+        /* Book section styles */
+        .book-nav-bar {
+            margin-bottom: 25px;
+        }
+
+        .book-nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .book-nav-btn {
+            padding: 12px 20px;
+            border: 2px solid #e9ecef;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .book-nav-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .book-nav-btn:hover:not(.active) {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .book-section {
+            display: none;
+        }
+
+        .book-section.active {
+            display: block;
+        }
+
+        .book-nav-content {
+            display: none;
+        }
+
+        .empty-section {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .empty-section-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.6;
+        }
+
+        .empty-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .empty-section-text {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Activity styles */
+        .activity-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .post-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .post-card:hover {
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .post-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .post-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .post-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .post-meta {
+            flex: 1;
+        }
+
+        .post-author-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .post-time {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .post-group {
+            font-size: 12px;
+            color: #667eea;
+        }
+
+        .activity-badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .activity-badge.liked {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+        }
+
+        .activity-badge.saved {
+            background: rgba(243, 156, 18, 0.1);
+            color: #f39c12;
+        }
+
+        .activity-badge.shared {
+            background: rgba(52, 152, 219, 0.1);
+            color: #3498db;
+        }
+
+        .post-content {
+            padding: 0 20px;
+        }
+
+        .post-text {
+            color: #495057;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .post-stats {
+            display: flex;
+            gap: 20px;
+            padding: 15px 20px;
+            border-top: 1px solid #f1f3f4;
+            font-size: 14px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #6c757d;
+        }
+
+        .post-actions {
+            padding: 15px 20px;
+            border-top: 1px solid #f1f3f4;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .action-btn {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: none;
+            background: #f8f9fa;
+            color: #495057;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-btn:hover {
+            background: #e9ecef;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .unsave-btn:hover {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+        }
+
         /* Responsive design */
         @media (max-width: 768px) {
             .profile-container {
@@ -553,6 +917,16 @@
             .activity-filter {
                 flex-wrap: wrap;
                 gap: 10px;
+            }
+
+            .privacy-toggle-container {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .book-nav-buttons {
+                flex-direction: column;
             }
         }
     </style>
@@ -671,6 +1045,40 @@
                         <div class="section-header">
                             <span class="section-icon">👤</span>
                             Personal Information
+                        </div>
+
+                        <!-- Privacy Settings Section -->
+                        <div class="privacy-section">
+                            <div class="privacy-title">
+                                🔒 Privacy Settings
+                            </div>
+                            
+                            <div class="privacy-toggle-container">
+                                <div class="privacy-info">
+                                    <div class="privacy-label">Profile Visibility</div>
+                                    <div class="privacy-description">
+                                        Control who can view your profile information and activity
+                                    </div>
+                                </div>
+                                <div class="privacy-toggle">
+                                    <span class="privacy-status" id="privacyStatus">
+                                        <asp:Literal ID="ltPrivacyStatus" runat="server" Text="Public" />
+                                    </span>
+                                    <label class="toggle-switch">
+                                        <asp:CheckBox ID="chkProfilePrivate" runat="server" 
+                                            OnCheckedChanged="chkProfilePrivate_CheckedChanged" AutoPostBack="true" />
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="privacy-explanation">
+                                <strong>Privacy Settings Explained:</strong>
+                                <ul>
+                                    <li><strong>Public Profile:</strong> Other users can view your activity feed when they visit your profile</li>
+                                    <li><strong>Private Profile:</strong> Other users see a blocked message and cannot view any of your information</li>
+                                </ul>
+                            </div>
                         </div>
 
                         <div class="form-section">
@@ -1096,6 +1504,7 @@
         </ContentTemplate>
         <Triggers>
             <asp:PostBackTrigger ControlID="btnUploadPhoto" />
+            <asp:PostBackTrigger ControlID="chkProfilePrivate" />
         </Triggers>
     </asp:UpdatePanel>
 
@@ -1276,8 +1685,26 @@
             }, 5000);
         }
 
+        // Update privacy status display
+        function updatePrivacyStatus() {
+            const checkbox = document.getElementById('<%= chkProfilePrivate.ClientID %>');
+            const statusSpan = document.getElementById('privacyStatus');
+            
+            if (checkbox && statusSpan) {
+                if (checkbox.checked) {
+                    statusSpan.textContent = 'Private';
+                    statusSpan.className = 'privacy-status status-private';
+                } else {
+                    statusSpan.textContent = 'Public';
+                    statusSpan.className = 'privacy-status status-public';
+                }
+            }
+        }
+
         // Initialize page
         document.addEventListener('DOMContentLoaded', function () {
+            updatePrivacyStatus();
+            
             // Add smooth scrolling to tab switching
             document.querySelectorAll('.tab-button').forEach(button => {
                 button.addEventListener('click', function (e) {
@@ -1288,6 +1715,12 @@
                     });
                 });
             });
+
+            // Privacy checkbox change handler
+            const privacyCheckbox = document.getElementById('<%= chkProfilePrivate.ClientID %>');
+            if (privacyCheckbox) {
+                privacyCheckbox.addEventListener('change', updatePrivacyStatus);
+            }
         });
 
         // Keyboard navigation support

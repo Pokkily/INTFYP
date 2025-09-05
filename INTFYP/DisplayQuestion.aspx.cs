@@ -19,7 +19,6 @@ namespace INTFYP
         {
             InitializeFirestore();
 
-            // Get language ID from query parameter
             currentLanguageId = Request.QueryString["languageId"];
             currentUserId = GetCurrentUserId();
 
@@ -54,15 +53,12 @@ namespace INTFYP
 
         private string GetCurrentUserId()
         {
-            // Check if user is logged in
             if (Session["UserId"] != null)
                 return Session["UserId"].ToString();
 
-            // Check if we have a demo user
             if (Session["DemoUserId"] != null)
                 return Session["DemoUserId"].ToString();
 
-            // Generate a demo user ID if none exists
             string demoUserId = "DEMO_" + DateTime.Now.Ticks.ToString();
             Session["DemoUserId"] = demoUserId;
 
@@ -86,12 +82,10 @@ namespace INTFYP
                     lblLanguageFlag.Text = data.ContainsKey("Flag") ? data["Flag"].ToString() : "🌍";
                     lblLanguageDescription.Text = data.ContainsKey("Description") ? data["Description"].ToString() : "";
 
-                    // Load statistics
                     var stats = await GetLanguageStatistics(currentLanguageId);
                     lblTotalQuestions.Text = stats.QuestionCount.ToString();
                     lblTotalLessons.Text = stats.LessonCount.ToString();
 
-                    // Load user progress overview
                     await LoadUserProgressOverview();
                 }
                 else
@@ -121,7 +115,6 @@ namespace INTFYP
                 {
                     var data = progressSnap.ToDictionary();
 
-                    // Display user progress (add these labels to your UI if needed)
                     int completedLessons = data.ContainsKey("completedLessons") ? Convert.ToInt32(data["completedLessons"]) : 0;
                     double averageScore = data.ContainsKey("averageScore") ? Convert.ToDouble(data["averageScore"]) : 0;
                     int currentStreak = data.ContainsKey("currentStreak") ? Convert.ToInt32(data["currentStreak"]) : 0;
@@ -139,7 +132,6 @@ namespace INTFYP
         {
             try
             {
-                // Get all topics for this language
                 CollectionReference topicsRef = db.Collection("languages").Document(currentLanguageId).Collection("topics");
                 QuerySnapshot topicsSnapshot = await topicsRef.GetSnapshotAsync();
 
@@ -150,7 +142,6 @@ namespace INTFYP
                     string topicName = topicDoc.Id;
                     var topicData = topicDoc.ToDictionary();
 
-                    // Get lessons for this topic
                     CollectionReference lessonsRef = topicDoc.Reference.Collection("lessons");
                     QuerySnapshot lessonsSnapshot = await lessonsRef.OrderBy("createdAt").GetSnapshotAsync();
 
@@ -162,13 +153,11 @@ namespace INTFYP
                         string lessonName = lessonDoc.Id;
                         var lessonData = lessonDoc.ToDictionary();
 
-                        // Get question count for this lesson
                         CollectionReference questionsRef = lessonDoc.Reference.Collection("questions");
                         QuerySnapshot questionsSnapshot = await questionsRef.GetSnapshotAsync();
                         int questionCount = questionsSnapshot.Documents.Count;
                         totalQuestionsInTopic += questionCount;
 
-                        // Get user's progress for this lesson
                         var lessonProgress = await GetUserLessonProgress(currentUserId, currentLanguageId, topicName, lessonName);
 
                         lessons.Add(new
@@ -180,7 +169,6 @@ namespace INTFYP
                             CreatedAt = lessonData.ContainsKey("createdAt") ? lessonData["createdAt"] : "",
                             TopicName = topicName,
 
-                            // User progress data
                             IsCompleted = lessonProgress.IsCompleted,
                             BestScore = lessonProgress.BestScore,
                             TotalAttempts = lessonProgress.TotalAttempts,
@@ -206,7 +194,6 @@ namespace INTFYP
                     rptTopics.DataBind();
                     pnlNoQuestions.Visible = false;
 
-                    // Update quick stats in sidebar
                     int totalTopics = topicsWithLessons.Count;
                     int totalLessons = 0;
                     foreach (var topic in topicsWithLessons)
@@ -214,7 +201,6 @@ namespace INTFYP
                         totalLessons += ((dynamic)topic).LessonCount;
                     }
 
-                    // Update sidebar labels directly
                     lblQuickTopics.Text = totalTopics.ToString();
                     lblQuickLessons.Text = totalLessons.ToString();
                 }
@@ -305,18 +291,15 @@ namespace INTFYP
                 int lessonCount = 0;
                 int questionCount = 0;
 
-                // Get all topics
                 CollectionReference topicsRef = db.Collection("languages").Document(languageId).Collection("topics");
                 QuerySnapshot topicsSnapshot = await topicsRef.GetSnapshotAsync();
 
                 foreach (DocumentSnapshot topicDoc in topicsSnapshot.Documents)
                 {
-                    // Get lessons in this topic
                     CollectionReference lessonsRef = topicDoc.Reference.Collection("lessons");
                     QuerySnapshot lessonsSnapshot = await lessonsRef.GetSnapshotAsync();
                     lessonCount += lessonsSnapshot.Documents.Count;
 
-                    // Get questions in each lesson
                     foreach (DocumentSnapshot lessonDoc in lessonsSnapshot.Documents)
                     {
                         CollectionReference questionsRef = lessonDoc.Reference.Collection("questions");
@@ -343,7 +326,6 @@ namespace INTFYP
         {
             if (e.Item.ItemType == ListItemType.Item || e.Item.ItemType == ListItemType.AlternatingItem)
             {
-                // Find the nested repeater for lessons
                 Repeater rptLessons = (Repeater)e.Item.FindControl("rptLessons");
                 if (rptLessons != null)
                 {
@@ -359,7 +341,6 @@ namespace INTFYP
 
         protected void rptLessons_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
-            // Parse the command argument which contains "lessonId|topicName"
             string[] args = e.CommandArgument.ToString().Split('|');
             if (args.Length != 2) return;
 
@@ -370,7 +351,6 @@ namespace INTFYP
             {
                 if (e.CommandName == "StartLesson")
                 {
-                    // Redirect to the lesson/quiz page for this specific lesson
                     string redirectUrl = $"TakeQuiz.aspx?languageId={currentLanguageId}&topicName={Server.UrlEncode(topicName)}&lessonId={Server.UrlEncode(lessonId)}";
                     Response.Redirect(redirectUrl, false);
                     Context.ApplicationInstance.CompleteRequest();
@@ -382,7 +362,6 @@ namespace INTFYP
             }
         }
 
-        // Method to get all questions in a lesson
         public async System.Threading.Tasks.Task<List<object>> GetQuestionsInLesson(string topicName, string lessonId)
         {
             try
@@ -403,7 +382,6 @@ namespace INTFYP
                 {
                     var questionData = questionDoc.ToDictionary();
 
-                    // Parse options
                     var options = new List<string>();
                     if (questionData.ContainsKey("options") && questionData["options"] is object[] optionArray)
                     {
@@ -435,7 +413,6 @@ namespace INTFYP
             }
         }
 
-        // Method to get lesson details
         public async System.Threading.Tasks.Task<object> GetLessonDetails(string topicName, string lessonId)
         {
             try
@@ -452,7 +429,6 @@ namespace INTFYP
                 {
                     var lessonData = lessonDoc.ToDictionary();
 
-                    // Get question count
                     CollectionReference questionsRef = lessonDoc.Reference.Collection("questions");
                     QuerySnapshot questionsSnapshot = await questionsRef.GetSnapshotAsync();
 

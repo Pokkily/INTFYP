@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Web.UI;
+using System.Web.UI.WebControls;
 using Google.Cloud.Firestore;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
@@ -98,21 +99,90 @@ namespace YourProjectNamespace
                 currentList.Add(new UploadedFileItem
                 {
                     Url = uploadResult.SecureUrl.ToString(),
-                    Name = fileUploadAdd.FileName
+                    Name = fileUploadAdd.FileName,
+                    PublicId = uploadResult.PublicId // Store public ID for deletion
                 });
                 UploadedFiles = currentList;
 
-                // Update hidden field and UI
-                hfUploadedFiles.Value = JsonConvert.SerializeObject(currentList);
-                rptAttachedFiles.DataSource = currentList;
-                rptAttachedFiles.DataBind();
-                phAttachedFiles.Visible = true;
+                // Update UI
+                RefreshFileList();
+
+                lblStatus.Text = "File uploaded successfully!";
+                lblStatus.Visible = true;
             }
             catch (Exception ex)
             {
                 lblStatus.Text = "File upload failed: " + ex.Message;
                 lblStatus.Visible = true;
             }
+        }
+
+        // NEW METHOD: Handle file removal
+        protected async void rptAttachedFiles_ItemCommand(object sender, RepeaterCommandEventArgs e)
+        {
+            if (e.CommandName == "RemoveFile")
+            {
+                try
+                {
+                    int fileIndex = Convert.ToInt32(e.CommandArgument);
+                    var currentList = UploadedFiles;
+
+                    if (fileIndex >= 0 && fileIndex < currentList.Count)
+                    {
+                        // Get the file to be removed
+                        var fileToRemove = currentList[fileIndex];
+
+                        // Delete from Cloudinary if PublicId exists
+                        if (!string.IsNullOrEmpty(fileToRemove.PublicId))
+                        {
+                            var account = new Account(
+                                ConfigurationManager.AppSettings["CloudinaryCloudName"],
+                                ConfigurationManager.AppSettings["CloudinaryApiKey"],
+                                ConfigurationManager.AppSettings["CloudinaryApiSecret"]
+                            );
+                            var cloudinary = new Cloudinary(account);
+
+                            var deleteParams = new DeletionParams(fileToRemove.PublicId)
+                            {
+                                ResourceType = ResourceType.Raw
+                            };
+
+                            await cloudinary.DestroyAsync(deleteParams);
+                        }
+
+                        // Remove from list
+                        currentList.RemoveAt(fileIndex);
+                        UploadedFiles = currentList;
+
+                        // Refresh UI
+                        RefreshFileList();
+
+                        lblStatus.Text = $"File '{fileToRemove.Name}' has been removed successfully.";
+                        lblStatus.Visible = true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    lblStatus.Text = "Error removing file: " + ex.Message;
+                    lblStatus.Visible = true;
+                }
+            }
+        }
+
+        // NEW METHOD: Refresh the file list display
+        private void RefreshFileList()
+        {
+            var currentList = UploadedFiles;
+
+            // Update hidden field
+            hfUploadedFiles.Value = JsonConvert.SerializeObject(currentList);
+
+            // Update repeater
+            rptAttachedFiles.DataSource = currentList;
+            rptAttachedFiles.DataBind();
+
+            // Show/hide the file preview section
+            phAttachedFiles.Visible = currentList.Count > 0;
         }
 
         protected async void btnSubmitPost_Click(object sender, EventArgs e)
@@ -186,6 +256,7 @@ namespace YourProjectNamespace
         {
             public string Url { get; set; }
             public string Name { get; set; }
+            public string PublicId { get; set; } // NEW: For Cloudinary deletion
         }
 
         public class ClassItem

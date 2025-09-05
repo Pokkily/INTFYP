@@ -22,7 +22,6 @@ namespace YourProjectNamespace
 
         protected async void Page_Load(object sender, EventArgs pageLoadArgs)
         {
-            // Check authentication first
             currentUserEmail = Session["email"]?.ToString();
             currentUserName = Session["username"]?.ToString() ?? "Anonymous";
             currentUserId = Session["userId"]?.ToString();
@@ -38,7 +37,6 @@ namespace YourProjectNamespace
             {
                 InitializeFirestore();
 
-                // Set username for feedback form from session
                 txtFeedbackUsername.Text = currentUserName;
 
                 await LoadAllFeedbacks();
@@ -64,18 +62,15 @@ namespace YourProjectNamespace
 
         protected async void btnSubmit_Click(object sender, EventArgs btnArgs)
         {
-            // Clear any previous messages
             lblMessage.Visible = false;
             lblMessage.Text = "";
 
-            // Double-check authentication
             if (string.IsNullOrEmpty(currentUserId))
             {
                 ShowMessage("Please login to submit feedback.", "alert alert-danger");
                 return;
             }
 
-            // Server-side validation (backup to client-side)
             if (!Page.IsValid)
             {
                 lblMessage.Text = "Please correct the validation errors above.";
@@ -84,16 +79,13 @@ namespace YourProjectNamespace
                 return;
             }
 
-            // Additional server-side validation
             List<string> validationErrors = new List<string>();
 
-            // Validate Username
             if (string.IsNullOrWhiteSpace(txtFeedbackUsername.Text))
             {
                 validationErrors.Add("Username is required.");
             }
 
-            // Validate Description
             if (string.IsNullOrWhiteSpace(txtDescription.Text))
             {
                 validationErrors.Add("Description is required.");
@@ -103,20 +95,17 @@ namespace YourProjectNamespace
                 validationErrors.Add("Description cannot exceed 1000 characters.");
             }
 
-            // Validate File Upload
             if (!fileUpload.HasFile)
             {
                 validationErrors.Add("Please select a file to upload.");
             }
             else
             {
-                // Validate file size (10MB limit)
                 if (fileUpload.PostedFile.ContentLength > 10 * 1024 * 1024)
                 {
                     validationErrors.Add("File size must be less than 10MB.");
                 }
 
-                // Validate file type
                 string fileExtension = Path.GetExtension(fileUpload.FileName).ToLower();
                 string[] allowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".avi" };
 
@@ -125,7 +114,6 @@ namespace YourProjectNamespace
                     validationErrors.Add("Invalid file type. Please upload JPG, PNG, GIF, MP4, or AVI files only.");
                 }
 
-                // Validate content type for additional security
                 string[] allowedContentTypes = {
                     "image/jpeg", "image/jpg", "image/png", "image/gif",
                     "video/mp4", "video/avi", "video/x-msvideo"
@@ -136,14 +124,12 @@ namespace YourProjectNamespace
                     validationErrors.Add("Invalid file content type.");
                 }
 
-                // Additional security: Check for potentially malicious files
                 if (IsDisallowedFileType(fileUpload.FileName))
                 {
                     validationErrors.Add("File type not allowed for security reasons.");
                 }
             }
 
-            // If there are validation errors, display them
             if (validationErrors.Count > 0)
             {
                 lblMessage.Text = "<strong>Please correct the following errors:</strong><br/>" +
@@ -155,7 +141,6 @@ namespace YourProjectNamespace
 
             try
             {
-                // Upload file (now guaranteed to exist due to validation)
                 string mediaUrl = await UploadFileIfAny();
 
                 if (string.IsNullOrEmpty(mediaUrl))
@@ -164,7 +149,6 @@ namespace YourProjectNamespace
                     return;
                 }
 
-                // Create feedback object
                 var feedback = new
                 {
                     userId = currentUserId,
@@ -177,21 +161,15 @@ namespace YourProjectNamespace
                     createdAt = Timestamp.GetCurrentTimestamp()
                 };
 
-                // Save to database
                 await db.Collection("feedbacks").AddAsync(feedback);
 
-                // Success message
                 ShowMessage("Feedback submitted successfully!", "alert alert-success");
 
-                // Clear form
                 txtDescription.Text = "";
-                // Don't clear username as it's readonly
 
-                // Close modal after success (using client script)
                 ScriptManager.RegisterStartupScript(this, GetType(), "CloseModal",
                     "setTimeout(function(){ $('#feedbackModal').modal('hide'); }, 1500);", true);
 
-                // Refresh the feedback list
                 await LoadAllFeedbacks();
             }
             catch (Exception ex)
@@ -202,7 +180,6 @@ namespace YourProjectNamespace
 
         private bool IsDisallowedFileType(string fileName)
         {
-            // List of disallowed extensions for security
             string[] disallowedExtensions = {
                 ".exe", ".bat", ".cmd", ".com", ".pif", ".scr", ".vbs", ".js",
                 ".jar", ".asp", ".aspx", ".php", ".jsp", ".cfm", ".pl", ".py",
@@ -231,7 +208,6 @@ namespace YourProjectNamespace
                 {
                     string ext = Path.GetExtension(fileUpload.FileName).ToLower();
 
-                    // Upload images
                     if (ext == ".jpg" || ext == ".jpeg" || ext == ".png" || ext == ".gif")
                     {
                         var uploadParams = new ImageUploadParams
@@ -249,7 +225,6 @@ namespace YourProjectNamespace
                             return uploadResult.SecureUrl?.ToString();
                         }
                     }
-                    // Upload videos
                     else if (ext == ".mp4" || ext == ".mov" || ext == ".avi" || ext == ".webm")
                     {
                         var uploadParams = new VideoUploadParams
@@ -288,14 +263,12 @@ namespace YourProjectNamespace
                     var data = doc.ToDictionary();
                     var likesList = data.ContainsKey("likes") ? (data["likes"] as IEnumerable<object>)?.ToList() : new List<object>();
 
-                    // Load comments for this feedback post
                     var commentsSnapshot = await db.Collection("feedbacks").Document(doc.Id).Collection("comments").OrderBy("createdAt").GetSnapshotAsync();
 
                     var comments = commentsSnapshot.Documents.Select(commentDoc =>
                     {
                         var cData = commentDoc.ToDictionary();
 
-                        // Properly handle comment timestamp with timezone conversion
                         DateTime commentCreatedAt = DateTime.UtcNow;
                         if (cData.ContainsKey("createdAt") && cData["createdAt"] != null)
                         {
@@ -327,7 +300,6 @@ namespace YourProjectNamespace
                         };
                     }).ToList();
 
-                    // Properly handle feedback timestamp with timezone conversion
                     DateTime feedbackCreatedAt = DateTime.UtcNow;
                     if (data.ContainsKey("createdAt") && data["createdAt"] != null)
                     {
@@ -379,7 +351,6 @@ namespace YourProjectNamespace
             {
                 var feedback = (dynamic)itemArgs.Item.DataItem;
 
-                // Handle the modal comments repeater
                 var rptCommentsDetail = (Repeater)itemArgs.Item.FindControl("rptCommentsDetail");
                 var noCommentsDetailDiv = (HtmlGenericControl)itemArgs.Item.FindControl("noCommentsDetailDiv");
 
@@ -400,7 +371,6 @@ namespace YourProjectNamespace
                     }
                 }
 
-                // Also handle regular comments repeater if it exists
                 var rptComments = (Repeater)itemArgs.Item.FindControl("rptComments");
                 var noCommentsDiv = (HtmlGenericControl)itemArgs.Item.FindControl("noCommentsDiv");
 
@@ -425,7 +395,6 @@ namespace YourProjectNamespace
 
         protected async void rptFeedback_ItemCommand(object source, RepeaterCommandEventArgs cmdArgs)
         {
-            // Check authentication before processing any command
             if (string.IsNullOrEmpty(currentUserId))
             {
                 ShowMessage("Please login to interact with feedback posts.", "alert alert-warning");
@@ -451,12 +420,10 @@ namespace YourProjectNamespace
 
                         if (likes.Contains(currentUserId))
                         {
-                            // Unlike
                             likes.Remove(currentUserId);
                         }
                         else
                         {
-                            // Like
                             likes.Add(currentUserId);
                         }
 
@@ -478,17 +445,14 @@ namespace YourProjectNamespace
             {
                 string postId = cmdArgs.CommandArgument.ToString();
 
-                // Try to find the modal comment controls first
                 var txtCommentInputDetail = (TextBox)cmdArgs.Item.FindControl("txtCommentInputDetail");
                 var lblCommentErrorDetail = (Label)cmdArgs.Item.FindControl("lblCommentErrorDetail");
 
-                // If modal controls not found, try regular controls (fallback)
                 var txtCommentInput = txtCommentInputDetail ?? (TextBox)cmdArgs.Item.FindControl("txtCommentInput");
                 var lblCommentError = lblCommentErrorDetail ?? (Label)cmdArgs.Item.FindControl("lblCommentError");
 
                 string commentText = txtCommentInput?.Text.Trim();
 
-                // Validate comment text
                 if (string.IsNullOrWhiteSpace(commentText))
                 {
                     if (lblCommentError != null)
@@ -499,7 +463,6 @@ namespace YourProjectNamespace
                     return;
                 }
 
-                // Additional comment validation
                 if (commentText.Length > 500)
                 {
                     if (lblCommentError != null)
@@ -510,7 +473,6 @@ namespace YourProjectNamespace
                     return;
                 }
 
-                // Check for inappropriate content (basic filter)
                 if (ContainsInappropriateContent(commentText))
                 {
                     if (lblCommentError != null)
@@ -533,15 +495,12 @@ namespace YourProjectNamespace
                 {
                     await db.Collection("feedbacks").Document(postId).Collection("comments").AddAsync(commentData);
 
-                    // Clear the comment input
                     if (txtCommentInput != null) txtCommentInput.Text = "";
 
-                    // Hide any previous error
                     if (lblCommentError != null) lblCommentError.Visible = false;
 
                     await LoadAllFeedbacks();
 
-                    // Add JavaScript to keep the modal open after postback
                     string script = $@"
                         <script type='text/javascript'>
                             $(document).ready(function() {{
@@ -565,10 +524,8 @@ namespace YourProjectNamespace
 
         private bool ContainsInappropriateContent(string text)
         {
-            // Basic content filter - you can expand this as needed
             string[] inappropriateWords = {
                 "spam", "scam", "fake", "hate", "abuse" 
-                // Add more words as needed
             };
 
             string lowerText = text.ToLower();
@@ -582,7 +539,6 @@ namespace YourProjectNamespace
             lblMessage.Visible = true;
         }
 
-        // Add page methods for better error handling
         protected override void OnError(EventArgs errorArgs)
         {
             Exception ex = Server.GetLastError();
@@ -593,10 +549,8 @@ namespace YourProjectNamespace
 
         protected override void OnPreRender(EventArgs preRenderArgs)
         {
-            // Ensure validation scripts are registered
             if (Page.IsPostBack)
             {
-                // Re-register validation scripts if needed
                 ClientScript.RegisterStartupScript(this.GetType(), "ValidationScripts", @"
                     <script type='text/javascript'>
                         // Ensure validation functions are available after postback
@@ -608,7 +562,6 @@ namespace YourProjectNamespace
             base.OnPreRender(preRenderArgs);
         }
 
-        // Helper methods for time formatting (similar to ChatRoom)
         protected string FormatRelativeTime(DateTime timestamp)
         {
             DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;

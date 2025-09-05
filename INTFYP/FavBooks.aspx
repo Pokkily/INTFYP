@@ -6,7 +6,6 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Enhanced FavBooks Page with Library Design Formula */
         
         .library-page {
             padding: 40px 20px;
@@ -17,7 +16,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated background elements */
         .library-page::before {
             content: '';
             position: fixed;
@@ -97,7 +95,6 @@
             margin: 0;
         }
 
-        /* Sidebar Card */
         .sidebar-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -160,7 +157,6 @@
             font-size: 24px;
         }
 
-        /* Search Input */
         .search-input {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(5px);
@@ -180,7 +176,6 @@
             background: rgba(255, 255, 255, 1);
         }
 
-        /* Navigation Buttons */
         .nav-button {
             display: flex;
             align-items: center;
@@ -244,7 +239,6 @@
             background: linear-gradient(135deg, #44a08d 0%, #4ecdc4 100%);
         }
 
-        /* Main Content Card */
         .main-content-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -289,7 +283,6 @@
             font-size: 22px;
         }
 
-        /* Book Cards - Grid */
         .books-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -466,7 +459,6 @@
             transform: translateY(-2px);
         }
 
-        /* Button styles */
         .btn-recommend {
             background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%);
             color: #2c3e50;
@@ -512,7 +504,6 @@
             100% { transform: scale(1); }
         }
 
-        /* No Books Message */
         .no-books {
             text-align: center;
             padding: 40px 30px;
@@ -560,7 +551,6 @@
             margin: 0;
         }
 
-        /* Top search bar styling */
         .top-search-bar {
             background: rgba(255, 255, 255, 0.9);
             backdrop-filter: blur(5px);
@@ -579,7 +569,6 @@
             background: rgba(255, 255, 255, 1);
         }
 
-        /* Responsive design */
         @media (max-width: 768px) {
             .library-page {
                 padding: 20px 15px;
@@ -629,7 +618,6 @@
             }
         }
 
-        /* Content header with search */
         .content-header-with-search {
             display: flex;
             justify-content: space-between;
@@ -655,7 +643,6 @@
             </div>
 
             <div class="row">
-                <!-- Sidebar -->
                 <div class="col-md-3 mb-4">
                     <div class="sidebar-card">
                         <h5 class="sidebar-title">Search Books</h5>
@@ -676,7 +663,6 @@
                     </div>
                 </div>
 
-                <!-- Main Content -->
                 <div class="col-md-9">
                     <div class="main-content-card">
                         <div class="content-header">
@@ -733,16 +719,13 @@
 
     <script>
         function addClickEffect(button) {
-            // Add clicked class for animation
             button.classList.add('clicked');
 
-            // Remove the class after animation completes
             setTimeout(function () {
                 button.classList.remove('clicked');
             }, 600);
         }
     </script>
 
-    <!-- Font Awesome for additional icons if needed -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 </asp:Content>

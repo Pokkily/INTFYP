@@ -2,7 +2,6 @@
 
 <asp:Content ID="ChatContent" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Modern Design System Implementation - Following Library Style */
         .chat-page {
             padding: 40px 20px;
             font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -12,7 +11,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated background elements - From Library */
         .chat-page::before {
             content: '';
             position: fixed;
@@ -731,7 +729,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Utility Classes */
         .form-group { margin-bottom: 15px; }
         .search-section { padding: 15px 20px; border-bottom: 1px solid rgba(233, 236, 239, 0.8); background: rgba(248, 249, 250, 0.9); }
         .create-room-section, .start-chat-section { padding: 20px; border-bottom: 1px solid rgba(233, 236, 239, 0.8); }
@@ -749,7 +746,6 @@
         </div>
 
         <div class="chat-container">
-            <!-- Enhanced Sidebar -->
             <div class="sidebar glass-card">
                 <div class="sidebar-header">
                     <h3>Chat Rooms</h3>
@@ -760,14 +756,12 @@
                     </div>
                 </div>
 
-                <!-- Sidebar Tabs -->
                 <div class="sidebar-tabs">
                     <button type="button" class="tab-btn active" data-tab="my-rooms">My Rooms</button>
                     <button type="button" class="tab-btn" data-tab="private-chat">Private Chat</button>
                     <button type="button" class="tab-btn" data-tab="create-room">Create</button>
                 </div>
 
-                <!-- My Rooms Tab -->
                 <div class="tab-content active" id="my-rooms-tab">
                     <div class="rooms-list" id="myRoomsList">
                         <asp:Repeater ID="rptMyRooms" runat="server">
@@ -791,7 +785,6 @@
                     </div>
                 </div>
 
-                <!-- Private Chat Tab -->
                 <div class="tab-content" id="private-chat-tab">
                     <div class="start-chat-section">
                         <h4 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 16px;">Start New Private Chat</h4>
@@ -862,7 +855,6 @@
                     </div>
                 </div>
 
-                <!-- Create Room Tab -->
                 <div class="tab-content" id="create-room-tab">
                     <div class="create-room-section">
                         <h4 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 16px;">Create New Room</h4>
@@ -880,7 +872,6 @@
                 </div>
             </div>
 
-            <!-- Main Chat Area -->
             <div class="main-chat glass-card">
                 <asp:Panel ID="pnlNoRoom" runat="server" CssClass="empty-state" Visible="true">
                     <h3>Welcome to Chat Rooms</h3>
@@ -994,7 +985,6 @@
             </div>
         </div>
 
-        <!-- Room Management Modal -->
         <div id="manageModal" class="modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1056,14 +1046,12 @@
         </div>
     </div>
 
-    <!-- Hidden fields -->
     <asp:HiddenField ID="hfCurrentRoomId" runat="server" />
     <asp:HiddenField ID="hfActiveTab" runat="server" Value="my-rooms" />
     <asp:HiddenField ID="hfCurrentRoomType" runat="server" />
     <asp:HiddenField ID="hfIsOwner" runat="server" />
 
     <script type="text/javascript">
-        // Basic functionality without auto-refresh
         let currentActiveTab = 'my-rooms';
         let isTabSwitching = false;
         let selectedFile = null;
@@ -1263,7 +1251,6 @@
             console.log('Event handlers setup complete');
         }
 
-        // DOM ready initialization
         document.addEventListener('DOMContentLoaded', function () {
             console.log('Chat page loaded, initializing...');
 

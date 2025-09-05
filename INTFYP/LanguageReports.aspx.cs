@@ -13,10 +13,8 @@ namespace INTFYP
         private static FirestoreDb db;
         private static readonly object dbLock = new object();
 
-        // Cache for user lookups to avoid repeated database calls
         private static Dictionary<string, UserInfo> userCache = new Dictionary<string, UserInfo>();
 
-        // User info class to store user details
         public class UserInfo
         {
             public string UserId { get; set; }
@@ -70,7 +68,6 @@ namespace INTFYP
             }
         }
 
-        // Helper method to safely get field value from document
         private static T GetFieldValue<T>(Dictionary<string, object> doc, string fieldName, T defaultValue = default(T))
         {
             try
@@ -113,6 +110,51 @@ namespace INTFYP
             return defaultValue;
         }
 
+        protected string FormatRelativeTime(DateTime timestamp)
+        {
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            var timeSpan = DateTime.Now - localTime;
+
+            if (timeSpan.Days > 0)
+                return $"{timeSpan.Days}d ago";
+            else if (timeSpan.Hours > 0)
+                return $"{timeSpan.Hours}h ago";
+            else if (timeSpan.Minutes > 0)
+                return $"{timeSpan.Minutes}m ago";
+            else
+                return "Just now";
+        }
+
+        protected string FormatMessageTime(DateTime timestamp)
+        {
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            return localTime.ToString("HH:mm");
+        }
+
+        protected string FormatFullDateTime(DateTime timestamp)
+        {
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            return localTime.ToString("MMM dd, yyyy HH:mm");
+        }
+
+        private DateTime ConvertTimestampToLocal(Timestamp timestamp)
+        {
+            try
+            {
+                var utcDateTime = timestamp.ToDateTime();
+                if (utcDateTime.Kind == DateTimeKind.Unspecified)
+                {
+                    utcDateTime = DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc);
+                }
+                return utcDateTime.ToLocalTime();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error converting timestamp: {ex.Message}");
+                return DateTime.Now;
+            }
+        }
+
         private async System.Threading.Tasks.Task<UserInfo> GetUserDetailsAsync(string userId)
         {
             try
@@ -122,13 +164,11 @@ namespace INTFYP
                     return new UserInfo { UserId = userId };
                 }
 
-                // Check cache first
                 if (userCache.ContainsKey(userId))
                 {
                     return userCache[userId];
                 }
 
-                // Query users collection
                 DocumentReference userDoc = db.Collection("users").Document(userId);
                 DocumentSnapshot userSnapshot = await userDoc.GetSnapshotAsync();
 
@@ -141,7 +181,6 @@ namespace INTFYP
                     userInfo.Email = GetFieldValue(userData, "email", "");
                 }
 
-                // Cache the result
                 userCache[userId] = userInfo;
                 return userInfo;
             }
@@ -161,7 +200,6 @@ namespace INTFYP
 
             try
             {
-                // Check cache first
                 foreach (string userId in userIds.Distinct().Where(id => !string.IsNullOrEmpty(id)))
                 {
                     if (userCache.ContainsKey(userId))
@@ -174,7 +212,6 @@ namespace INTFYP
                     }
                 }
 
-                // Fetch uncached users in batches
                 if (uncachedUserIds.Count > 0)
                 {
                     for (int i = 0; i < uncachedUserIds.Count; i += 10)
@@ -213,7 +250,6 @@ namespace INTFYP
                             userInfo.Email = GetFieldValue(userData, "email", "");
                         }
 
-                        // Cache and return
                         userCache[userId] = userInfo;
                         return new { UserId = userId, UserInfo = userInfo };
                     }
@@ -245,12 +281,9 @@ namespace INTFYP
             {
                 System.Diagnostics.Debug.WriteLine("Loading filters...");
 
-                // Clear existing items
                 ddlLanguageFilter.Items.Clear();
                 ddlLanguageFilter.Items.Add(new ListItem("All Languages", ""));
 
-                // Load available languages from languageResults collection
-                // Use simple query without complex filtering to avoid index issues
                 Query languagesQuery = db.Collection("languageResults").Limit(1000);
                 QuerySnapshot languagesSnapshot = await languagesQuery.GetSnapshotAsync();
 
@@ -274,7 +307,6 @@ namespace INTFYP
                     }
                 }
 
-                // Add languages to dropdown
                 foreach (var lang in uniqueLanguages.OrderBy(l => l.Value))
                 {
                     ddlLanguageFilter.Items.Add(new ListItem(lang.Value, lang.Key));
@@ -282,7 +314,6 @@ namespace INTFYP
 
                 System.Diagnostics.Debug.WriteLine($"Added {uniqueLanguages.Count} unique languages to filter");
 
-                // Load topics for selected language
                 await LoadTopicsForLanguage("");
             }
             catch (Exception ex)
@@ -301,7 +332,6 @@ namespace INTFYP
                 ddlTopicFilter.Items.Clear();
                 ddlTopicFilter.Items.Add(new ListItem("All Topics", ""));
 
-                // Use simple query to avoid index requirements
                 Query topicsQuery = db.Collection("languageResults").Limit(1000);
 
                 QuerySnapshot topicsSnapshot = await topicsQuery.GetSnapshotAsync();
@@ -312,7 +342,6 @@ namespace INTFYP
                 {
                     var data = doc.ToDictionary();
 
-                    // Apply language filter client-side if specified
                     if (!string.IsNullOrEmpty(languageId))
                     {
                         string docLanguageId = GetFieldValue(data, "languageId", "");
@@ -330,7 +359,6 @@ namespace INTFYP
                     }
                 }
 
-                // Add topics to dropdown
                 foreach (var topic in uniqueTopics.OrderBy(t => t))
                 {
                     ddlTopicFilter.Items.Add(new ListItem(topic, topic));
@@ -341,7 +369,6 @@ namespace INTFYP
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error loading topics: {ex.Message}");
-                // Don't show error message for topics as it's not critical
             }
         }
 
@@ -381,7 +408,6 @@ namespace INTFYP
                 System.Diagnostics.Debug.WriteLine($"Topic filter: {ddlTopicFilter.SelectedValue}");
                 System.Diagnostics.Debug.WriteLine($"Date range: {ddlDateRange.SelectedValue}");
 
-                // Use defensive querying approach to avoid index issues
                 List<Dictionary<string, object>> allResults = await GetLanguageResultsWithFallback();
 
                 if (allResults.Count == 0)
@@ -394,7 +420,6 @@ namespace INTFYP
 
                 System.Diagnostics.Debug.WriteLine($"Retrieved {allResults.Count} total results");
 
-                // Apply client-side filtering
                 var filteredResults = ApplyClientSideFilters(allResults);
 
                 System.Diagnostics.Debug.WriteLine($"Final filtered results: {filteredResults.Count}");
@@ -408,7 +433,6 @@ namespace INTFYP
 
                 pnlNoData.Visible = false;
 
-                // Calculate statistics and load data
                 await CalculateOverallStats(filteredResults);
                 await LoadLanguagePerformance(filteredResults);
                 await LoadRecentActivityAsync(filteredResults);
@@ -431,10 +455,8 @@ namespace INTFYP
 
             try
             {
-                // Strategy 1: Try with minimal server-side filtering first
                 Query baseQuery = db.Collection("languageResults");
 
-                // Only apply language filter if selected (single field filter should work)
                 if (!string.IsNullOrEmpty(ddlLanguageFilter.SelectedValue))
                 {
                     try
@@ -445,11 +467,10 @@ namespace INTFYP
                     catch (Exception ex)
                     {
                         System.Diagnostics.Debug.WriteLine($"Server-side language filter failed: {ex.Message}");
-                        baseQuery = db.Collection("languageResults"); // Fallback to no server filter
+                        baseQuery = db.Collection("languageResults");
                     }
                 }
 
-                // Add ordering and limit to prevent large data retrieval
                 try
                 {
                     baseQuery = baseQuery.OrderByDescending("completedAt").Limit(5000);
@@ -463,14 +484,12 @@ namespace INTFYP
                 QuerySnapshot snapshot = await baseQuery.GetSnapshotAsync();
                 System.Diagnostics.Debug.WriteLine($"Retrieved {snapshot.Documents.Count} documents from Firestore");
 
-                // Convert to dictionaries and validate
                 foreach (var doc in snapshot.Documents)
                 {
                     try
                     {
                         var data = doc.ToDictionary();
 
-                        // Validate required fields exist
                         if (data.ContainsKey("userId") && data.ContainsKey("score") &&
                             data.ContainsKey("languageId") && data.ContainsKey("languageName"))
                         {
@@ -490,7 +509,6 @@ namespace INTFYP
             {
                 System.Diagnostics.Debug.WriteLine($"Error retrieving language results: {ex.Message}");
 
-                // Fallback strategy: Try basic query without any filters
                 try
                 {
                     System.Diagnostics.Debug.WriteLine("Attempting fallback query without filters...");
@@ -530,7 +548,6 @@ namespace INTFYP
 
             try
             {
-                // Apply language filter (if not already applied server-side)
                 if (!string.IsNullOrEmpty(ddlLanguageFilter.SelectedValue))
                 {
                     filteredResults = filteredResults.Where(r =>
@@ -538,7 +555,6 @@ namespace INTFYP
                     System.Diagnostics.Debug.WriteLine("Applied client-side language filter");
                 }
 
-                // Apply topic filter
                 if (!string.IsNullOrEmpty(ddlTopicFilter.SelectedValue))
                 {
                     filteredResults = filteredResults.Where(r =>
@@ -546,7 +562,6 @@ namespace INTFYP
                     System.Diagnostics.Debug.WriteLine("Applied client-side topic filter");
                 }
 
-                // Apply date filter
                 int daysBack = Convert.ToInt32(ddlDateRange.SelectedValue);
                 if (daysBack > 0)
                 {
@@ -556,7 +571,8 @@ namespace INTFYP
                         try
                         {
                             Timestamp completedAt = GetFieldValue(r, "completedAt", Timestamp.GetCurrentTimestamp());
-                            return completedAt.ToDateTime() >= cutoffDate;
+                            DateTime localCompletedAt = ConvertTimestampToLocal(completedAt);
+                            return localCompletedAt >= cutoffDate;
                         }
                         catch
                         {
@@ -569,7 +585,7 @@ namespace INTFYP
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"Error in client-side filtering: {ex.Message}");
-                return allResults.ToList(); // Return unfiltered results on error
+                return allResults.ToList();
             }
 
             return filteredResults.ToList();
@@ -577,7 +593,6 @@ namespace INTFYP
 
         private void ClearAllDisplays()
         {
-            // Clear all statistics
             lblTotalStudents.Text = "0";
             lblTotalAttempts.Text = "0";
             lblAverageScore.Text = "0";
@@ -585,13 +600,11 @@ namespace INTFYP
             lblTotalLanguages.Text = "0";
             lblAvgTimeSpent.Text = "0";
 
-            // Clear repeaters
             rptLanguageStats.DataSource = null;
             rptLanguageStats.DataBind();
             rptRecentActivity.DataSource = null;
             rptRecentActivity.DataBind();
 
-            // Clear chart data
             hfScoreDistributionData.Value = "[0,0,0,0,0]";
             hfDailyActivityData.Value = JsonConvert.SerializeObject(new { labels = new string[0], attempts = new int[0] });
         }
@@ -602,14 +615,11 @@ namespace INTFYP
             {
                 if (results.Count == 0) return;
 
-                // Unique students
                 var uniqueStudents = results.Select(r => GetFieldValue(r, "userId", "")).Where(id => !string.IsNullOrEmpty(id)).Distinct().Count();
                 lblTotalStudents.Text = uniqueStudents.ToString();
 
-                // Total attempts
                 lblTotalAttempts.Text = results.Count.ToString();
 
-                // Average score
                 var scores = results.Select(r => GetFieldValue(r, "score", 0.0)).Where(s => s > 0).ToList();
                 if (scores.Any())
                 {
@@ -621,7 +631,6 @@ namespace INTFYP
                     lblAverageScore.Text = "0";
                 }
 
-                // Pass rate (≥70%)
                 if (scores.Any())
                 {
                     int passedAttempts = scores.Count(s => s >= 70);
@@ -633,11 +642,9 @@ namespace INTFYP
                     lblPassRate.Text = "0";
                 }
 
-                // Total languages
                 var uniqueLanguages = results.Select(r => GetFieldValue(r, "languageId", "")).Where(id => !string.IsNullOrEmpty(id)).Distinct().Count();
                 lblTotalLanguages.Text = uniqueLanguages.ToString();
 
-                // Average time spent
                 var timeSpentValues = results.Select(r => GetFieldValue(r, "timeSpentSeconds", 0.0)).Where(t => t > 0).ToList();
                 if (timeSpentValues.Any())
                 {
@@ -711,17 +718,17 @@ namespace INTFYP
                     return;
                 }
 
-                // Get all unique user IDs
                 var userIds = recentResults.Select(r => GetFieldValue(r, "userId", "")).Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
 
-                // Batch fetch user details
                 var userLookup = await GetMultipleUsersAsync(userIds);
 
-                // Build activity data with proper user names
                 var recentActivity = recentResults.Select(r =>
                 {
                     string userId = GetFieldValue(r, "userId", "");
                     UserInfo userInfo = userLookup.ContainsKey(userId) ? userLookup[userId] : new UserInfo { UserId = userId };
+
+                    Timestamp completedTimestamp = GetFieldValue(r, "completedAt", Timestamp.GetCurrentTimestamp());
+                    DateTime localCompletedAt = ConvertTimestampToLocal(completedTimestamp);
 
                     return new
                     {
@@ -732,7 +739,7 @@ namespace INTFYP
                         LessonName = GetFieldValue(r, "lessonName", "Unknown"),
                         Score = GetFieldValue(r, "score", 0),
                         TimeSpent = Math.Round(GetFieldValue(r, "timeSpentSeconds", 0.0) / 60.0, 1),
-                        CompletedAt = GetFieldValue(r, "completedAt", Timestamp.GetCurrentTimestamp()).ToDateTime().ToString("MMM dd, HH:mm")
+                        CompletedAt = FormatFullDateTime(localCompletedAt)
                     };
                 }).ToList();
 
@@ -753,8 +760,7 @@ namespace INTFYP
         {
             try
             {
-                // Score Distribution Data
-                var scoreRanges = new int[5]; // 90-100, 80-89, 70-79, 60-69, <60
+                var scoreRanges = new int[5];
 
                 foreach (var result in results)
                 {
@@ -768,7 +774,6 @@ namespace INTFYP
 
                 hfScoreDistributionData.Value = JsonConvert.SerializeObject(scoreRanges);
 
-                // Daily Activity Data (last 7 days)
                 var dailyActivity = new Dictionary<string, int>();
                 for (int i = 6; i >= 0; i--)
                 {
@@ -781,8 +786,8 @@ namespace INTFYP
                     try
                     {
                         Timestamp completedTimestamp = GetFieldValue(result, "completedAt", Timestamp.GetCurrentTimestamp());
-                        DateTime completedDate = completedTimestamp.ToDateTime();
-                        string dateKey = completedDate.ToString("MMM dd");
+                        DateTime localCompletedDate = ConvertTimestampToLocal(completedTimestamp);
+                        string dateKey = localCompletedDate.ToString("MMM dd");
 
                         if (dailyActivity.ContainsKey(dateKey))
                         {

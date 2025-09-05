@@ -6,7 +6,6 @@
 
 <asp:Content ID="Content2" ContentPlaceHolderID="MainContent" runat="server">
     <style>
-        /* Modern Scholarship Application Design Following AddBook Pattern */
         .scholarship-application-page {
             padding: 40px 20px;
             font-family: 'Segoe UI', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -15,7 +14,6 @@
             position: relative;
         }
 
-        /* Animated background elements */
         .scholarship-application-page::before {
             content: '';
             position: fixed;
@@ -323,7 +321,6 @@
             color: white;
         }
 
-        /* NEW: Supporting Documents Section */
         .documents-section {
             background: rgba(248, 249, 250, 0.8);
             border-radius: 10px;
@@ -408,7 +405,6 @@
             50% { transform: translateY(-10px); }
         }
 
-        /* File Upload Styling */
         .file-upload-wrapper {
             position: relative;
             overflow: hidden;
@@ -430,7 +426,6 @@
             font-size: 16px;
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .scholarship-application-page {
                 padding: 20px 10px;
@@ -460,7 +455,6 @@
             }
         }
 
-        /* Animations */
         @keyframes slideInFromBottom {
             from {
                 opacity: 0;
@@ -483,7 +477,6 @@
             }
         }
 
-        /* Utility Classes */
         .mb-0 { margin-bottom: 0; }
         .mb-2 { margin-bottom: 10px; }
         .mb-3 { margin-bottom: 15px; }
@@ -503,16 +496,13 @@
                 <p class="page-subtitle">Apply for educational scholarships and funding opportunities</p>
             </div>
 
-            <!-- Application Form -->
             <div class="glass-card">
                 <div class="card-header">
                     <i class="fas fa-user-graduate"></i>
                     Submit New Scholarship Application
                 </div>
                 <div class="card-body">
-                    <!-- Personal Information Section -->
                     <div class="form-section">
-                        <!-- Status Message -->
                         <asp:Panel ID="pnlStatus" runat="server" Visible="false">
                             <div class="status-message" id="statusMessage">
                                 <i class="fas fa-check-circle"></i>
@@ -581,7 +571,6 @@
                         </div>
                     </div>
 
-                    <!-- Academic Information Section -->
                     <div class="form-section">
                         <div class="section-header">
                             <i class="fas fa-graduation-cap"></i>
@@ -651,7 +640,6 @@
                         </div>
                     </div>
 
-                    <!-- Documents Section -->
                     <div class="form-section">
                         <div class="section-header">
                             <i class="fas fa-file-upload"></i>
@@ -708,7 +696,6 @@
                 </div>
             </div>
 
-            <!-- My Applications Section -->
             <div class="glass-card">
                 <div class="card-header">
                     <i class="fas fa-history"></i>
@@ -733,7 +720,6 @@
                                     <strong>Field of Study:</strong> <%# Eval("FieldOfStudy") %><br/>
                                     <strong>Current Result:</strong> <%# Eval("CurrentResult") %>
                                     
-                                    <!-- NEW: Supporting Documents Section -->
                                     <div class="documents-section">
                                         <div class="documents-title">Supporting Documents</div>
                                         <div class="document-links">
@@ -767,7 +753,6 @@
         </div>
     </div>
 
-    <!-- Include Required Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
@@ -776,7 +761,6 @@
         $(document).ready(function () {
             console.log('Scholarship Application page loaded');
 
-            // Auto-hide status messages
             setTimeout(function () {
                 var statusMessage = document.getElementById('statusMessage');
                 if (statusMessage) {
@@ -789,7 +773,6 @@
                 }
             }, 6000);
 
-            // Enhanced hover effects for application cards
             const cards = document.querySelectorAll('.application-card');
             cards.forEach((card, index) => {
                 card.style.animationDelay = `${index * 0.1}s`;
@@ -805,7 +788,6 @@
                 });
             });
 
-            // Form input focus effects
             const inputs = document.querySelectorAll('.form-control');
             inputs.forEach(input => {
                 input.addEventListener('focus', function () {
@@ -819,7 +801,6 @@
                 });
             });
 
-            // File upload styling
             const fileInputs = document.querySelectorAll('input[type="file"]');
             fileInputs.forEach(input => {
                 input.addEventListener('change', function () {
@@ -834,13 +815,11 @@
                 });
             });
 
-            // Smooth scrolling for form sections
             const sectionHeaders = document.querySelectorAll('.section-header');
             sectionHeaders.forEach((header, index) => {
                 header.style.animationDelay = `${(index + 1) * 0.2}s`;
             });
 
-            // Document link hover effects
             const docLinks = document.querySelectorAll('.document-link');
             docLinks.forEach(link => {
                 link.addEventListener('mouseenter', function () {
@@ -853,7 +832,6 @@
             });
         });
 
-        // Function for form validation feedback
         function validateForm() {
             const requiredFields = document.querySelectorAll('[required]');
             let isValid = true;

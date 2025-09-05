@@ -15,12 +15,10 @@ namespace INTFYP
         private static FirestoreDb db;
         private static readonly object dbLock = new object();
 
-        // Store all books for search functionality
         private static List<object> allBooks = new List<object>();
 
         protected async void Page_Load(object sender, EventArgs e)
         {
-            // Check if request was too large - UPDATED FOR 4MB
             if (Request.ContentLength > (4 * 1024 * 1024))
             {
                 ShowErrorMessage("❌ File size exceeds 4 MB limit. Please select a smaller file.");
@@ -50,7 +48,6 @@ namespace INTFYP
             }
         }
 
-        // Helper method to update the book count display
         private void UpdateBookCountDisplay(List<object> books, string searchTerm = "")
         {
             int count = books.Count;
@@ -92,25 +89,21 @@ namespace INTFYP
 
         protected async void btnSubmit_Click(object sender, EventArgs e)
         {
-            // Only validate if the validation group passes
             Page.Validate("AddBookGroup");
             if (!Page.IsValid)
             {
                 return;
             }
 
-            // Hide previous messages
             pnlStatus.Visible = false;
 
             try
             {
-                // Validate form inputs
                 if (!ValidateForm())
                 {
                     return;
                 }
 
-                // Validate PDF file
                 if (!ValidatePdfFile(filePdf))
                 {
                     return;
@@ -118,13 +111,11 @@ namespace INTFYP
 
                 string pdfUrl = "";
 
-                // Upload PDF file to Cloudinary
                 if (filePdf.HasFile)
                 {
                     pdfUrl = await UploadPdfToCloudinary(filePdf);
                 }
 
-                // Save book metadata + PDF URL to Firestore
                 DocumentReference addedDocRef = await db.Collection("books").AddAsync(new
                 {
                     Title = txtTitle.Text.Trim(),
@@ -137,10 +128,8 @@ namespace INTFYP
 
                 ShowSuccessMessage($"✅ Learning material added successfully! (ID: {addedDocRef.Id})");
 
-                // Clear input fields
                 ClearForm();
 
-                // Reload books
                 await LoadBooks();
             }
             catch (Exception ex)
@@ -151,21 +140,18 @@ namespace INTFYP
 
         private bool ValidateForm()
         {
-            // Check if title is empty
             if (string.IsNullOrWhiteSpace(txtTitle.Text))
             {
                 ShowErrorMessage("❌ Please enter a title.");
                 return false;
             }
 
-            // Check if author is empty
             if (string.IsNullOrWhiteSpace(txtAuthor.Text))
             {
                 ShowErrorMessage("❌ Please enter an author.");
                 return false;
             }
 
-            // Validate category selection
             if (string.IsNullOrEmpty(ddlCategory.SelectedValue))
             {
                 ShowErrorMessage("❌ Please select a category.");
@@ -183,7 +169,6 @@ namespace INTFYP
                 return false;
             }
 
-            // Check file extension
             string fileExtension = Path.GetExtension(fileUpload.FileName).ToLower();
             if (fileExtension != ".pdf")
             {
@@ -191,15 +176,13 @@ namespace INTFYP
                 return false;
             }
 
-            // Check file size (4 MB limit) - UPDATED FOR 4MB
-            const int maxFileSize = 4 * 1024 * 1024; // 4 MB in bytes
+            const int maxFileSize = 4 * 1024 * 1024;
             if (fileUpload.PostedFile.ContentLength > maxFileSize)
             {
                 ShowErrorMessage("❌ File size exceeds 4 MB limit. Please select a smaller file.");
                 return false;
             }
 
-            // Check MIME type for additional security
             if (fileUpload.PostedFile.ContentType != "application/pdf")
             {
                 ShowErrorMessage("❌ Invalid file type. Please select a valid PDF file.");
@@ -211,13 +194,11 @@ namespace INTFYP
 
         private bool ValidateEditPdfFile(FileUpload fileUpload)
         {
-            // For edit, PDF file is optional
             if (!fileUpload.HasFile)
             {
-                return true; // No file selected is OK for edit
+                return true;
             }
 
-            // Check file extension
             string fileExtension = Path.GetExtension(fileUpload.FileName).ToLower();
             if (fileExtension != ".pdf")
             {
@@ -226,8 +207,7 @@ namespace INTFYP
                 return false;
             }
 
-            // Check file size (4 MB limit) - UPDATED FOR 4MB
-            const int maxFileSize = 4 * 1024 * 1024; // 4 MB in bytes
+            const int maxFileSize = 4 * 1024 * 1024;
             if (fileUpload.PostedFile.ContentLength > maxFileSize)
             {
                 lblBookStatus.Text = "❌ File size exceeds 4 MB limit. Please select a smaller file.";
@@ -235,7 +215,6 @@ namespace INTFYP
                 return false;
             }
 
-            // Check MIME type for additional security
             if (fileUpload.PostedFile.ContentType != "application/pdf")
             {
                 lblBookStatus.Text = "❌ Invalid file type. Please select a valid PDF file.";
@@ -295,19 +274,15 @@ namespace INTFYP
                     });
                 }
 
-                // Store all books for search functionality
                 allBooks = books;
 
-                // Apply search filter if there's a search term
                 var filteredBooks = FilterBooks(books, txtSearch.Text);
 
                 rptBooks.DataSource = filteredBooks;
                 rptBooks.DataBind();
 
-                // Update book count display
                 UpdateBookCountDisplay(filteredBooks, txtSearch.Text);
 
-                // Set the selected values for edit dropdowns after databinding
                 foreach (RepeaterItem item in rptBooks.Items)
                 {
                     DropDownList ddlEditCategory = (DropDownList)item.FindControl("ddlEditCategory");
@@ -316,7 +291,6 @@ namespace INTFYP
                         var bookData = (dynamic)filteredBooks[item.ItemIndex];
                         string categoryValue = bookData.Category;
 
-                        // Set the selected value
                         ListItem listItem = ddlEditCategory.Items.FindByValue(categoryValue);
                         if (listItem != null)
                         {
@@ -327,7 +301,6 @@ namespace INTFYP
 
                 pnlNoBooks.Visible = filteredBooks.Count == 0;
 
-                // Show appropriate message based on whether we're searching or not
                 if (pnlNoBooks.Visible)
                 {
                     Panel pnlNoSearchResults = (Panel)pnlNoBooks.FindControl("pnlNoSearchResults");
@@ -338,7 +311,6 @@ namespace INTFYP
                     pnlNoBooksAtAll.Visible = !hasSearchTerm;
                 }
 
-                // Clear any previous book status messages
                 lblBookStatus.Text = "";
             }
             catch (Exception ex)
@@ -346,7 +318,6 @@ namespace INTFYP
                 lblBookStatus.ForeColor = System.Drawing.Color.Red;
                 lblBookStatus.Text = "❌ Error loading books: " + ex.Message;
 
-                // Show 0 books if there's an error
                 UpdateBookCountDisplay(new List<object>());
             }
         }
@@ -383,16 +354,13 @@ namespace INTFYP
 
         protected async void txtSearch_TextChanged(object sender, EventArgs e)
         {
-            // Filter and display books based on search term
             var filteredBooks = FilterBooks(allBooks, txtSearch.Text);
 
             rptBooks.DataSource = filteredBooks;
             rptBooks.DataBind();
 
-            // Update book count display with search term
             UpdateBookCountDisplay(filteredBooks, txtSearch.Text);
 
-            // Set the selected values for edit dropdowns after databinding
             foreach (RepeaterItem item in rptBooks.Items)
             {
                 DropDownList ddlEditCategory = (DropDownList)item.FindControl("ddlEditCategory");
@@ -401,7 +369,6 @@ namespace INTFYP
                     var bookData = (dynamic)filteredBooks[item.ItemIndex];
                     string categoryValue = bookData.Category;
 
-                    // Set the selected value
                     ListItem listItem = ddlEditCategory.Items.FindByValue(categoryValue);
                     if (listItem != null)
                     {
@@ -412,7 +379,6 @@ namespace INTFYP
 
             pnlNoBooks.Visible = filteredBooks.Count == 0;
 
-            // Show appropriate message based on whether we're searching or not
             if (pnlNoBooks.Visible)
             {
                 Panel pnlNoSearchResults = (Panel)pnlNoBooks.FindControl("pnlNoSearchResults");
@@ -428,14 +394,11 @@ namespace INTFYP
         {
             txtSearch.Text = "";
 
-            // Display all books
             rptBooks.DataSource = allBooks;
             rptBooks.DataBind();
 
-            // Update book count display (no search term)
             UpdateBookCountDisplay(allBooks);
 
-            // Set the selected values for edit dropdowns after databinding
             foreach (RepeaterItem item in rptBooks.Items)
             {
                 DropDownList ddlEditCategory = (DropDownList)item.FindControl("ddlEditCategory");
@@ -444,7 +407,6 @@ namespace INTFYP
                     var bookData = (dynamic)allBooks[item.ItemIndex];
                     string categoryValue = bookData.Category;
 
-                    // Set the selected value
                     ListItem listItem = ddlEditCategory.Items.FindByValue(categoryValue);
                     if (listItem != null)
                     {
@@ -454,15 +416,14 @@ namespace INTFYP
             }
 
             pnlNoBooks.Visible = allBooks.Count == 0;
-
-            // Show appropriate message 
+ 
             if (pnlNoBooks.Visible)
             {
                 Panel pnlNoSearchResults = (Panel)pnlNoBooks.FindControl("pnlNoSearchResults");
                 Panel pnlNoBooksAtAll = (Panel)pnlNoBooks.FindControl("pnlNoBooksAtAll");
 
-                pnlNoSearchResults.Visible = false; // No search term now
-                pnlNoBooksAtAll.Visible = true; // Show general message
+                pnlNoSearchResults.Visible = false;
+                pnlNoBooksAtAll.Visible = true;
             }
         }
 
@@ -490,14 +451,12 @@ namespace INTFYP
 
         private async System.Threading.Tasks.Task UpdateBook(RepeaterCommandEventArgs e, string bookId)
         {
-            // Find controls in the repeater item
             TextBox txtEditTitle = (TextBox)e.Item.FindControl("txtEditTitle");
             TextBox txtEditAuthor = (TextBox)e.Item.FindControl("txtEditAuthor");
             DropDownList ddlEditCategory = (DropDownList)e.Item.FindControl("ddlEditCategory");
             TextBox txtEditTag = (TextBox)e.Item.FindControl("txtEditTag");
             FileUpload fileEditPdf = (FileUpload)e.Item.FindControl("fileEditPdf");
 
-            // Validate required fields
             if (string.IsNullOrWhiteSpace(txtEditTitle.Text))
             {
                 lblBookStatus.Text = "❌ Please enter a title.";
@@ -512,7 +471,6 @@ namespace INTFYP
                 return;
             }
 
-            // Validate category selection
             if (string.IsNullOrEmpty(ddlEditCategory.SelectedValue))
             {
                 lblBookStatus.Text = "❌ Please select a category.";
@@ -520,7 +478,6 @@ namespace INTFYP
                 return;
             }
 
-            // Validate PDF file if uploaded
             if (!ValidateEditPdfFile(fileEditPdf))
             {
                 return;
@@ -536,7 +493,6 @@ namespace INTFYP
                 { "UpdatedAt", Timestamp.GetCurrentTimestamp() }
             };
 
-            // If new PDF is uploaded, update PDF URL
             if (fileEditPdf.HasFile)
             {
                 string newPdfUrl = await UploadPdfToCloudinary(fileEditPdf);
@@ -548,7 +504,6 @@ namespace INTFYP
             lblBookStatus.ForeColor = System.Drawing.Color.Green;
             lblBookStatus.Text = "✅ Book updated successfully!";
 
-            // Reload books
             await LoadBooks();
         }
 
@@ -560,7 +515,6 @@ namespace INTFYP
             lblBookStatus.ForeColor = System.Drawing.Color.Green;
             lblBookStatus.Text = "✅ Book deleted successfully!";
 
-            // Reload books
             await LoadBooks();
         }
 
@@ -582,9 +536,8 @@ namespace INTFYP
         {
             txtTitle.Text = "";
             txtAuthor.Text = "";
-            ddlCategory.SelectedIndex = 0; // Reset to first item (-- Select Category --)
+            ddlCategory.SelectedIndex = 0;
             txtTag.Text = "";
-            // Note: We don't clear the file upload control as it's automatically cleared after postback
         }
     }
 }

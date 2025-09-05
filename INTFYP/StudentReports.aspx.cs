@@ -20,10 +20,9 @@ namespace INTFYP
             InitializeFirestore();
             currentUserId = GetCurrentUserId();
 
-            // No demo users - require real authentication
             if (string.IsNullOrEmpty(currentUserId))
             {
-                Response.Redirect("Login.aspx"); // Redirect to your login page
+                Response.Redirect("Login.aspx");
                 return;
             }
 
@@ -31,7 +30,6 @@ namespace INTFYP
             {
                 await LoadAvailableLanguages();
 
-                // Check if languageId is passed in URL
                 string languageId = Request.QueryString["languageId"];
                 if (!string.IsNullOrEmpty(languageId))
                 {
@@ -59,15 +57,99 @@ namespace INTFYP
 
         private string GetCurrentUserId()
         {
-            // REMOVED DEMO USER - Only real authenticated users
             return Session["UserId"]?.ToString();
+        }
+
+        protected string FormatRelativeTime(DateTime timestamp)
+        {
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            var timeSpan = DateTime.Now - localTime;
+
+            if (timeSpan.Days > 0)
+                return $"{timeSpan.Days}d ago";
+            else if (timeSpan.Hours > 0)
+                return $"{timeSpan.Hours}h ago";
+            else if (timeSpan.Minutes > 0)
+                return $"{timeSpan.Minutes}m ago";
+            else
+                return "Just now";
+        }
+
+        protected string FormatMessageTime(DateTime timestamp)
+        {
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            return localTime.ToString("HH:mm");
+        }
+
+        protected string FormatFullDateTime(DateTime timestamp)
+        {
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            return localTime.ToString("MMM dd, yyyy HH:mm");
+        }
+
+        private DateTime ConvertTimestampToLocal(Timestamp timestamp)
+        {
+            try
+            {
+                var utcDateTime = timestamp.ToDateTime();
+                if (utcDateTime.Kind == DateTimeKind.Unspecified)
+                {
+                    utcDateTime = DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc);
+                }
+                return utcDateTime.ToLocalTime();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error converting timestamp: {ex.Message}");
+                return DateTime.Now;
+            }
+        }
+
+        private DateTime SafeParseDateTime(object dateValue, DateTime defaultValue = default(DateTime))
+        {
+            try
+            {
+                if (dateValue == null)
+                {
+                    return defaultValue == default(DateTime) ? DateTime.Now : defaultValue;
+                }
+
+                if (dateValue is Timestamp timestamp)
+                {
+                    return ConvertTimestampToLocal(timestamp);
+                }
+
+                if (dateValue is DateTime dateTime)
+                {
+                    if (dateTime.Kind == DateTimeKind.Unspecified)
+                    {
+                        dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+                    }
+                    return dateTime.Kind == DateTimeKind.Utc ? dateTime.ToLocalTime() : dateTime;
+                }
+
+                if (DateTime.TryParse(dateValue.ToString(), out DateTime parsedDate))
+                {
+                    if (parsedDate.Kind == DateTimeKind.Unspecified)
+                    {
+                        parsedDate = DateTime.SpecifyKind(parsedDate, DateTimeKind.Utc);
+                    }
+                    return parsedDate.Kind == DateTimeKind.Utc ? parsedDate.ToLocalTime() : parsedDate;
+                }
+
+                return defaultValue == default(DateTime) ? DateTime.Now : defaultValue;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error parsing DateTime: {ex.Message}");
+                return defaultValue == default(DateTime) ? DateTime.Now : defaultValue;
+            }
         }
 
         private async System.Threading.Tasks.Task LoadAvailableLanguages()
         {
             try
             {
-                // Get languages that the user has progress in from user progress structure
                 CollectionReference progressRef = db.Collection("users").Document(currentUserId).Collection("progress");
                 QuerySnapshot progressSnapshot = await progressRef.GetSnapshotAsync();
 
@@ -78,7 +160,6 @@ namespace INTFYP
                 {
                     string languageId = progressDoc.Id;
 
-                    // Get language details
                     DocumentSnapshot languageDoc = await db.Collection("languages").Document(languageId).GetSnapshotAsync();
                     if (languageDoc.Exists)
                     {
@@ -88,7 +169,6 @@ namespace INTFYP
                     }
                     else
                     {
-                        // Add with ID as name if language doc doesn't exist
                         ddlLanguages.Items.Add(new ListItem(languageId, languageId));
                     }
                 }
@@ -124,7 +204,6 @@ namespace INTFYP
         {
             try
             {
-                // Get user's progress for this language from user progress structure
                 DocumentReference languageProgressRef = db.Collection("users")
                     .Document(currentUserId)
                     .Collection("progress")
@@ -136,7 +215,6 @@ namespace INTFYP
                 {
                     var progressData = languageProgressSnap.ToDictionary();
 
-                    // Load basic statistics from user progress (except average score)
                     lblTotalAttempts.Text = progressData.ContainsKey("totalAttempts") ? progressData["totalAttempts"].ToString() : "0";
                     lblCompletedLessons.Text = progressData.ContainsKey("completedLessons") ? progressData["completedLessons"].ToString() : "0";
                     lblCurrentStreak.Text = progressData.ContainsKey("currentStreak") ? progressData["currentStreak"].ToString() : "0";
@@ -144,7 +222,6 @@ namespace INTFYP
                     double totalMinutes = progressData.ContainsKey("totalTimeSpent") ? Convert.ToDouble(progressData["totalTimeSpent"]) : 0;
                     lblTotalTime.Text = Math.Round(totalMinutes, 1).ToString();
 
-                    // Calculate average score dynamically from all attempts
                     var allAttempts = await GetAllAttemptsForLanguage(languageId);
                     if (allAttempts.Any())
                     {
@@ -158,10 +235,8 @@ namespace INTFYP
                         System.Diagnostics.Debug.WriteLine("📊 No attempts found, average score set to 0");
                     }
 
-                    // Load topic progress from user progress structure
                     await LoadTopicProgress(languageId);
 
-                    // Load recent activity and chart data from user progress structure
                     await LoadRecentActivityAndChartData(languageId);
 
                     pnlStats.Visible = true;
@@ -180,14 +255,12 @@ namespace INTFYP
             }
         }
 
-        // Helper method to get all attempts for average score calculation
         private async System.Threading.Tasks.Task<List<AttemptData>> GetAllAttemptsForLanguage(string languageId)
         {
             var allAttempts = new List<AttemptData>();
 
             try
             {
-                // Get all topics for this language from user progress
                 CollectionReference topicsRef = db.Collection("users")
                     .Document(currentUserId)
                     .Collection("progress")
@@ -248,13 +321,11 @@ namespace INTFYP
                     int lessonsInTopic = topicData.ContainsKey("lessonsInTopic") ? Convert.ToInt32(topicData["lessonsInTopic"]) : 0;
                     int completedLessons = topicData.ContainsKey("completedLessons") ? Convert.ToInt32(topicData["completedLessons"]) : 0;
 
-                    // Check actual lesson scores to determine true completion status
                     var lessonScores = await GetLessonScoresForTopic(topicDoc.Reference);
                     int lessonsWithPerfectScore = lessonScores.Count(score => score >= 100);
 
                     double progress = lessonsInTopic > 0 ? Math.Round((double)completedLessons / lessonsInTopic * 100, 1) : 0;
 
-                    // Topic is only complete if ALL lessons are attempted AND ALL have 100% score
                     bool isComplete = (completedLessons >= lessonsInTopic && lessonsWithPerfectScore >= lessonsInTopic && lessonsInTopic > 0);
 
                     string statusText;
@@ -267,13 +338,11 @@ namespace INTFYP
                     }
                     else if (completedLessons >= lessonsInTopic && lessonsInTopic > 0)
                     {
-                        // All lessons attempted but not all have 100%
                         statusText = "Needs Review";
                         statusClass = "needs-review";
                     }
                     else
                     {
-                        // Still in progress
                         statusText = $"{progress}%";
                         statusClass = "in-progress";
                     }
@@ -302,7 +371,6 @@ namespace INTFYP
             }
         }
 
-        // Helper method to get the best scores for all lessons in a topic
         private async System.Threading.Tasks.Task<List<int>> GetLessonScoresForTopic(DocumentReference topicRef)
         {
             var lessonScores = new List<int>();
@@ -314,7 +382,6 @@ namespace INTFYP
 
                 foreach (DocumentSnapshot lessonDoc in lessonsSnapshot.Documents)
                 {
-                    // Get all attempts for this lesson
                     CollectionReference attemptsRef = lessonDoc.Reference.Collection("attempts");
                     QuerySnapshot attemptsSnapshot = await attemptsRef.GetSnapshotAsync();
 
@@ -330,7 +397,6 @@ namespace INTFYP
                         }
                     }
 
-                    // Only add to list if there was at least one attempt
                     if (attemptsSnapshot.Documents.Count > 0)
                     {
                         lessonScores.Add(bestScore);
@@ -353,7 +419,6 @@ namespace INTFYP
 
                 var allAttempts = new List<dynamic>();
 
-                // Get all topics for this language from user progress
                 CollectionReference topicsRef = db.Collection("users")
                     .Document(currentUserId)
                     .Collection("progress")
@@ -370,7 +435,6 @@ namespace INTFYP
                     var topicData = topicDoc.ToDictionary();
                     string topicDisplayName = topicData.ContainsKey("topicName") ? topicData["topicName"].ToString() : topicName;
 
-                    // Get all lessons for this topic
                     CollectionReference lessonsRef = topicDoc.Reference.Collection("lessons");
                     QuerySnapshot lessonsSnapshot = await lessonsRef.GetSnapshotAsync();
 
@@ -382,7 +446,6 @@ namespace INTFYP
                         var lessonData = lessonDoc.ToDictionary();
                         string lessonName = lessonData.ContainsKey("lessonName") ? lessonData["lessonName"].ToString() : lessonId;
 
-                        // Get all attempts for this lesson
                         CollectionReference attemptsRef = lessonDoc.Reference.Collection("attempts");
                         QuerySnapshot attemptsSnapshot = await attemptsRef.GetSnapshotAsync();
 
@@ -392,20 +455,15 @@ namespace INTFYP
                         {
                             var attemptData = attemptDoc.ToDictionary();
 
-                            // Extract attempt information
                             int score = attemptData.ContainsKey("score") ? Convert.ToInt32(attemptData["score"]) : 0;
                             int attemptNumber = attemptData.ContainsKey("attemptNumber") ? Convert.ToInt32(attemptData["attemptNumber"]) : 1;
 
                             DateTime completedAt = DateTime.Now;
                             if (attemptData.ContainsKey("completedAt"))
                             {
-                                if (attemptData["completedAt"] is Timestamp timestamp)
-                                    completedAt = timestamp.ToDateTime();
-                                else if (DateTime.TryParse(attemptData["completedAt"].ToString(), out DateTime parsedDate))
-                                    completedAt = parsedDate;
+                                completedAt = SafeParseDateTime(attemptData["completedAt"], DateTime.Now);
                             }
 
-                            // Create attempt object
                             allAttempts.Add(new
                             {
                                 LessonName = lessonName,
@@ -413,14 +471,13 @@ namespace INTFYP
                                 Score = score,
                                 AttemptNumber = attemptNumber,
                                 CompletedAt = completedAt,
-                                CompletedAtFormatted = completedAt.ToString("MMM dd, yyyy HH:mm"),
+                                CompletedAtFormatted = FormatFullDateTime(completedAt),
                                 ScoreText = $"{score}%",
                                 ScoreClass = GetScoreClass(score),
-                                // Add sorting keys
                                 SortKey = completedAt.Ticks
                             });
 
-                            System.Diagnostics.Debug.WriteLine($"✅ Added attempt: {lessonName} - {score}% on {completedAt:MMM dd HH:mm}");
+                            System.Diagnostics.Debug.WriteLine($"✅ Added attempt: {lessonName} - {score}% on {FormatFullDateTime(completedAt)}");
                         }
                     }
                 }
@@ -431,7 +488,6 @@ namespace INTFYP
                 {
                     System.Diagnostics.Debug.WriteLine("⚠️ No attempts found in user progress structure");
 
-                    // Set empty data
                     rptRecentActivity.DataSource = new List<object>();
                     rptRecentActivity.DataBind();
 
@@ -439,15 +495,13 @@ namespace INTFYP
                     return;
                 }
 
-                // Sort all attempts by date (most recent first) for recent activity
                 var sortedAttempts = allAttempts
                     .OrderByDescending(a => a.SortKey)
-                    .Take(20) // Limit to last 20 attempts for recent activity
+                    .Take(20)
                     .ToList();
 
                 System.Diagnostics.Debug.WriteLine($"📋 Showing {sortedAttempts.Count} recent activities");
 
-                // Prepare recent activity data
                 var recentActivity = sortedAttempts.Select(a => new
                 {
                     LessonName = a.LessonName,
@@ -458,9 +512,8 @@ namespace INTFYP
                     CompletedAt = a.CompletedAtFormatted
                 }).ToList();
 
-                // FIXED: Prepare chart data (chronological order for graph, ALL attempts)
                 var chartAttempts = allAttempts
-                    .OrderBy(a => a.SortKey) // Chronological order (oldest first)
+                    .OrderBy(a => a.SortKey)
                     .ToList();
 
                 var chartLabels = new List<string>();
@@ -468,7 +521,6 @@ namespace INTFYP
 
                 System.Diagnostics.Debug.WriteLine($"📈 Preparing chart data for {chartAttempts.Count} attempts");
 
-                // Add ALL attempts to chart (not just recent ones)
                 for (int i = 0; i < chartAttempts.Count; i++)
                 {
                     chartLabels.Add($"Quiz {i + 1}");
@@ -477,13 +529,11 @@ namespace INTFYP
                     System.Diagnostics.Debug.WriteLine($"Chart point {i + 1}: {chartAttempts[i].LessonName} = {chartAttempts[i].Score}%");
                 }
 
-                // Bind to UI
                 rptRecentActivity.DataSource = recentActivity;
                 rptRecentActivity.DataBind();
 
                 System.Diagnostics.Debug.WriteLine($"✅ Bound {recentActivity.Count} recent activities to repeater");
 
-                // Prepare chart data
                 var chartData = new
                 {
                     labels = chartLabels.ToArray(),
@@ -504,7 +554,6 @@ namespace INTFYP
             }
         }
 
-        // Helper method to get CSS class based on score
         private string GetScoreClass(int score)
         {
             if (score >= 90) return "score-excellent";
@@ -526,7 +575,6 @@ namespace INTFYP
         }
     }
 
-    // Helper class for attempt data
     public class AttemptData
     {
         public int Score { get; set; }
