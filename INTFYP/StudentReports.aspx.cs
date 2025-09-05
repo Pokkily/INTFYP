@@ -63,6 +63,95 @@ namespace INTFYP
             return Session["UserId"]?.ToString();
         }
 
+        // Helper methods for time formatting (same as ChatRoom and Feedback)
+        protected string FormatRelativeTime(DateTime timestamp)
+        {
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            var timeSpan = DateTime.Now - localTime;
+
+            if (timeSpan.Days > 0)
+                return $"{timeSpan.Days}d ago";
+            else if (timeSpan.Hours > 0)
+                return $"{timeSpan.Hours}h ago";
+            else if (timeSpan.Minutes > 0)
+                return $"{timeSpan.Minutes}m ago";
+            else
+                return "Just now";
+        }
+
+        protected string FormatMessageTime(DateTime timestamp)
+        {
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            return localTime.ToString("HH:mm");
+        }
+
+        protected string FormatFullDateTime(DateTime timestamp)
+        {
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            return localTime.ToString("MMM dd, yyyy HH:mm");
+        }
+
+        // Helper method to convert Firestore timestamp to local DateTime
+        private DateTime ConvertTimestampToLocal(Timestamp timestamp)
+        {
+            try
+            {
+                var utcDateTime = timestamp.ToDateTime();
+                if (utcDateTime.Kind == DateTimeKind.Unspecified)
+                {
+                    utcDateTime = DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc);
+                }
+                return utcDateTime.ToLocalTime();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error converting timestamp: {ex.Message}");
+                return DateTime.Now;
+            }
+        }
+
+        // Helper method to safely parse DateTime from various formats
+        private DateTime SafeParseDateTime(object dateValue, DateTime defaultValue = default(DateTime))
+        {
+            try
+            {
+                if (dateValue == null)
+                {
+                    return defaultValue == default(DateTime) ? DateTime.Now : defaultValue;
+                }
+
+                if (dateValue is Timestamp timestamp)
+                {
+                    return ConvertTimestampToLocal(timestamp);
+                }
+
+                if (dateValue is DateTime dateTime)
+                {
+                    if (dateTime.Kind == DateTimeKind.Unspecified)
+                    {
+                        dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+                    }
+                    return dateTime.Kind == DateTimeKind.Utc ? dateTime.ToLocalTime() : dateTime;
+                }
+
+                if (DateTime.TryParse(dateValue.ToString(), out DateTime parsedDate))
+                {
+                    if (parsedDate.Kind == DateTimeKind.Unspecified)
+                    {
+                        parsedDate = DateTime.SpecifyKind(parsedDate, DateTimeKind.Utc);
+                    }
+                    return parsedDate.Kind == DateTimeKind.Utc ? parsedDate.ToLocalTime() : parsedDate;
+                }
+
+                return defaultValue == default(DateTime) ? DateTime.Now : defaultValue;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error parsing DateTime: {ex.Message}");
+                return defaultValue == default(DateTime) ? DateTime.Now : defaultValue;
+            }
+        }
+
         private async System.Threading.Tasks.Task LoadAvailableLanguages()
         {
             try
@@ -396,13 +485,11 @@ namespace INTFYP
                             int score = attemptData.ContainsKey("score") ? Convert.ToInt32(attemptData["score"]) : 0;
                             int attemptNumber = attemptData.ContainsKey("attemptNumber") ? Convert.ToInt32(attemptData["attemptNumber"]) : 1;
 
+                            // FIXED: Proper timestamp handling with timezone conversion
                             DateTime completedAt = DateTime.Now;
                             if (attemptData.ContainsKey("completedAt"))
                             {
-                                if (attemptData["completedAt"] is Timestamp timestamp)
-                                    completedAt = timestamp.ToDateTime();
-                                else if (DateTime.TryParse(attemptData["completedAt"].ToString(), out DateTime parsedDate))
-                                    completedAt = parsedDate;
+                                completedAt = SafeParseDateTime(attemptData["completedAt"], DateTime.Now);
                             }
 
                             // Create attempt object
@@ -413,14 +500,14 @@ namespace INTFYP
                                 Score = score,
                                 AttemptNumber = attemptNumber,
                                 CompletedAt = completedAt,
-                                CompletedAtFormatted = completedAt.ToString("MMM dd, yyyy HH:mm"),
+                                CompletedAtFormatted = FormatFullDateTime(completedAt), // Use our formatting helper
                                 ScoreText = $"{score}%",
                                 ScoreClass = GetScoreClass(score),
                                 // Add sorting keys
                                 SortKey = completedAt.Ticks
                             });
 
-                            System.Diagnostics.Debug.WriteLine($"✅ Added attempt: {lessonName} - {score}% on {completedAt:MMM dd HH:mm}");
+                            System.Diagnostics.Debug.WriteLine($"✅ Added attempt: {lessonName} - {score}% on {FormatFullDateTime(completedAt)}");
                         }
                     }
                 }

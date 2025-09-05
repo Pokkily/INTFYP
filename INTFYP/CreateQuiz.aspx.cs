@@ -8,7 +8,6 @@ using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using System.IO;
 
-
 namespace YourProjectNamespace
 {
     public partial class CreateQuiz : System.Web.UI.Page
@@ -21,15 +20,19 @@ namespace YourProjectNamespace
             public string Question { get; set; }
             public List<string> Options { get; set; } = new List<string> { "", "", "", "" };
             public List<bool> IsCorrect { get; set; } = new List<bool> { false, false, false, false };
-            public string ImageUrl { get; set; } = "";
         }
-
-
 
         private List<QuizQuestion> QuestionList
         {
             get => ViewState["QuestionList"] as List<QuizQuestion> ?? new List<QuizQuestion>();
             set => ViewState["QuestionList"] = value;
+        }
+
+        // Store quiz image URL in ViewState to persist across postbacks
+        private string QuizImageUrl
+        {
+            get => ViewState["QuizImageUrl"] as string ?? "";
+            set => ViewState["QuizImageUrl"] = value;
         }
 
         protected void Page_Load(object sender, EventArgs e)
@@ -40,6 +43,17 @@ namespace YourProjectNamespace
             {
                 QuestionList.Add(new QuizQuestion()); // first question
                 BindRepeater();
+            }
+            else
+            {
+                // Restore quiz image preview on postback
+                if (!string.IsNullOrEmpty(QuizImageUrl))
+                {
+                    imgQuizPreview.ImageUrl = QuizImageUrl;
+                    imgQuizPreview.Visible = true;
+                    lblUploadSuccess.Text = "✓ Quiz image uploaded successfully";
+                    lblUploadSuccess.Visible = true;
+                }
             }
         }
 
@@ -59,30 +73,17 @@ namespace YourProjectNamespace
             rptQuestions.DataBind();
         }
 
-        protected void btnAddQuestion_Click(object sender, EventArgs e)
+        // Quiz image upload handler
+        protected void btnUploadQuizImage_Click(object sender, EventArgs e)
         {
-            SaveRepeaterToState();
-            QuestionList.Add(new QuizQuestion());
-            BindRepeater();
-        }
-
-        protected void btnSubmitQuiz_Click(object sender, EventArgs e)
-        {
-            SaveRepeaterToState();
-
-            string quizTitle = txtQuizTitle.Text.Trim();
-            string teacherEmail = Session["email"]?.ToString()?.ToLower();
-            if (string.IsNullOrEmpty(quizTitle) || string.IsNullOrEmpty(teacherEmail)) return;
-
-            // 📸 Validate and upload quiz image
             if (!fileQuizImage.HasFile)
             {
-                lblImageError.Text = "Please upload a quiz image.";
+                lblImageError.Text = "Please select an image first.";
                 lblImageError.Visible = true;
+                lblUploadSuccess.Visible = false;
                 return;
             }
 
-            string quizImageUrl = "";
             try
             {
                 var account = new Account(
@@ -100,51 +101,103 @@ namespace YourProjectNamespace
                     };
 
                     var uploadResult = cloudinary.Upload(uploadParams);
-                    quizImageUrl = uploadResult.SecureUrl.ToString();
+                    QuizImageUrl = uploadResult.SecureUrl.ToString();
 
-                    // Optional preview
-                    imgQuizPreview.ImageUrl = quizImageUrl;
+                    // Show preview and success message
+                    imgQuizPreview.ImageUrl = QuizImageUrl;
                     imgQuizPreview.Visible = true;
+                    lblImageError.Visible = false;
+                    lblUploadSuccess.Text = "✓ Quiz image uploaded successfully";
+                    lblUploadSuccess.Visible = true;
                 }
             }
             catch (Exception ex)
             {
                 lblImageError.Text = "Image upload failed: " + ex.Message;
                 lblImageError.Visible = true;
+                lblUploadSuccess.Visible = false;
+                QuizImageUrl = ""; // Clear on error
+            }
+        }
+
+        protected void btnAddQuestion_Click(object sender, EventArgs e)
+        {
+            SaveRepeaterToState();
+            QuestionList.Add(new QuizQuestion());
+            BindRepeater();
+        }
+
+        protected void btnSubmitQuiz_Click(object sender, EventArgs e)
+        {
+            SaveRepeaterToState();
+
+            string quizTitle = txtQuizTitle.Text.Trim();
+            string teacherEmail = Session["email"]?.ToString()?.ToLower();
+
+            if (string.IsNullOrEmpty(quizTitle) || string.IsNullOrEmpty(teacherEmail))
+            {
+                lblImageError.Text = "Please enter a quiz title.";
+                lblImageError.Visible = true;
                 return;
             }
 
-
-            string quizCode = GenerateQuizCode();
-
-            List<Dictionary<string, object>> formattedQuestions = new List<Dictionary<string, object>>();
-            foreach (var q in QuestionList)
+            // Check if quiz image was uploaded
+            if (string.IsNullOrEmpty(QuizImageUrl))
             {
-                formattedQuestions.Add(new Dictionary<string, object>
-    {
-        { "question", q.Question },
-        { "options", q.Options },
-        { "correctIndexes", GetCorrectIndexes(q.IsCorrect) },
-        { "imageUrl", q.ImageUrl } // ✅ Include it here
-    });
+                lblImageError.Text = "Please upload a quiz image first.";
+                lblImageError.Visible = true;
+                return;
             }
 
+            // Validate that we have at least one question with content
+            if (QuestionList.Count == 0 || string.IsNullOrEmpty(QuestionList[0].Question.Trim()))
+            {
+                lblImageError.Text = "Please add at least one question.";
+                lblImageError.Visible = true;
+                return;
+            }
 
-            var quizDoc = new Dictionary<string, object>
-{
-    { "quizCode", quizCode },
-    { "title", quizTitle },
-    { "createdBy", teacherEmail },
-    { "createdAt", Timestamp.GetCurrentTimestamp() },
-    { "quizImageUrl", quizImageUrl }, // ✅ Save quiz image URL
-    { "questions", formattedQuestions }
-};
+            try
+            {
+                string quizCode = GenerateQuizCode();
 
+                List<Dictionary<string, object>> formattedQuestions = new List<Dictionary<string, object>>();
+                foreach (var q in QuestionList)
+                {
+                    // Skip empty questions
+                    if (string.IsNullOrEmpty(q.Question.Trim())) continue;
 
-            db.Collection("quizzes").Document(quizCode).SetAsync(quizDoc).GetAwaiter().GetResult();
-            ViewState["QuestionList"] = null;
+                    formattedQuestions.Add(new Dictionary<string, object>
+                    {
+                        { "question", q.Question },
+                        { "options", q.Options },
+                        { "correctIndexes", GetCorrectIndexes(q.IsCorrect) }
+                    });
+                }
 
-            Response.Redirect("ManagePost.aspx");
+                var quizDoc = new Dictionary<string, object>
+                {
+                    { "quizCode", quizCode },
+                    { "title", quizTitle },
+                    { "createdBy", teacherEmail },
+                    { "createdAt", Timestamp.GetCurrentTimestamp() },
+                    { "quizImageUrl", QuizImageUrl }, // Use stored image URL
+                    { "questions", formattedQuestions }
+                };
+
+                db.Collection("quizzes").Document(quizCode).SetAsync(quizDoc).GetAwaiter().GetResult();
+
+                // Clear ViewState
+                ViewState["QuestionList"] = null;
+                ViewState["QuizImageUrl"] = null;
+
+                Response.Redirect("QuizAnalytics.aspx");
+            }
+            catch (Exception ex)
+            {
+                lblImageError.Text = "Error creating quiz: " + ex.Message;
+                lblImageError.Visible = true;
+            }
         }
 
         private void SaveRepeaterToState()
@@ -167,33 +220,15 @@ namespace YourProjectNamespace
                     q.IsCorrect[i] = chk?.Checked ?? false;
                 }
 
-                // 📸 Handle optional image upload
-                var fileUpload = (FileUpload)item.FindControl("fileUpload");
-                if (fileUpload != null && fileUpload.HasFile)
-                {
-                    var account = new Account(
-                        ConfigurationManager.AppSettings["CloudinaryCloudName"],
-                        ConfigurationManager.AppSettings["CloudinaryApiKey"],
-                        ConfigurationManager.AppSettings["CloudinaryApiSecret"]
-                    );
-                    var cloudinary = new Cloudinary(account);
-
-                    using (var stream = fileUpload.PostedFile.InputStream)
-                    {
-                        var uploadParams = new ImageUploadParams()
-                        {
-                            File = new FileDescription(fileUpload.FileName, stream)
-                        };
-
-                        var uploadResult = cloudinary.Upload(uploadParams);
-                        q.ImageUrl = uploadResult.SecureUrl.ToString();
-                    }
-                }
-
                 updatedList.Add(q);
             }
 
             QuestionList = updatedList;
+        }
+
+        protected void rptQuestions_ItemDataBound(object sender, RepeaterItemEventArgs e)
+        {
+            // No special handling needed since we removed question images
         }
 
         protected void rptQuestions_ItemCommand(object source, RepeaterCommandEventArgs e)
@@ -201,7 +236,6 @@ namespace YourProjectNamespace
             if (e.CommandName == "Remove")
             {
                 int indexToRemove = Convert.ToInt32(e.CommandArgument);
-
                 SaveRepeaterToState(); // Save current inputs
                 var list = QuestionList;
 

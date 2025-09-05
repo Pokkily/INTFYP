@@ -113,6 +113,53 @@ namespace INTFYP
             return defaultValue;
         }
 
+        // Helper methods for time formatting (same as ChatRoom and Feedback)
+        protected string FormatRelativeTime(DateTime timestamp)
+        {
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            var timeSpan = DateTime.Now - localTime;
+
+            if (timeSpan.Days > 0)
+                return $"{timeSpan.Days}d ago";
+            else if (timeSpan.Hours > 0)
+                return $"{timeSpan.Hours}h ago";
+            else if (timeSpan.Minutes > 0)
+                return $"{timeSpan.Minutes}m ago";
+            else
+                return "Just now";
+        }
+
+        protected string FormatMessageTime(DateTime timestamp)
+        {
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            return localTime.ToString("HH:mm");
+        }
+
+        protected string FormatFullDateTime(DateTime timestamp)
+        {
+            DateTime localTime = timestamp.Kind == DateTimeKind.Utc ? timestamp.ToLocalTime() : timestamp;
+            return localTime.ToString("MMM dd, yyyy HH:mm");
+        }
+
+        // Helper method to convert Firestore timestamp to local DateTime
+        private DateTime ConvertTimestampToLocal(Timestamp timestamp)
+        {
+            try
+            {
+                var utcDateTime = timestamp.ToDateTime();
+                if (utcDateTime.Kind == DateTimeKind.Unspecified)
+                {
+                    utcDateTime = DateTime.SpecifyKind(utcDateTime, DateTimeKind.Utc);
+                }
+                return utcDateTime.ToLocalTime();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error converting timestamp: {ex.Message}");
+                return DateTime.Now;
+            }
+        }
+
         private async System.Threading.Tasks.Task<UserInfo> GetUserDetailsAsync(string userId)
         {
             try
@@ -546,7 +593,7 @@ namespace INTFYP
                     System.Diagnostics.Debug.WriteLine("Applied client-side topic filter");
                 }
 
-                // Apply date filter
+                // Apply date filter with proper timezone handling
                 int daysBack = Convert.ToInt32(ddlDateRange.SelectedValue);
                 if (daysBack > 0)
                 {
@@ -556,7 +603,8 @@ namespace INTFYP
                         try
                         {
                             Timestamp completedAt = GetFieldValue(r, "completedAt", Timestamp.GetCurrentTimestamp());
-                            return completedAt.ToDateTime() >= cutoffDate;
+                            DateTime localCompletedAt = ConvertTimestampToLocal(completedAt);
+                            return localCompletedAt >= cutoffDate;
                         }
                         catch
                         {
@@ -717,11 +765,15 @@ namespace INTFYP
                 // Batch fetch user details
                 var userLookup = await GetMultipleUsersAsync(userIds);
 
-                // Build activity data with proper user names
+                // Build activity data with proper user names and fixed timestamp handling
                 var recentActivity = recentResults.Select(r =>
                 {
                     string userId = GetFieldValue(r, "userId", "");
                     UserInfo userInfo = userLookup.ContainsKey(userId) ? userLookup[userId] : new UserInfo { UserId = userId };
+
+                    // Proper timestamp conversion to local time
+                    Timestamp completedTimestamp = GetFieldValue(r, "completedAt", Timestamp.GetCurrentTimestamp());
+                    DateTime localCompletedAt = ConvertTimestampToLocal(completedTimestamp);
 
                     return new
                     {
@@ -732,7 +784,7 @@ namespace INTFYP
                         LessonName = GetFieldValue(r, "lessonName", "Unknown"),
                         Score = GetFieldValue(r, "score", 0),
                         TimeSpent = Math.Round(GetFieldValue(r, "timeSpentSeconds", 0.0) / 60.0, 1),
-                        CompletedAt = GetFieldValue(r, "completedAt", Timestamp.GetCurrentTimestamp()).ToDateTime().ToString("MMM dd, HH:mm")
+                        CompletedAt = FormatFullDateTime(localCompletedAt) // Use our formatting helper
                     };
                 }).ToList();
 
@@ -768,7 +820,7 @@ namespace INTFYP
 
                 hfScoreDistributionData.Value = JsonConvert.SerializeObject(scoreRanges);
 
-                // Daily Activity Data (last 7 days)
+                // Daily Activity Data (last 7 days) with proper timezone handling
                 var dailyActivity = new Dictionary<string, int>();
                 for (int i = 6; i >= 0; i--)
                 {
@@ -781,8 +833,8 @@ namespace INTFYP
                     try
                     {
                         Timestamp completedTimestamp = GetFieldValue(result, "completedAt", Timestamp.GetCurrentTimestamp());
-                        DateTime completedDate = completedTimestamp.ToDateTime();
-                        string dateKey = completedDate.ToString("MMM dd");
+                        DateTime localCompletedDate = ConvertTimestampToLocal(completedTimestamp);
+                        string dateKey = localCompletedDate.ToString("MMM dd");
 
                         if (dailyActivity.ContainsKey(dateKey))
                         {

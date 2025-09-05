@@ -67,6 +67,128 @@ namespace YourProjectNamespace
             }
         }
 
+        // Privacy Settings Handler
+        protected async void chkProfilePrivate_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                // Update privacy setting in database
+                var userRef = db.Collection("users").Document(currentUserId);
+
+                var updateData = new Dictionary<string, object>
+                {
+                    { "profilePrivate", chkProfilePrivate.Checked },
+                    { "privacyUpdatedAt", Timestamp.GetCurrentTimestamp() }
+                };
+
+                await userRef.UpdateAsync(updateData);
+
+                // Update the privacy status display
+                UpdatePrivacyStatusDisplay();
+
+                string privacyStatus = chkProfilePrivate.Checked ? "Private" : "Public";
+                ShowMessage($"Privacy setting updated to {privacyStatus} successfully!", "success");
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("Error updating privacy settings: " + ex.Message, "danger");
+            }
+        }
+
+        private void UpdatePrivacyStatusDisplay()
+        {
+            if (chkProfilePrivate.Checked)
+            {
+                ltPrivacyStatus.Text = "Private";
+                // Add JavaScript to update status display
+                ScriptManager.RegisterStartupScript(this, GetType(), "updatePrivacyStatus",
+                    "updatePrivacyStatus();", true);
+            }
+            else
+            {
+                ltPrivacyStatus.Text = "Public";
+                ScriptManager.RegisterStartupScript(this, GetType(), "updatePrivacyStatus",
+                    "updatePrivacyStatus();", true);
+            }
+        }
+
+        private async Task LoadUserProfile()
+        {
+            try
+            {
+                // Get user data from Firestore
+                var userRef = db.Collection("users").Document(currentUserId);
+                var userSnap = await userRef.GetSnapshotAsync();
+
+                if (!userSnap.Exists)
+                {
+                    ShowMessage("User profile not found.", "danger");
+                    return;
+                }
+
+                userData = userSnap.ToDictionary();
+
+                // Check if userData is null (this should not happen if document exists, but let's be safe)
+                if (userData == null)
+                {
+                    userData = new Dictionary<string, object>();
+                    ShowMessage("Error loading user data.", "danger");
+                    return;
+                }
+
+                // Safely get values with null checks
+                string firstName = GetSafeValue(userData, "firstName");
+                string lastName = GetSafeValue(userData, "lastName");
+                string username = GetSafeValue(userData, "username");
+                string position = GetSafeValue(userData, "position", "Student");
+
+                // Load privacy setting
+                bool isPrivate = userData.ContainsKey("profilePrivate") ?
+                    Convert.ToBoolean(userData["profilePrivate"]) : false;
+
+                chkProfilePrivate.Checked = isPrivate;
+                ltPrivacyStatus.Text = isPrivate ? "Private" : "Public";
+
+                ltProfileName.Text = $"{firstName} {lastName}";
+                ltUsername.Text = username;
+                ltPosition.Text = position;
+
+                // Load profile image if exists
+                string profileImageUrl = GetSafeValue(userData, "profileImageUrl");
+                if (!string.IsNullOrEmpty(profileImageUrl))
+                {
+                    imgProfile.ImageUrl = profileImageUrl;
+                }
+
+                // Populate form fields
+                txtFirstName.Text = firstName;
+                txtLastName.Text = lastName;
+                txtEmail.Text = GetSafeValue(userData, "email");
+                txtUsername.Text = username;
+                txtPhone.Text = GetSafeValue(userData, "phone");
+                txtPosition.Text = position;
+                txtAddress.Text = GetSafeValue(userData, "address");
+
+                // Set gender dropdown
+                string gender = GetSafeValue(userData, "gender");
+                if (!string.IsNullOrEmpty(gender) && ddlGender.Items.FindByValue(gender) != null)
+                {
+                    ddlGender.SelectedValue = gender;
+                }
+
+                // Set birthdate
+                string birthdate = GetSafeValue(userData, "birthdate");
+                if (!string.IsNullOrEmpty(birthdate))
+                {
+                    txtBirthdate.Text = birthdate;
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMessage("Error loading user profile: " + ex.Message, "danger");
+            }
+        }
+
         private async Task LoadUserFeedback()
         {
             try
@@ -210,76 +332,6 @@ namespace YourProjectNamespace
             {
                 pnlNoFeedback.Visible = true;
                 ShowMessage($"Error loading feedback: {ex.Message}", "danger");
-            }
-        }
-
-        private async Task LoadUserProfile()
-        {
-            try
-            {
-                // Get user data from Firestore
-                var userRef = db.Collection("users").Document(currentUserId);
-                var userSnap = await userRef.GetSnapshotAsync();
-
-                if (!userSnap.Exists)
-                {
-                    ShowMessage("User profile not found.", "danger");
-                    return;
-                }
-
-                userData = userSnap.ToDictionary();
-
-                // Check if userData is null (this should not happen if document exists, but let's be safe)
-                if (userData == null)
-                {
-                    userData = new Dictionary<string, object>();
-                    ShowMessage("Error loading user data.", "danger");
-                    return;
-                }
-
-                // Safely get values with null checks
-                string firstName = GetSafeValue(userData, "firstName");
-                string lastName = GetSafeValue(userData, "lastName");
-                string username = GetSafeValue(userData, "username");
-                string position = GetSafeValue(userData, "position", "Student");
-
-                ltProfileName.Text = $"{firstName} {lastName}";
-                ltUsername.Text = username;
-                ltPosition.Text = position;
-
-                // Load profile image if exists
-                string profileImageUrl = GetSafeValue(userData, "profileImageUrl");
-                if (!string.IsNullOrEmpty(profileImageUrl))
-                {
-                    imgProfile.ImageUrl = profileImageUrl;
-                }
-
-                // Populate form fields
-                txtFirstName.Text = firstName;
-                txtLastName.Text = lastName;
-                txtEmail.Text = GetSafeValue(userData, "email");
-                txtUsername.Text = username;
-                txtPhone.Text = GetSafeValue(userData, "phone");
-                txtPosition.Text = position;
-                txtAddress.Text = GetSafeValue(userData, "address");
-
-                // Set gender dropdown
-                string gender = GetSafeValue(userData, "gender");
-                if (!string.IsNullOrEmpty(gender) && ddlGender.Items.FindByValue(gender) != null)
-                {
-                    ddlGender.SelectedValue = gender;
-                }
-
-                // Set birthdate
-                string birthdate = GetSafeValue(userData, "birthdate");
-                if (!string.IsNullOrEmpty(birthdate))
-                {
-                    txtBirthdate.Text = birthdate;
-                }
-            }
-            catch (Exception ex)
-            {
-                ShowMessage("Error loading user profile: " + ex.Message, "danger");
             }
         }
 

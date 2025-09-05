@@ -33,6 +33,15 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.FileUpload fileQuizImage;
 
         /// <summary>
+        /// btnUploadQuizImage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnUploadQuizImage;
+
+        /// <summary>
         /// lblImageError control.
         /// </summary>
         /// <remarks>
@@ -42,6 +51,15 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.Label lblImageError;
 
         /// <summary>
+        /// lblUploadSuccess control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblUploadSuccess;
+
+        /// <summary>
         /// imgQuizPreview control.
         /// </summary>
         /// <remarks>
@@ -49,6 +67,15 @@ namespace YourProjectNamespace
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Image imgQuizPreview;
+
+        /// <summary>
+        /// UpdatePanelQuestions control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.UpdatePanel UpdatePanelQuestions;
 
         /// <summary>
         /// rptQuestions control.

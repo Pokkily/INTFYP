@@ -141,6 +141,24 @@ namespace YourProjectNamespace
         protected global::System.Web.UI.WebControls.Button btnUploadPhoto;
 
         /// <summary>
+        /// ltPrivacyStatus control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Literal ltPrivacyStatus;
+
+        /// <summary>
+        /// chkProfilePrivate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.CheckBox chkProfilePrivate;
+
+        /// <summary>
         /// txtFirstName control.
         /// </summary>
         /// <remarks>
